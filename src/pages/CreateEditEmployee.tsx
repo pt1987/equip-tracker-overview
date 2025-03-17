@@ -68,9 +68,9 @@ export default function CreateEditEmployee() {
       lastName: employee.lastName || "",
       position: employee.position || "",
       cluster: employee.cluster || "",
-      entryDate: employee.startDate ? new Date(employee.startDate).toISOString().split('T')[0] : "",
+      entryDate: employee.entryDate || employee.startDate ? new Date(employee.startDate).toISOString().split('T')[0] : "",
       budget: employee.budget || 0,
-      profileImage: employee.imageUrl || "",
+      profileImage: employee.profileImage || employee.imageUrl || "",
     } : {
       firstName: "",
       lastName: "",
@@ -97,9 +97,9 @@ export default function CreateEditEmployee() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex min-h-screen">
       <Navbar />
-      <div className="flex-1 container px-4 py-6 md:px-6 md:py-8">
+      <div className="flex-1 container px-4 py-6 md:py-8 md:ml-64">
         <PageTransition>
           <div className="flex flex-col gap-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

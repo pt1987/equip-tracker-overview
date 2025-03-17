@@ -30,7 +30,7 @@ export default function AssetGroups() {
     setSearchQuery(query.toLowerCase());
   };
 
-  const renderGroups = (groups: Record<string, any[]>) => {
+  const renderGroups = (groups: Record<string, Asset[]>) => {
     return Object.entries(groups)
       .filter(([groupName]) => groupName.toLowerCase().includes(searchQuery))
       .map(([groupName, groupAssets]) => (
@@ -70,9 +70,9 @@ export default function AssetGroups() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex min-h-screen">
       <Navbar />
-      <div className="flex-1 container px-4 py-6 md:px-6 md:py-8">
+      <div className="flex-1 container px-4 py-6 md:py-8 md:ml-64">
         <PageTransition>
           <div className="flex flex-col gap-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -110,7 +110,7 @@ export default function AssetGroups() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <TabsContent value="category" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-0 w-full">
                   {renderGroups(assetsByCategory)}
                 </TabsContent>
