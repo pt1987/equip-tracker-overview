@@ -14,7 +14,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { formatDate, formatCurrency } from "@/lib/utils";
 import SearchFilter from "@/components/shared/SearchFilter";
 import { useState } from "react";
-import { assets, employees } from "@/data/mockData";
+import { assets } from "@/data/assets";
+import { employees } from "@/data/employees";
 import StatusBadge from "@/components/assets/StatusBadge";
 import { Asset } from "@/lib/types";
 

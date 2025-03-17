@@ -5,11 +5,13 @@ import Navbar from "@/components/layout/Navbar";
 import StatCard from "@/components/dashboard/StatCard";
 import { 
   getDashboardStats, 
+} from "@/data/helpers";
+import { 
   getAssetTypeDistribution, 
   getAssetStatusDistribution,
-  assets,
-  employees
-} from "@/data/mockData";
+  assets
+} from "@/data/assets";
+import { employees } from "@/data/employees";
 import OverviewChart from "@/components/dashboard/OverviewChart";
 import { 
   Monitor, 

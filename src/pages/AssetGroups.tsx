@@ -8,8 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SearchFilter from "@/components/shared/SearchFilter";
 import { useState } from "react";
-import { groupBy } from "@/lib/utils";
-import { assets } from "@/data/mockData";
+import { groupBy } from "@/data/helpers";
+import { assets } from "@/data/assets";
 import { Asset } from "@/lib/types";
 
 export default function AssetGroups() {

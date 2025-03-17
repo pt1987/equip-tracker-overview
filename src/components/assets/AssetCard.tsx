@@ -4,7 +4,7 @@ import { cn, formatCurrency } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import StatusBadge from "./StatusBadge";
-import { getEmployeeById } from "@/data/mockData";
+import { getEmployeeById } from "@/data/employees";
 import { 
   CalendarClock, 
   Euro 

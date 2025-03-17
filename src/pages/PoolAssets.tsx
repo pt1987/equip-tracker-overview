@@ -7,7 +7,7 @@ import { PlusCircle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SearchFilter from "@/components/shared/SearchFilter";
 import { useState } from "react";
-import { assets } from "@/data/mockData";
+import { assets } from "@/data/assets";
 import AssetCard from "@/components/assets/AssetCard";
 import { Asset } from "@/lib/types";
 

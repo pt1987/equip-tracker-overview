@@ -1,6 +1,6 @@
 
 import { Employee } from "@/lib/types";
-import { getEmployeeAssetsSummary } from "@/data/mockData";
+import { getEmployeeAssetsSummary } from "@/data/employees";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
