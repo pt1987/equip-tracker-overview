@@ -4,14 +4,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import PageTransition from "@/components/layout/PageTransition";
 import Navbar from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
 import { 
   Card, 
   CardContent, 
@@ -20,33 +12,13 @@ import {
   CardHeader, 
   CardTitle 
 } from "@/components/ui/card";
-import { 
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { employees } from "@/data/mockData";
+import { Form } from "@/components/ui/form";
+import { employees } from "@/data/employees";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { toast } from "@/hooks/use-toast";
-
-// Schema für das Formular
-const employeeFormSchema = z.object({
-  firstName: z.string().min(1, "Bitte geben Sie einen Vornamen ein"),
-  lastName: z.string().min(1, "Bitte geben Sie einen Nachnamen ein"),
-  position: z.string().min(1, "Bitte geben Sie eine Position ein"),
-  cluster: z.string().min(1, "Bitte wählen Sie einen Cluster"),
-  entryDate: z.string().min(1, "Bitte geben Sie ein Eintrittsdatum an"),
-  budget: z.coerce.number().min(0, "Das Budget darf nicht negativ sein"),
-  profileImage: z.string().optional(),
-});
-
-type EmployeeFormValues = z.infer<typeof employeeFormSchema>;
+import EmployeeFormFields from "@/components/employees/EmployeeFormFields";
+import { employeeFormSchema, EmployeeFormValues } from "@/components/employees/EmployeeFormTypes";
 
 export default function CreateEditEmployee() {
   const { id } = useParams();
@@ -83,16 +55,16 @@ export default function CreateEditEmployee() {
   });
 
   const onSubmit = (data: EmployeeFormValues) => {
-    // In einer echten Anwendung würden wir hier die Daten zur API senden
+    // In a real application, we would send the data to the API
     console.log(data);
     
-    // Toast-Nachricht anzeigen
+    // Show toast message
     toast({
       title: isEditing ? "Mitarbeiter aktualisiert" : "Mitarbeiter erstellt",
       description: `${data.firstName} ${data.lastName} wurde erfolgreich ${isEditing ? 'aktualisiert' : 'erstellt'}.`,
     });
     
-    // Zurück zur Mitarbeiter-Übersicht navigieren
+    // Navigate back to the employee overview
     navigate("/employees");
   };
 
@@ -125,132 +97,7 @@ export default function CreateEditEmployee() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="firstName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Vorname</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Max" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="lastName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Nachname</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Mustermann" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="position"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Position</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Software Entwickler" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="cluster"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Cluster</FormLabel>
-                            <Select 
-                              onValueChange={field.onChange} 
-                              defaultValue={field.value}
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Cluster auswählen" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="development">Entwicklung</SelectItem>
-                                <SelectItem value="design">Design</SelectItem>
-                                <SelectItem value="operations">Betrieb</SelectItem>
-                                <SelectItem value="management">Management</SelectItem>
-                                <SelectItem value="sales">Vertrieb</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="entryDate"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Eintrittsdatum</FormLabel>
-                            <FormControl>
-                              <Input type="date" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="budget"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Geräte-Budget (€)</FormLabel>
-                            <FormControl>
-                              <Input 
-                                type="number" 
-                                placeholder="5000" 
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormDescription>
-                              Verfügbares Budget für Hardware-Anschaffungen
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="profileImage"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Profilbild URL</FormLabel>
-                            <FormControl>
-                              <Input 
-                                placeholder="https://example.com/image.jpg" 
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormDescription>
-                              Geben Sie die URL eines Profilbilds ein
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+                    <EmployeeFormFields />
                   </CardContent>
                   <CardFooter className="flex justify-between">
                     <Button 
