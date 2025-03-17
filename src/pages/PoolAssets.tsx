@@ -7,22 +7,22 @@ import { PlusCircle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SearchFilter from "@/components/shared/SearchFilter";
 import { useState } from "react";
-import { mockAssets } from "@/data/mockData";
-import { AssetCard } from "@/components/assets/AssetCard";
+import { assets } from "@/data/mockData";
+import AssetCard from "@/components/assets/AssetCard";
 import { Asset } from "@/lib/types";
 
 export default function PoolAssets() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
 
-  const { data: assets = [] } = useQuery({
+  const { data: assetData = [] } = useQuery({
     queryKey: ["assets"],
-    queryFn: () => mockAssets,
-    initialData: mockAssets,
+    queryFn: () => assets,
+    initialData: assets,
   });
 
   // Filter assets with status "pool"
-  const poolAssets = assets.filter(asset => 
+  const poolAssets = assetData.filter((asset: Asset) => 
     asset.status === "pool" && 
     (activeCategory === "all" || asset.category === activeCategory) &&
     (
@@ -34,7 +34,7 @@ export default function PoolAssets() {
 
   // Get unique categories from pool assets
   const assetCategories = Array.from(new Set(
-    assets.filter(asset => asset.status === "pool").map(asset => asset.category)
+    assetData.filter((asset: Asset) => asset.status === "pool").map(asset => asset.category)
   ));
 
   const handleSearch = (query: string) => {
@@ -75,7 +75,7 @@ export default function PoolAssets() {
               >
                 <TabsList className="mb-4 flex flex-wrap h-auto">
                   <TabsTrigger value="all">Alle</TabsTrigger>
-                  {assetCategories.map(category => (
+                  {assetCategories.map((category: string) => (
                     <TabsTrigger key={category} value={category}>
                       {category}
                     </TabsTrigger>
@@ -85,8 +85,8 @@ export default function PoolAssets() {
                 <TabsContent value={activeCategory} className="mt-0">
                   {poolAssets.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                      {poolAssets.map((asset: Asset) => (
-                        <AssetCard key={asset.id} asset={asset} />
+                      {poolAssets.map((asset: Asset, index: number) => (
+                        <AssetCard key={asset.id} asset={asset} index={index} />
                       ))}
                     </div>
                   ) : (

@@ -9,21 +9,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SearchFilter from "@/components/shared/SearchFilter";
 import { useState } from "react";
 import { groupBy } from "@/lib/utils";
-import { mockAssets } from "@/data/mockData";
+import { assets } from "@/data/mockData";
+import { Asset } from "@/lib/types";
 
 export default function AssetGroups() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("category");
 
-  const { data: assets = [] } = useQuery({
+  const { data: assetData = [] } = useQuery({
     queryKey: ["assets"],
-    queryFn: () => mockAssets,
-    initialData: mockAssets,
+    queryFn: () => assets,
+    initialData: assets,
   });
 
   // Group assets by category and manufacturer
-  const assetsByCategory = groupBy(assets, (asset) => asset.category);
-  const assetsByManufacturer = groupBy(assets, (asset) => asset.manufacturer);
+  const assetsByCategory = groupBy(assetData, (asset: Asset) => asset.category);
+  const assetsByManufacturer = groupBy(assetData, (asset: Asset) => asset.manufacturer);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query.toLowerCase());

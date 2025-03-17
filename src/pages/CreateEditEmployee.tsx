@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import PageTransition from "@/components/layout/PageTransition";
@@ -29,7 +28,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { mockEmployees } from "@/data/mockData";
+import { employees } from "@/data/mockData";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -53,13 +52,13 @@ export default function CreateEditEmployee() {
   const navigate = useNavigate();
   const isEditing = !!id;
 
-  const { data: employees = [] } = useQuery({
+  const { data: employeeData = [] } = useQuery({
     queryKey: ["employees"],
-    queryFn: () => mockEmployees,
-    initialData: mockEmployees,
+    queryFn: () => employees,
+    initialData: employees,
   });
 
-  const employee = isEditing ? employees.find(e => e.id === id) : null;
+  const employee = isEditing ? employeeData.find(e => e.id === id) : null;
 
   const form = useForm<EmployeeFormValues>({
     resolver: zodResolver(employeeFormSchema),

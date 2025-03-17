@@ -12,10 +12,10 @@ import {
 
 interface AssetCardProps {
   asset: Asset;
-  index: number;
+  index?: number;
 }
 
-export default function AssetCard({ asset, index }: AssetCardProps) {
+export default function AssetCard({ asset, index = 0 }: AssetCardProps) {
   const employee = asset.employeeId ? getEmployeeById(asset.employeeId) : null;
   
   const getAssetTypeLabel = (type: Asset["type"]) => {

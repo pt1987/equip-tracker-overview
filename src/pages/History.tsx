@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import PageTransition from "@/components/layout/PageTransition";
 import Navbar from "@/components/layout/Navbar";
@@ -14,26 +13,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { formatDate, formatCurrency } from "@/lib/utils";
 import SearchFilter from "@/components/shared/SearchFilter";
 import { useState } from "react";
-import { mockAssets, mockEmployees } from "@/data/mockData";
-import { StatusBadge } from "@/components/assets/StatusBadge";
+import { assets, employees } from "@/data/mockData";
+import StatusBadge from "@/components/assets/StatusBadge";
 
 export default function History() {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: assets = [] } = useQuery({
+  const { data: assetData = [] } = useQuery({
     queryKey: ["assets"],
-    queryFn: () => mockAssets,
-    initialData: mockAssets,
+    queryFn: () => assets,
+    initialData: assets,
   });
 
-  const { data: employees = [] } = useQuery({
+  const { data: employeeData = [] } = useQuery({
     queryKey: ["employees"],
-    queryFn: () => mockEmployees,
-    initialData: mockEmployees,
+    queryFn: () => employees,
+    initialData: employees,
   });
 
   // Sort assets by purchase date, newest first
-  const sortedAssets = [...assets].sort((a, b) => 
+  const sortedAssets = [...assetData].sort((a, b) => 
     new Date(b.purchaseDate).getTime() - new Date(a.purchaseDate).getTime()
   );
 
@@ -46,7 +45,7 @@ export default function History() {
 
   function getEmployeeName(employeeId: string | null): string {
     if (!employeeId) return "Nicht zugewiesen";
-    const employee = employees.find(emp => emp.id === employeeId);
+    const employee = employeeData.find(emp => emp.id === employeeId);
     return employee ? `${employee.firstName} ${employee.lastName}` : "Unbekannt";
   }
 
