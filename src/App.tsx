@@ -10,6 +10,11 @@ import Assets from "./pages/Assets";
 import Employees from "./pages/Employees";
 import AssetDetail from "./pages/AssetDetail";
 import EmployeeDetail from "./pages/EmployeeDetail";
+import AssetGroups from "./pages/AssetGroups";
+import History from "./pages/History";
+import PoolAssets from "./pages/PoolAssets";
+import CreateEditAsset from "./pages/CreateEditAsset";
+import CreateEditEmployee from "./pages/CreateEditEmployee";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,11 +32,13 @@ const App = () => (
             <Route path="/employees" element={<Employees />} />
             <Route path="/asset/:id" element={<AssetDetail />} />
             <Route path="/employee/:id" element={<EmployeeDetail />} />
-            
-            {/* These routes would be implemented in the future */}
-            <Route path="/asset-groups" element={<NotFound />} />
-            <Route path="/history" element={<NotFound />} />
-            <Route path="/pool-assets" element={<NotFound />} />
+            <Route path="/asset-groups" element={<AssetGroups />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/pool-assets" element={<PoolAssets />} />
+            <Route path="/asset/create" element={<CreateEditAsset />} />
+            <Route path="/asset/edit/:id" element={<CreateEditAsset />} />
+            <Route path="/employee/create" element={<CreateEditEmployee />} />
+            <Route path="/employee/edit/:id" element={<CreateEditEmployee />} />
             
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />

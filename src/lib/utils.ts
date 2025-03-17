@@ -43,3 +43,44 @@ export function calculateAgeInMonths(date: string | Date): number {
   
   return yearDiff * 12 + monthDiff;
 }
+
+// Neue Funktion zur Lokalisierung von Status-Texten
+export function localizeStatus(status: string): string {
+  const statusMap: Record<string, string> = {
+    ordered: "Bestellt",
+    delivered: "Geliefert",
+    in_use: "In Gebrauch",
+    defective: "Defekt",
+    in_repair: "In Reparatur",
+    pool: "Pool"
+  };
+  
+  return statusMap[status] || status;
+}
+
+// Neue Funktion zur Lokalisierung von Kategorien
+export function localizeCategory(category: string): string {
+  const categoryMap: Record<string, string> = {
+    notebook: "Notebook",
+    smartphone: "Smartphone",
+    tablet: "Tablet",
+    mouse: "Maus",
+    keyboard: "Tastatur",
+    accessory: "Zubehör"
+  };
+  
+  return categoryMap[category] || category;
+}
+
+// Neue Funktion zur Lokalisierung von Cluster-Namen
+export function localizeCluster(cluster: string): string {
+  const clusterMap: Record<string, string> = {
+    development: "Entwicklung",
+    design: "Design",
+    operations: "Betrieb",
+    management: "Management",
+    sales: "Vertrieb"
+  };
+  
+  return clusterMap[cluster] || cluster;
+}
