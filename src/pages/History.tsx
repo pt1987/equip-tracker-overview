@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import PageTransition from "@/components/layout/PageTransition";
 import Navbar from "@/components/layout/Navbar";
@@ -15,6 +16,7 @@ import SearchFilter from "@/components/shared/SearchFilter";
 import { useState } from "react";
 import { assets, employees } from "@/data/mockData";
 import StatusBadge from "@/components/assets/StatusBadge";
+import { Asset } from "@/lib/types";
 
 export default function History() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -40,7 +42,7 @@ export default function History() {
     asset.model.toLowerCase().includes(searchQuery.toLowerCase()) ||
     asset.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
     asset.manufacturer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    getEmployeeName(asset.assignedTo).toLowerCase().includes(searchQuery.toLowerCase())
+    getEmployeeName(asset.employeeId).toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   function getEmployeeName(employeeId: string | null): string {
@@ -100,7 +102,7 @@ export default function History() {
                         <TableCell>{asset.category}</TableCell>
                         <TableCell>{formatCurrency(asset.price)}</TableCell>
                         <TableCell><StatusBadge status={asset.status} /></TableCell>
-                        <TableCell>{getEmployeeName(asset.assignedTo)}</TableCell>
+                        <TableCell>{getEmployeeName(asset.employeeId)}</TableCell>
                       </TableRow>
                     ))}
                     {filteredAssets.length === 0 && (

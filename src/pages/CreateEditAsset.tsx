@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import PageTransition from "@/components/layout/PageTransition";
@@ -37,6 +38,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "@/hooks/use-toast";
+import { Asset } from "@/lib/types";
 
 // Schema für das Formular
 const assetFormSchema = z.object({
@@ -89,19 +91,19 @@ export default function CreateEditAsset() {
       manufacturer: asset.manufacturer || "",
       model: asset.model || "",
       status: asset.status || "ordered",
-      assignedTo: asset.assignedTo || "",
+      assignedTo: asset.employeeId || "",
       purchaseDate: new Date(asset.purchaseDate).toISOString().split('T')[0],
       price: asset.price || 0,
       vendor: asset.vendor || "",
       serialNumber: asset.serialNumber || "",
       inventoryNumber: asset.inventoryNumber || "",
-      hasWarranty: asset.hasWarranty || false,
+      hasWarranty: asset.additionalWarranty || false,
       imei: asset.imei || "",
       phoneNumber: asset.phoneNumber || "",
       provider: asset.provider || "",
-      contractDuration: asset.contractDuration || "",
+      contractDuration: asset.contractEndDate || "",
       contractName: asset.contractName || "",
-      relatedAssetId: asset.relatedAssetId || "",
+      relatedAssetId: asset.connectedAssetId || "",
     } : {
       category: "",
       manufacturer: "",

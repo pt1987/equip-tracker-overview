@@ -53,7 +53,7 @@ export default function AssetGroups() {
           </CardHeader>
           <CardContent className="pt-0">
             <div className="flex flex-wrap gap-2">
-              {groupAssets.slice(0, 5).map((asset) => (
+              {groupAssets.slice(0, 5).map((asset: Asset) => (
                 <span key={asset.id} className="bg-secondary/50 text-xs px-2 py-1 rounded">
                   {asset.model}
                 </span>

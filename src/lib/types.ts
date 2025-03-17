@@ -1,4 +1,3 @@
-
 export type AssetStatus = 
   | 'ordered' 
   | 'delivered' 
@@ -26,15 +25,20 @@ export interface Asset {
   price: number;
   status: AssetStatus;
   employeeId: string | null;
+  assignedTo?: string | null;
+  category: string;
   serialNumber?: string;
   inventoryNumber?: string;
   additionalWarranty?: boolean;
+  hasWarranty?: boolean;
   imei?: string;
   phoneNumber?: string;
   provider?: string;
   contractEndDate?: string;
   contractName?: string;
+  contractDuration?: string;
   connectedAssetId?: string;
+  relatedAssetId?: string;
   imageUrl?: string;
 }
 
@@ -44,10 +48,12 @@ export interface Employee {
   lastName: string;
   imageUrl: string;
   startDate: string;
+  entryDate?: string;
   cluster: string;
   position: string;
   budget: number;
   usedBudget: number;
+  profileImage?: string;
 }
 
 export interface AssetHistoryEntry {

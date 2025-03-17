@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import PageTransition from "@/components/layout/PageTransition";
@@ -67,9 +68,9 @@ export default function CreateEditEmployee() {
       lastName: employee.lastName || "",
       position: employee.position || "",
       cluster: employee.cluster || "",
-      entryDate: new Date(employee.entryDate).toISOString().split('T')[0],
+      entryDate: employee.startDate ? new Date(employee.startDate).toISOString().split('T')[0] : "",
       budget: employee.budget || 0,
-      profileImage: employee.profileImage || "",
+      profileImage: employee.imageUrl || "",
     } : {
       firstName: "",
       lastName: "",

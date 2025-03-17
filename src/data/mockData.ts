@@ -1,4 +1,3 @@
-
 import { Asset, AssetHistoryEntry, AssetStatus, AssetType, AssetTypeDistribution, AssetStatusDistribution, DashboardStats, Employee } from "@/lib/types";
 
 // Employee mock data
@@ -66,6 +65,7 @@ export const assets: Asset[] = [
     id: "ast001",
     name: "MacBook Pro 16",
     type: "laptop",
+    category: "notebook",
     manufacturer: "Apple",
     model: "MacBook Pro 16 M1 Pro",
     purchaseDate: "2022-03-15",
@@ -73,15 +73,18 @@ export const assets: Asset[] = [
     price: 2499,
     status: "in_use",
     employeeId: "emp001",
+    assignedTo: "emp001",
     serialNumber: "C02F134RXXXX",
     inventoryNumber: "PHAT-L-001",
     additionalWarranty: true,
+    hasWarranty: true,
     imageUrl: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/mbp16-spacegray-select-202110?wid=904&hei=840&fmt=jpeg&qlt=90&.v=1632788574000"
   },
   {
     id: "ast002",
     name: "iPhone 14 Pro",
     type: "smartphone",
+    category: "smartphone",
     manufacturer: "Apple",
     model: "iPhone 14 Pro",
     purchaseDate: "2022-11-10",
@@ -89,12 +92,14 @@ export const assets: Asset[] = [
     price: 1299,
     status: "in_use",
     employeeId: "emp001",
+    assignedTo: "emp001",
     serialNumber: "FVFXC1XXXXXX",
     inventoryNumber: "PHAT-S-001",
     imei: "35123456789012X",
     phoneNumber: "+4915123456789",
     provider: "Telekom",
     contractEndDate: "2024-11-09",
+    contractDuration: "24 Monate",
     contractName: "Business Mobile L",
     imageUrl: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/iphone-14-pro-finish-select-202209-6-1inch-deeppurple?wid=5120&hei=2880&fmt=p-jpg&qlt=80&.v=1663703841896"
   },
