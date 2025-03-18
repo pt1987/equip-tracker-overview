@@ -1,8 +1,6 @@
-
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { 
-  Layers, 
   MonitorSmartphone, 
   Users, 
   BarChart3,
@@ -61,7 +59,6 @@ export default function Navbar() {
     { to: "/", label: "Dashboard", icon: <BarChart3 size={20} /> },
     { to: "/assets", label: "Assets", icon: <MonitorSmartphone size={20} /> },
     { to: "/employees", label: "Employees", icon: <Users size={20} /> },
-    { to: "/asset-groups", label: "Asset Groups", icon: <Layers size={20} /> },
     { to: "/history", label: "History", icon: <Clock size={20} /> },
     { to: "/pool-assets", label: "Pool Assets", icon: <CircleDot size={20} /> },
   ];

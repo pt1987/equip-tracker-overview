@@ -68,17 +68,22 @@ export default function AssetDetailView({
         <div className="mt-4 flex gap-2 justify-center">
           <Button 
             variant="outline" 
-            size="sm" 
+            size="xs" 
             onClick={onEdit}
+            className="h-8 px-2 text-xs"
           >
-            <Pencil size={16} className="mr-2" />
+            <Pencil size={14} className="mr-1.5" />
             Bearbeiten
           </Button>
           
           <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive" size="sm">
-                <Trash size={16} className="mr-2" />
+              <Button 
+                variant="destructive" 
+                size="xs"
+                className="h-8 px-2 text-xs"
+              >
+                <Trash size={14} className="mr-1.5" />
                 Löschen
               </Button>
             </AlertDialogTrigger>

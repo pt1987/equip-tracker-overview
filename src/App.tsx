@@ -11,7 +11,6 @@ import Assets from "./pages/Assets";
 import Employees from "./pages/Employees";
 import AssetDetail from "./pages/AssetDetail";
 import EmployeeDetail from "./pages/EmployeeDetail";
-import AssetGroups from "./pages/AssetGroups";
 import History from "./pages/History";
 import PoolAssets from "./pages/PoolAssets";
 import CreateEditAsset from "./pages/CreateEditAsset";
@@ -34,7 +33,6 @@ const App = () => (
               <Route path="/employees" element={<Employees />} />
               <Route path="/asset/:id" element={<AssetDetail />} />
               <Route path="/employee/:id" element={<EmployeeDetail />} />
-              <Route path="/asset-groups" element={<AssetGroups />} />
               <Route path="/history" element={<History />} />
               <Route path="/pool-assets" element={<PoolAssets />} />
               <Route path="/asset/create" element={<CreateEditAsset />} />
