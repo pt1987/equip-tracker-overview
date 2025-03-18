@@ -1,5 +1,5 @@
 
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import PageTransition from "@/components/layout/PageTransition";
 import Navbar from "@/components/layout/Navbar";
@@ -8,7 +8,7 @@ import { getAssetsByEmployeeId } from "@/data/assets";
 import { Asset, Employee } from "@/lib/types";
 import QRCode from "@/components/shared/QRCode";
 import { motion } from "framer-motion";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency, formatDate, calculateEmploymentDuration } from "@/lib/utils";
 import AssetCard from "@/components/assets/AssetCard";
 import { 
   ChevronLeft, 
@@ -24,6 +24,9 @@ import {
   User,
   Users
 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
+import EmployeeDetailView from "@/components/employees/EmployeeDetailView";
+import EmployeeDetailEdit from "@/components/employees/EmployeeDetailEdit";
 
 const AssetTypeIcon = ({ type }: { type: Asset["type"] }) => {
   switch (type) {
@@ -46,9 +49,11 @@ const AssetTypeIcon = ({ type }: { type: Asset["type"] }) => {
 
 const EmployeeDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
   
   useEffect(() => {
     if (id) {
@@ -63,6 +68,49 @@ const EmployeeDetail = () => {
       setLoading(false);
     }
   }, [id]);
+  
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+  
+  const handleCancel = () => {
+    setIsEditing(false);
+  };
+  
+  const handleSave = (data: any) => {
+    // In a real app, this would update the data in the API
+    console.log("Updated employee data:", data);
+    
+    // Update local state
+    if (employee) {
+      const updatedEmployee = {
+        ...employee,
+        ...data,
+        startDate: data.startDate.toISOString(),
+      };
+      setEmployee(updatedEmployee);
+    }
+    
+    setIsEditing(false);
+    
+    toast({
+      title: "Mitarbeiter aktualisiert",
+      description: "Die Änderungen wurden erfolgreich gespeichert."
+    });
+  };
+  
+  const handleDelete = () => {
+    // In a real app, this would delete the data from the API
+    console.log("Delete employee:", id);
+    
+    toast({
+      title: "Mitarbeiter gelöscht",
+      description: "Der Mitarbeiter wurde erfolgreich gelöscht."
+    });
+    
+    // Navigate back to employees list
+    navigate("/employees");
+  };
   
   if (loading) {
     return (
@@ -79,7 +127,7 @@ const EmployeeDetail = () => {
     return (
       <div className="flex min-h-screen">
         <Navbar />
-        <div className="flex-1 md:ml-64 p-8">
+        <div className="flex-1 md:ml-64 p-4 md:p-8">
           <div className="glass-card p-12 text-center">
             <h2 className="text-xl font-medium mb-4">Employee not found</h2>
             <p className="text-muted-foreground mb-6">
@@ -113,7 +161,7 @@ const EmployeeDetail = () => {
     <div className="flex min-h-screen">
       <Navbar />
       
-      <div className="flex-1 md:ml-64">
+      <div className="flex-1 md:ml-32">
         <PageTransition>
           <div className="p-4 md:p-8 pb-24 max-w-7xl mx-auto mt-12 md:mt-0">
             <div className="mb-6">
@@ -129,52 +177,20 @@ const EmployeeDetail = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
                 <div className="glass-card p-6 mb-6">
-                  <div className="flex flex-col md:flex-row gap-6">
-                    <div className="w-full md:w-1/4 flex-shrink-0">
-                      <div className="aspect-square bg-muted rounded-full overflow-hidden">
-                        <motion.img 
-                          src={employee.imageUrl} 
-                          alt={`${employee.firstName} ${employee.lastName}`}
-                          className="w-full h-full object-cover object-center"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ duration: 0.5 }}
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="flex-1">
-                      <div className="inline-flex items-center px-2 py-1 mb-2 rounded-full bg-secondary text-xs font-medium">
-                        {employee.cluster}
-                      </div>
-                      <h1 className="text-2xl font-bold mb-1">
-                        {employee.firstName} {employee.lastName}
-                      </h1>
-                      <p className="text-muted-foreground mb-6">{employee.position}</p>
-                      
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2.5 rounded-full bg-blue-100">
-                            <CalendarClock size={16} className="text-blue-700" />
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">Start Date</p>
-                            <p className="font-medium">{formatDate(employee.startDate)}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-3">
-                          <div className="p-2.5 rounded-full bg-purple-100">
-                            <PackageIcon size={16} className="text-purple-700" />
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">Total Assets</p>
-                            <p className="font-medium">{assets.length}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  {isEditing ? (
+                    <EmployeeDetailEdit 
+                      employee={employee} 
+                      onSave={handleSave} 
+                      onCancel={handleCancel} 
+                    />
+                  ) : (
+                    <EmployeeDetailView 
+                      employee={employee} 
+                      assets={assets} 
+                      onEdit={handleEdit} 
+                      onDelete={handleDelete} 
+                    />
+                  )}
                 </div>
                 
                 <div className="glass-card p-6 mb-6">

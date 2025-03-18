@@ -6,8 +6,11 @@ import { employees } from "@/data/mockData";
 import { Employee } from "@/lib/types";
 import EmployeeCard from "@/components/employees/EmployeeCard";
 import SearchFilter from "@/components/shared/SearchFilter";
+import ViewToggle from "@/components/shared/ViewToggle";
 import { motion } from "framer-motion";
-import { SlidersHorizontal, X, Check, Users } from "lucide-react";
+import { SlidersHorizontal, X, Check, Users, ArrowRight } from "lucide-react";
+import { formatDate, calculateEmploymentDuration } from "@/lib/utils";
+import { Link } from "react-router-dom";
 
 interface FilterOption {
   label: string;
@@ -19,6 +22,7 @@ const EmployeesPage = () => {
   const [selectedClusters, setSelectedClusters] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>(employees);
+  const [view, setView] = useState<"grid" | "list">("grid");
   
   // Get unique clusters
   const clusters = [...new Set(employees.map(emp => emp.cluster))];
@@ -62,7 +66,7 @@ const EmployeesPage = () => {
     <div className="flex min-h-screen">
       <Navbar />
       
-      <div className="flex-1 md:ml-64">
+      <div className="flex-1 md:ml-32">
         <PageTransition>
           <div className="p-4 md:p-8 pb-24 max-w-7xl mx-auto mt-12 md:mt-0">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
@@ -71,6 +75,10 @@ const EmployeesPage = () => {
                 <p className="text-muted-foreground mt-1">
                   Manage and view all employees
                 </p>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <ViewToggle view={view} onViewChange={setView} />
               </div>
             </div>
             
@@ -154,7 +162,7 @@ const EmployeesPage = () => {
                   Clear filters
                 </button>
               </div>
-            ) : (
+            ) : view === "grid" ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredEmployees.map((employee, index) => (
                   <EmployeeCard 
@@ -162,6 +170,43 @@ const EmployeesPage = () => {
                     employee={employee} 
                     index={index} 
                   />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredEmployees.map((employee, index) => (
+                  <Link
+                    key={employee.id}
+                    to={`/employee/${employee.id}`}
+                    className="glass-card p-4 flex items-center gap-4 hover:bg-secondary/10 transition-colors"
+                  >
+                    <div className="w-12 h-12 rounded-full overflow-hidden bg-muted flex-shrink-0">
+                      <img
+                        src={employee.imageUrl}
+                        alt={`${employee.firstName} ${employee.lastName}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-medium">{employee.firstName} {employee.lastName}</h3>
+                      <p className="text-sm text-muted-foreground">{employee.position}</p>
+                    </div>
+                    <div className="hidden md:block w-48">
+                      <span className="inline-flex items-center px-2 py-1 rounded-full bg-secondary text-xs font-medium">
+                        {employee.cluster}
+                      </span>
+                    </div>
+                    <div className="hidden md:block w-48">
+                      <p className="text-sm">
+                        <span className="text-muted-foreground">Seit: </span>
+                        {formatDate(employee.startDate)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {calculateEmploymentDuration(employee.startDate)}
+                      </p>
+                    </div>
+                    <ArrowRight size={16} className="text-muted-foreground" />
+                  </Link>
                 ))}
               </div>
             )}

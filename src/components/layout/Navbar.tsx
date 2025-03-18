@@ -9,10 +9,13 @@ import {
   Clock,
   CircleDot,
   Menu,
-  X
+  X,
+  UserPlus,
+  PackagePlus
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { ThemeSwitcher } from "./ThemeSwitcher";
 
 interface NavItemProps {
   to: string;
@@ -63,6 +66,11 @@ export default function Navbar() {
     { to: "/pool-assets", label: "Pool Assets", icon: <CircleDot size={20} /> },
   ];
 
+  const createButtons = [
+    { to: "/employee/create", label: "Neuen Mitarbeiter erstellen", icon: <UserPlus size={20} /> },
+    { to: "/asset/create", label: "Neues Asset erstellen", icon: <PackagePlus size={20} /> },
+  ];
+
   return (
     <>
       {/* Desktop Nav */}
@@ -86,9 +94,26 @@ export default function Navbar() {
               isActive={location.pathname === item.to}
             />
           ))}
+          
+          <div className="h-8 mt-4 mb-2 border-t border-border"></div>
+          
+          {createButtons.map((item) => (
+            <NavItem
+              key={item.to}
+              to={item.to}
+              label={item.label}
+              icon={item.icon}
+              isActive={location.pathname === item.to}
+            />
+          ))}
         </div>
         
         <div className="mt-auto p-4">
+          <div className="glass-card p-4 mb-4">
+            <div className="flex justify-center mb-2">
+              <ThemeSwitcher />
+            </div>
+          </div>
           <div className="glass-card p-4">
             <p className="text-sm text-muted-foreground mb-2">Need help?</p>
             <p className="text-sm">
@@ -112,12 +137,15 @@ export default function Navbar() {
             <h1 className="text-xl font-semibold">Asset Portal</h1>
           </div>
           
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-2 rounded-lg hover:bg-secondary"
-          >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          <div className="flex items-center gap-2">
+            <ThemeSwitcher />
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 rounded-lg hover:bg-secondary"
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
         
         {isMobileMenuOpen && (
@@ -130,6 +158,18 @@ export default function Navbar() {
           >
             <div className="flex flex-col gap-1 p-3">
               {navItems.map((item) => (
+                <NavItem
+                  key={item.to}
+                  to={item.to}
+                  label={item.label}
+                  icon={item.icon}
+                  isActive={location.pathname === item.to}
+                />
+              ))}
+              
+              <div className="h-8 mt-4 mb-2 border-t border-border"></div>
+              
+              {createButtons.map((item) => (
                 <NavItem
                   key={item.to}
                   to={item.to}

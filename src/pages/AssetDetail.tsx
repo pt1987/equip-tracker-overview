@@ -1,22 +1,26 @@
 
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import PageTransition from "@/components/layout/PageTransition";
 import Navbar from "@/components/layout/Navbar";
 import { getAssetById, getEmployeeById, getAssetHistoryByAssetId } from "@/data/mockData";
 import { Asset, AssetHistoryEntry } from "@/lib/types";
 import QRCode from "@/components/shared/QRCode";
-import StatusBadge from "@/components/assets/StatusBadge";
 import { motion } from "framer-motion";
 import { formatCurrency, formatDate, calculateAgeInMonths } from "@/lib/utils";
 import { ChevronLeft, CalendarClock, Euro, Tag, User, History, ArrowRight } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
+import AssetDetailView from "@/components/assets/AssetDetailView";
+import AssetDetailEdit from "@/components/assets/AssetDetailEdit";
 
 const AssetDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [asset, setAsset] = useState<Asset | null>(null);
   const [employee, setEmployee] = useState<any>(null);
   const [history, setHistory] = useState<AssetHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
   
   useEffect(() => {
     if (id) {
@@ -35,6 +39,49 @@ const AssetDetail = () => {
     }
   }, [id]);
   
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+  
+  const handleCancel = () => {
+    setIsEditing(false);
+  };
+  
+  const handleSave = (data: any) => {
+    // In a real app, this would update the data in the API
+    console.log("Updated asset data:", data);
+    
+    // Update local state
+    if (asset) {
+      const updatedAsset = {
+        ...asset,
+        ...data,
+        purchaseDate: data.purchaseDate.toISOString(),
+      };
+      setAsset(updatedAsset);
+    }
+    
+    setIsEditing(false);
+    
+    toast({
+      title: "Asset aktualisiert",
+      description: "Die Änderungen wurden erfolgreich gespeichert."
+    });
+  };
+  
+  const handleDelete = () => {
+    // In a real app, this would delete the data from the API
+    console.log("Delete asset:", id);
+    
+    toast({
+      title: "Asset gelöscht",
+      description: "Das Asset wurde erfolgreich gelöscht."
+    });
+    
+    // Navigate back to assets list
+    navigate("/assets");
+  };
+  
   if (loading) {
     return (
       <div className="flex min-h-screen">
@@ -50,7 +97,7 @@ const AssetDetail = () => {
     return (
       <div className="flex min-h-screen">
         <Navbar />
-        <div className="flex-1 md:ml-64 p-8">
+        <div className="flex-1 md:ml-32 p-4 md:p-8">
           <div className="glass-card p-12 text-center">
             <h2 className="text-xl font-medium mb-4">Asset not found</h2>
             <p className="text-muted-foreground mb-6">
@@ -68,19 +115,9 @@ const AssetDetail = () => {
     );
   }
   
-  const getAssetTypeLabel = (type: Asset["type"]) => {
-    switch (type) {
-      case "laptop": return "Laptop";
-      case "smartphone": return "Smartphone";
-      case "tablet": return "Tablet";
-      case "mouse": return "Mouse";
-      case "keyboard": return "Keyboard";
-      case "accessory": return "Accessory";
-      default: return "Other";
-    }
-  };
-  
   const renderAdditionalFields = () => {
+    if (isEditing) return null;
+    
     switch (asset.type) {
       case "laptop":
         return (
@@ -150,7 +187,7 @@ const AssetDetail = () => {
     <div className="flex min-h-screen">
       <Navbar />
       
-      <div className="flex-1 md:ml-64">
+      <div className="flex-1 md:ml-32">
         <PageTransition>
           <div className="p-4 md:p-8 pb-24 max-w-7xl mx-auto mt-12 md:mt-0">
             <div className="mb-6">
@@ -166,116 +203,29 @@ const AssetDetail = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
                 <div className="glass-card p-6 mb-6">
-                  <div className="flex flex-col md:flex-row gap-6">
-                    <div className="w-full md:w-1/3 flex-shrink-0">
-                      <div className="aspect-square bg-muted rounded-lg overflow-hidden">
-                        {asset.imageUrl ? (
-                          <motion.img 
-                            src={asset.imageUrl} 
-                            alt={asset.name}
-                            className="w-full h-full object-cover object-center"
-                            initial={{ opacity: 0, scale: 1.05 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.5 }}
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <span className="text-muted-foreground">No image</span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="mt-4 flex justify-center">
-                        <StatusBadge status={asset.status} size="lg" />
-                      </div>
-                    </div>
-                    
-                    <div className="flex-1">
-                      <div className="inline-flex items-center px-2 py-1 mb-2 rounded-full bg-secondary text-xs font-medium">
-                        {getAssetTypeLabel(asset.type)}
-                      </div>
-                      <h1 className="text-2xl font-bold mb-2">{asset.name}</h1>
-                      <p className="text-muted-foreground mb-4">
-                        {asset.manufacturer} {asset.model}
-                      </p>
-                      
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2.5 rounded-full bg-blue-100">
-                            <CalendarClock size={16} className="text-blue-700" />
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">Purchase Date</p>
-                            <p className="font-medium">{formatDate(asset.purchaseDate)}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-3">
-                          <div className="p-2.5 rounded-full bg-green-100">
-                            <Euro size={16} className="text-green-700" />
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">Purchase Price</p>
-                            <p className="font-medium">{formatCurrency(asset.price)}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-3">
-                          <div className="p-2.5 rounded-full bg-purple-100">
-                            <Tag size={16} className="text-purple-700" />
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">Vendor</p>
-                            <p className="font-medium">{asset.vendor}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-3">
-                          <div className="p-2.5 rounded-full bg-amber-100">
-                            <CalendarClock size={16} className="text-amber-700" />
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">Age</p>
-                            <p className="font-medium">{calculateAgeInMonths(asset.purchaseDate)} months</p>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {employee && (
-                        <div className="frosted-glass rounded-lg p-4">
-                          <h3 className="text-sm font-medium mb-3">Assigned to</h3>
-                          <Link 
-                            to={`/employee/${employee.id}`}
-                            className="flex items-center gap-3 group"
-                          >
-                            <div className="w-10 h-10 rounded-full overflow-hidden bg-muted">
-                              <img 
-                                src={employee.imageUrl} 
-                                alt={`${employee.firstName} ${employee.lastName}`}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                            <div>
-                              <p className="font-medium group-hover:text-primary transition-colors">
-                                {employee.firstName} {employee.lastName}
-                              </p>
-                              <p className="text-sm text-muted-foreground">
-                                {employee.position} • {employee.cluster}
-                              </p>
-                            </div>
-                            <ArrowRight size={16} className="ml-auto text-muted-foreground group-hover:text-primary transition-colors" />
-                          </Link>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  {isEditing ? (
+                    <AssetDetailEdit
+                      asset={asset}
+                      onSave={handleSave}
+                      onCancel={handleCancel}
+                    />
+                  ) : (
+                    <AssetDetailView
+                      asset={asset}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                    />
+                  )}
                 </div>
                 
-                <div className="glass-card p-6 mb-6">
-                  <h2 className="text-lg font-semibold mb-4">Details</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                    {renderAdditionalFields()}
+                {!isEditing && (
+                  <div className="glass-card p-6 mb-6">
+                    <h2 className="text-lg font-semibold mb-4">Details</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                      {renderAdditionalFields()}
+                    </div>
                   </div>
-                </div>
+                )}
                 
                 <div className="glass-card p-6">
                   <div className="flex items-center gap-2 mb-4">
@@ -344,6 +294,33 @@ const AssetDetail = () => {
                     Scan this QR code to access asset details quickly
                   </p>
                 </div>
+                
+                {employee && (
+                  <div className="glass-card p-6 mb-6">
+                    <h3 className="text-lg font-semibold mb-4">Zugewiesen an</h3>
+                    <Link 
+                      to={`/employee/${employee.id}`}
+                      className="flex items-center gap-3 group"
+                    >
+                      <div className="w-12 h-12 rounded-full overflow-hidden bg-muted">
+                        <img 
+                          src={employee.imageUrl} 
+                          alt={`${employee.firstName} ${employee.lastName}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div>
+                        <p className="font-medium group-hover:text-primary transition-colors">
+                          {employee.firstName} {employee.lastName}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {employee.position} • {employee.cluster}
+                        </p>
+                      </div>
+                      <ArrowRight size={16} className="ml-auto text-muted-foreground group-hover:text-primary transition-colors" />
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           </div>

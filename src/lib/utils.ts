@@ -1,4 +1,3 @@
-
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -44,7 +43,26 @@ export function calculateAgeInMonths(date: string | Date): number {
   return yearDiff * 12 + monthDiff;
 }
 
-// Neue Funktion zur Lokalisierung von Status-Texten
+export function calculateEmploymentDuration(startDate: string | Date): string {
+  const start = new Date(startDate);
+  const now = new Date();
+  
+  const yearDiff = now.getFullYear() - start.getFullYear();
+  const monthDiff = now.getMonth() - start.getMonth();
+  
+  const totalMonths = yearDiff * 12 + monthDiff;
+  const years = Math.floor(totalMonths / 12);
+  const months = totalMonths % 12;
+  
+  if (years > 0 && months > 0) {
+    return `${years} Jahr${years !== 1 ? 'e' : ''}, ${months} Monat${months !== 1 ? 'e' : ''}`;
+  } else if (years > 0) {
+    return `${years} Jahr${years !== 1 ? 'e' : ''}`;
+  } else {
+    return `${months} Monat${months !== 1 ? 'e' : ''}`;
+  }
+}
+
 export function localizeStatus(status: string): string {
   const statusMap: Record<string, string> = {
     ordered: "Bestellt",
@@ -58,7 +76,6 @@ export function localizeStatus(status: string): string {
   return statusMap[status] || status;
 }
 
-// Neue Funktion zur Lokalisierung von Kategorien
 export function localizeCategory(category: string): string {
   const categoryMap: Record<string, string> = {
     notebook: "Notebook",
@@ -72,7 +89,6 @@ export function localizeCategory(category: string): string {
   return categoryMap[category] || category;
 }
 
-// Neue Funktion zur Lokalisierung von Cluster-Namen
 export function localizeCluster(cluster: string): string {
   const clusterMap: Record<string, string> = {
     development: "Entwicklung",

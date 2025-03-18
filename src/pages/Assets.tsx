@@ -6,6 +6,7 @@ import { assets } from "@/data/mockData";
 import { Asset, AssetStatus, AssetType } from "@/lib/types";
 import AssetCard from "@/components/assets/AssetCard";
 import SearchFilter from "@/components/shared/SearchFilter";
+import ViewToggle from "@/components/shared/ViewToggle";
 import { motion } from "framer-motion";
 import { 
   SlidersHorizontal, 
@@ -16,8 +17,12 @@ import {
   TabletIcon,
   MouseIcon,
   KeyboardIcon,
-  PackageIcon
+  PackageIcon,
+  ArrowRight
 } from "lucide-react";
+import { formatDate, formatCurrency } from "@/lib/utils";
+import { Link } from "react-router-dom";
+import StatusBadge from "@/components/assets/StatusBadge";
 
 const AssetTypeIcon = ({ type }: { type: AssetType }) => {
   switch (type) {
@@ -67,6 +72,7 @@ const AssetsPage = () => {
   const [selectedStatuses, setSelectedStatuses] = useState<AssetStatus[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [filteredAssets, setFilteredAssets] = useState<Asset[]>(assets);
+  const [view, setView] = useState<"grid" | "list">("grid");
   
   useEffect(() => {
     let filtered = assets;
@@ -120,7 +126,7 @@ const AssetsPage = () => {
     <div className="flex min-h-screen">
       <Navbar />
       
-      <div className="flex-1 md:ml-64">
+      <div className="flex-1 md:ml-32">
         <PageTransition>
           <div className="p-4 md:p-8 pb-24 max-w-7xl mx-auto mt-12 md:mt-0">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
@@ -129,6 +135,10 @@ const AssetsPage = () => {
                 <p className="text-muted-foreground mt-1">
                   Manage and view all hardware assets
                 </p>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <ViewToggle view={view} onViewChange={setView} />
               </div>
             </div>
             
@@ -237,7 +247,7 @@ const AssetsPage = () => {
                   Clear filters
                 </button>
               </div>
-            ) : (
+            ) : view === "grid" ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {filteredAssets.map((asset, index) => (
                   <AssetCard 
@@ -245,6 +255,51 @@ const AssetsPage = () => {
                     asset={asset} 
                     index={index} 
                   />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredAssets.map((asset) => (
+                  <Link
+                    key={asset.id}
+                    to={`/asset/${asset.id}`}
+                    className="glass-card p-4 flex items-center gap-4 hover:bg-secondary/10 transition-colors"
+                  >
+                    <div className="w-12 h-12 rounded-md overflow-hidden bg-muted flex-shrink-0">
+                      {asset.imageUrl ? (
+                        <img
+                          src={asset.imageUrl}
+                          alt={asset.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <AssetTypeIcon type={asset.type} />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-medium">{asset.name}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {asset.manufacturer} {asset.model}
+                      </p>
+                    </div>
+                    <div className="hidden md:block w-32">
+                      <StatusBadge status={asset.status} />
+                    </div>
+                    <div className="hidden md:block w-36">
+                      <p className="text-sm">
+                        <span className="text-muted-foreground">Type: </span>
+                        {asset.type}
+                      </p>
+                    </div>
+                    <div className="hidden md:block w-32">
+                      <p className="text-sm font-medium">
+                        {formatCurrency(asset.price)}
+                      </p>
+                    </div>
+                    <ArrowRight size={16} className="text-muted-foreground" />
+                  </Link>
                 ))}
               </div>
             )}
