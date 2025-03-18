@@ -17,7 +17,7 @@ import { employees } from "@/data/employees";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@/hooks/use-toast";
-import EmployeeFormFields from "@/components/employees/EmployeeFormFields";
+import EmployeeFormFields from "@/components/employees/EmployeeForm";
 import { employeeFormSchema, EmployeeFormValues } from "@/components/employees/EmployeeFormTypes";
 
 export default function CreateEditEmployee() {
