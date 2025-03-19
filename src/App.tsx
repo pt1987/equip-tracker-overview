@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { ThemeProvider } from "@/hooks/use-theme";
+import { ThemeSwitcher } from "@/components/layout/ThemeSwitcher";
 import Dashboard from "./pages/Index";
 import Assets from "./pages/Assets";
 import Employees from "./pages/Employees";
@@ -23,28 +24,33 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <ThemeProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AnimatePresence mode="wait">
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/assets" element={<Assets />} />
-              <Route path="/employees" element={<Employees />} />
-              <Route path="/asset/:id" element={<AssetDetail />} />
-              <Route path="/employee/:id" element={<EmployeeDetail />} />
-              <Route path="/history" element={<History />} />
-              <Route path="/pool-assets" element={<PoolAssets />} />
-              <Route path="/asset/create" element={<CreateEditAsset />} />
-              <Route path="/asset/edit/:id" element={<CreateEditAsset />} />
-              <Route path="/employee/create" element={<CreateEditEmployee />} />
-              <Route path="/employee/edit/:id" element={<CreateEditEmployee />} />
-              
-              {/* Catch-all route */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </AnimatePresence>
-        </BrowserRouter>
+        <div className="relative">
+          <div className="fixed top-4 right-4 z-50">
+            <ThemeSwitcher />
+          </div>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AnimatePresence mode="wait">
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/assets" element={<Assets />} />
+                <Route path="/employees" element={<Employees />} />
+                <Route path="/asset/:id" element={<AssetDetail />} />
+                <Route path="/employee/:id" element={<EmployeeDetail />} />
+                <Route path="/history" element={<History />} />
+                <Route path="/pool-assets" element={<PoolAssets />} />
+                <Route path="/asset/create" element={<CreateEditAsset />} />
+                <Route path="/asset/edit/:id" element={<CreateEditAsset />} />
+                <Route path="/employee/create" element={<CreateEditEmployee />} />
+                <Route path="/employee/edit/:id" element={<CreateEditEmployee />} />
+                
+                {/* Catch-all route */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </AnimatePresence>
+          </BrowserRouter>
+        </div>
       </ThemeProvider>
     </TooltipProvider>
   </QueryClientProvider>

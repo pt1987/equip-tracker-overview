@@ -1,61 +1,38 @@
-import { Link, useLocation } from "react-router-dom";
-import { motion } from "framer-motion";
-import { 
-  MonitorSmartphone, 
-  Users, 
+import { useState, useEffect } from "react";
+import { useLocation, Link } from "react-router-dom";
+import { useMobile } from "@/hooks/use-mobile";
+import {
   BarChart3,
+  MonitorSmartphone,
+  Users,
   Clock,
   CircleDot,
-  Menu,
-  X,
+  PlusCircle,
   UserPlus,
-  PackagePlus
+  Menu,
+  X
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
-import { ThemeSwitcher } from "./ThemeSwitcher";
-
-interface NavItemProps {
-  to: string;
-  label: string;
-  icon: React.ReactNode;
-  isActive: boolean;
-}
-
-const NavItem = ({ to, label, icon, isActive }: NavItemProps) => {
-  return (
-    <Link to={to} className="w-full">
-      <div
-        className={cn(
-          "relative flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200",
-          isActive 
-            ? "bg-primary/10 text-primary font-medium" 
-            : "hover:bg-secondary text-muted-foreground hover:text-foreground"
-        )}
-      >
-        <span className="flex h-5 w-5 items-center justify-center">
-          {icon}
-        </span>
-        <span>{label}</span>
-        {isActive && (
-          <motion.div
-            layoutId="nav-indicator"
-            className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-full my-1"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-          />
-        )}
-      </div>
-    </Link>
-  );
-};
 
 export default function Navbar() {
   const location = useLocation();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
-  const navItems = [
+  const isMobile = useMobile();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Toggle sidebar
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  // Close sidebar when route changes
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [location]);
+
+  // Menu links
+  const menuItems = [
     { to: "/", label: "Dashboard", icon: <BarChart3 size={20} /> },
     { to: "/assets", label: "Assets", icon: <MonitorSmartphone size={20} /> },
     { to: "/employees", label: "Employees", icon: <Users size={20} /> },
@@ -63,122 +40,107 @@ export default function Navbar() {
     { to: "/pool-assets", label: "Pool Assets", icon: <CircleDot size={20} /> },
   ];
 
-  const createButtons = [
-    { to: "/employee/create", label: "Neuen Mitarbeiter erstellen", icon: <UserPlus size={20} /> },
-    { to: "/asset/create", label: "Neues Asset erstellen", icon: <PackagePlus size={20} /> },
-  ];
+  // Add create links if not on mobile
+  const createLinks = !isMobile ? [
+    { to: "/asset/create", label: "Create Asset", icon: <PlusCircle size={20} /> },
+    { to: "/employee/create", label: "Create Employee", icon: <UserPlus size={20} /> },
+  ] : [];
 
   return (
     <>
-      {/* Desktop Nav */}
-      <div className="hidden md:flex min-h-screen w-64 border-r border-border bg-background flex-col">
-        <div className="p-6">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-semibold">P</span>
-            </div>
-            <h1 className="text-xl font-semibold">Asset Portal</h1>
-          </div>
-        </div>
-        
-        <div className="flex flex-col gap-1 px-3 mt-6">
-          {navItems.map((item) => (
-            <NavItem
-              key={item.to}
-              to={item.to}
-              label={item.label}
-              icon={item.icon}
-              isActive={location.pathname === item.to}
-            />
-          ))}
-          
-          <div className="h-8 mt-4 mb-2 border-t border-border"></div>
-          
-          {createButtons.map((item) => (
-            <NavItem
-              key={item.to}
-              to={item.to}
-              label={item.label}
-              icon={item.icon}
-              isActive={location.pathname === item.to}
-            />
-          ))}
-        </div>
-        
-        <div className="mt-auto p-4">
-          <div className="glass-card p-4 mb-4">
-            <div className="flex justify-center mb-2">
-              <ThemeSwitcher />
-            </div>
-          </div>
-          <div className="glass-card p-4">
-            <p className="text-sm text-muted-foreground mb-2">Need help?</p>
-            <p className="text-sm">
-              Contact IT Support
-              <br />
-              <a href="mailto:it@phat-consulting.de" className="text-primary hover:underline">
-                it@phat-consulting.de
-              </a>
-            </p>
-          </div>
-        </div>
-      </div>
-      
-      {/* Mobile Nav */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-sm">
-        <div className="flex justify-between items-center p-4">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-semibold">P</span>
-            </div>
-            <h1 className="text-xl font-semibold">Asset Portal</h1>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <ThemeSwitcher />
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 rounded-lg hover:bg-secondary"
+      {isMobile ? (
+        <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+          <SheetTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="md:hidden fixed top-4 left-4 z-50"
+              onClick={toggleSidebar}
             >
-              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
-        </div>
-        
-        {isMobileMenuOpen && (
-          <motion.div
-            className="bg-background border-b border-border"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <div className="flex flex-col gap-1 p-3">
-              {navItems.map((item) => (
-                <NavItem
-                  key={item.to}
-                  to={item.to}
-                  label={item.label}
-                  icon={item.icon}
-                  isActive={location.pathname === item.to}
-                />
-              ))}
-              
-              <div className="h-8 mt-4 mb-2 border-t border-border"></div>
-              
-              {createButtons.map((item) => (
-                <NavItem
-                  key={item.to}
-                  to={item.to}
-                  label={item.label}
-                  icon={item.icon}
-                  isActive={location.pathname === item.to}
-                />
-              ))}
+              <Menu className="h-4 w-4" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="p-0 pt-6 w-64">
+            <div className="flex flex-col h-full">
+              <div className="px-4 pb-4">
+                <Link to="/" className="flex items-center font-semibold">
+                  Asset Tracker
+                </Link>
+              </div>
+              <div className="flex-1">
+                <ul className="space-y-1">
+                  {menuItems.map((item) => (
+                    <li key={item.to}>
+                      <Link
+                        to={item.to}
+                        className={cn(
+                          "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
+                          location.pathname === item.to ? "font-medium bg-secondary" : ""
+                        )}
+                      >
+                        {item.icon}
+                        <span>{item.label}</span>
+                      </Link>
+                    </li>
+                  ))}
+                  {createLinks.map((item) => (
+                    <li key={item.to}>
+                      <Link
+                        to={item.to}
+                        className={cn(
+                          "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
+                          location.pathname === item.to ? "font-medium bg-secondary" : ""
+                        )}
+                      >
+                        {item.icon}
+                        <span>{item.label}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
-          </motion.div>
-        )}
-      </div>
+          </SheetContent>
+        </Sheet>
+      ) : (
+        <aside className="fixed left-0 top-0 z-40 h-full flex-col bg-background border-r border-r-border flex w-64">
+          <Link to="/" className="flex items-center h-16 px-4 font-semibold">
+            Asset Tracker
+          </Link>
+          <div className="flex-1">
+            <ul className="pt-6 space-y-1">
+              {menuItems.map((item) => (
+                <li key={item.to}>
+                  <Link
+                    to={item.to}
+                    className={cn(
+                      "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
+                      location.pathname === item.to ? "font-medium bg-secondary" : ""
+                    )}
+                  >
+                    {item.icon}
+                    <span>{item.label}</span>
+                  </Link>
+                </li>
+              ))}
+              {createLinks.map((item) => (
+                <li key={item.to}>
+                  <Link
+                    to={item.to}
+                    className={cn(
+                      "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
+                      location.pathname === item.to ? "font-medium bg-secondary" : ""
+                    )}
+                  >
+                    {item.icon}
+                    <span>{item.label}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </aside>
+      )}
     </>
   );
 }

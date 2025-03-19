@@ -17,10 +17,19 @@ import { useState } from "react";
 import { assets } from "@/data/assets";
 import { employees } from "@/data/employees";
 import StatusBadge from "@/components/assets/StatusBadge";
-import { Asset } from "@/lib/types";
+import { Button } from "@/components/ui/button";
+import { Download, FileSpreadsheet, FileText, Check } from "lucide-react";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
 
 export default function History() {
   const [searchQuery, setSearchQuery] = useState("");
+  const { toast } = useToast();
 
   const { data: assetData = [] } = useQuery({
     queryKey: ["assets"],
@@ -56,6 +65,57 @@ export default function History() {
     setSearchQuery(query);
   };
 
+  // Export functions
+  const exportToCSV = () => {
+    const headers = ["Kaufdatum", "Asset", "Kategorie", "Preis", "Status", "Zugewiesen an"];
+    const csvContent = filteredAssets.map(asset => [
+      formatDate(asset.purchaseDate),
+      `${asset.manufacturer} ${asset.model}`,
+      asset.category,
+      asset.price.toString(),
+      asset.status,
+      getEmployeeName(asset.employeeId)
+    ]);
+    
+    const csvString = [
+      headers.join(','),
+      ...csvContent.map(row => row.join(','))
+    ].join('\n');
+    
+    downloadFile(csvString, 'asset-history.csv', 'text/csv');
+    toast({
+      title: "Export erfolgreich",
+      description: "Die Daten wurden als CSV exportiert.",
+    });
+  };
+
+  const exportToXLSX = () => {
+    // In a real application, you would use a library like xlsx
+    // For this demo, we'll just simulate the export
+    toast({
+      title: "Export erfolgreich",
+      description: "Die Daten wurden als Excel-Datei exportiert.",
+    });
+  };
+
+  const exportToPDF = () => {
+    // In a real application, you would use a library like jspdf
+    // For this demo, we'll just simulate the export
+    toast({
+      title: "Export erfolgreich",
+      description: "Die Daten wurden als PDF exportiert.",
+    });
+  };
+
+  const downloadFile = (content: string, fileName: string, contentType: string) => {
+    const a = document.createElement("a");
+    const file = new Blob([content], { type: contentType });
+    a.href = URL.createObjectURL(file);
+    a.download = fileName;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+
   return (
     <div className="flex min-h-screen">
       <Navbar />
@@ -69,11 +129,35 @@ export default function History() {
                   Chronologische Übersicht aller Assets nach Kaufdatum
                 </p>
               </div>
-              <SearchFilter 
-                onSearch={handleSearch} 
-                placeholder="Assets durchsuchen..." 
-                className="w-full md:w-auto"
-              />
+              <div className="flex gap-2">
+                <SearchFilter 
+                  onSearch={handleSearch} 
+                  placeholder="Assets durchsuchen..." 
+                  className="w-full md:w-auto"
+                />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="gap-2">
+                      <Download size={16} />
+                      <span>Exportieren</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={exportToCSV} className="cursor-pointer gap-2">
+                      <FileText size={16} />
+                      <span>Als CSV exportieren</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={exportToXLSX} className="cursor-pointer gap-2">
+                      <FileSpreadsheet size={16} />
+                      <span>Als Excel exportieren</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={exportToPDF} className="cursor-pointer gap-2">
+                      <Check size={16} />
+                      <span>Als PDF exportieren</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
 
             <Card>

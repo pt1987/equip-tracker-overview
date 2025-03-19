@@ -1,5 +1,5 @@
 
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { cn } from "@/lib/utils";
 
 interface ChartData {
@@ -7,26 +7,6 @@ interface ChartData {
   value: number;
   color: string;
 }
-
-interface CustomTooltipProps {
-  active?: boolean;
-  payload?: any[];
-}
-
-const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-background border border-border rounded-md shadow-md p-3">
-        <p className="font-medium">{payload[0].name}</p>
-        <p className="text-sm">
-          <span className="font-medium">{payload[0].value}</span> items
-        </p>
-      </div>
-    );
-  }
-
-  return null;
-};
 
 interface OverviewChartProps {
   data: ChartData[];
@@ -59,7 +39,6 @@ export default function OverviewChart({ data, title, className }: OverviewChartP
                 <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
             </Pie>
-            <Tooltip content={<CustomTooltip />} />
           </PieChart>
         </ResponsiveContainer>
         
