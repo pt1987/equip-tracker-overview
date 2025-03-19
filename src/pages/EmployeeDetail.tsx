@@ -10,6 +10,7 @@ import QRCode from "@/components/shared/QRCode";
 import { motion } from "framer-motion";
 import { formatCurrency, formatDate, calculateEmploymentDuration } from "@/lib/utils";
 import AssetCard from "@/components/assets/AssetCard";
+import ViewToggle from "@/components/shared/ViewToggle";
 import { 
   ChevronLeft, 
   CalendarClock, 
@@ -22,7 +23,8 @@ import {
   PackageIcon,
   Briefcase,
   User,
-  Users
+  Users,
+  ArrowRight
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import EmployeeDetailView from "@/components/employees/EmployeeDetailView";
@@ -54,6 +56,7 @@ const EmployeeDetail = () => {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [assetView, setAssetView] = useState<"grid" | "list">("grid");
   
   useEffect(() => {
     if (id) {
@@ -231,8 +234,11 @@ const EmployeeDetail = () => {
                       <PackageIcon size={18} />
                       <h2 className="text-lg font-semibold">Assets</h2>
                     </div>
-                    <div className="text-sm font-medium">
-                      Total value: <span className="text-primary">{formatCurrency(assets.reduce((sum, asset) => sum + asset.price, 0))}</span>
+                    <div className="flex items-center gap-4">
+                      <div className="text-sm font-medium hidden md:block">
+                        Total value: <span className="text-primary">{formatCurrency(assets.reduce((sum, asset) => sum + asset.price, 0))}</span>
+                      </div>
+                      <ViewToggle view={assetView} onViewChange={setAssetView} />
                     </div>
                   </div>
                   
@@ -248,15 +254,54 @@ const EmployeeDetail = () => {
                             </span>
                           </div>
                           
-                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {typeAssets.map((asset, index) => (
-                              <AssetCard 
-                                key={asset.id} 
-                                asset={asset} 
-                                index={index} 
-                              />
-                            ))}
-                          </div>
+                          {assetView === "grid" ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                              {typeAssets.map((asset, index) => (
+                                <AssetCard 
+                                  key={asset.id} 
+                                  asset={asset} 
+                                  index={index} 
+                                />
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="space-y-2">
+                              {typeAssets.map((asset) => (
+                                <Link
+                                  key={asset.id}
+                                  to={`/asset/${asset.id}`}
+                                  className="block w-full p-3 rounded-lg border border-border hover:bg-secondary/10 transition-colors"
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-md overflow-hidden bg-muted flex-shrink-0">
+                                      {asset.imageUrl ? (
+                                        <img
+                                          src={asset.imageUrl}
+                                          alt={asset.name}
+                                          className="w-full h-full object-cover"
+                                        />
+                                      ) : (
+                                        <div className="w-full h-full flex items-center justify-center">
+                                          <AssetTypeIcon type={asset.type} />
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <h4 className="font-medium truncate">{asset.name}</h4>
+                                      <p className="text-sm text-muted-foreground truncate">
+                                        {asset.manufacturer} {asset.model}
+                                      </p>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className="font-medium">{formatCurrency(asset.price)}</p>
+                                      <p className="text-xs text-muted-foreground">{new Date(asset.purchaseDate).toLocaleDateString()}</p>
+                                    </div>
+                                    <ArrowRight size={16} className="text-muted-foreground ml-2" />
+                                  </div>
+                                </Link>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
