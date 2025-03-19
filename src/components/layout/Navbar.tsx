@@ -50,59 +50,66 @@ export default function Navbar() {
   return (
     <>
       {isMobile ? (
-        <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-          <SheetTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="md:hidden fixed top-4 left-4 z-[100] bg-background/80 backdrop-blur-sm"
-              onClick={toggleSidebar}
-            >
-              <Menu className="h-4 w-4" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="p-0 pt-6 w-64">
-            <div className="flex flex-col h-full">
-              <div className="px-4 pb-4">
-                <Link to="/" className="flex items-center font-semibold">
-                  Asset Tracker
-                </Link>
+        <div className="fixed top-0 left-0 right-0 z-[100] flex justify-between items-center p-4 bg-background/95 backdrop-blur-md border-b border-border">
+          <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+            <SheetTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center"
+                onClick={toggleSidebar}
+              >
+                <Menu className="h-4 w-4" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="p-0 pt-6 w-64">
+              <div className="flex flex-col h-full">
+                <div className="px-4 pb-4">
+                  <Link to="/" className="flex items-center font-semibold">
+                    Asset Tracker
+                  </Link>
+                </div>
+                <div className="flex-1">
+                  <ul className="space-y-1">
+                    {menuItems.map((item) => (
+                      <li key={item.to}>
+                        <Link
+                          to={item.to}
+                          className={cn(
+                            "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
+                            location.pathname === item.to ? "font-medium bg-secondary" : ""
+                          )}
+                        >
+                          {item.icon}
+                          <span>{item.label}</span>
+                        </Link>
+                      </li>
+                    ))}
+                    {createLinks.map((item) => (
+                      <li key={item.to}>
+                        <Link
+                          to={item.to}
+                          className={cn(
+                            "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
+                            location.pathname === item.to ? "font-medium bg-secondary" : ""
+                          )}
+                        >
+                          {item.icon}
+                          <span>{item.label}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
-              <div className="flex-1">
-                <ul className="space-y-1">
-                  {menuItems.map((item) => (
-                    <li key={item.to}>
-                      <Link
-                        to={item.to}
-                        className={cn(
-                          "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
-                          location.pathname === item.to ? "font-medium bg-secondary" : ""
-                        )}
-                      >
-                        {item.icon}
-                        <span>{item.label}</span>
-                      </Link>
-                    </li>
-                  ))}
-                  {createLinks.map((item) => (
-                    <li key={item.to}>
-                      <Link
-                        to={item.to}
-                        className={cn(
-                          "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
-                          location.pathname === item.to ? "font-medium bg-secondary" : ""
-                        )}
-                      >
-                        {item.icon}
-                        <span>{item.label}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </SheetContent>
-        </Sheet>
+            </SheetContent>
+          </Sheet>
+          <div className="flex items-center">
+            <Link to="/" className="font-semibold">
+              Asset Tracker
+            </Link>
+          </div>
+        </div>
       ) : (
         <aside className="fixed left-0 top-0 z-40 h-full flex-col bg-background border-r border-r-border flex w-64">
           <Link to="/" className="flex items-center h-16 px-4 font-semibold">
