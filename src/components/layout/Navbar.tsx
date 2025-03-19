@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
-import { useMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   BarChart3,
   MonitorSmartphone,
@@ -18,7 +19,7 @@ import { cn } from "@/lib/utils";
 
 export default function Navbar() {
   const location = useLocation();
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Toggle sidebar
