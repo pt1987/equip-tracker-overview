@@ -55,7 +55,7 @@ export default function Navbar() {
             <Button
               variant="ghost"
               size="sm"
-              className="md:hidden fixed top-4 left-4 z-50"
+              className="md:hidden fixed top-4 left-4 z-[100] bg-background/80 backdrop-blur-sm"
               onClick={toggleSidebar}
             >
               <Menu className="h-4 w-4" />

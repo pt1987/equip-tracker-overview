@@ -25,7 +25,7 @@ const App = () => (
     <TooltipProvider>
       <ThemeProvider>
         <div className="relative">
-          <div className="fixed top-4 right-4 z-50">
+          <div className="fixed top-4 right-4 z-[100] bg-background/80 backdrop-blur-sm p-2 rounded-lg shadow-sm">
             <ThemeSwitcher />
           </div>
           <Toaster />

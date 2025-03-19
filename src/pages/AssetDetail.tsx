@@ -12,6 +12,7 @@ import { ChevronLeft, CalendarClock, Euro, Tag, User, History, ArrowRight } from
 import { toast } from "@/hooks/use-toast";
 import AssetDetailView from "@/components/assets/AssetDetailView";
 import AssetDetailEdit from "@/components/assets/AssetDetailEdit";
+import DocumentUpload, { Document } from "@/components/assets/DocumentUpload";
 
 const AssetDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,6 +22,7 @@ const AssetDetail = () => {
   const [history, setHistory] = useState<AssetHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [documents, setDocuments] = useState<Document[]>([]);
   
   useEffect(() => {
     if (id) {
@@ -34,6 +36,10 @@ const AssetDetail = () => {
       
       const historyData = getAssetHistoryByAssetId(id);
       setHistory(historyData);
+      
+      // In a real app, you would fetch documents from the server
+      // For this demo, we'll use an empty array
+      setDocuments([]);
       
       setLoading(false);
     }
@@ -80,6 +86,18 @@ const AssetDetail = () => {
     
     // Navigate back to assets list
     navigate("/assets");
+  };
+
+  const handleAddDocument = (document: Document) => {
+    setDocuments([...documents, document]);
+  };
+
+  const handleDeleteDocument = (documentId: string) => {
+    setDocuments(documents.filter(doc => doc.id !== documentId));
+    toast({
+      title: "Dokument gelöscht",
+      description: "Das Dokument wurde erfolgreich gelöscht."
+    });
   };
   
   if (loading) {
@@ -219,12 +237,23 @@ const AssetDetail = () => {
                 </div>
                 
                 {!isEditing && (
-                  <div className="glass-card p-6 mb-6">
-                    <h2 className="text-lg font-semibold mb-4">Details</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                      {renderAdditionalFields()}
+                  <>
+                    <div className="glass-card p-6 mb-6">
+                      <h2 className="text-lg font-semibold mb-4">Details</h2>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                        {renderAdditionalFields()}
+                      </div>
                     </div>
-                  </div>
+                    
+                    <div className="glass-card p-6 mb-6">
+                      <DocumentUpload
+                        assetId={asset.id}
+                        documents={documents}
+                        onAddDocument={handleAddDocument}
+                        onDeleteDocument={handleDeleteDocument}
+                      />
+                    </div>
+                  </>
                 )}
                 
                 <div className="glass-card p-6">

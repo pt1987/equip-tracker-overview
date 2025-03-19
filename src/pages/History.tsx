@@ -26,6 +26,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 export default function History() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -65,6 +68,18 @@ export default function History() {
     setSearchQuery(query);
   };
 
+  // Prepare data for export
+  const prepareExportData = () => {
+    return filteredAssets.map(asset => ({
+      purchaseDate: formatDate(asset.purchaseDate),
+      asset: `${asset.manufacturer} ${asset.model}`,
+      category: asset.category,
+      price: formatCurrency(asset.price),
+      status: asset.status,
+      assignedTo: getEmployeeName(asset.employeeId)
+    }));
+  };
+
   // Export functions
   const exportToCSV = () => {
     const headers = ["Kaufdatum", "Asset", "Kategorie", "Preis", "Status", "Zugewiesen an"];
@@ -90,8 +105,14 @@ export default function History() {
   };
 
   const exportToXLSX = () => {
-    // In a real application, you would use a library like xlsx
-    // For this demo, we'll just simulate the export
+    const exportData = prepareExportData();
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Asset History");
+    
+    // Generate and save the file
+    XLSX.writeFile(workbook, "asset-history.xlsx");
+    
     toast({
       title: "Export erfolgreich",
       description: "Die Daten wurden als Excel-Datei exportiert.",
@@ -99,8 +120,34 @@ export default function History() {
   };
 
   const exportToPDF = () => {
-    // In a real application, you would use a library like jspdf
-    // For this demo, we'll just simulate the export
+    const doc = new jsPDF();
+    const exportData = prepareExportData();
+    
+    // Add title
+    doc.setFontSize(18);
+    doc.text("Asset History", 14, 22);
+    doc.setFontSize(11);
+    doc.text(`Exported on ${new Date().toLocaleDateString()}`, 14, 30);
+    
+    // Create table
+    autoTable(doc, {
+      head: [['Kaufdatum', 'Asset', 'Kategorie', 'Preis', 'Status', 'Zugewiesen an']],
+      body: exportData.map(item => [
+        item.purchaseDate,
+        item.asset,
+        item.category,
+        item.price,
+        item.status,
+        item.assignedTo
+      ]),
+      startY: 35,
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [66, 66, 66] }
+    });
+    
+    // Save the PDF
+    doc.save('asset-history.pdf');
+    
     toast({
       title: "Export erfolgreich",
       description: "Die Daten wurden als PDF exportiert.",
