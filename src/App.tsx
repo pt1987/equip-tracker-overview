@@ -19,6 +19,7 @@ import PoolAssets from "./pages/PoolAssets";
 import CreateEditAsset from "./pages/CreateEditAsset";
 import CreateEditEmployee from "./pages/CreateEditEmployee";
 import NotFound from "./pages/NotFound";
+import Reporting from "./pages/Reporting"; // Add import for the Reporting page
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,7 @@ const AppContent = () => {
             <Route path="/asset/edit/:id" element={<CreateEditAsset />} />
             <Route path="/employee/create" element={<CreateEditEmployee />} />
             <Route path="/employee/edit/:id" element={<CreateEditEmployee />} />
+            <Route path="/reporting" element={<Reporting />} /> {/* Add Reporting route */}
             
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />

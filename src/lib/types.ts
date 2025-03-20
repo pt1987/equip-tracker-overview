@@ -1,3 +1,4 @@
+
 export type AssetStatus = 
   | 'ordered' 
   | 'delivered' 
@@ -83,3 +84,52 @@ export interface AssetStatusDistribution {
   status: AssetStatus;
   count: number;
 }
+
+// New types for reporting
+export interface OrderTimeline {
+  employeeId: string;
+  employeeName: string;
+  orders: {
+    date: string;
+    assetName: string;
+    assetType: string;
+    price: number;
+  }[];
+}
+
+export interface YearlyBudgetReport {
+  year: number;
+  totalSpent: number;
+}
+
+export interface YearlyAssetPurchaseReport {
+  year: number;
+  assetsByType: {
+    [key in AssetType]?: number;
+  };
+  total: number;
+}
+
+export interface AssetUsageDurationReport {
+  category: string;
+  averageMonths: number;
+  count: number;
+}
+
+export interface WarrantyDefectReport {
+  withWarranty: {
+    count: number;
+    percentage: number;
+  };
+  withoutWarranty: {
+    count: number;
+    percentage: number;
+  };
+}
+
+export type ReportType = 
+  | 'orderTimeline'
+  | 'yearlyBudget'
+  | 'yearlyPurchases'
+  | 'usageDuration'
+  | 'warrantyDefects';

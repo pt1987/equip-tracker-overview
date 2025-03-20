@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -11,7 +10,8 @@ import {
   PlusCircle,
   UserPlus,
   Menu,
-  X
+  X,
+  FileBarChart
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -23,26 +23,23 @@ export default function Navbar() {
   const isMobile = useIsMobile();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Toggle sidebar
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  // Close sidebar when route changes
   useEffect(() => {
     setIsSidebarOpen(false);
   }, [location]);
 
-  // Menu links
   const menuItems = [
     { to: "/", label: "Dashboard", icon: <BarChart3 size={20} /> },
     { to: "/assets", label: "Assets", icon: <MonitorSmartphone size={20} /> },
     { to: "/employees", label: "Employees", icon: <Users size={20} /> },
     { to: "/history", label: "History", icon: <Clock size={20} /> },
     { to: "/pool-assets", label: "Pool Assets", icon: <CircleDot size={20} /> },
+    { to: "/reporting", label: "Reporting", icon: <FileBarChart size={20} /> },
   ];
 
-  // Create links for both mobile and desktop
   const createLinks = [
     { to: "/asset/create", label: "Create Asset", icon: <PlusCircle size={20} /> },
     { to: "/employee/create", label: "Create Employee", icon: <UserPlus size={20} /> },
@@ -89,7 +86,6 @@ export default function Navbar() {
                         </Link>
                       </li>
                     ))}
-                    {/* Add create links for mobile */}
                     <li className="pt-4">
                       <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
                         Create New
