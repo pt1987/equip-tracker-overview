@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { ThemeSwitcher } from "./ThemeSwitcher";
 
 export default function Navbar() {
   const location = useLocation();
@@ -41,11 +42,11 @@ export default function Navbar() {
     { to: "/pool-assets", label: "Pool Assets", icon: <CircleDot size={20} /> },
   ];
 
-  // Add create links if not on mobile
-  const createLinks = !isMobile ? [
+  // Create links for both mobile and desktop
+  const createLinks = [
     { to: "/asset/create", label: "Create Asset", icon: <PlusCircle size={20} /> },
     { to: "/employee/create", label: "Create Employee", icon: <UserPlus size={20} /> },
-  ] : [];
+  ];
 
   return (
     <>
@@ -64,10 +65,11 @@ export default function Navbar() {
             </SheetTrigger>
             <SheetContent side="left" className="p-0 pt-6 w-64">
               <div className="flex flex-col h-full">
-                <div className="px-4 pb-4">
+                <div className="px-4 pb-4 flex justify-between items-center">
                   <Link to="/" className="flex items-center font-semibold">
                     Asset Tracker
                   </Link>
+                  <ThemeSwitcher />
                 </div>
                 <div className="flex-1">
                   <ul className="space-y-1">
@@ -85,6 +87,12 @@ export default function Navbar() {
                         </Link>
                       </li>
                     ))}
+                    {/* Add create links for mobile */}
+                    <li className="pt-4">
+                      <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
+                        Create New
+                      </div>
+                    </li>
                     {createLinks.map((item) => (
                       <li key={item.to}>
                         <Link
@@ -109,6 +117,7 @@ export default function Navbar() {
               Asset Tracker
             </Link>
           </div>
+          <ThemeSwitcher />
         </div>
       ) : (
         <aside className="fixed left-0 top-0 z-40 h-full flex-col bg-background border-r border-r-border flex w-64">
@@ -131,6 +140,11 @@ export default function Navbar() {
                   </Link>
                 </li>
               ))}
+              <li className="pt-4">
+                <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
+                  Create New
+                </div>
+              </li>
               {createLinks.map((item) => (
                 <li key={item.to}>
                   <Link

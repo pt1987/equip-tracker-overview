@@ -8,7 +8,7 @@ import { AnimatePresence } from "framer-motion";
 import { ThemeProvider } from "@/hooks/use-theme";
 import { ThemeSwitcher } from "@/components/layout/ThemeSwitcher";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { cn } from "@/lib/utils";
+import Navbar from "@/components/layout/Navbar";
 import Dashboard from "./pages/Index";
 import Assets from "./pages/Assets";
 import Employees from "./pages/Employees";
@@ -26,13 +26,13 @@ const AppContent = () => {
   const isMobile = useIsMobile();
   
   return (
-    <div className="relative">
-      <div className={cn(
-        "fixed z-[100] bg-background/80 backdrop-blur-sm p-2 rounded-lg shadow-sm",
-        isMobile ? "top-16 right-4" : "top-4 right-4"
-      )}>
-        <ThemeSwitcher />
-      </div>
+    <div className="relative min-h-screen">
+      <Navbar />
+      {!isMobile && (
+        <div className="fixed top-4 right-4 z-50 bg-background/80 backdrop-blur-sm p-2 rounded-lg shadow-sm">
+          <ThemeSwitcher />
+        </div>
+      )}
       <Toaster />
       <Sonner />
       <AnimatePresence mode="wait">

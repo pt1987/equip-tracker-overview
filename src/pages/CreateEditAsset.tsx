@@ -1,8 +1,6 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import PageTransition from "@/components/layout/PageTransition";
-import Navbar from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,9 +36,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "@/hooks/use-toast";
-import { Asset } from "@/lib/types";
 
-// Schema für das Formular
+// Schema for the form
 const assetFormSchema = z.object({
   category: z.string().min(1, "Bitte wählen Sie eine Kategorie"),
   manufacturer: z.string().min(1, "Bitte geben Sie einen Hersteller an"),
@@ -50,7 +47,7 @@ const assetFormSchema = z.object({
   purchaseDate: z.string().min(1, "Bitte geben Sie ein Kaufdatum an"),
   price: z.coerce.number().min(0, "Der Preis darf nicht negativ sein"),
   vendor: z.string().optional(),
-  // Erweiterte Felder für verschiedene Kategorien
+  // Extended fields for different categories
   serialNumber: z.string().optional(),
   inventoryNumber: z.string().optional(),
   hasWarranty: z.boolean().optional(),
@@ -125,7 +122,7 @@ export default function CreateEditAsset() {
     }
   });
 
-  // Wenn sich die Kategorie ändert, setzen wir den aktiven Tab
+  // When the category changes, we set the active tab
   const watchCategory = form.watch("category");
   useEffect(() => {
     if (["notebook", "smartphone", "tablet"].includes(watchCategory)) {
@@ -138,24 +135,23 @@ export default function CreateEditAsset() {
   }, [watchCategory]);
 
   const onSubmit = (data: AssetFormValues) => {
-    // In einer echten Anwendung würden wir hier die Daten zur API senden
+    // In a real application, we would send the data to the API
     console.log(data);
     
-    // Toast-Nachricht anzeigen
+    // Show toast message
     toast({
       title: isEditing ? "Asset aktualisiert" : "Asset erstellt",
       description: `${data.manufacturer} ${data.model} wurde erfolgreich ${isEditing ? 'aktualisiert' : 'erstellt'}.`,
     });
     
-    // Zurück zur Asset-Übersicht navigieren
+    // Navigate back to the asset overview
     navigate("/assets");
   };
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Navbar />
-      <div className="flex-1 container px-4 py-6 md:px-6 md:py-8">
-        <PageTransition>
+      <PageTransition>
+        <div className="container px-4 py-6 md:py-8">
           <div className="flex flex-col gap-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
@@ -555,8 +551,8 @@ export default function CreateEditAsset() {
               </form>
             </Form>
           </div>
-        </PageTransition>
-      </div>
+        </div>
+      </PageTransition>
     </div>
   );
 }

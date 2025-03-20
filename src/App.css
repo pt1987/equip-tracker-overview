@@ -2,13 +2,20 @@
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 1rem;
   text-align: center;
+  width: 100%;
 }
 
-@media (max-width: 768px) {
+@media (min-width: 768px) {
   #root {
-    padding-top: 4rem; /* Add space for the fixed mobile menu */
+    padding: 2rem;
+  }
+}
+
+@media (max-width: 767px) {
+  #root {
+    padding-top: 4.5rem; /* Add space for the fixed mobile menu */
   }
 }
 
@@ -46,4 +53,18 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/* Add responsive grid layout */
+.responsive-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .responsive-grid {
+    grid-template-columns: 1fr;
+  }
 }
