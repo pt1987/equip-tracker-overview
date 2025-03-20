@@ -7,7 +7,13 @@ import StatusBadge from "./StatusBadge";
 import { getEmployeeById } from "@/data/employees";
 import { 
   CalendarClock, 
-  Euro 
+  Euro,
+  Laptop,
+  Smartphone,
+  Tablet,
+  Mouse,
+  Keyboard,
+  Package
 } from "lucide-react";
 
 interface AssetCardProps {
@@ -37,11 +43,18 @@ export default function AssetCard({ asset, index = 0 }: AssetCardProps) {
     day: "numeric"
   });
   
-  // Calculate asset age in months
-  const assetAgeInMonths = Math.floor(
-    (new Date().getTime() - new Date(asset.purchaseDate).getTime()) / 
-    (1000 * 60 * 60 * 24 * 30)
-  );
+  // Get appropriate icon based on asset type
+  const getAssetIcon = () => {
+    switch (asset.type) {
+      case "laptop": return <Laptop className="w-12 h-12 text-primary/70" />;
+      case "smartphone": return <Smartphone className="w-12 h-12 text-primary/70" />;
+      case "tablet": return <Tablet className="w-12 h-12 text-primary/70" />;
+      case "mouse": return <Mouse className="w-12 h-12 text-primary/70" />;
+      case "keyboard": return <Keyboard className="w-12 h-12 text-primary/70" />;
+      case "accessory": 
+      default: return <Package className="w-12 h-12 text-primary/70" />;
+    }
+  };
 
   return (
     <motion.div
@@ -61,7 +74,7 @@ export default function AssetCard({ asset, index = 0 }: AssetCardProps) {
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-muted">
-                <span className="text-muted-foreground">No image</span>
+                {getAssetIcon()}
               </div>
             )}
             <div className="absolute top-2 right-2">
@@ -99,11 +112,17 @@ export default function AssetCard({ asset, index = 0 }: AssetCardProps) {
               {employee && (
                 <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
                   <div className="flex-shrink-0 w-6 h-6 rounded-full overflow-hidden bg-muted">
-                    <img 
-                      src={employee.imageUrl} 
-                      alt={`${employee.firstName} ${employee.lastName}`}
-                      className="w-full h-full object-cover"
-                    />
+                    {employee.imageUrl ? (
+                      <img 
+                        src={employee.imageUrl} 
+                        alt={`${employee.firstName} ${employee.lastName}`}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-primary/10 text-xs font-medium">
+                        {employee.firstName.charAt(0)}{employee.lastName.charAt(0)}
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium truncate">

@@ -69,7 +69,9 @@ export default function Navbar() {
                   <Link to="/" className="flex items-center font-semibold">
                     Asset Tracker
                   </Link>
-                  <ThemeSwitcher />
+                </div>
+                <div className="px-4 pb-4">
+                  <ThemeSwitcher inMobileMenu={true} />
                 </div>
                 <div className="flex-1">
                   <ul className="space-y-1">
@@ -117,7 +119,6 @@ export default function Navbar() {
               Asset Tracker
             </Link>
           </div>
-          <ThemeSwitcher />
         </div>
       ) : (
         <aside className="fixed left-0 top-0 z-40 h-full flex-col bg-background border-r border-r-border flex w-64">

@@ -2,7 +2,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import PageTransition from "@/components/layout/PageTransition";
-import Navbar from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
 import { 
   Card, 
@@ -69,54 +68,51 @@ export default function CreateEditEmployee() {
   };
 
   return (
-    <div className="flex min-h-screen">
-      <Navbar />
-      <div className="flex-1 container px-4 py-6 md:py-8 md:ml-64">
-        <PageTransition>
-          <div className="flex flex-col gap-8">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight">
-                  {isEditing ? "Mitarbeiter bearbeiten" : "Neuen Mitarbeiter anlegen"}
-                </h1>
-                <p className="text-muted-foreground">
-                  {isEditing 
-                    ? "Aktualisieren Sie die Informationen des ausgewählten Mitarbeiters" 
-                    : "Fügen Sie einen neuen Mitarbeiter zur Datenbank hinzu"}
-                </p>
-              </div>
+    <PageTransition>
+      <div className="container mx-auto px-4 py-6 md:py-8">
+        <div className="flex flex-col gap-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">
+                {isEditing ? "Mitarbeiter bearbeiten" : "Neuen Mitarbeiter anlegen"}
+              </h1>
+              <p className="text-muted-foreground">
+                {isEditing 
+                  ? "Aktualisieren Sie die Informationen des ausgewählten Mitarbeiters" 
+                  : "Fügen Sie einen neuen Mitarbeiter zur Datenbank hinzu"}
+              </p>
             </div>
-
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Mitarbeiter Details</CardTitle>
-                    <CardDescription>
-                      Geben Sie die Informationen für diesen Mitarbeiter ein
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <EmployeeFormFields />
-                  </CardContent>
-                  <CardFooter className="flex justify-between">
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={() => navigate(-1)}
-                    >
-                      Abbrechen
-                    </Button>
-                    <Button type="submit">
-                      {isEditing ? "Speichern" : "Erstellen"}
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </form>
-            </Form>
           </div>
-        </PageTransition>
+
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Mitarbeiter Details</CardTitle>
+                  <CardDescription>
+                    Geben Sie die Informationen für diesen Mitarbeiter ein
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="card-content">
+                  <EmployeeFormFields />
+                </CardContent>
+                <CardFooter className="flex justify-between">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => navigate(-1)}
+                  >
+                    Abbrechen
+                  </Button>
+                  <Button type="submit">
+                    {isEditing ? "Speichern" : "Erstellen"}
+                  </Button>
+                </CardFooter>
+              </Card>
+            </form>
+          </Form>
+        </div>
       </div>
-    </div>
+    </PageTransition>
   );
 }

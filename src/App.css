@@ -13,12 +13,6 @@
   }
 }
 
-@media (max-width: 767px) {
-  #root {
-    padding-top: 4.5rem; /* Add space for the fixed mobile menu */
-  }
-}
-
 .logo {
   height: 6em;
   padding: 1.5em;
@@ -66,5 +60,20 @@
 @media (max-width: 640px) {
   .responsive-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Make forms more responsive on mobile */
+@media (max-width: 768px) {
+  form .grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .card-content {
+    padding: 1rem !important;
+  }
+  
+  .tabs-content {
+    padding: 0.5rem !important;
   }
 }

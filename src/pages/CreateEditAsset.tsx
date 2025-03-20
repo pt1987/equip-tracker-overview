@@ -1,9 +1,9 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import PageTransition from "@/components/layout/PageTransition";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { 
   Select, 
   SelectContent, 
@@ -149,108 +149,215 @@ export default function CreateEditAsset() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <PageTransition>
-        <div className="container px-4 py-6 md:py-8">
-          <div className="flex flex-col gap-8">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight">
-                  {isEditing ? "Asset bearbeiten" : "Neues Asset anlegen"}
-                </h1>
-                <p className="text-muted-foreground">
-                  {isEditing 
-                    ? "Aktualisieren Sie die Informationen des ausgewählten Assets" 
-                    : "Fügen Sie ein neues Asset zur Inventarliste hinzu"}
-                </p>
-              </div>
+    <PageTransition>
+      <div className="container mx-auto px-4 py-6 md:py-8">
+        <div className="flex flex-col gap-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">
+                {isEditing ? "Asset bearbeiten" : "Neues Asset anlegen"}
+              </h1>
+              <p className="text-muted-foreground">
+                {isEditing 
+                  ? "Aktualisieren Sie die Informationen des ausgewählten Assets" 
+                  : "Fügen Sie ein neues Asset zur Inventarliste hinzu"}
+              </p>
             </div>
+          </div>
 
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Asset Details</CardTitle>
-                    <CardDescription>
-                      Geben Sie die grundlegenden Informationen für dieses Asset ein
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Tabs value={activeTab} onValueChange={setActiveTab}>
-                      <TabsList className="mb-4">
-                        <TabsTrigger value="basic">Grundinformationen</TabsTrigger>
-                        <TabsTrigger value="details">Erweiterte Details</TabsTrigger>
-                        <TabsTrigger value="relation">Zuordnung</TabsTrigger>
-                      </TabsList>
-                      
-                      <TabsContent value="basic" className="space-y-4">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Asset Details</CardTitle>
+                  <CardDescription>
+                    Geben Sie die grundlegenden Informationen für dieses Asset ein
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="card-content">
+                  <Tabs value={activeTab} onValueChange={setActiveTab}>
+                    <TabsList className="mb-4 w-full flex flex-wrap justify-start md:justify-start">
+                      <TabsTrigger value="basic">Grundinformationen</TabsTrigger>
+                      <TabsTrigger value="details">Erweiterte Details</TabsTrigger>
+                      <TabsTrigger value="relation">Zuordnung</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="basic" className="space-y-4 tabs-content">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="category"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Kategorie</FormLabel>
+                              <Select 
+                                onValueChange={field.onChange} 
+                                defaultValue={field.value}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Kategorie auswählen" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="notebook">Notebook</SelectItem>
+                                  <SelectItem value="smartphone">Smartphone</SelectItem>
+                                  <SelectItem value="tablet">Tablet</SelectItem>
+                                  <SelectItem value="mouse">Maus</SelectItem>
+                                  <SelectItem value="keyboard">Tastatur</SelectItem>
+                                  <SelectItem value="accessory">Zubehör</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="status"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Status</FormLabel>
+                              <Select 
+                                onValueChange={field.onChange} 
+                                defaultValue={field.value}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Status auswählen" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="ordered">Bestellt</SelectItem>
+                                  <SelectItem value="delivered">Geliefert</SelectItem>
+                                  <SelectItem value="in_use">In Gebrauch</SelectItem>
+                                  <SelectItem value="defective">Defekt</SelectItem>
+                                  <SelectItem value="in_repair">In Reparatur</SelectItem>
+                                  <SelectItem value="pool">Pool</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="manufacturer"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Hersteller</FormLabel>
+                              <FormControl>
+                                <Input placeholder="z.B. Apple, Dell, Logitech" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="model"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Modell</FormLabel>
+                              <FormControl>
+                                <Input placeholder="z.B. MacBook Pro, XPS 13" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="purchaseDate"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Kaufdatum</FormLabel>
+                              <FormControl>
+                                <Input type="date" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="price"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Kaufpreis (€)</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="number" 
+                                  placeholder="0.00" 
+                                  {...field} 
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="vendor"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Verkäufer</FormLabel>
+                              <FormControl>
+                                <Input placeholder="z.B. Amazon, MediaMarkt" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="assignedTo"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Zugewiesen an</FormLabel>
+                              <Select 
+                                onValueChange={field.onChange} 
+                                defaultValue={field.value}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Mitarbeiter auswählen" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="pool">Nicht zugewiesen (Pool)</SelectItem>
+                                  {employeeData.map(employee => (
+                                    <SelectItem key={employee.id} value={employee.id}>
+                                      {employee.firstName} {employee.lastName}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="details" className="space-y-4 tabs-content">
+                      {(watchCategory === "notebook" || watchCategory === "smartphone" || watchCategory === "tablet") && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <FormField
                             control={form.control}
-                            name="category"
+                            name="serialNumber"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Kategorie</FormLabel>
-                                <Select 
-                                  onValueChange={field.onChange} 
-                                  defaultValue={field.value}
-                                >
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Kategorie auswählen" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    <SelectItem value="notebook">Notebook</SelectItem>
-                                    <SelectItem value="smartphone">Smartphone</SelectItem>
-                                    <SelectItem value="tablet">Tablet</SelectItem>
-                                    <SelectItem value="mouse">Maus</SelectItem>
-                                    <SelectItem value="keyboard">Tastatur</SelectItem>
-                                    <SelectItem value="accessory">Zubehör</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={form.control}
-                            name="status"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Status</FormLabel>
-                                <Select 
-                                  onValueChange={field.onChange} 
-                                  defaultValue={field.value}
-                                >
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Status auswählen" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    <SelectItem value="ordered">Bestellt</SelectItem>
-                                    <SelectItem value="delivered">Geliefert</SelectItem>
-                                    <SelectItem value="in_use">In Gebrauch</SelectItem>
-                                    <SelectItem value="defective">Defekt</SelectItem>
-                                    <SelectItem value="in_repair">In Reparatur</SelectItem>
-                                    <SelectItem value="pool">Pool</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={form.control}
-                            name="manufacturer"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Hersteller</FormLabel>
+                                <FormLabel>Seriennummer</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="z.B. Apple, Dell, Logitech" {...field} />
+                                  <Input {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -259,300 +366,191 @@ export default function CreateEditAsset() {
                           
                           <FormField
                             control={form.control}
-                            name="model"
+                            name="inventoryNumber"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Modell</FormLabel>
+                                <FormLabel>Inventarnummer</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="z.B. MacBook Pro, XPS 13" {...field} />
+                                  <Input {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
                             )}
                           />
                           
-                          <FormField
-                            control={form.control}
-                            name="purchaseDate"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Kaufdatum</FormLabel>
-                                <FormControl>
-                                  <Input type="date" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={form.control}
-                            name="price"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Kaufpreis (€)</FormLabel>
-                                <FormControl>
-                                  <Input 
-                                    type="number" 
-                                    placeholder="0.00" 
-                                    {...field} 
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={form.control}
-                            name="vendor"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Verkäufer</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="z.B. Amazon, MediaMarkt" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={form.control}
-                            name="assignedTo"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Zugewiesen an</FormLabel>
-                                <Select 
-                                  onValueChange={field.onChange} 
-                                  defaultValue={field.value}
-                                >
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Mitarbeiter auswählen" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    <SelectItem value="">Nicht zugewiesen (Pool)</SelectItem>
-                                    {employeeData.map(employee => (
-                                      <SelectItem key={employee.id} value={employee.id}>
-                                        {employee.firstName} {employee.lastName}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                      </TabsContent>
-                      
-                      <TabsContent value="details" className="space-y-4">
-                        {(watchCategory === "notebook" || watchCategory === "smartphone" || watchCategory === "tablet") && (
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {watchCategory === "notebook" && (
                             <FormField
                               control={form.control}
-                              name="serialNumber"
+                              name="hasWarranty"
                               render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Seriennummer</FormLabel>
+                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                                  <div className="space-y-0.5">
+                                    <FormLabel className="text-base">
+                                      Zusatzgarantie
+                                    </FormLabel>
+                                    <FormDescription>
+                                      Hat dieses Gerät eine erweiterte Garantie?
+                                    </FormDescription>
+                                  </div>
                                   <FormControl>
-                                    <Input {...field} />
+                                    <Switch
+                                      checked={field.value}
+                                      onCheckedChange={field.onChange}
+                                    />
                                   </FormControl>
-                                  <FormMessage />
                                 </FormItem>
                               )}
                             />
-                            
-                            <FormField
-                              control={form.control}
-                              name="inventoryNumber"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Inventarnummer</FormLabel>
-                                  <FormControl>
-                                    <Input {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            
-                            {watchCategory === "notebook" && (
+                          )}
+                          
+                          {watchCategory === "smartphone" && (
+                            <>
                               <FormField
                                 control={form.control}
-                                name="hasWarranty"
+                                name="imei"
                                 render={({ field }) => (
-                                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                                    <div className="space-y-0.5">
-                                      <FormLabel className="text-base">
-                                        Zusatzgarantie
-                                      </FormLabel>
-                                      <FormDescription>
-                                        Hat dieses Gerät eine erweiterte Garantie?
-                                      </FormDescription>
-                                    </div>
+                                  <FormItem>
+                                    <FormLabel>IMEI</FormLabel>
                                     <FormControl>
-                                      <Switch
-                                        checked={field.value}
-                                        onCheckedChange={field.onChange}
-                                      />
+                                      <Input {...field} />
                                     </FormControl>
+                                    <FormMessage />
                                   </FormItem>
                                 )}
                               />
-                            )}
-                            
-                            {watchCategory === "smartphone" && (
-                              <>
-                                <FormField
-                                  control={form.control}
-                                  name="imei"
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel>IMEI</FormLabel>
-                                      <FormControl>
-                                        <Input {...field} />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                                
-                                <FormField
-                                  control={form.control}
-                                  name="phoneNumber"
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel>Telefonnummer</FormLabel>
-                                      <FormControl>
-                                        <Input {...field} />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                                
-                                <FormField
-                                  control={form.control}
-                                  name="provider"
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel>Provider</FormLabel>
-                                      <FormControl>
-                                        <Input placeholder="z.B. Telekom, Vodafone" {...field} />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                                
-                                <FormField
-                                  control={form.control}
-                                  name="contractDuration"
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel>Vertragslaufzeit</FormLabel>
-                                      <FormControl>
-                                        <Input placeholder="z.B. 24 Monate" {...field} />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                                
-                                <FormField
-                                  control={form.control}
-                                  name="contractName"
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel>Vertragsbezeichnung</FormLabel>
-                                      <FormControl>
-                                        <Input {...field} />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                              </>
-                            )}
-                          </div>
-                        )}
-                        
-                        {!["notebook", "smartphone", "tablet"].includes(watchCategory) && (
-                          <div className="flex items-center justify-center h-40">
-                            <p className="text-muted-foreground">
-                              Bitte wählen Sie zuerst eine Kategorie (Notebook, Smartphone oder Tablet), 
-                              um erweiterte Details einzugeben.
-                            </p>
-                          </div>
-                        )}
-                      </TabsContent>
+                              
+                              <FormField
+                                control={form.control}
+                                name="phoneNumber"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Telefonnummer</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              
+                              <FormField
+                                control={form.control}
+                                name="provider"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Provider</FormLabel>
+                                    <FormControl>
+                                      <Input placeholder="z.B. Telekom, Vodafone" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              
+                              <FormField
+                                control={form.control}
+                                name="contractDuration"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Vertragslaufzeit</FormLabel>
+                                    <FormControl>
+                                      <Input placeholder="z.B. 24 Monate" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              
+                              <FormField
+                                control={form.control}
+                                name="contractName"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Vertragsbezeichnung</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </>
+                          )}
+                        </div>
+                      )}
                       
-                      <TabsContent value="relation" className="space-y-4">
-                        {watchCategory === "accessory" ? (
-                          <FormField
-                            control={form.control}
-                            name="relatedAssetId"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Zugehöriges Gerät</FormLabel>
-                                <Select 
-                                  onValueChange={field.onChange} 
-                                  defaultValue={field.value}
-                                >
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Gerät auswählen" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    <SelectItem value="">Kein zugehöriges Gerät</SelectItem>
-                                    {assetData
-                                      .filter(a => ["notebook", "smartphone", "tablet"].includes(a.category))
-                                      .map(asset => (
-                                        <SelectItem key={asset.id} value={asset.id}>
-                                          {asset.manufacturer} {asset.model}
-                                        </SelectItem>
-                                      ))}
-                                  </SelectContent>
-                                </Select>
-                                <FormDescription>
-                                  Wenn dieses Zubehör zu einem anderen Gerät gehört, wählen Sie es hier aus.
-                                </FormDescription>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        ) : (
-                          <div className="flex items-center justify-center h-40">
-                            <p className="text-muted-foreground">
-                              Die Zuordnung ist nur für Zubehör verfügbar. Bitte wählen Sie "Zubehör" als Kategorie.
-                            </p>
-                          </div>
-                        )}
-                      </TabsContent>
-                    </Tabs>
-                  </CardContent>
-                  <CardFooter className="flex justify-between">
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={() => navigate(-1)}
-                    >
-                      Abbrechen
-                    </Button>
-                    <Button type="submit">
-                      {isEditing ? "Speichern" : "Erstellen"}
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </form>
-            </Form>
-          </div>
+                      {!["notebook", "smartphone", "tablet"].includes(watchCategory) && (
+                        <div className="flex items-center justify-center h-40">
+                          <p className="text-muted-foreground">
+                            Bitte wählen Sie zuerst eine Kategorie (Notebook, Smartphone oder Tablet), 
+                            um erweiterte Details einzugeben.
+                          </p>
+                        </div>
+                      )}
+                    </TabsContent>
+                    
+                    <TabsContent value="relation" className="space-y-4 tabs-content">
+                      {watchCategory === "accessory" ? (
+                        <FormField
+                          control={form.control}
+                          name="relatedAssetId"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Zugehöriges Gerät</FormLabel>
+                              <Select 
+                                onValueChange={field.onChange} 
+                                defaultValue={field.value}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Gerät auswählen" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="none">Kein zugehöriges Gerät</SelectItem>
+                                  {assetData
+                                    .filter(a => ["notebook", "smartphone", "tablet"].includes(a.category))
+                                    .map(asset => (
+                                      <SelectItem key={asset.id} value={asset.id}>
+                                        {asset.manufacturer} {asset.model}
+                                      </SelectItem>
+                                    ))}
+                                </SelectContent>
+                              </Select>
+                              <FormDescription>
+                                Wenn dieses Zubehör zu einem anderen Gerät gehört, wählen Sie es hier aus.
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center h-40">
+                          <p className="text-muted-foreground">
+                            Die Zuordnung ist nur für Zubehör verfügbar. Bitte wählen Sie "Zubehör" als Kategorie.
+                          </p>
+                        </div>
+                      )}
+                    </TabsContent>
+                  </Tabs>
+                </CardContent>
+                <CardFooter className="flex justify-between">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => navigate(-1)}
+                  >
+                    Abbrechen
+                  </Button>
+                  <Button type="submit">
+                    {isEditing ? "Speichern" : "Erstellen"}
+                  </Button>
+                </CardFooter>
+              </Card>
+            </form>
+          </Form>
         </div>
-      </PageTransition>
-    </div>
+      </div>
+    </PageTransition>
   );
 }

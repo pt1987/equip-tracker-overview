@@ -36,22 +36,24 @@ const AppContent = () => {
       <Toaster />
       <Sonner />
       <AnimatePresence mode="wait">
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/assets" element={<Assets />} />
-          <Route path="/employees" element={<Employees />} />
-          <Route path="/asset/:id" element={<AssetDetail />} />
-          <Route path="/employee/:id" element={<EmployeeDetail />} />
-          <Route path="/history" element={<History />} />
-          <Route path="/pool-assets" element={<PoolAssets />} />
-          <Route path="/asset/create" element={<CreateEditAsset />} />
-          <Route path="/asset/edit/:id" element={<CreateEditAsset />} />
-          <Route path="/employee/create" element={<CreateEditEmployee />} />
-          <Route path="/employee/edit/:id" element={<CreateEditEmployee />} />
-          
-          {/* Catch-all route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <div className={`${isMobile ? 'pt-16' : 'md:pl-64'} w-full`}>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/assets" element={<Assets />} />
+            <Route path="/employees" element={<Employees />} />
+            <Route path="/asset/:id" element={<AssetDetail />} />
+            <Route path="/employee/:id" element={<EmployeeDetail />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/pool-assets" element={<PoolAssets />} />
+            <Route path="/asset/create" element={<CreateEditAsset />} />
+            <Route path="/asset/edit/:id" element={<CreateEditAsset />} />
+            <Route path="/employee/create" element={<CreateEditEmployee />} />
+            <Route path="/employee/edit/:id" element={<CreateEditEmployee />} />
+            
+            {/* Catch-all route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </div>
       </AnimatePresence>
     </div>
   );
