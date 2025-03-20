@@ -66,7 +66,7 @@ export default function Reporting() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-6 max-w-full">
+    <div className="container mx-auto p-4 md:p-6 space-y-6 max-w-7xl">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
@@ -85,8 +85,8 @@ export default function Reporting() {
         onValueChange={(value) => setActiveReport(value as ReportType)}
         className="w-full"
       >
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 flex-wrap">
-          <TabsList className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 w-full sm:w-auto">
+        <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
+          <TabsList className="flex flex-wrap gap-2 h-auto">
             <TabsTrigger value="orderTimeline">Order Timeline</TabsTrigger>
             <TabsTrigger value="yearlyBudget">Yearly Budget</TabsTrigger>
             <TabsTrigger value="yearlyPurchases">Yearly Purchases</TabsTrigger>
@@ -113,8 +113,8 @@ export default function Reporting() {
           </DropdownMenu>
         </div>
         
-        <Card>
-          <CardHeader>
+        <Card className="shadow-sm border">
+          <CardHeader className="pb-3">
             <CardTitle>
               {activeReport === "orderTimeline" && "Employee Order Timeline"}
               {activeReport === "yearlyBudget" && "Yearly Budget Usage"}
@@ -130,28 +130,26 @@ export default function Reporting() {
               {activeReport === "warrantyDefects" && "Analysis of defective hardware with and without warranty"}
             </CardDescription>
           </CardHeader>
-          <CardContent className="p-0">
-            <div className="p-4 overflow-x-auto">
-              <TabsContent value="orderTimeline" className="mt-0">
-                <OrderTimelineReport />
-              </TabsContent>
-              
-              <TabsContent value="yearlyBudget" className="mt-0">
-                <BudgetYearlyReport />
-              </TabsContent>
-              
-              <TabsContent value="yearlyPurchases" className="mt-0">
-                <AssetPurchasesReport />
-              </TabsContent>
-              
-              <TabsContent value="usageDuration" className="mt-0">
-                <AssetUsageDurationReport />
-              </TabsContent>
-              
-              <TabsContent value="warrantyDefects" className="mt-0">
-                <WarrantyDefectsReport />
-              </TabsContent>
-            </div>
+          <CardContent>
+            <TabsContent value="orderTimeline" className="mt-0">
+              <OrderTimelineReport />
+            </TabsContent>
+            
+            <TabsContent value="yearlyBudget" className="mt-0">
+              <BudgetYearlyReport />
+            </TabsContent>
+            
+            <TabsContent value="yearlyPurchases" className="mt-0">
+              <AssetPurchasesReport />
+            </TabsContent>
+            
+            <TabsContent value="usageDuration" className="mt-0">
+              <AssetUsageDurationReport />
+            </TabsContent>
+            
+            <TabsContent value="warrantyDefects" className="mt-0">
+              <WarrantyDefectsReport />
+            </TabsContent>
           </CardContent>
         </Card>
       </Tabs>

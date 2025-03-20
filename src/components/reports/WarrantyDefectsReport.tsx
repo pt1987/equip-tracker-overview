@@ -10,7 +10,6 @@ import {
 } from "recharts";
 import { getWarrantyDefectReport } from "@/data/reports";
 import { WarrantyDefectReport } from "@/lib/types";
-import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 
 export default function WarrantyDefectsReport() {
   const [warrantyData, setWarrantyData] = useState<WarrantyDefectReport | null>(null);
@@ -25,7 +24,9 @@ export default function WarrantyDefectsReport() {
   }, []);
 
   if (!warrantyData) {
-    return <div>Loading...</div>;
+    return <div className="flex items-center justify-center h-64">
+      <div className="animate-pulse text-muted-foreground">Loading data...</div>
+    </div>;
   }
 
   const pieData = [
@@ -34,29 +35,23 @@ export default function WarrantyDefectsReport() {
   ];
 
   const COLORS = ["#16a34a", "#dc2626"];
-
-  const chartConfig = {
-    "With Warranty": { color: "#16a34a" },
-    "Without Warranty": { color: "#dc2626" }
-  };
-
   const totalDefective = warrantyData.withWarranty.count + warrantyData.withoutWarranty.count;
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="min-h-[300px] flex items-center justify-center">
-          <ResponsiveContainer width="100%" height={300}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="h-[300px] md:h-[350px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={pieData}
                 cx="50%"
                 cy="50%"
-                labelLine={false}
-                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                outerRadius={100}
+                labelLine={true}
+                outerRadius={({ index }) => (index === 0 ? 120 : 100)}
                 fill="#8884d8"
                 dataKey="value"
+                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
               >
                 {pieData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -65,13 +60,16 @@ export default function WarrantyDefectsReport() {
               <Tooltip
                 content={({ active, payload }) => {
                   if (active && payload && payload.length) {
+                    const data = payload[0].payload;
                     const value = Number(payload[0].value);
+                    const percentage = (value / totalDefective) * 100;
+                    
                     return (
-                      <div className="p-2 bg-background border rounded shadow-sm">
-                        <p className="font-semibold">{payload[0].name}</p>
-                        <p>Count: {value}</p>
-                        <p>
-                          Percentage: {((value / totalDefective) * 100).toFixed(1)}%
+                      <div className="p-3 bg-card border shadow-sm rounded-md">
+                        <p className="font-medium text-sm">{data.name}</p>
+                        <p className="text-sm">Count: {value}</p>
+                        <p className="text-sm">
+                          Percentage: {percentage.toFixed(1)}%
                         </p>
                       </div>
                     );
@@ -79,7 +77,7 @@ export default function WarrantyDefectsReport() {
                   return null;
                 }}
               />
-              <Legend />
+              <Legend verticalAlign="bottom" />
             </PieChart>
           </ResponsiveContainer>
         </div>
@@ -94,8 +92,8 @@ export default function WarrantyDefectsReport() {
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-4 border rounded-md bg-secondary/30">
-                <h4 className="font-semibold text-green-600">With Warranty</h4>
+              <div className="p-4 rounded-lg border bg-secondary/30">
+                <h4 className="font-medium text-green-600 dark:text-green-500">With Warranty</h4>
                 <div className="mt-2 text-2xl font-bold">
                   {warrantyData.withWarranty.count}
                 </div>
@@ -104,8 +102,8 @@ export default function WarrantyDefectsReport() {
                 </div>
               </div>
               
-              <div className="p-4 border rounded-md bg-secondary/30">
-                <h4 className="font-semibold text-red-600">Without Warranty</h4>
+              <div className="p-4 rounded-lg border bg-secondary/30">
+                <h4 className="font-medium text-red-600 dark:text-red-500">Without Warranty</h4>
                 <div className="mt-2 text-2xl font-bold">
                   {warrantyData.withoutWarranty.count}
                 </div>
@@ -118,31 +116,31 @@ export default function WarrantyDefectsReport() {
         </div>
       </div>
       
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto border rounded-lg">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="border-b">
-              <th className="text-left py-2 px-4">Warranty Status</th>
-              <th className="text-center py-2 px-4">Count</th>
-              <th className="text-right py-2 px-4">Percentage</th>
+            <tr className="border-b bg-muted/50">
+              <th className="text-left py-2 px-4 font-medium">Warranty Status</th>
+              <th className="text-center py-2 px-4 font-medium">Count</th>
+              <th className="text-right py-2 px-4 font-medium">Percentage</th>
             </tr>
           </thead>
           <tbody>
-            <tr className="border-b hover:bg-secondary/50">
+            <tr className="border-b hover:bg-muted/30">
               <td className="py-2 px-4">With Warranty</td>
               <td className="py-2 px-4 text-center">{warrantyData.withWarranty.count}</td>
               <td className="py-2 px-4 text-right">
                 {warrantyData.withWarranty.percentage.toFixed(1)}%
               </td>
             </tr>
-            <tr className="border-b hover:bg-secondary/50">
+            <tr className="border-b hover:bg-muted/30">
               <td className="py-2 px-4">Without Warranty</td>
               <td className="py-2 px-4 text-center">{warrantyData.withoutWarranty.count}</td>
               <td className="py-2 px-4 text-right">
                 {warrantyData.withoutWarranty.percentage.toFixed(1)}%
               </td>
             </tr>
-            <tr className="font-semibold">
+            <tr className="font-medium bg-muted/20">
               <td className="py-2 px-4">Total</td>
               <td className="py-2 px-4 text-center">{totalDefective}</td>
               <td className="py-2 px-4 text-right">100%</td>

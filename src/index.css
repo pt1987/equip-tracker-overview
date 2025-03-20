@@ -148,20 +148,44 @@
     @apply w-full md:pl-64 transition-all duration-300;
   }
   
-  /* Chart responsiveness */
+  /* Better charts for reporting */
   .chart-container {
-    @apply w-full h-full min-h-[300px] overflow-hidden;
+    @apply w-full h-full min-h-[350px] overflow-hidden border rounded-lg;
   }
   
-  /* Improved table responsiveness */
+  /* Improved table styles */
   .responsive-table {
-    @apply w-full overflow-x-auto;
+    @apply w-full overflow-x-auto border rounded-lg;
   }
   
   .responsive-table table {
-    @apply min-w-full;
+    @apply min-w-full border-collapse;
   }
   
+  .responsive-table th {
+    @apply text-left py-3 px-4 font-medium border-b bg-muted/50;
+  }
+  
+  .responsive-table td {
+    @apply py-3 px-4 border-b;
+  }
+  
+  .responsive-table tr:hover td {
+    @apply bg-muted/30;
+  }
+  
+  /* Responsive card layouts */
+  .cards-grid {
+    @apply grid gap-4;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+  
+  /* Collapsible sidebar */
+  .sidebar-collapsed {
+    @apply -translate-x-full md:translate-x-0;
+  }
+  
+  /* Improve mobile layouts */
   @media (max-width: 767px) {
     .main-content {
       padding-left: 0;
@@ -172,6 +196,16 @@
     .responsive-table th,
     .responsive-table td {
       @apply py-2 px-2 text-sm;
+    }
+    
+    /* Make tabs more compact on mobile */
+    .tabs-list {
+      @apply flex-wrap gap-1;
+    }
+    
+    /* Theme switcher position in mobile menu */
+    .mobile-theme-switcher {
+      @apply mt-4 border-t border-sidebar-border pt-4 pb-2 px-4;
     }
   }
 }
@@ -219,7 +253,7 @@
   transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Responsive grid layouts */
+/* Better responsive grid layouts */
 .responsive-grid-2 {
   @apply grid gap-4;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -237,11 +271,20 @@
 
 /* Chart and report specific styles */
 .report-card {
-  @apply p-4 bg-card rounded-lg border shadow-sm;
+  @apply p-4 bg-card rounded-lg border shadow-sm overflow-hidden;
 }
 
 .report-tabs-list {
   @apply flex flex-wrap gap-2 mb-4;
+}
+
+/* Enhanced responsiveness for charts */
+.chart-responsive {
+  @apply w-full h-[350px] md:h-[400px];
+}
+
+.chart-tooltip {
+  @apply p-3 bg-card border shadow-sm rounded-md text-sm;
 }
 
 @media (max-width: 640px) {
@@ -251,8 +294,18 @@
     grid-template-columns: 1fr;
   }
   
-  /* Ensure charts are visible on mobile */
+  /* Make sure charts are visible on mobile */
   .recharts-responsive-container {
-    @apply max-h-[400px];
+    @apply max-h-[350px];
+  }
+  
+  /* Adjust chart margins on mobile */
+  .recharts-wrapper .recharts-cartesian-grid {
+    @apply -mx-2;
+  }
+  
+  /* Fix table scrolling on mobile */
+  .responsive-table {
+    @apply max-w-full -mx-2 px-2;
   }
 }

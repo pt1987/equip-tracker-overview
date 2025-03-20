@@ -20,6 +20,9 @@ import CreateEditEmployee from "./pages/CreateEditEmployee";
 import NotFound from "./pages/NotFound";
 import Reporting from "./pages/Reporting";
 
+// Remove App.css import as we're already using index.css for styling
+// import "./App.css"; 
+
 const queryClient = new QueryClient();
 
 const AppContent = () => {

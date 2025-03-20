@@ -8,11 +8,11 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  Legend 
+  Legend,
+  ReferenceLine
 } from "recharts";
 import { getYearlyBudgetReport } from "@/data/reports";
 import { formatCurrency } from "@/lib/utils";
-import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 
 export default function BudgetYearlyReport() {
   const [budgetData, setBudgetData] = useState<any[]>([]);
@@ -26,29 +26,38 @@ export default function BudgetYearlyReport() {
     fetchData();
   }, []);
 
-  const chartConfig = {
-    totalSpent: { color: "#2563eb" }
-  };
+  // Calculate average spend for reference line
+  const averageSpend = budgetData.length > 0
+    ? budgetData.reduce((sum, item) => sum + item.totalSpent, 0) / budgetData.length
+    : 0;
 
   return (
     <div className="space-y-6">
-      <div className="h-[400px] w-full">
-        <ChartContainer config={chartConfig}>
+      <div className="h-[350px] md:h-[400px] w-full border rounded-lg p-4">
+        <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={budgetData}
-            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+            margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="year" />
-            <YAxis tickFormatter={(value) => formatCurrency(value)} />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+            <XAxis 
+              dataKey="year" 
+              axisLine={true}
+              tickLine={true}
+            />
+            <YAxis 
+              tickFormatter={(value) => formatCurrency(value, true)}
+              width={80}
+            />
             <Tooltip
               content={({ active, payload }) => {
                 if (active && payload && payload.length) {
+                  const data = payload[0].payload;
                   return (
-                    <div className="p-2 bg-background border rounded shadow-sm">
-                      <p className="font-semibold">Year: {payload[0].payload.year}</p>
-                      <p className="font-semibold mt-1">
-                        Total Spent: {formatCurrency(payload[0].payload.totalSpent)}
+                    <div className="p-3 bg-card border shadow-sm rounded-md">
+                      <p className="font-medium text-sm">Year: {data.year}</p>
+                      <p className="font-medium mt-1 text-sm">
+                        Total Spent: {formatCurrency(data.totalSpent)}
                       </p>
                     </div>
                   );
@@ -57,36 +66,47 @@ export default function BudgetYearlyReport() {
               }}
             />
             <Legend />
+            <ReferenceLine y={averageSpend} label="Average" stroke="#888" strokeDasharray="3 3" />
             <Bar 
               dataKey="totalSpent" 
-              fill="#8884d8" 
+              fill="#2563eb" 
               name="Budget Spent"
-              radius={[4, 4, 0, 0]}
+              radius={[6, 6, 0, 0]}
             />
           </BarChart>
-        </ChartContainer>
+        </ResponsiveContainer>
       </div>
       
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto border rounded-lg">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="border-b">
-              <th className="text-left py-2 px-4">Year</th>
-              <th className="text-right py-2 px-4">Total Spent</th>
+            <tr className="border-b bg-muted/50">
+              <th className="text-left py-3 px-4 font-medium">Year</th>
+              <th className="text-right py-3 px-4 font-medium">Total Spent</th>
+              <th className="text-right py-3 px-4 font-medium">% of Average</th>
             </tr>
           </thead>
           <tbody>
             {budgetData.map((item, index) => (
-              <tr key={index} className="border-b hover:bg-secondary/50">
-                <td className="py-2 px-4">{item.year}</td>
-                <td className="py-2 px-4 text-right">{formatCurrency(item.totalSpent)}</td>
+              <tr key={index} className="border-b hover:bg-muted/30">
+                <td className="py-3 px-4">{item.year}</td>
+                <td className="py-3 px-4 text-right font-medium">{formatCurrency(item.totalSpent)}</td>
+                <td className="py-3 px-4 text-right">
+                  {averageSpend > 0 ? `${((item.totalSpent / averageSpend) * 100).toFixed(1)}%` : '0%'}
+                </td>
               </tr>
             ))}
-            <tr className="font-semibold">
-              <td className="py-2 px-4">Total</td>
-              <td className="py-2 px-4 text-right">
+            <tr className="font-medium bg-muted/20">
+              <td className="py-3 px-4">Average</td>
+              <td className="py-3 px-4 text-right">{formatCurrency(averageSpend)}</td>
+              <td className="py-3 px-4 text-right">100%</td>
+            </tr>
+            <tr className="font-medium bg-muted/20">
+              <td className="py-3 px-4">Total</td>
+              <td className="py-3 px-4 text-right">
                 {formatCurrency(budgetData.reduce((sum, item) => sum + item.totalSpent, 0))}
               </td>
+              <td className="py-3 px-4 text-right">-</td>
             </tr>
           </tbody>
         </table>
