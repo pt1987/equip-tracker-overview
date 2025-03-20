@@ -6,7 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { ThemeProvider } from "@/hooks/use-theme";
-import { ThemeSwitcher } from "@/components/layout/ThemeSwitcher";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Navbar from "@/components/layout/Navbar";
 import Dashboard from "./pages/Index";
@@ -19,7 +18,7 @@ import PoolAssets from "./pages/PoolAssets";
 import CreateEditAsset from "./pages/CreateEditAsset";
 import CreateEditEmployee from "./pages/CreateEditEmployee";
 import NotFound from "./pages/NotFound";
-import Reporting from "./pages/Reporting"; // Add import for the Reporting page
+import Reporting from "./pages/Reporting";
 
 const queryClient = new QueryClient();
 
@@ -29,11 +28,6 @@ const AppContent = () => {
   return (
     <div className="relative min-h-screen">
       <Navbar />
-      {!isMobile && (
-        <div className="fixed top-4 right-4 z-50 bg-background/80 backdrop-blur-sm p-2 rounded-lg shadow-sm">
-          <ThemeSwitcher />
-        </div>
-      )}
       <Toaster />
       <Sonner />
       <AnimatePresence mode="wait">
@@ -50,7 +44,7 @@ const AppContent = () => {
             <Route path="/asset/edit/:id" element={<CreateEditAsset />} />
             <Route path="/employee/create" element={<CreateEditEmployee />} />
             <Route path="/employee/edit/:id" element={<CreateEditEmployee />} />
-            <Route path="/reporting" element={<Reporting />} /> {/* Add Reporting route */}
+            <Route path="/reporting" element={<Reporting />} />
             
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />

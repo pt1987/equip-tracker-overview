@@ -45,8 +45,8 @@ export default function WarrantyDefectsReport() {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="h-[300px]">
-          <ChartContainer config={chartConfig}>
+        <div className="min-h-[300px] flex items-center justify-center">
+          <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
                 data={pieData}
@@ -81,7 +81,7 @@ export default function WarrantyDefectsReport() {
               />
               <Legend />
             </PieChart>
-          </ChartContainer>
+          </ResponsiveContainer>
         </div>
         
         <div className="flex items-center justify-center">
@@ -93,7 +93,7 @@ export default function WarrantyDefectsReport() {
               </p>
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="p-4 border rounded-md bg-secondary/30">
                 <h4 className="font-semibold text-green-600">With Warranty</h4>
                 <div className="mt-2 text-2xl font-bold">

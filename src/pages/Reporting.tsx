@@ -66,7 +66,7 @@ export default function Reporting() {
   };
 
   return (
-    <div className="container mx-auto p-4 md:p-6 space-y-6">
+    <div className="container mx-auto px-4 py-6 space-y-6 max-w-full">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
@@ -85,8 +85,8 @@ export default function Reporting() {
         onValueChange={(value) => setActiveReport(value as ReportType)}
         className="w-full"
       >
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
-          <TabsList className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 flex-wrap">
+          <TabsList className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 w-full sm:w-auto">
             <TabsTrigger value="orderTimeline">Order Timeline</TabsTrigger>
             <TabsTrigger value="yearlyBudget">Yearly Budget</TabsTrigger>
             <TabsTrigger value="yearlyPurchases">Yearly Purchases</TabsTrigger>
@@ -96,7 +96,7 @@ export default function Reporting() {
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="ml-auto">
                 <DownloadIcon className="mr-2 h-4 w-4" />
                 Export Report
                 <ChevronDown className="ml-2 h-4 w-4" />
@@ -131,25 +131,27 @@ export default function Reporting() {
             </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
-            <TabsContent value="orderTimeline" className="p-4 m-0">
-              <OrderTimelineReport />
-            </TabsContent>
-            
-            <TabsContent value="yearlyBudget" className="p-4 m-0">
-              <BudgetYearlyReport />
-            </TabsContent>
-            
-            <TabsContent value="yearlyPurchases" className="p-4 m-0">
-              <AssetPurchasesReport />
-            </TabsContent>
-            
-            <TabsContent value="usageDuration" className="p-4 m-0">
-              <AssetUsageDurationReport />
-            </TabsContent>
-            
-            <TabsContent value="warrantyDefects" className="p-4 m-0">
-              <WarrantyDefectsReport />
-            </TabsContent>
+            <div className="p-4 overflow-x-auto">
+              <TabsContent value="orderTimeline" className="mt-0">
+                <OrderTimelineReport />
+              </TabsContent>
+              
+              <TabsContent value="yearlyBudget" className="mt-0">
+                <BudgetYearlyReport />
+              </TabsContent>
+              
+              <TabsContent value="yearlyPurchases" className="mt-0">
+                <AssetPurchasesReport />
+              </TabsContent>
+              
+              <TabsContent value="usageDuration" className="mt-0">
+                <AssetUsageDurationReport />
+              </TabsContent>
+              
+              <TabsContent value="warrantyDefects" className="mt-0">
+                <WarrantyDefectsReport />
+              </TabsContent>
+            </div>
           </CardContent>
         </Card>
       </Tabs>

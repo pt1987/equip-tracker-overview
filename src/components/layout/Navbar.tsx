@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -68,7 +69,7 @@ export default function Navbar() {
                   </Link>
                 </div>
                 <div className="px-4 pb-4">
-                  <ThemeSwitcher inMobileMenu={true} />
+                  <ThemeSwitcher />
                 </div>
                 <div className="flex-1">
                   <ul className="space-y-1">
@@ -157,6 +158,9 @@ export default function Navbar() {
                 </li>
               ))}
             </ul>
+          </div>
+          <div className="p-4 border-t">
+            <ThemeSwitcher />
           </div>
         </aside>
       )}

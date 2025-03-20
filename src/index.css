@@ -148,10 +148,30 @@
     @apply w-full md:pl-64 transition-all duration-300;
   }
   
+  /* Chart responsiveness */
+  .chart-container {
+    @apply w-full h-full min-h-[300px] overflow-hidden;
+  }
+  
+  /* Improved table responsiveness */
+  .responsive-table {
+    @apply w-full overflow-x-auto;
+  }
+  
+  .responsive-table table {
+    @apply min-w-full;
+  }
+  
   @media (max-width: 767px) {
     .main-content {
       padding-left: 0;
       padding-top: 4rem;
+    }
+    
+    /* Better spacing for mobile tables */
+    .responsive-table th,
+    .responsive-table td {
+      @apply py-2 px-2 text-sm;
     }
   }
 }
@@ -215,10 +235,24 @@
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
+/* Chart and report specific styles */
+.report-card {
+  @apply p-4 bg-card rounded-lg border shadow-sm;
+}
+
+.report-tabs-list {
+  @apply flex flex-wrap gap-2 mb-4;
+}
+
 @media (max-width: 640px) {
   .responsive-grid-2,
   .responsive-grid-3,
   .responsive-grid-4 {
     grid-template-columns: 1fr;
+  }
+  
+  /* Ensure charts are visible on mobile */
+  .recharts-responsive-container {
+    @apply max-h-[400px];
   }
 }
