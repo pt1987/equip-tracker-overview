@@ -65,12 +65,13 @@ export default function WarrantyDefectsReport() {
               <Tooltip
                 content={({ active, payload }) => {
                   if (active && payload && payload.length) {
+                    const value = Number(payload[0].value);
                     return (
                       <div className="p-2 bg-background border rounded shadow-sm">
                         <p className="font-semibold">{payload[0].name}</p>
-                        <p>Count: {payload[0].value}</p>
+                        <p>Count: {value}</p>
                         <p>
-                          Percentage: {((payload[0].value / totalDefective) * 100).toFixed(1)}%
+                          Percentage: {((value / totalDefective) * 100).toFixed(1)}%
                         </p>
                       </div>
                     );
