@@ -1,6 +1,7 @@
 
-import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import ReactECharts from "echarts-for-react";
 import { cn } from "@/lib/utils";
+import { getCommonOptions, getColorOptions } from "@/lib/echarts-theme";
 
 interface ChartData {
   name: string;
@@ -17,35 +18,81 @@ interface OverviewChartProps {
 export default function OverviewChart({ data, title, className }: OverviewChartProps) {
   const total = data.reduce((sum, item) => sum + item.value, 0);
 
+  const getOption = () => {
+    return {
+      ...getCommonOptions(),
+      color: data.map(item => item.color),
+      title: {
+        text: total.toString(),
+        subtext: 'Gesamt',
+        left: 'center',
+        top: 'center',
+        textStyle: {
+          fontSize: 28,
+          fontWeight: 'bold',
+          color: 'var(--foreground)',
+        },
+        subtextStyle: {
+          fontSize: 12,
+          color: 'var(--muted-foreground)',
+        },
+      },
+      tooltip: {
+        trigger: 'item',
+        formatter: (params: any) => {
+          const percent = ((params.value / total) * 100).toFixed(0);
+          return `
+            <div class="font-medium">${params.name}</div>
+            <div>${params.value} (${percent}%)</div>
+          `;
+        }
+      },
+      legend: {
+        show: false,
+      },
+      series: [
+        {
+          name: title,
+          type: 'pie',
+          radius: ['60%', '80%'],
+          avoidLabelOverlap: true,
+          itemStyle: {
+            borderRadius: 4,
+            borderColor: '#fff',
+            borderWidth: 2,
+          },
+          label: {
+            show: false,
+          },
+          emphasis: {
+            scale: true,
+            scaleSize: 5,
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.2)',
+            }
+          },
+          data: data
+        }
+      ],
+      animation: true,
+      animationType: 'scale',
+      animationEasing: 'elasticOut',
+    };
+  };
+
   return (
     <div className={cn("glass-card p-6", className)}>
       <h3 className="font-medium mb-4">{title}</h3>
       
       <div className="relative h-[240px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              innerRadius={60}
-              outerRadius={80}
-              paddingAngle={2}
-              dataKey="value"
-              strokeWidth={2}
-              stroke="#fff"
-            >
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
-              ))}
-            </Pie>
-          </PieChart>
-        </ResponsiveContainer>
-        
-        <div className="absolute inset-0 flex items-center justify-center flex-col pointer-events-none">
-          <p className="text-3xl font-bold">{total}</p>
-          <p className="text-sm text-muted-foreground">Total Items</p>
-        </div>
+        <ReactECharts
+          option={getOption()}
+          style={{ height: '100%', width: '100%' }}
+          opts={{ renderer: 'canvas' }}
+          className="echarts-for-react"
+        />
       </div>
       
       <div className="mt-4 space-y-2">

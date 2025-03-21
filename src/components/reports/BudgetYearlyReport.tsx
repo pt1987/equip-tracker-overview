@@ -1,18 +1,9 @@
 
 import { useEffect, useState } from "react";
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  Legend,
-  ReferenceLine
-} from "recharts";
+import ReactECharts from "echarts-for-react";
 import { getYearlyBudgetReport } from "@/data/reports";
 import { formatCurrency } from "@/lib/utils";
+import { getCommonOptions, getAxisOptions, getColorOptions, gradients, formatters } from "@/lib/echarts-theme";
 
 export default function BudgetYearlyReport() {
   const [budgetData, setBudgetData] = useState<any[]>([]);
@@ -31,51 +22,99 @@ export default function BudgetYearlyReport() {
     ? budgetData.reduce((sum, item) => sum + item.totalSpent, 0) / budgetData.length
     : 0;
 
+  // ECharts option
+  const getOption = () => {
+    return {
+      ...getCommonOptions(),
+      ...getColorOptions(['primary']),
+      ...getAxisOptions(),
+      tooltip: {
+        trigger: 'axis',
+        formatter: (params: any) => {
+          const data = params[0].data;
+          return `
+            <div class="font-medium mb-1">Jahr: ${params[0].name}</div>
+            <div>Gesamtausgaben: ${formatters.currency(data)}</div>
+            ${averageSpend > 0 ? 
+              `<div class="mt-1">
+                ${data > averageSpend 
+                  ? `<span class="text-green-500">+${((data / averageSpend - 1) * 100).toFixed(1)}%</span> über dem Durchschnitt` 
+                  : `<span class="text-red-500">-${((1 - data / averageSpend) * 100).toFixed(1)}%</span> unter dem Durchschnitt`}
+              </div>` 
+              : ''
+            }
+          `;
+        },
+      },
+      xAxis: {
+        type: 'category',
+        data: budgetData.map(item => item.year),
+        axisLabel: {
+          fontSize: 11,
+          interval: 0,
+        },
+      },
+      yAxis: {
+        type: 'value',
+        axisLabel: {
+          formatter: (value: number) => formatters.currency(value),
+        },
+      },
+      series: [
+        {
+          name: 'Budget Ausgaben',
+          type: 'bar',
+          data: budgetData.map(item => item.totalSpent),
+          itemStyle: {
+            borderRadius: [6, 6, 0, 0],
+            color: {
+              type: 'linear',
+              x: 0,
+              y: 0,
+              x2: 0,
+              y2: 1,
+              colorStops: gradients.blue,
+            },
+          },
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowColor: 'rgba(0, 0, 0, 0.2)',
+            }
+          },
+          barWidth: '60%',
+          animationDelay: (idx: number) => idx * 100,
+        }
+      ],
+      markLine: {
+        symbol: ['none', 'none'],
+        label: {
+          formatter: 'Durchschnitt',
+          position: 'start'
+        },
+        lineStyle: {
+          type: 'dashed',
+          color: '#888',
+        },
+        data: [
+          { 
+            type: 'value', 
+            yAxis: averageSpend,
+          }
+        ]
+      },
+    };
+  };
+
   return (
     <div className="space-y-4 md:space-y-6">
       <div className="h-[300px] sm:h-[350px] md:h-[400px] w-full border rounded-lg p-2 sm:p-4">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={budgetData}
-            margin={{ top: 20, right: 20, left: 10, bottom: 20 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-            <XAxis 
-              dataKey="year" 
-              axisLine={true}
-              tickLine={true}
-            />
-            <YAxis 
-              tickFormatter={(value) => formatCurrency(value)}
-              width={60}
-              dx={-5}
-            />
-            <Tooltip
-              content={({ active, payload }) => {
-                if (active && payload && payload.length) {
-                  const data = payload[0].payload;
-                  return (
-                    <div className="p-3 bg-card border shadow-sm rounded-md">
-                      <p className="font-medium text-sm">Year: {data.year}</p>
-                      <p className="font-medium mt-1 text-sm">
-                        Total Spent: {formatCurrency(data.totalSpent)}
-                      </p>
-                    </div>
-                  );
-                }
-                return null;
-              }}
-            />
-            <Legend />
-            <ReferenceLine y={averageSpend} label="Average" stroke="#888" strokeDasharray="3 3" />
-            <Bar 
-              dataKey="totalSpent" 
-              fill="#2563eb" 
-              name="Budget Spent"
-              radius={[6, 6, 0, 0]}
-            />
-          </BarChart>
-        </ResponsiveContainer>
+        <ReactECharts
+          option={getOption()}
+          style={{ height: '100%', width: '100%' }}
+          opts={{ renderer: 'canvas' }}
+          className="echarts-for-react"
+        />
       </div>
       
       <div className="overflow-x-auto border rounded-lg">
@@ -83,9 +122,9 @@ export default function BudgetYearlyReport() {
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b bg-muted/50">
-                <th className="text-left py-2 px-3 sm:py-3 sm:px-4 font-medium">Year</th>
-                <th className="text-right py-2 px-3 sm:py-3 sm:px-4 font-medium">Total Spent</th>
-                <th className="text-right py-2 px-3 sm:py-3 sm:px-4 font-medium">% of Average</th>
+                <th className="text-left py-2 px-3 sm:py-3 sm:px-4 font-medium">Jahr</th>
+                <th className="text-right py-2 px-3 sm:py-3 sm:px-4 font-medium">Gesamtausgaben</th>
+                <th className="text-right py-2 px-3 sm:py-3 sm:px-4 font-medium">% vom Durchschnitt</th>
               </tr>
             </thead>
             <tbody>
@@ -99,12 +138,12 @@ export default function BudgetYearlyReport() {
                 </tr>
               ))}
               <tr className="font-medium bg-muted/20">
-                <td className="py-2 px-3 sm:py-3 sm:px-4">Average</td>
+                <td className="py-2 px-3 sm:py-3 sm:px-4">Durchschnitt</td>
                 <td className="py-2 px-3 sm:py-3 sm:px-4 text-right">{formatCurrency(averageSpend)}</td>
                 <td className="py-2 px-3 sm:py-3 sm:px-4 text-right">100%</td>
               </tr>
               <tr className="font-medium bg-muted/20">
-                <td className="py-2 px-3 sm:py-3 sm:px-4">Total</td>
+                <td className="py-2 px-3 sm:py-3 sm:px-4">Gesamt</td>
                 <td className="py-2 px-3 sm:py-3 sm:px-4 text-right">
                   {formatCurrency(budgetData.reduce((sum, item) => sum + item.totalSpent, 0))}
                 </td>

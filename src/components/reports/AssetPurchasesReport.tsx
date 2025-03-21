@@ -1,17 +1,9 @@
 
 import { useEffect, useState } from "react";
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  Legend 
-} from "recharts";
+import ReactECharts from "echarts-for-react";
 import { getYearlyAssetPurchasesReport } from "@/data/reports";
 import { AssetType } from "@/lib/types";
+import { getCommonOptions, getAxisOptions, getColorOptions } from "@/lib/echarts-theme";
 
 export default function AssetPurchasesReport() {
   const [purchaseData, setPurchaseData] = useState<any[]>([]);
@@ -53,80 +45,117 @@ export default function AssetPurchasesReport() {
     laptop: "Laptops",
     smartphone: "Smartphones",
     tablet: "Tablets",
-    mouse: "Mice",
-    keyboard: "Keyboards",
-    accessory: "Accessories"
+    mouse: "Mäuse",
+    keyboard: "Tastaturen",
+    accessory: "Zubehör"
+  };
+
+  const getOption = () => {
+    return {
+      ...getCommonOptions(),
+      color: assetTypes.map(type => assetColors[type] || '#8884d8'),
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'shadow'
+        },
+        formatter: (params: any) => {
+          let content = `<div class="font-medium mb-2">Jahr: ${params[0].axisValue}</div>`;
+          let total = 0;
+          
+          params.forEach((item: any) => {
+            content += `
+              <div class="flex items-center justify-between gap-2 mb-1">
+                <div class="flex items-center gap-1">
+                  <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background-color:${item.color};"></span>
+                  <span>${assetTypeLabels[item.seriesName] || item.seriesName}:</span>
+                </div>
+                <span class="font-medium">${item.value}</span>
+              </div>`;
+            total += item.value;
+          });
+          
+          content += `
+            <div class="flex items-center justify-between gap-2 mt-1 pt-1 border-t border-muted">
+              <span class="font-medium">Gesamt:</span>
+              <span class="font-medium">${total}</span>
+            </div>`;
+          
+          return content;
+        }
+      },
+      legend: {
+        data: assetTypes.map(type => assetTypeLabels[type] || type),
+        bottom: 0,
+        orient: 'horizontal',
+        textStyle: {
+          color: 'var(--muted-foreground)',
+          fontSize: 12,
+        },
+      },
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '12%',
+        top: '3%',
+        containLabel: true,
+      },
+      xAxis: {
+        type: 'category',
+        data: purchaseData.map(item => item.year),
+        axisLabel: {
+          fontSize: 12,
+          interval: 0,
+        },
+      },
+      yAxis: {
+        type: 'value',
+        name: 'Anzahl',
+        nameTextStyle: {
+          color: 'var(--muted-foreground)',
+          fontSize: 12,
+        },
+      },
+      series: assetTypes.map(type => ({
+        name: assetTypeLabels[type] || type,
+        type: 'bar',
+        stack: 'total',
+        emphasis: {
+          focus: 'series'
+        },
+        data: purchaseData.map(item => item[type] || 0),
+        itemStyle: {
+          borderRadius: type === 'accessory' ? [4, 4, 0, 0] : [0, 0, 0, 0],
+        },
+        animationDelay: (idx: number) => idx * 50 + assetTypes.indexOf(type) * 100,
+      })),
+      animationEasing: 'elasticOut',
+      animationDelayUpdate: (idx: number) => idx * 5,
+    };
   };
 
   return (
     <div className="space-y-6">
       <div className="h-[350px] md:h-[400px] w-full border rounded-lg p-4">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={purchaseData}
-            margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-            <XAxis dataKey="year" />
-            <YAxis />
-            <Tooltip 
-              content={({ active, payload, label }) => {
-                if (active && payload && payload.length) {
-                  return (
-                    <div className="p-3 bg-card border shadow-sm rounded-md">
-                      <p className="font-medium text-sm mb-2">Year: {label}</p>
-                      <div className="space-y-1">
-                        {payload.map((entry, index) => (
-                          <div key={index} className="flex items-center justify-between gap-4">
-                            <div className="flex items-center gap-2">
-                              <div 
-                                className="w-3 h-3 rounded-sm" 
-                                style={{ backgroundColor: entry.color }}
-                              />
-                              <span className="text-sm">{assetTypeLabels[entry.name] || entry.name}:</span>
-                            </div>
-                            <span className="text-sm font-medium">{entry.value}</span>
-                          </div>
-                        ))}
-                        <div className="flex items-center justify-between gap-4 pt-1 mt-1 border-t">
-                          <span className="text-sm font-medium">Total:</span>
-                          <span className="text-sm font-medium">
-                            {payload.reduce((sum, entry) => sum + (entry.value as number), 0)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                }
-                return null;
-              }}
-            />
-            <Legend />
-            {assetTypes.map((type) => (
-              <Bar
-                key={type}
-                dataKey={type}
-                stackId="a"
-                fill={assetColors[type] || "#8884d8"}
-                name={assetTypeLabels[type] || type}
-                radius={type === 'accessory' ? [4, 4, 0, 0] : [0, 0, 0, 0]}
-              />
-            ))}
-          </BarChart>
-        </ResponsiveContainer>
+        <ReactECharts
+          option={getOption()}
+          style={{ height: '100%', width: '100%' }}
+          opts={{ renderer: 'canvas' }}
+          className="echarts-for-react"
+        />
       </div>
       
       <div className="overflow-x-auto border rounded-lg">
         <table className="w-full border-collapse">
           <thead>
             <tr className="border-b bg-muted/50">
-              <th className="text-left py-3 px-4 font-medium">Year</th>
+              <th className="text-left py-3 px-4 font-medium">Jahr</th>
               {assetTypes.map(type => (
                 <th key={type} className="text-center py-3 px-4 font-medium">
                   {assetTypeLabels[type] || type}
                 </th>
               ))}
-              <th className="text-right py-3 px-4 font-medium">Total</th>
+              <th className="text-right py-3 px-4 font-medium">Gesamt</th>
             </tr>
           </thead>
           <tbody>
@@ -144,7 +173,7 @@ export default function AssetPurchasesReport() {
               </tr>
             ))}
             <tr className="font-medium bg-muted/20">
-              <td className="py-3 px-4">Total</td>
+              <td className="py-3 px-4">Gesamt</td>
               {assetTypes.map(type => (
                 <td key={type} className="py-3 px-4 text-center">
                   {purchaseData.reduce((sum, item) => sum + (item[type] || 0), 0)}
