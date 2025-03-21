@@ -38,9 +38,9 @@ export default function AssetUsageDurationReport() {
     return {
       ...getCommonOptions(),
       tooltip: {
-        trigger: 'axis',
+        trigger: 'axis' as const,
         axisPointer: {
-          type: 'shadow'
+          type: 'shadow' as const
         },
         formatter: (params: any) => {
           const data = params[0].data;
@@ -67,9 +67,9 @@ export default function AssetUsageDurationReport() {
         containLabel: true,
       },
       xAxis: {
-        type: 'value',
+        type: 'value' as const,
         name: 'Monate',
-        nameLocation: 'end',
+        nameLocation: 'end' as const,
         nameGap: 10,
         nameTextStyle: {
           color: 'var(--muted-foreground)',
@@ -87,12 +87,12 @@ export default function AssetUsageDurationReport() {
         splitLine: {
           lineStyle: {
             color: 'var(--border)',
-            type: 'dashed',
+            type: 'dashed' as const,
           },
         },
       },
       yAxis: {
-        type: 'category',
+        type: 'category' as const,
         data: usageData.map(item => localizeCategory(item.category)),
         axisLine: {
           show: false,
@@ -108,7 +108,7 @@ export default function AssetUsageDurationReport() {
       series: [
         {
           name: 'Durchschnittliche Nutzungsdauer',
-          type: 'bar',
+          type: 'bar' as const,
           data: usageData.map(item => item.averageMonths),
           itemStyle: {
             borderRadius: [0, 4, 4, 0],
@@ -132,16 +132,16 @@ export default function AssetUsageDurationReport() {
         symbol: ['none', 'none'],
         label: {
           formatter: 'Durchschnitt',
-          position: 'middle',
+          position: 'middle' as const,
           distance: 10,
         },
         lineStyle: {
-          type: 'dashed',
+          type: 'dashed' as const,
           color: '#888',
         },
         data: [
           { 
-            type: 'value', 
+            type: 'value' as const, 
             xAxis: averageUsage,
           }
         ]

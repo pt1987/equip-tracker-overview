@@ -25,11 +25,11 @@ export default function OverviewChart({ data, title, className }: OverviewChartP
       title: {
         text: total.toString(),
         subtext: 'Gesamt',
-        left: 'center',
-        top: 'center',
+        left: 'center' as const,
+        top: 'center' as const,
         textStyle: {
           fontSize: 28,
-          fontWeight: 'bold',
+          fontWeight: 'bold' as const,
           color: 'var(--foreground)',
         },
         subtextStyle: {
@@ -38,7 +38,7 @@ export default function OverviewChart({ data, title, className }: OverviewChartP
         },
       },
       tooltip: {
-        trigger: 'item',
+        trigger: 'item' as const,
         formatter: (params: any) => {
           const percent = ((params.value / total) * 100).toFixed(0);
           return `
@@ -53,7 +53,7 @@ export default function OverviewChart({ data, title, className }: OverviewChartP
       series: [
         {
           name: title,
-          type: 'pie',
+          type: 'pie' as const,
           radius: ['60%', '80%'],
           avoidLabelOverlap: true,
           itemStyle: {
@@ -73,12 +73,14 @@ export default function OverviewChart({ data, title, className }: OverviewChartP
               shadowColor: 'rgba(0, 0, 0, 0.2)',
             }
           },
-          data: data
+          data: data,
+          animationType: 'scale' as const,
+          animationEasing: 'elasticOut' as const,
         }
       ],
       animation: true,
-      animationType: 'scale',
-      animationEasing: 'elasticOut',
+      animationType: 'scale' as const,
+      animationEasing: 'elasticOut' as const,
     };
   };
 

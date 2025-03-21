@@ -29,7 +29,7 @@ export default function BudgetYearlyReport() {
       ...getColorOptions(['primary']),
       ...getAxisOptions(),
       tooltip: {
-        trigger: 'axis',
+        trigger: 'axis' as const,
         formatter: (params: any) => {
           const data = params[0].data;
           return `
@@ -47,7 +47,7 @@ export default function BudgetYearlyReport() {
         },
       },
       xAxis: {
-        type: 'category',
+        type: 'category' as const,
         data: budgetData.map(item => item.year),
         axisLabel: {
           fontSize: 11,
@@ -55,7 +55,7 @@ export default function BudgetYearlyReport() {
         },
       },
       yAxis: {
-        type: 'value',
+        type: 'value' as const,
         axisLabel: {
           formatter: (value: number) => formatters.currency(value),
         },
@@ -63,12 +63,12 @@ export default function BudgetYearlyReport() {
       series: [
         {
           name: 'Budget Ausgaben',
-          type: 'bar',
+          type: 'bar' as const,
           data: budgetData.map(item => item.totalSpent),
           itemStyle: {
             borderRadius: [6, 6, 0, 0],
             color: {
-              type: 'linear',
+              type: 'linear' as const,
               x: 0,
               y: 0,
               x2: 0,
@@ -90,15 +90,15 @@ export default function BudgetYearlyReport() {
         symbol: ['none', 'none'],
         label: {
           formatter: 'Durchschnitt',
-          position: 'start'
+          position: 'start' as const
         },
         lineStyle: {
-          type: 'dashed',
+          type: 'dashed' as const,
           color: '#888',
         },
         data: [
           { 
-            type: 'value', 
+            type: 'value' as const, 
             yAxis: averageSpend,
           }
         ]

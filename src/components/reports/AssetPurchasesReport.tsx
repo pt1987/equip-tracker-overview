@@ -55,9 +55,9 @@ export default function AssetPurchasesReport() {
       ...getCommonOptions(),
       color: assetTypes.map(type => assetColors[type] || '#8884d8'),
       tooltip: {
-        trigger: 'axis',
+        trigger: 'axis' as const,
         axisPointer: {
-          type: 'shadow'
+          type: 'shadow' as const
         },
         formatter: (params: any) => {
           let content = `<div class="font-medium mb-2">Jahr: ${params[0].axisValue}</div>`;
@@ -87,7 +87,7 @@ export default function AssetPurchasesReport() {
       legend: {
         data: assetTypes.map(type => assetTypeLabels[type] || type),
         bottom: 0,
-        orient: 'horizontal',
+        orient: 'horizontal' as const,
         textStyle: {
           color: 'var(--muted-foreground)',
           fontSize: 12,
@@ -101,7 +101,7 @@ export default function AssetPurchasesReport() {
         containLabel: true,
       },
       xAxis: {
-        type: 'category',
+        type: 'category' as const,
         data: purchaseData.map(item => item.year),
         axisLabel: {
           fontSize: 12,
@@ -109,7 +109,7 @@ export default function AssetPurchasesReport() {
         },
       },
       yAxis: {
-        type: 'value',
+        type: 'value' as const,
         name: 'Anzahl',
         nameTextStyle: {
           color: 'var(--muted-foreground)',
@@ -118,10 +118,10 @@ export default function AssetPurchasesReport() {
       },
       series: assetTypes.map(type => ({
         name: assetTypeLabels[type] || type,
-        type: 'bar',
+        type: 'bar' as const,
         stack: 'total',
         emphasis: {
-          focus: 'series'
+          focus: 'series' as const
         },
         data: purchaseData.map(item => item[type] || 0),
         itemStyle: {
@@ -129,7 +129,7 @@ export default function AssetPurchasesReport() {
         },
         animationDelay: (idx: number) => idx * 50 + assetTypes.indexOf(type) * 100,
       })),
-      animationEasing: 'elasticOut',
+      animationEasing: 'elasticOut' as const,
       animationDelayUpdate: (idx: number) => idx * 5,
     };
   };

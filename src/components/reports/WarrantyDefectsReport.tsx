@@ -36,7 +36,7 @@ export default function WarrantyDefectsReport() {
       ...getCommonOptions(),
       color: COLORS,
       tooltip: {
-        trigger: 'item',
+        trigger: 'item' as const,
         formatter: (params: any) => {
           const percent = (params.value / totalDefective * 100).toFixed(1);
           return `
@@ -47,9 +47,9 @@ export default function WarrantyDefectsReport() {
         }
       },
       legend: {
-        orient: 'horizontal',
+        orient: 'horizontal' as const,
         bottom: 0,
-        left: 'center',
+        left: 'center' as const,
         data: pieData.map(item => item.name),
         textStyle: {
           color: 'var(--muted-foreground)',
@@ -59,7 +59,7 @@ export default function WarrantyDefectsReport() {
       series: [
         {
           name: 'Garantiestatus',
-          type: 'pie',
+          type: 'pie' as const,
           radius: ['40%', '70%'],
           center: ['50%', '45%'],
           avoidLabelOverlap: false,
@@ -93,8 +93,8 @@ export default function WarrantyDefectsReport() {
             length2: 15,
           },
           data: pieData,
-          animationType: 'scale',
-          animationEasing: 'elasticOut',
+          animationType: 'scale' as const,
+          animationEasing: 'elasticOut' as const,
           animationDelay: function () {
             return Math.random() * 200;
           }

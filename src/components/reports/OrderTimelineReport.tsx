@@ -63,9 +63,9 @@ export default function OrderTimelineReport() {
     return {
       ...getCommonOptions(),
       tooltip: {
-        trigger: 'axis',
+        trigger: 'axis' as const,
         axisPointer: {
-          type: 'shadow'
+          type: 'shadow' as const
         },
         formatter: (params: any) => {
           const item = params[0];
@@ -87,7 +87,7 @@ export default function OrderTimelineReport() {
       },
       dataZoom: [
         {
-          type: 'slider',
+          type: 'slider' as const,
           show: true,
           start: 0,
           end: 100,
@@ -104,16 +104,16 @@ export default function OrderTimelineReport() {
           }
         },
         {
-          type: 'inside',
+          type: 'inside' as const,
           start: 0,
           end: 100,
         }
       ],
       xAxis: {
-        type: 'category',
+        type: 'category' as const,
         data: timelineData.map((item) => formatDate(item.date)),
         axisLabel: {
-          interval: 'auto',
+          interval: 'auto' as const,
           rotate: 45,
           hideOverlap: true,
           formatter: (value: string) => {
@@ -122,7 +122,7 @@ export default function OrderTimelineReport() {
         },
       },
       yAxis: {
-        type: 'value',
+        type: 'value' as const,
         axisLabel: {
           formatter: (value: number) => formatCurrency(value),
         },
@@ -130,7 +130,7 @@ export default function OrderTimelineReport() {
       series: [
         {
           name: 'Kaufpreis',
-          type: 'bar',
+          type: 'bar' as const,
           data: timelineData.map(item => ({
             value: item.price,
             date: item.date,
@@ -159,20 +159,20 @@ export default function OrderTimelineReport() {
         symbol: ['none', 'none'],
         label: {
           formatter: 'Durchschnitt',
-          position: 'middle',
+          position: 'middle' as const,
         },
         lineStyle: {
-          type: 'dashed',
+          type: 'dashed' as const,
           color: '#888',
         },
         data: [
           { 
-            type: 'value', 
+            type: 'value' as const, 
             yAxis: averagePrice,
           }
         ]
       },
-      animationEasing: 'elasticOut',
+      animationEasing: 'elasticOut' as const,
     };
   };
 
