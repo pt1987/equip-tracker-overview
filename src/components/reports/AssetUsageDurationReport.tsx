@@ -5,7 +5,7 @@ import { getAssetUsageDurationReport } from "@/data/reports";
 import { AssetUsageDurationReport as AssetUsageReport } from "@/lib/types";
 import { localizeCategory } from "@/lib/utils";
 import { getCommonOptions, getAxisOptions, getColorOptions } from "@/lib/echarts-theme";
-import { EChartsOption } from "echarts";
+import * as echarts from 'echarts';
 
 export default function AssetUsageDurationReport() {
   const [usageData, setUsageData] = useState<AssetUsageReport[]>([]);
@@ -35,8 +35,8 @@ export default function AssetUsageDurationReport() {
     ? usageData.reduce((sum, item) => sum + item.averageMonths, 0) / usageData.length
     : 0;
 
-  const getOption = (): EChartsOption => {
-    const options: EChartsOption = {
+  const getOption = (): echarts.EChartsOption => {
+    const options: echarts.EChartsOption = {
       ...getCommonOptions(),
       tooltip: {
         trigger: 'axis',

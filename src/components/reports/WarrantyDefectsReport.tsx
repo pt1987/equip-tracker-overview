@@ -4,7 +4,7 @@ import ReactECharts from "echarts-for-react";
 import { getWarrantyDefectReport } from "@/data/reports";
 import { WarrantyDefectReport } from "@/lib/types";
 import { getCommonOptions, getColorOptions } from "@/lib/echarts-theme";
-import { EChartsOption } from "echarts";
+import * as echarts from 'echarts';
 
 export default function WarrantyDefectsReport() {
   const [warrantyData, setWarrantyData] = useState<WarrantyDefectReport | null>(null);
@@ -32,8 +32,8 @@ export default function WarrantyDefectsReport() {
   const COLORS = ["#16a34a", "#dc2626"];
   const totalDefective = warrantyData.withWarranty.count + warrantyData.withoutWarranty.count;
 
-  const getOption = (): EChartsOption => {
-    const options: EChartsOption = {
+  const getOption = (): echarts.EChartsOption => {
+    const options: echarts.EChartsOption = {
       ...getCommonOptions(),
       color: COLORS,
       tooltip: {

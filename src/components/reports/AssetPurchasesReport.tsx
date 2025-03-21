@@ -4,7 +4,7 @@ import ReactECharts from "echarts-for-react";
 import { getYearlyAssetPurchasesReport } from "@/data/reports";
 import { AssetType } from "@/lib/types";
 import { getCommonOptions, getAxisOptions, getColorOptions } from "@/lib/echarts-theme";
-import { EChartsOption } from "echarts";
+import * as echarts from 'echarts';
 
 export default function AssetPurchasesReport() {
   const [purchaseData, setPurchaseData] = useState<any[]>([]);
@@ -51,8 +51,8 @@ export default function AssetPurchasesReport() {
     accessory: "Zubehör"
   };
 
-  const getOption = (): EChartsOption => {
-    const options: EChartsOption = {
+  const getOption = (): echarts.EChartsOption => {
+    const options: echarts.EChartsOption = {
       ...getCommonOptions(),
       color: assetTypes.map(type => assetColors[type] || '#8884d8'),
       tooltip: {

@@ -4,7 +4,7 @@ import ReactECharts from "echarts-for-react";
 import { getYearlyBudgetReport } from "@/data/reports";
 import { formatCurrency } from "@/lib/utils";
 import { getCommonOptions, getAxisOptions, getColorOptions, gradients, formatters } from "@/lib/echarts-theme";
-import { EChartsOption } from "echarts";
+import * as echarts from 'echarts';
 
 export default function BudgetYearlyReport() {
   const [budgetData, setBudgetData] = useState<any[]>([]);
@@ -24,8 +24,8 @@ export default function BudgetYearlyReport() {
     : 0;
 
   // ECharts option
-  const getOption = (): EChartsOption => {
-    const options: EChartsOption = {
+  const getOption = (): echarts.EChartsOption => {
+    const options: echarts.EChartsOption = {
       ...getCommonOptions(),
       ...getColorOptions(['primary']),
       ...getAxisOptions(),

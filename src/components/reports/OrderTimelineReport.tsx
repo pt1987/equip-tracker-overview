@@ -6,7 +6,7 @@ import { getOrderTimelineByEmployee } from "@/data/reports";
 import { employees } from "@/data/employees";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { getCommonOptions, getAxisOptions, getColorOptions, gradients } from "@/lib/echarts-theme";
-import { EChartsOption } from "echarts";
+import * as echarts from 'echarts';
 
 export default function OrderTimelineReport() {
   const [selectedEmployee, setSelectedEmployee] = useState<string>("all");
@@ -60,8 +60,8 @@ export default function OrderTimelineReport() {
     ? timelineData.reduce((sum, item) => sum + item.price, 0) / timelineData.length
     : 0;
 
-  const getOption = (): EChartsOption => {
-    const options: EChartsOption = {
+  const getOption = (): echarts.EChartsOption => {
+    const options: echarts.EChartsOption = {
       ...getCommonOptions(),
       tooltip: {
         trigger: 'axis',

@@ -2,7 +2,7 @@
 import ReactECharts from "echarts-for-react";
 import { cn } from "@/lib/utils";
 import { getCommonOptions, getColorOptions } from "@/lib/echarts-theme";
-import { EChartsOption } from "echarts";
+import * as echarts from 'echarts';
 
 interface ChartData {
   name: string;
@@ -19,8 +19,8 @@ interface OverviewChartProps {
 export default function OverviewChart({ data, title, className }: OverviewChartProps) {
   const total = data.reduce((sum, item) => sum + item.value, 0);
 
-  const getOption = (): EChartsOption => {
-    const options: EChartsOption = {
+  const getOption = (): echarts.EChartsOption => {
+    const options: echarts.EChartsOption = {
       ...getCommonOptions(),
       color: data.map(item => item.color),
       title: {
