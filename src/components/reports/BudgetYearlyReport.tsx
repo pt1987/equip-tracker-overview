@@ -32,12 +32,12 @@ export default function BudgetYearlyReport() {
     : 0;
 
   return (
-    <div className="space-y-6">
-      <div className="h-[350px] md:h-[400px] w-full border rounded-lg p-4">
+    <div className="space-y-4 md:space-y-6">
+      <div className="h-[300px] sm:h-[350px] md:h-[400px] w-full border rounded-lg p-2 sm:p-4">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={budgetData}
-            margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+            margin={{ top: 20, right: 20, left: 10, bottom: 20 }}
           >
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis 
@@ -47,7 +47,8 @@ export default function BudgetYearlyReport() {
             />
             <YAxis 
               tickFormatter={(value) => formatCurrency(value)}
-              width={80}
+              width={60}
+              dx={-5}
             />
             <Tooltip
               content={({ active, payload }) => {
@@ -78,38 +79,40 @@ export default function BudgetYearlyReport() {
       </div>
       
       <div className="overflow-x-auto border rounded-lg">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="border-b bg-muted/50">
-              <th className="text-left py-3 px-4 font-medium">Year</th>
-              <th className="text-right py-3 px-4 font-medium">Total Spent</th>
-              <th className="text-right py-3 px-4 font-medium">% of Average</th>
-            </tr>
-          </thead>
-          <tbody>
-            {budgetData.map((item, index) => (
-              <tr key={index} className="border-b hover:bg-muted/30">
-                <td className="py-3 px-4">{item.year}</td>
-                <td className="py-3 px-4 text-right font-medium">{formatCurrency(item.totalSpent)}</td>
-                <td className="py-3 px-4 text-right">
-                  {averageSpend > 0 ? `${((item.totalSpent / averageSpend) * 100).toFixed(1)}%` : '0%'}
-                </td>
+        <div className="min-w-full">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="border-b bg-muted/50">
+                <th className="text-left py-2 px-3 sm:py-3 sm:px-4 font-medium">Year</th>
+                <th className="text-right py-2 px-3 sm:py-3 sm:px-4 font-medium">Total Spent</th>
+                <th className="text-right py-2 px-3 sm:py-3 sm:px-4 font-medium">% of Average</th>
               </tr>
-            ))}
-            <tr className="font-medium bg-muted/20">
-              <td className="py-3 px-4">Average</td>
-              <td className="py-3 px-4 text-right">{formatCurrency(averageSpend)}</td>
-              <td className="py-3 px-4 text-right">100%</td>
-            </tr>
-            <tr className="font-medium bg-muted/20">
-              <td className="py-3 px-4">Total</td>
-              <td className="py-3 px-4 text-right">
-                {formatCurrency(budgetData.reduce((sum, item) => sum + item.totalSpent, 0))}
-              </td>
-              <td className="py-3 px-4 text-right">-</td>
-            </tr>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {budgetData.map((item, index) => (
+                <tr key={index} className="border-b hover:bg-muted/30">
+                  <td className="py-2 px-3 sm:py-3 sm:px-4">{item.year}</td>
+                  <td className="py-2 px-3 sm:py-3 sm:px-4 text-right font-medium">{formatCurrency(item.totalSpent)}</td>
+                  <td className="py-2 px-3 sm:py-3 sm:px-4 text-right">
+                    {averageSpend > 0 ? `${((item.totalSpent / averageSpend) * 100).toFixed(1)}%` : '0%'}
+                  </td>
+                </tr>
+              ))}
+              <tr className="font-medium bg-muted/20">
+                <td className="py-2 px-3 sm:py-3 sm:px-4">Average</td>
+                <td className="py-2 px-3 sm:py-3 sm:px-4 text-right">{formatCurrency(averageSpend)}</td>
+                <td className="py-2 px-3 sm:py-3 sm:px-4 text-right">100%</td>
+              </tr>
+              <tr className="font-medium bg-muted/20">
+                <td className="py-2 px-3 sm:py-3 sm:px-4">Total</td>
+                <td className="py-2 px-3 sm:py-3 sm:px-4 text-right">
+                  {formatCurrency(budgetData.reduce((sum, item) => sum + item.totalSpent, 0))}
+                </td>
+                <td className="py-2 px-3 sm:py-3 sm:px-4 text-right">-</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

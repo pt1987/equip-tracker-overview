@@ -145,12 +145,12 @@
   }
   
   .main-content {
-    @apply w-full md:pl-64 transition-all duration-300;
+    @apply w-full md:pl-64 pt-16 md:pt-0 transition-all duration-300;
   }
   
   /* Better charts for reporting */
   .chart-container {
-    @apply w-full h-full min-h-[350px] overflow-hidden border rounded-lg;
+    @apply w-full h-full min-h-[300px] sm:min-h-[350px] overflow-hidden border rounded-lg p-2 sm:p-4;
   }
   
   /* Improved table styles */
@@ -163,11 +163,11 @@
   }
   
   .responsive-table th {
-    @apply text-left py-3 px-4 font-medium border-b bg-muted/50;
+    @apply text-left py-2 px-3 sm:py-3 sm:px-4 font-medium border-b bg-muted/50;
   }
   
   .responsive-table td {
-    @apply py-3 px-4 border-b;
+    @apply py-2 px-3 sm:py-3 sm:px-4 border-b;
   }
   
   .responsive-table tr:hover td {
@@ -176,8 +176,8 @@
   
   /* Responsive card layouts */
   .cards-grid {
-    @apply grid gap-4;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    @apply grid gap-3 sm:gap-4;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   }
   
   /* Collapsible sidebar */
@@ -192,20 +192,9 @@
       padding-top: 4rem;
     }
     
-    /* Better spacing for mobile tables */
-    .responsive-table th,
-    .responsive-table td {
-      @apply py-2 px-2 text-sm;
-    }
-    
     /* Make tabs more compact on mobile */
     .tabs-list {
       @apply flex-wrap gap-1;
-    }
-    
-    /* Theme switcher position in mobile menu */
-    .mobile-theme-switcher {
-      @apply mt-4 border-t border-sidebar-border pt-4 pb-2 px-4;
     }
   }
 }
@@ -255,23 +244,23 @@
 
 /* Better responsive grid layouts */
 .responsive-grid-2 {
-  @apply grid gap-4;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  @apply grid gap-3 sm:gap-4;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 
 .responsive-grid-3 {
-  @apply grid gap-4;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  @apply grid gap-3 sm:gap-4;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
 }
 
 .responsive-grid-4 {
-  @apply grid gap-4;
+  @apply grid gap-3 sm:gap-4;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
 /* Chart and report specific styles */
 .report-card {
-  @apply p-4 bg-card rounded-lg border shadow-sm overflow-hidden;
+  @apply p-3 sm:p-4 bg-card rounded-lg border shadow-sm overflow-hidden;
 }
 
 .report-tabs-list {
@@ -280,7 +269,7 @@
 
 /* Enhanced responsiveness for charts */
 .chart-responsive {
-  @apply w-full h-[350px] md:h-[400px];
+  @apply w-full h-[300px] sm:h-[350px] md:h-[400px];
 }
 
 .chart-tooltip {
@@ -288,15 +277,9 @@
 }
 
 @media (max-width: 640px) {
-  .responsive-grid-2,
-  .responsive-grid-3,
-  .responsive-grid-4 {
-    grid-template-columns: 1fr;
-  }
-  
   /* Make sure charts are visible on mobile */
   .recharts-responsive-container {
-    @apply max-h-[350px];
+    @apply max-h-[300px];
   }
   
   /* Adjust chart margins on mobile */

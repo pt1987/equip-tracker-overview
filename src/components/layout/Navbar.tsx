@@ -61,18 +61,18 @@ export default function Navbar() {
                 <Menu className="h-4 w-4" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="p-0 pt-6 w-64">
+            <SheetContent side="left" className="p-0 pt-6 w-64 overflow-y-auto">
               <div className="flex flex-col h-full">
                 <div className="px-4 pb-4 flex justify-between items-center">
                   <Link to="/" className="flex items-center font-semibold">
                     Asset Tracker
                   </Link>
                 </div>
-                <div className="px-4 pb-4">
+                <div className="px-4 pb-2 border-b border-border">
                   <ThemeSwitcher />
                 </div>
-                <div className="flex-1">
-                  <ul className="space-y-1">
+                <div className="flex-1 overflow-y-auto py-4">
+                  <ul className="space-y-1 px-2">
                     {menuItems.map((item) => (
                       <li key={item.to}>
                         <Link
@@ -118,12 +118,15 @@ export default function Navbar() {
           </div>
         </div>
       ) : (
-        <aside className="fixed left-0 top-0 z-40 h-full flex-col bg-background border-r border-r-border flex w-64">
+        <aside className="fixed left-0 top-0 z-40 h-full flex-col bg-background border-r border-r-border flex w-64 overflow-hidden">
           <Link to="/" className="flex items-center h-16 px-4 font-semibold">
             Asset Tracker
           </Link>
-          <div className="flex-1">
-            <ul className="pt-6 space-y-1">
+          <div className="px-4 py-2 border-t border-b">
+            <ThemeSwitcher />
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            <ul className="pt-4 space-y-1 px-2">
               {menuItems.map((item) => (
                 <li key={item.to}>
                   <Link
@@ -158,9 +161,6 @@ export default function Navbar() {
                 </li>
               ))}
             </ul>
-          </div>
-          <div className="p-4 border-t">
-            <ThemeSwitcher />
           </div>
         </aside>
       )}
