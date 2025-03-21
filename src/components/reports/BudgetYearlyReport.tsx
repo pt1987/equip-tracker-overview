@@ -46,7 +46,7 @@ export default function BudgetYearlyReport() {
               tickLine={true}
             />
             <YAxis 
-              tickFormatter={(value) => formatCurrency(value, true)}
+              tickFormatter={(value) => formatCurrency(value)}
               width={80}
             />
             <Tooltip

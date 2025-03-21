@@ -48,7 +48,7 @@ export default function WarrantyDefectsReport() {
                 cx="50%"
                 cy="50%"
                 labelLine={true}
-                outerRadius={({ index }) => (index === 0 ? 120 : 100)}
+                outerRadius={120}
                 fill="#8884d8"
                 dataKey="value"
                 label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}

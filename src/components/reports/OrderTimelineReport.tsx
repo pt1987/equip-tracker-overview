@@ -135,7 +135,8 @@ export default function OrderTimelineReport() {
               dataKey="price" 
               name="Purchase Price" 
               radius={[4, 4, 0, 0]}
-              fill={(entry) => getBarColor(entry.type)}
+              fill="#2563eb"
+              fillOpacity={0.8}
             />
           </BarChart>
         </ResponsiveContainer>

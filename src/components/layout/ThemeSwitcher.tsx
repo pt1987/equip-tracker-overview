@@ -18,8 +18,7 @@ export function ThemeSwitcher({ className, minimal = false }: { className?: stri
         checked={theme === "dark"}
         onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
         aria-label="Toggle theme"
-        size="sm"
-        className={minimal ? "scale-90" : ""}
+        className={cn(minimal ? "scale-90" : "")}
       />
       <Moon size={minimal ? 14 : 16} className={theme === 'dark' ? 'text-blue-400' : 'text-muted-foreground'} />
     </div>
