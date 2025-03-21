@@ -19,6 +19,7 @@ import CreateEditAsset from "./pages/CreateEditAsset";
 import CreateEditEmployee from "./pages/CreateEditEmployee";
 import NotFound from "./pages/NotFound";
 import Reporting from "./pages/Reporting";
+import HardwareOrder from "./pages/HardwareOrder";
 
 // Remove App.css import as we're already using index.css for styling
 // import "./App.css"; 
@@ -48,6 +49,7 @@ const AppContent = () => {
             <Route path="/employee/create" element={<CreateEditEmployee />} />
             <Route path="/employee/edit/:id" element={<CreateEditEmployee />} />
             <Route path="/reporting" element={<Reporting />} />
+            <Route path="/hardware-order" element={<HardwareOrder />} />
             
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />

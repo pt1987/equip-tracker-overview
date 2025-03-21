@@ -12,7 +12,8 @@ import {
   UserPlus,
   Menu,
   X,
-  FileBarChart
+  FileBarChart,
+  Package
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -39,6 +40,7 @@ export default function Navbar() {
     { to: "/history", label: "History", icon: <Clock size={20} /> },
     { to: "/pool-assets", label: "Pool Assets", icon: <CircleDot size={20} /> },
     { to: "/reporting", label: "Reporting", icon: <FileBarChart size={20} /> },
+    { to: "/hardware-order", label: "Hardware-Bestellung", icon: <Package size={20} /> },
   ];
 
   const createLinks = [
