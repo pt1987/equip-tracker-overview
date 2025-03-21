@@ -302,7 +302,7 @@
   }
   
   .echarts-for-react canvas {
-    @apply !max-height-[300px];
+    @apply !max-h-[300px];
   }
   
   .recharts-responsive-container {
