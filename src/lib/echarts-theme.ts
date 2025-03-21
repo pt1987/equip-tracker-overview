@@ -1,6 +1,6 @@
 
 // ECharts Theme-Konfiguration
-import { ECBasicOption } from 'echarts/types/dist/shared';
+import { EChartsOption } from 'echarts/types/dist/shared';
 
 // Farbtöne, die auf Tailwind CSS-Farben basieren
 export const colors = {
@@ -50,7 +50,7 @@ export const gradients = {
 };
 
 // Gemeinsame Optionen für alle Charts
-export const getCommonOptions = (): ECBasicOption => ({
+export const getCommonOptions = (): Partial<EChartsOption> => ({
   textStyle: {
     fontFamily: 'Inter, sans-serif',
     color: 'var(--foreground)',
@@ -66,7 +66,6 @@ export const getCommonOptions = (): ECBasicOption => ({
     itemGap: 12,
   },
   tooltip: {
-    trigger: 'item',
     backgroundColor: 'var(--card)',
     borderColor: 'var(--border)',
     borderWidth: 1,
@@ -91,12 +90,12 @@ export const getCommonOptions = (): ECBasicOption => ({
 // Farboptionen für Charts
 export const getColorOptions = (
   colorKeys: Array<keyof typeof colors> = ['primary', 'green', 'purple', 'amber', 'red', 'cyan', 'pink']
-): ECBasicOption => ({
+): Partial<EChartsOption> => ({
   color: colorKeys.map(key => colors[key]),
 });
 
 // Achsenoptionen für kartesische Charts
-export const getAxisOptions = (): ECBasicOption => ({
+export const getAxisOptions = (): Partial<EChartsOption> => ({
   xAxis: {
     axisLine: {
       lineStyle: {

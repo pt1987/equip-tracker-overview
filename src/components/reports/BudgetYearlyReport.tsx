@@ -4,6 +4,7 @@ import ReactECharts from "echarts-for-react";
 import { getYearlyBudgetReport } from "@/data/reports";
 import { formatCurrency } from "@/lib/utils";
 import { getCommonOptions, getAxisOptions, getColorOptions, gradients, formatters } from "@/lib/echarts-theme";
+import { EChartsOption } from "echarts";
 
 export default function BudgetYearlyReport() {
   const [budgetData, setBudgetData] = useState<any[]>([]);
@@ -23,13 +24,13 @@ export default function BudgetYearlyReport() {
     : 0;
 
   // ECharts option
-  const getOption = () => {
-    return {
+  const getOption = (): EChartsOption => {
+    const options: EChartsOption = {
       ...getCommonOptions(),
       ...getColorOptions(['primary']),
       ...getAxisOptions(),
       tooltip: {
-        trigger: 'axis' as const,
+        trigger: 'axis',
         formatter: (params: any) => {
           const data = params[0].data;
           return `
@@ -47,7 +48,7 @@ export default function BudgetYearlyReport() {
         },
       },
       xAxis: {
-        type: 'category' as const,
+        type: 'category',
         data: budgetData.map(item => item.year),
         axisLabel: {
           fontSize: 11,
@@ -55,7 +56,7 @@ export default function BudgetYearlyReport() {
         },
       },
       yAxis: {
-        type: 'value' as const,
+        type: 'value',
         axisLabel: {
           formatter: (value: number) => formatters.currency(value),
         },
@@ -63,12 +64,12 @@ export default function BudgetYearlyReport() {
       series: [
         {
           name: 'Budget Ausgaben',
-          type: 'bar' as const,
+          type: 'bar',
           data: budgetData.map(item => item.totalSpent),
           itemStyle: {
             borderRadius: [6, 6, 0, 0],
             color: {
-              type: 'linear' as const,
+              type: 'linear',
               x: 0,
               y: 0,
               x2: 0,
@@ -90,20 +91,22 @@ export default function BudgetYearlyReport() {
         symbol: ['none', 'none'],
         label: {
           formatter: 'Durchschnitt',
-          position: 'start' as const
+          position: 'start'
         },
         lineStyle: {
-          type: 'dashed' as const,
+          type: 'dashed',
           color: '#888',
         },
         data: [
           { 
-            type: 'value' as const, 
+            type: 'value', 
             yAxis: averageSpend,
           }
         ]
       },
     };
+    
+    return options;
   };
 
   return (

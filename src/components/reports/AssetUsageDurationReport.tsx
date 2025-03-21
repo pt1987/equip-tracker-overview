@@ -5,6 +5,7 @@ import { getAssetUsageDurationReport } from "@/data/reports";
 import { AssetUsageDurationReport as AssetUsageReport } from "@/lib/types";
 import { localizeCategory } from "@/lib/utils";
 import { getCommonOptions, getAxisOptions, getColorOptions } from "@/lib/echarts-theme";
+import { EChartsOption } from "echarts";
 
 export default function AssetUsageDurationReport() {
   const [usageData, setUsageData] = useState<AssetUsageReport[]>([]);
@@ -34,13 +35,13 @@ export default function AssetUsageDurationReport() {
     ? usageData.reduce((sum, item) => sum + item.averageMonths, 0) / usageData.length
     : 0;
 
-  const getOption = () => {
-    return {
+  const getOption = (): EChartsOption => {
+    const options: EChartsOption = {
       ...getCommonOptions(),
       tooltip: {
-        trigger: 'axis' as const,
+        trigger: 'axis',
         axisPointer: {
-          type: 'shadow' as const
+          type: 'shadow'
         },
         formatter: (params: any) => {
           const data = params[0].data;
@@ -67,9 +68,9 @@ export default function AssetUsageDurationReport() {
         containLabel: true,
       },
       xAxis: {
-        type: 'value' as const,
+        type: 'value',
         name: 'Monate',
-        nameLocation: 'end' as const,
+        nameLocation: 'end',
         nameGap: 10,
         nameTextStyle: {
           color: 'var(--muted-foreground)',
@@ -87,12 +88,12 @@ export default function AssetUsageDurationReport() {
         splitLine: {
           lineStyle: {
             color: 'var(--border)',
-            type: 'dashed' as const,
+            type: 'dashed',
           },
         },
       },
       yAxis: {
-        type: 'category' as const,
+        type: 'category',
         data: usageData.map(item => localizeCategory(item.category)),
         axisLine: {
           show: false,
@@ -108,7 +109,7 @@ export default function AssetUsageDurationReport() {
       series: [
         {
           name: 'Durchschnittliche Nutzungsdauer',
-          type: 'bar' as const,
+          type: 'bar',
           data: usageData.map(item => item.averageMonths),
           itemStyle: {
             borderRadius: [0, 4, 4, 0],
@@ -132,21 +133,23 @@ export default function AssetUsageDurationReport() {
         symbol: ['none', 'none'],
         label: {
           formatter: 'Durchschnitt',
-          position: 'middle' as const,
+          position: 'middle',
           distance: 10,
         },
         lineStyle: {
-          type: 'dashed' as const,
+          type: 'dashed',
           color: '#888',
         },
         data: [
           { 
-            type: 'value' as const, 
+            type: 'value', 
             xAxis: averageUsage,
           }
         ]
       }
     };
+    
+    return options;
   };
 
   return (

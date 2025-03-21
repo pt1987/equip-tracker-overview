@@ -6,6 +6,7 @@ import { getOrderTimelineByEmployee } from "@/data/reports";
 import { employees } from "@/data/employees";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { getCommonOptions, getAxisOptions, getColorOptions, gradients } from "@/lib/echarts-theme";
+import { EChartsOption } from "echarts";
 
 export default function OrderTimelineReport() {
   const [selectedEmployee, setSelectedEmployee] = useState<string>("all");
@@ -59,13 +60,13 @@ export default function OrderTimelineReport() {
     ? timelineData.reduce((sum, item) => sum + item.price, 0) / timelineData.length
     : 0;
 
-  const getOption = () => {
-    return {
+  const getOption = (): EChartsOption => {
+    const options: EChartsOption = {
       ...getCommonOptions(),
       tooltip: {
-        trigger: 'axis' as const,
+        trigger: 'axis',
         axisPointer: {
-          type: 'shadow' as const
+          type: 'shadow'
         },
         formatter: (params: any) => {
           const item = params[0];
@@ -87,7 +88,7 @@ export default function OrderTimelineReport() {
       },
       dataZoom: [
         {
-          type: 'slider' as const,
+          type: 'slider',
           show: true,
           start: 0,
           end: 100,
@@ -104,16 +105,16 @@ export default function OrderTimelineReport() {
           }
         },
         {
-          type: 'inside' as const,
+          type: 'inside',
           start: 0,
           end: 100,
         }
       ],
       xAxis: {
-        type: 'category' as const,
+        type: 'category',
         data: timelineData.map((item) => formatDate(item.date)),
         axisLabel: {
-          interval: 'auto' as const,
+          interval: 'auto',
           rotate: 45,
           hideOverlap: true,
           formatter: (value: string) => {
@@ -122,7 +123,7 @@ export default function OrderTimelineReport() {
         },
       },
       yAxis: {
-        type: 'value' as const,
+        type: 'value',
         axisLabel: {
           formatter: (value: number) => formatCurrency(value),
         },
@@ -130,7 +131,7 @@ export default function OrderTimelineReport() {
       series: [
         {
           name: 'Kaufpreis',
-          type: 'bar' as const,
+          type: 'bar',
           data: timelineData.map(item => ({
             value: item.price,
             date: item.date,
@@ -159,21 +160,23 @@ export default function OrderTimelineReport() {
         symbol: ['none', 'none'],
         label: {
           formatter: 'Durchschnitt',
-          position: 'middle' as const,
+          position: 'middle',
         },
         lineStyle: {
-          type: 'dashed' as const,
+          type: 'dashed',
           color: '#888',
         },
         data: [
           { 
-            type: 'value' as const, 
+            type: 'value', 
             yAxis: averagePrice,
           }
         ]
       },
-      animationEasing: 'elasticOut' as const,
+      animationEasing: 'elasticOut',
     };
+    
+    return options;
   };
 
   return (

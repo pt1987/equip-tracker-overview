@@ -2,6 +2,7 @@
 import ReactECharts from "echarts-for-react";
 import { cn } from "@/lib/utils";
 import { getCommonOptions, getColorOptions } from "@/lib/echarts-theme";
+import { EChartsOption } from "echarts";
 
 interface ChartData {
   name: string;
@@ -18,18 +19,18 @@ interface OverviewChartProps {
 export default function OverviewChart({ data, title, className }: OverviewChartProps) {
   const total = data.reduce((sum, item) => sum + item.value, 0);
 
-  const getOption = () => {
-    return {
+  const getOption = (): EChartsOption => {
+    const options: EChartsOption = {
       ...getCommonOptions(),
       color: data.map(item => item.color),
       title: {
         text: total.toString(),
         subtext: 'Gesamt',
-        left: 'center' as const,
-        top: 'center' as const,
+        left: 'center',
+        top: 'center',
         textStyle: {
           fontSize: 28,
-          fontWeight: 'bold' as const,
+          fontWeight: 'bold',
           color: 'var(--foreground)',
         },
         subtextStyle: {
@@ -38,7 +39,7 @@ export default function OverviewChart({ data, title, className }: OverviewChartP
         },
       },
       tooltip: {
-        trigger: 'item' as const,
+        trigger: 'item',
         formatter: (params: any) => {
           const percent = ((params.value / total) * 100).toFixed(0);
           return `
@@ -53,7 +54,7 @@ export default function OverviewChart({ data, title, className }: OverviewChartP
       series: [
         {
           name: title,
-          type: 'pie' as const,
+          type: 'pie',
           radius: ['60%', '80%'],
           avoidLabelOverlap: true,
           itemStyle: {
@@ -74,14 +75,15 @@ export default function OverviewChart({ data, title, className }: OverviewChartP
             }
           },
           data: data,
-          animationType: 'scale' as const,
-          animationEasing: 'elasticOut' as const,
+          animationType: 'scale',
+          animationEasing: 'elasticOut',
         }
       ],
       animation: true,
-      animationType: 'scale' as const,
-      animationEasing: 'elasticOut' as const,
+      animationEasing: 'elasticOut',
     };
+    
+    return options;
   };
 
   return (

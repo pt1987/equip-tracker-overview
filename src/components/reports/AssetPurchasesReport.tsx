@@ -4,6 +4,7 @@ import ReactECharts from "echarts-for-react";
 import { getYearlyAssetPurchasesReport } from "@/data/reports";
 import { AssetType } from "@/lib/types";
 import { getCommonOptions, getAxisOptions, getColorOptions } from "@/lib/echarts-theme";
+import { EChartsOption } from "echarts";
 
 export default function AssetPurchasesReport() {
   const [purchaseData, setPurchaseData] = useState<any[]>([]);
@@ -50,14 +51,14 @@ export default function AssetPurchasesReport() {
     accessory: "Zubehör"
   };
 
-  const getOption = () => {
-    return {
+  const getOption = (): EChartsOption => {
+    const options: EChartsOption = {
       ...getCommonOptions(),
       color: assetTypes.map(type => assetColors[type] || '#8884d8'),
       tooltip: {
-        trigger: 'axis' as const,
+        trigger: 'axis',
         axisPointer: {
-          type: 'shadow' as const
+          type: 'shadow'
         },
         formatter: (params: any) => {
           let content = `<div class="font-medium mb-2">Jahr: ${params[0].axisValue}</div>`;
@@ -87,7 +88,7 @@ export default function AssetPurchasesReport() {
       legend: {
         data: assetTypes.map(type => assetTypeLabels[type] || type),
         bottom: 0,
-        orient: 'horizontal' as const,
+        orient: 'horizontal',
         textStyle: {
           color: 'var(--muted-foreground)',
           fontSize: 12,
@@ -101,7 +102,7 @@ export default function AssetPurchasesReport() {
         containLabel: true,
       },
       xAxis: {
-        type: 'category' as const,
+        type: 'category',
         data: purchaseData.map(item => item.year),
         axisLabel: {
           fontSize: 12,
@@ -109,7 +110,7 @@ export default function AssetPurchasesReport() {
         },
       },
       yAxis: {
-        type: 'value' as const,
+        type: 'value',
         name: 'Anzahl',
         nameTextStyle: {
           color: 'var(--muted-foreground)',
@@ -118,10 +119,10 @@ export default function AssetPurchasesReport() {
       },
       series: assetTypes.map(type => ({
         name: assetTypeLabels[type] || type,
-        type: 'bar' as const,
+        type: 'bar',
         stack: 'total',
         emphasis: {
-          focus: 'series' as const
+          focus: 'series'
         },
         data: purchaseData.map(item => item[type] || 0),
         itemStyle: {
@@ -129,9 +130,11 @@ export default function AssetPurchasesReport() {
         },
         animationDelay: (idx: number) => idx * 50 + assetTypes.indexOf(type) * 100,
       })),
-      animationEasing: 'elasticOut' as const,
+      animationEasing: 'elasticOut',
       animationDelayUpdate: (idx: number) => idx * 5,
     };
+    
+    return options;
   };
 
   return (

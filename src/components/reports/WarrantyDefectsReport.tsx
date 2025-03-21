@@ -4,6 +4,7 @@ import ReactECharts from "echarts-for-react";
 import { getWarrantyDefectReport } from "@/data/reports";
 import { WarrantyDefectReport } from "@/lib/types";
 import { getCommonOptions, getColorOptions } from "@/lib/echarts-theme";
+import { EChartsOption } from "echarts";
 
 export default function WarrantyDefectsReport() {
   const [warrantyData, setWarrantyData] = useState<WarrantyDefectReport | null>(null);
@@ -31,12 +32,12 @@ export default function WarrantyDefectsReport() {
   const COLORS = ["#16a34a", "#dc2626"];
   const totalDefective = warrantyData.withWarranty.count + warrantyData.withoutWarranty.count;
 
-  const getOption = () => {
-    return {
+  const getOption = (): EChartsOption => {
+    const options: EChartsOption = {
       ...getCommonOptions(),
       color: COLORS,
       tooltip: {
-        trigger: 'item' as const,
+        trigger: 'item',
         formatter: (params: any) => {
           const percent = (params.value / totalDefective * 100).toFixed(1);
           return `
@@ -47,9 +48,9 @@ export default function WarrantyDefectsReport() {
         }
       },
       legend: {
-        orient: 'horizontal' as const,
+        orient: 'horizontal',
         bottom: 0,
-        left: 'center' as const,
+        left: 'center',
         data: pieData.map(item => item.name),
         textStyle: {
           color: 'var(--muted-foreground)',
@@ -59,7 +60,7 @@ export default function WarrantyDefectsReport() {
       series: [
         {
           name: 'Garantiestatus',
-          type: 'pie' as const,
+          type: 'pie',
           radius: ['40%', '70%'],
           center: ['50%', '45%'],
           avoidLabelOverlap: false,
@@ -93,14 +94,16 @@ export default function WarrantyDefectsReport() {
             length2: 15,
           },
           data: pieData,
-          animationType: 'scale' as const,
-          animationEasing: 'elasticOut' as const,
+          animationType: 'scale',
+          animationEasing: 'elasticOut',
           animationDelay: function () {
             return Math.random() * 200;
           }
         }
       ]
     };
+    
+    return options;
   };
 
   return (
