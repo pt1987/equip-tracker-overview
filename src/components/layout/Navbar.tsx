@@ -70,7 +70,7 @@ export default function Navbar() {
                     Asset Tracker
                   </Link>
                 </div>
-                <div className="px-4 pb-2 border-b border-border">
+                <div className="px-4 py-4 border-b border-border">
                   <ThemeSwitcher />
                 </div>
                 <div className="flex-1 overflow-y-auto py-4">
