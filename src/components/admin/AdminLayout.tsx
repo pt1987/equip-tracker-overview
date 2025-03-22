@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { 
@@ -16,7 +15,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
-import ThemeSwitcher from "@/components/layout/ThemeSwitcher";
+import { ThemeSwitcher } from "@/components/layout/ThemeSwitcher";
 
 interface NavItemProps {
   to: string;
@@ -49,7 +48,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [lastActivity, setLastActivity] = useState(Date.now());
   const [showInactivityWarning, setShowInactivityWarning] = useState(false);
 
-  // Check for activity for session timeout
   useEffect(() => {
     const handleActivity = () => {
       setLastActivity(Date.now());
@@ -59,18 +57,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     window.addEventListener("mousemove", handleActivity);
     window.addEventListener("keypress", handleActivity);
     
-    // Check for inactivity
     const inactivityInterval = setInterval(() => {
-      // Show warning after 12 minutes
       if (Date.now() - lastActivity > 12 * 60 * 1000 && !showInactivityWarning) {
         setShowInactivityWarning(true);
       }
       
-      // Logout after 15 minutes of inactivity
       if (Date.now() - lastActivity > 15 * 60 * 1000) {
         handleLogout("Sie wurden aufgrund von Inaktivität abgemeldet.");
       }
-    }, 60 * 1000); // Check every minute
+    }, 60 * 1000);
     
     return () => {
       window.removeEventListener("mousemove", handleActivity);
@@ -99,7 +94,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Desktop Sidebar */}
       <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 z-20">
         <div className="flex flex-col flex-grow border-r border-border bg-card rounded-r-lg">
           <div className="flex items-center h-16 px-6 border-b border-border">
@@ -146,7 +140,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </div>
 
-      {/* Mobile Navigation */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-20 bg-background border-b">
         <div className="flex justify-between items-center h-16 px-4">
           <span className="flex items-center gap-2 font-semibold text-base">
@@ -212,7 +205,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="flex flex-col flex-1 md:pl-64 pt-16 md:pt-0">
         <div className="p-6 flex-1">
           {showInactivityWarning && (
