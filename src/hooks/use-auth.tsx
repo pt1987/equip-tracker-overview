@@ -43,11 +43,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(false);
 
     // Set up session timeout
-    const inactivityTimer = setupInactivityTimeout();
+    const cleanup = setupInactivityTimeout();
     
-    return () => {
-      if (inactivityTimer) clearTimeout(inactivityTimer);
-    };
+    return cleanup;
   }, []);
 
   // Function to handle inactivity timeout
@@ -67,21 +65,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           });
         }
       }, 15 * 60 * 1000);
-      
-      return inactivityTimer;
     };
     
-    // Create the reset function first
+    // Create the reset timer function
     const resetInactivityTimer = () => {
-      inactivityTimer = resetTimer();
+      resetTimer();
     };
     
-    // Then set up the event listeners
+    // Set up event listeners
     window.addEventListener("mousemove", resetInactivityTimer);
     window.addEventListener("keypress", resetInactivityTimer);
     
     // Initial timer setup
-    return resetTimer();
+    resetTimer();
+    
+    // Return cleanup function
+    return () => {
+      if (inactivityTimer) clearTimeout(inactivityTimer);
+      window.removeEventListener("mousemove", resetInactivityTimer);
+      window.removeEventListener("keypress", resetInactivityTimer);
+    };
   };
 
   const login = async (email: string, password: string): Promise<boolean> => {

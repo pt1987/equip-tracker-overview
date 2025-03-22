@@ -14,7 +14,9 @@ import {
   X,
   FileBarChart,
   Package,
-  Shield
+  Shield,
+  LogIn,
+  LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -26,7 +28,7 @@ export default function Navbar() {
   const location = useLocation();
   const isMobile = useIsMobile();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
   const isAdmin = user?.role === "admin";
 
   const toggleSidebar = () => {
@@ -144,6 +146,38 @@ export default function Navbar() {
                         </Link>
                       </li>
                     ))}
+                    
+                    {/* Authentication section */}
+                    <li className="pt-4">
+                      <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
+                        Account
+                      </div>
+                    </li>
+                    {isAuthenticated ? (
+                      <li>
+                        <Button
+                          variant="ghost" 
+                          className="w-full justify-start text-left px-4 py-2 rounded-md hover:bg-secondary"
+                          onClick={() => logout()}
+                        >
+                          <LogOut size={20} className="mr-3" />
+                          <span>Logout</span>
+                        </Button>
+                      </li>
+                    ) : (
+                      <li>
+                        <Link
+                          to="/login"
+                          className={cn(
+                            "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
+                            location.pathname === "/login" ? "font-medium bg-secondary" : ""
+                          )}
+                        >
+                          <LogIn size={20} />
+                          <span>Login</span>
+                        </Link>
+                      </li>
+                    )}
                   </ul>
                 </div>
               </div>
@@ -154,6 +188,27 @@ export default function Navbar() {
               Asset Tracker
             </Link>
           </div>
+          
+          {/* Add login button for mobile */}
+          {!isAuthenticated && (
+            <Link to="/login">
+              <Button variant="outline" size="sm">
+                <LogIn className="h-4 w-4 mr-2" />
+                Login
+              </Button>
+            </Link>
+          )}
+          
+          {isAuthenticated && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => logout()}
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
+          )}
         </div>
       ) : (
         <aside className="fixed left-0 top-0 z-40 h-full flex-col bg-background border-r border-r-border flex w-64 overflow-hidden">
@@ -223,6 +278,38 @@ export default function Navbar() {
                   </Link>
                 </li>
               ))}
+              
+              {/* Authentication section */}
+              <li className="pt-4">
+                <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
+                  Account
+                </div>
+              </li>
+              {isAuthenticated ? (
+                <li>
+                  <Button
+                    variant="ghost" 
+                    className="w-full justify-start text-left px-4 py-2 rounded-md hover:bg-secondary"
+                    onClick={() => logout()}
+                  >
+                    <LogOut size={20} className="mr-3" />
+                    <span>Logout</span>
+                  </Button>
+                </li>
+              ) : (
+                <li>
+                  <Link
+                    to="/login"
+                    className={cn(
+                      "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
+                      location.pathname === "/login" ? "font-medium bg-secondary" : ""
+                    )}
+                  >
+                    <LogIn size={20} />
+                    <span>Login</span>
+                  </Link>
+                </li>
+              )}
             </ul>
           </div>
         </aside>
