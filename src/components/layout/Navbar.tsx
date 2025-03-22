@@ -13,17 +13,21 @@ import {
   Menu,
   X,
   FileBarChart,
-  Package
+  Package,
+  Shield
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { ThemeSwitcher } from "./ThemeSwitcher";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function Navbar() {
   const location = useLocation();
   const isMobile = useIsMobile();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -47,6 +51,13 @@ export default function Navbar() {
     { to: "/asset/create", label: "Create Asset", icon: <PlusCircle size={20} /> },
     { to: "/employee/create", label: "Create Employee", icon: <UserPlus size={20} /> },
   ];
+  
+  const adminLinks = isAdmin ? [
+    { to: "/admin/dashboard", label: "Admin Dashboard", icon: <Shield size={20} /> },
+    { to: "/admin/users", label: "User Management", icon: <Users size={20} /> },
+    { to: "/admin/roles", label: "Roles & Permissions", icon: <Shield size={20} /> },
+    { to: "/admin/logs", label: "Audit Logs", icon: <FileBarChart size={20} /> },
+  ] : [];
 
   return (
     <>
@@ -89,6 +100,31 @@ export default function Navbar() {
                         </Link>
                       </li>
                     ))}
+                    
+                    {isAdmin && (
+                      <>
+                        <li className="pt-4">
+                          <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
+                            Admin
+                          </div>
+                        </li>
+                        {adminLinks.map((item) => (
+                          <li key={item.to}>
+                            <Link
+                              to={item.to}
+                              className={cn(
+                                "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
+                                location.pathname === item.to ? "font-medium bg-secondary" : ""
+                              )}
+                            >
+                              {item.icon}
+                              <span>{item.label}</span>
+                            </Link>
+                          </li>
+                        ))}
+                      </>
+                    )}
+                    
                     <li className="pt-4">
                       <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
                         Create New
@@ -143,6 +179,31 @@ export default function Navbar() {
                   </Link>
                 </li>
               ))}
+              
+              {isAdmin && (
+                <>
+                  <li className="pt-4">
+                    <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
+                      Admin
+                    </div>
+                  </li>
+                  {adminLinks.map((item) => (
+                    <li key={item.to}>
+                      <Link
+                        to={item.to}
+                        className={cn(
+                          "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
+                          location.pathname.includes(item.to) ? "font-medium bg-secondary" : ""
+                        )}
+                      >
+                        {item.icon}
+                        <span>{item.label}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </>
+              )}
+              
               <li className="pt-4">
                 <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
                   Create New
