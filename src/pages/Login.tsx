@@ -12,6 +12,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import PageTransition from "@/components/layout/PageTransition";
+import { useAuth } from "@/hooks/use-auth";
 
 // Login form schema
 const formSchema = z.object({
@@ -26,6 +27,14 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { login, isAuthenticated } = useAuth();
+
+  // Redirect to dashboard if already authenticated
+  useState(() => {
+    if (isAuthenticated) {
+      navigate("/admin/dashboard");
+    }
+  });
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -39,23 +48,10 @@ export default function Login() {
     setIsLoading(true);
     
     try {
-      // In a real app, this would be an API call to authenticate
-      console.log("Login attempt with:", data);
+      // Use the login function from useAuth
+      const success = await login(data.email, data.password);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // For demo purposes: simple validation
-      if (data.email === "admin@example.com" && data.password === "password123") {
-        // Store auth state (in a real app use proper auth state management)
-        localStorage.setItem("isAuthenticated", "true");
-        localStorage.setItem("user", JSON.stringify({
-          id: "1",
-          email: data.email,
-          name: "Admin User",
-          role: "admin"
-        }));
-        
+      if (success) {
         toast({
           title: "Erfolgreich angemeldet",
           description: "Willkommen im Admin-Bereich.",
