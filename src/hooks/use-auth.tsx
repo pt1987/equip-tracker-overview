@@ -47,8 +47,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     
     return () => {
       if (inactivityTimer) clearTimeout(inactivityTimer);
-      window.removeEventListener("mousemove", resetInactivityTimer);
-      window.removeEventListener("keypress", resetInactivityTimer);
     };
   }, []);
 
@@ -73,13 +71,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return inactivityTimer;
     };
     
-    window.addEventListener("mousemove", resetInactivityTimer);
-    window.addEventListener("keypress", resetInactivityTimer);
-    
+    // Create the reset function first
     const resetInactivityTimer = () => {
       inactivityTimer = resetTimer();
     };
     
+    // Then set up the event listeners
+    window.addEventListener("mousemove", resetInactivityTimer);
+    window.addEventListener("keypress", resetInactivityTimer);
+    
+    // Initial timer setup
     return resetTimer();
   };
 
