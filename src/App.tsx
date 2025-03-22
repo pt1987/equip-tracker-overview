@@ -35,7 +35,7 @@ const AppContent = () => {
       <Toaster />
       <Sonner />
       <AnimatePresence mode="wait">
-        <div className={`${isMobile ? 'pt-16' : 'md:pl-64'} w-full px-1 sm:px-2 md:px-4`}>
+        <div className={`${isMobile ? 'pt-16' : 'md:pl-64'} w-full container mx-auto px-4 py-6 md:py-8`}>
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/assets" element={<Assets />} />

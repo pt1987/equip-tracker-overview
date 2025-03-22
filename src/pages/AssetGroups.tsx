@@ -1,7 +1,6 @@
 
 import { useQuery } from "@tanstack/react-query";
 import PageTransition from "@/components/layout/PageTransition";
-import Navbar from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Folder } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -70,58 +69,53 @@ export default function AssetGroups() {
   };
 
   return (
-    <div className="flex min-h-screen">
-      <Navbar />
-      <div className="flex-1 container px-4 py-6 md:py-8 md:ml-64">
-        <PageTransition>
-          <div className="flex flex-col gap-8">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight">Asset Gruppen</h1>
-                <p className="text-muted-foreground">
-                  Verwalten Sie Ihre Assets nach Kategorien und Herstellern
-                </p>
-              </div>
-              <Button>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Neue Gruppe
-              </Button>
-            </div>
+    <PageTransition>
+      <div className="flex flex-col gap-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Asset Gruppen</h1>
+            <p className="text-muted-foreground">
+              Verwalten Sie Ihre Assets nach Kategorien und Herstellern
+            </p>
+          </div>
+          <Button>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Neue Gruppe
+          </Button>
+        </div>
 
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-                <Tabs 
-                  defaultValue="category" 
-                  value={activeTab}
-                  onValueChange={setActiveTab}
-                  className="w-full md:w-auto"
-                >
-                  <TabsList>
-                    <TabsTrigger value="category">Nach Kategorie</TabsTrigger>
-                    <TabsTrigger value="manufacturer">Nach Hersteller</TabsTrigger>
-                  </TabsList>
-                </Tabs>
-                
-                <div className="w-full md:w-auto md:ml-auto">
-                  <SearchFilter 
-                    onSearch={handleSearch} 
-                    placeholder="Gruppen durchsuchen..." 
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-4">
-                <TabsContent value="category" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-0 w-full">
-                  {renderGroups(assetsByCategory)}
-                </TabsContent>
-                <TabsContent value="manufacturer" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-0 w-full">
-                  {renderGroups(assetsByManufacturer)}
-                </TabsContent>
-              </div>
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+            <Tabs 
+              defaultValue="category" 
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full md:w-auto"
+            >
+              <TabsList>
+                <TabsTrigger value="category">Nach Kategorie</TabsTrigger>
+                <TabsTrigger value="manufacturer">Nach Hersteller</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            
+            <div className="w-full md:w-auto md:ml-auto">
+              <SearchFilter 
+                onSearch={handleSearch} 
+                placeholder="Gruppen durchsuchen..." 
+              />
             </div>
           </div>
-        </PageTransition>
+
+          <div className="grid grid-cols-1 gap-4">
+            <TabsContent value="category" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-0 w-full">
+              {renderGroups(assetsByCategory)}
+            </TabsContent>
+            <TabsContent value="manufacturer" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-0 w-full">
+              {renderGroups(assetsByManufacturer)}
+            </TabsContent>
+          </div>
+        </div>
       </div>
-    </div>
+    </PageTransition>
   );
 }
