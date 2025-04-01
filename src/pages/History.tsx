@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import PageTransition from "@/components/layout/PageTransition";
 import { 
@@ -163,7 +164,7 @@ export default function History() {
 
   return (
     <PageTransition>
-      <div className="p-4 md:p-6">
+      <div className="p-3 md:p-4 xl:p-6 space-y-6 max-w-full">
         <div className="flex flex-col gap-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>

@@ -68,7 +68,7 @@ const AppContent = () => {
             element={
               <>
                 <Navbar />
-                <main className={`${isMobile ? 'pt-16' : 'md:pl-64'}`}>
+                <main className={`${isMobile ? 'pt-16' : 'md:pl-64'} max-w-full w-full`}>
                   <Routes>
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/assets" element={<Assets />} />

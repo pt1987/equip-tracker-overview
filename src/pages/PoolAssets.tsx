@@ -42,7 +42,7 @@ export default function PoolAssets() {
 
   return (
     <PageTransition>
-      <div className="flex flex-col gap-8">
+      <div className="p-3 md:p-4 xl:p-6 space-y-6 max-w-full">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Pool Assets</h1>
