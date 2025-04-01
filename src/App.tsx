@@ -68,7 +68,7 @@ const AppContent = () => {
             element={
               <>
                 <Navbar />
-                <div className={`${isMobile ? 'pt-16' : 'md:pl-64'} w-full container mx-auto px-4 py-6 md:py-8`}>
+                <div className={`${isMobile ? 'pt-16' : 'md:pl-64'} w-full`}>
                   <Routes>
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/assets" element={<Assets />} />

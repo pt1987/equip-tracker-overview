@@ -19,7 +19,7 @@ const NotFound = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="glass-card max-w-md w-full p-8 text-center"
+        className="glass-card max-w-md w-full p-6 md:p-8 text-center"
       >
         <div className="rounded-full bg-muted w-20 h-20 mx-auto mb-6 flex items-center justify-center">
           <span className="text-3xl font-bold">404</span>
