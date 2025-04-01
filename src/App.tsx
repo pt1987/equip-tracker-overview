@@ -68,7 +68,7 @@ const AppContent = () => {
             element={
               <>
                 <Navbar />
-                <div className={`${isMobile ? 'pt-16' : 'md:pl-64'} w-full`}>
+                <main className={`${isMobile ? 'pt-16' : 'md:pl-64'}`}>
                   <Routes>
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/assets" element={<Assets />} />
@@ -87,7 +87,7 @@ const AppContent = () => {
                     {/* Catch-all route */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
-                </div>
+                </main>
               </>
             }
           />

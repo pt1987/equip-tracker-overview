@@ -10,7 +10,7 @@ export default function HardwareOrder() {
   return (
     <PageTransition>
       <div className="p-4 md:p-6">
-        <div className="flex flex-col gap-6 max-w-full">
+        <div className="flex flex-col gap-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">

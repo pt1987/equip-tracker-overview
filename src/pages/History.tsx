@@ -1,7 +1,5 @@
-
 import { useQuery } from "@tanstack/react-query";
 import PageTransition from "@/components/layout/PageTransition";
-import Navbar from "@/components/layout/Navbar";
 import { 
   Table, 
   TableBody, 
@@ -164,93 +162,90 @@ export default function History() {
   };
 
   return (
-    <div className="flex min-h-screen">
-      <Navbar />
-      <div className="flex-1 container py-6 md:py-8 px-4 md:ml-64">
-        <PageTransition>
-          <div className="flex flex-col gap-8">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight">Asset Historie</h1>
-                <p className="text-muted-foreground">
-                  Chronologische Übersicht aller Assets nach Kaufdatum
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <SearchFilter 
-                  onSearch={handleSearch} 
-                  placeholder="Assets durchsuchen..." 
-                  className="w-full md:w-auto"
-                />
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="gap-2">
-                      <Download size={16} />
-                      <span>Exportieren</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={exportToCSV} className="cursor-pointer gap-2">
-                      <FileText size={16} />
-                      <span>Als CSV exportieren</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={exportToXLSX} className="cursor-pointer gap-2">
-                      <FileSpreadsheet size={16} />
-                      <span>Als Excel exportieren</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={exportToPDF} className="cursor-pointer gap-2">
-                      <Check size={16} />
-                      <span>Als PDF exportieren</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+    <PageTransition>
+      <div className="p-4 md:p-6">
+        <div className="flex flex-col gap-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Asset Historie</h1>
+              <p className="text-muted-foreground">
+                Chronologische Übersicht aller Assets nach Kaufdatum
+              </p>
             </div>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle>Anschaffungshistorie</CardTitle>
-                <CardDescription>
-                  Alle Assets, sortiert nach Kaufdatum (neueste zuerst)
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Kaufdatum</TableHead>
-                      <TableHead>Asset</TableHead>
-                      <TableHead>Kategorie</TableHead>
-                      <TableHead>Preis</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Zugewiesen an</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredAssets.map((asset) => (
-                      <TableRow key={asset.id}>
-                        <TableCell className="font-medium">{formatDate(asset.purchaseDate)}</TableCell>
-                        <TableCell>{asset.manufacturer} {asset.model}</TableCell>
-                        <TableCell>{asset.category}</TableCell>
-                        <TableCell>{formatCurrency(asset.price)}</TableCell>
-                        <TableCell><StatusBadge status={asset.status} /></TableCell>
-                        <TableCell>{getEmployeeName(asset.employeeId)}</TableCell>
-                      </TableRow>
-                    ))}
-                    {filteredAssets.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center py-4 text-muted-foreground">
-                          Keine Assets gefunden
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+            <div className="flex gap-2">
+              <SearchFilter 
+                onSearch={handleSearch} 
+                placeholder="Assets durchsuchen..." 
+                className="w-full md:w-auto"
+              />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="gap-2">
+                    <Download size={16} />
+                    <span>Exportieren</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={exportToCSV} className="cursor-pointer gap-2">
+                    <FileText size={16} />
+                    <span>Als CSV exportieren</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={exportToXLSX} className="cursor-pointer gap-2">
+                    <FileSpreadsheet size={16} />
+                    <span>Als Excel exportieren</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={exportToPDF} className="cursor-pointer gap-2">
+                    <Check size={16} />
+                    <span>Als PDF exportieren</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
-        </PageTransition>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle>Anschaffungshistorie</CardTitle>
+              <CardDescription>
+                Alle Assets, sortiert nach Kaufdatum (neueste zuerst)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Kaufdatum</TableHead>
+                    <TableHead>Asset</TableHead>
+                    <TableHead>Kategorie</TableHead>
+                    <TableHead>Preis</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Zugewiesen an</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredAssets.map((asset) => (
+                    <TableRow key={asset.id}>
+                      <TableCell className="font-medium">{formatDate(asset.purchaseDate)}</TableCell>
+                      <TableCell>{asset.manufacturer} {asset.model}</TableCell>
+                      <TableCell>{asset.category}</TableCell>
+                      <TableCell>{formatCurrency(asset.price)}</TableCell>
+                      <TableCell><StatusBadge status={asset.status} /></TableCell>
+                      <TableCell>{getEmployeeName(asset.employeeId)}</TableCell>
+                    </TableRow>
+                  ))}
+                  {filteredAssets.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-4 text-muted-foreground">
+                        Keine Assets gefunden
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </div>
+    </PageTransition>
   );
 }
