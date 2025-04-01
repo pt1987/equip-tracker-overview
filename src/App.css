@@ -1,15 +1,15 @@
 
 #root {
-  max-width: 1280px;
   margin: 0 auto;
-  padding: 1rem;
-  text-align: center;
   width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 @media (min-width: 768px) {
   #root {
-    padding: 2rem;
+    padding: 0;
   }
 }
 
@@ -49,17 +49,31 @@
   color: #888;
 }
 
-/* Add responsive grid layout */
+/* Improved responsive grid layout */
 .responsive-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1rem;
   width: 100%;
 }
 
-@media (max-width: 640px) {
-  .responsive-grid {
-    grid-template-columns: 1fr;
+/* Better container sizing for all screens */
+.content-container {
+  width: 100%;
+  max-width: 1920px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .content-container {
+    padding: 2rem;
+  }
+}
+
+@media (min-width: 1536px) {
+  .content-container {
+    padding: 2.5rem;
   }
 }
 
@@ -75,5 +89,82 @@
   
   .tabs-content {
     padding: 0.5rem !important;
+  }
+}
+
+/* Improved grid layouts based on screen size */
+.responsive-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1rem;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .responsive-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .responsive-grid-2 {
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  }
+}
+
+.responsive-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1rem;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .responsive-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .responsive-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1536px) {
+  .responsive-grid-3 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Flexible card layouts */
+.cards-grid {
+  display: grid;
+  gap: 1rem;
+  width: 100%;
+  grid-template-columns: repeat(1, 1fr);
+}
+
+@media (min-width: 640px) {
+  .cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .cards-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .cards-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 1536px) {
+  .cards-grid {
+    grid-template-columns: repeat(5, 1fr);
   }
 }

@@ -144,10 +144,17 @@
   }
   
   .main-content {
-    @apply w-full md:pl-64 pt-16 md:pt-0 transition-all duration-300;
+    @apply w-full max-w-[1920px] mx-auto transition-all duration-300;
   }
   
-  /* Better charts for reporting */
+  .main-content-with-sidebar {
+    @apply w-full md:pl-64 pt-16 md:pt-0 transition-all duration-300 max-w-full;
+  }
+  
+  .page-container {
+    @apply w-full max-w-[1920px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12;
+  }
+  
   .chart-container {
     @apply w-full h-full min-h-[300px] sm:min-h-[350px] overflow-hidden border rounded-lg p-2 sm:p-4 relative;
   }
@@ -182,47 +189,39 @@
     @apply bg-muted/30;
   }
   
-  /* Responsive card layouts */
   .cards-grid {
     @apply grid gap-3 sm:gap-4;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   }
   
-  /* Collapsible sidebar */
   .sidebar-collapsed {
     @apply -translate-x-full md:translate-x-0;
   }
   
-  /* Improve mobile layouts */
   @media (max-width: 767px) {
-    .main-content {
+    .main-content-with-sidebar {
       padding-left: 0;
       padding-top: 4rem;
     }
     
-    /* Make tabs more compact on mobile */
     .tabs-list {
       @apply flex-wrap gap-1;
     }
   }
   
-  /* ECharts Styling */
   .echarts-for-react {
     @apply w-full h-full overflow-visible;
   }
   
-  /* Smooth transitions for dark/light mode */
   .echarts-for-react canvas {
     @apply transition-colors duration-300;
   }
 
-  /* Fix tooltip position and make it look better */
   .echarts-tooltip {
     @apply !z-50 rounded-md;
   }
 }
 
-/* Page transitions */
 .page-transition-enter {
   opacity: 0;
   transform: translateY(8px);
@@ -245,7 +244,6 @@
   transition: opacity 300ms, transform 300ms;
 }
 
-/* Card hover effects */
 .hover-lift {
   transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
 }
@@ -255,7 +253,6 @@
   @apply shadow-card;
 }
 
-/* Progress */
 .budget-progress-track {
   @apply h-2 bg-muted rounded-full overflow-hidden;
 }
@@ -265,23 +262,6 @@
   transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Better responsive grid layouts */
-.responsive-grid-2 {
-  @apply grid gap-3 sm:gap-4;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-}
-
-.responsive-grid-3 {
-  @apply grid gap-3 sm:gap-4;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-}
-
-.responsive-grid-4 {
-  @apply grid gap-3 sm:gap-4;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-}
-
-/* Chart and report specific styles */
 .report-card {
   @apply p-3 sm:p-4 bg-card rounded-lg border shadow-sm overflow-hidden;
 }
@@ -290,12 +270,10 @@
   @apply flex flex-wrap gap-2 mb-4;
 }
 
-/* Enhanced responsiveness for charts */
 .chart-responsive {
   @apply w-full h-[300px] sm:h-[350px] md:h-[400px];
 }
 
-/* ECharts-specific responsive adjustments */
 @media (max-width: 640px) {
   .echarts-for-react {
     @apply max-h-[300px];

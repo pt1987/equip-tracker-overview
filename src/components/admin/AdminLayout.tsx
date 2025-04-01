@@ -96,16 +96,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="min-h-screen bg-background flex">
+      {/* Sidebar for desktop */}
       <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 z-20">
-        <div className="flex flex-col flex-grow border-r border-border bg-card rounded-r-lg">
+        <div className="flex flex-col flex-grow border-r border-border bg-card rounded-r-lg h-full">
+          {/* Sidebar header */}
           <div className="flex items-center h-16 px-6 border-b border-border">
             <span className="flex items-center gap-2 font-semibold text-lg">
               <Shield className="h-5 w-5 text-primary" />
               Admin Portal
             </span>
           </div>
+          
+          {/* Sidebar content */}
           <div className="flex-grow overflow-y-auto pt-5 px-3 pb-4 flex flex-col justify-between">
             <nav className="space-y-1">
+              {/* Navigation items */}
               {navItems.map((item) => (
                 <NavItem
                   key={item.to}
@@ -128,6 +133,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </div>
             </nav>
             
+            {/* Sidebar footer with user info */}
             <div className="space-y-4 mt-4">
               <Separator />
               <div className="px-3 text-sm text-muted-foreground">
@@ -153,6 +159,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </div>
 
+      {/* Mobile header */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-20 bg-background border-b">
         <div className="flex justify-between items-center h-16 px-4">
           <span className="flex items-center gap-2 font-semibold text-base">
@@ -237,8 +244,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </div>
 
-      <div className="flex flex-col flex-1 md:pl-64 pt-16 md:pt-0">
-        <div className="p-6 flex-1">
+      {/* Main content */}
+      <div className="flex flex-col flex-1 md:pl-64 pt-16 md:pt-0 w-full max-w-full">
+        <div className="p-4 sm:p-6 md:p-8 lg:p-10 w-full max-w-[1920px] mx-auto flex-1">
           {showInactivityWarning && (
             <div className="mb-6 p-4 bg-yellow-100 dark:bg-yellow-900 border border-yellow-300 dark:border-yellow-700 rounded-md">
               <p className="text-sm text-yellow-800 dark:text-yellow-200">

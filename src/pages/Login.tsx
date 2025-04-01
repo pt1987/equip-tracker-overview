@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -30,11 +30,11 @@ export default function Login() {
   const { login, isAuthenticated } = useAuth();
 
   // Redirect to dashboard if already authenticated
-  useState(() => {
+  useEffect(() => {
     if (isAuthenticated) {
       navigate("/admin/dashboard");
     }
-  });
+  }, [isAuthenticated, navigate]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
