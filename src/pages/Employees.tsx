@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import PageTransition from "@/components/layout/PageTransition";
 import { employees } from "@/data/mockData";
@@ -7,10 +6,9 @@ import EmployeeCard from "@/components/employees/EmployeeCard";
 import SearchFilter from "@/components/shared/SearchFilter";
 import ViewToggle from "@/components/shared/ViewToggle";
 import { motion } from "framer-motion";
-import { SlidersHorizontal, X, Check, Users, ArrowRight, FileText, Plus } from "lucide-react";
+import { SlidersHorizontal, X, Check, Users, ArrowRight } from "lucide-react";
 import { formatDate, calculateEmploymentDuration } from "@/lib/utils";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 
 interface FilterOption {
   label: string;
@@ -74,18 +72,6 @@ const EmployeesPage = () => {
           </div>
           
           <div className="flex items-center gap-2">
-            <Link to="/forms">
-              <Button variant="outline" className="gap-2">
-                <FileText size={16} />
-                Formulare
-              </Button>
-            </Link>
-            <Link to="/employee/create">
-              <Button variant="default" className="gap-2">
-                <Plus size={16} />
-                Neuer Mitarbeiter
-              </Button>
-            </Link>
             <ViewToggle view={view} onViewChange={setView} />
           </div>
         </div>

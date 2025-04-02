@@ -133,38 +133,3 @@ export type ReportType =
   | 'yearlyPurchases'
   | 'usageDuration'
   | 'warrantyDefects';
-
-// New types for form automation
-export type FormType = 'onboarding' | 'offboarding';
-
-export type FormStatus = 'draft' | 'pending' | 'completed' | 'cancelled';
-
-export interface AssetChecklistItem {
-  id: string;
-  label: string;
-  checked: boolean;
-}
-
-export interface AssetFormEntry {
-  assetId: string;
-  assetName: string;
-  serialNumber?: string;
-  condition: string;
-  accessories: string[];
-  checklistItems: AssetChecklistItem[];
-}
-
-export interface EmployeeForm {
-  id: string;
-  formType: FormType;
-  employeeId: string;
-  employeeName: string;
-  createdDate: string;
-  completedDate?: string;
-  status: FormStatus;
-  assets: AssetFormEntry[];
-  signature?: string;
-  notes?: string;
-  documentUrl?: string;
-  emailSent: boolean;
-}

@@ -29,7 +29,6 @@ import {
 import { toast } from "@/hooks/use-toast";
 import EmployeeDetailView from "@/components/employees/EmployeeDetailView";
 import EmployeeDetailEdit from "@/components/employees/EmployeeDetailEdit";
-import EmployeeFormSection from "@/components/employees/EmployeeFormSection";
 
 const AssetTypeIcon = ({ type }: { type: Asset["type"] }) => {
   switch (type) {
@@ -167,7 +166,7 @@ const EmployeeDetail = () => {
       
       <div className="flex-1 md:ml-32">
         <PageTransition>
-          <div className="p-3 md:p-4 xl:p-6 pb-24 max-w-7xl mx-auto mt-12 md:mt-0 space-y-6">
+          <div className="p-4 md:p-8 pb-24 max-w-7xl mx-auto mt-12 md:mt-0">
             <div className="mb-6">
               <Link 
                 to="/employees"
@@ -228,9 +227,6 @@ const EmployeeDetail = () => {
                     </p>
                   </div>
                 </div>
-                
-                {/* Employee Forms Section */}
-                {id && <EmployeeFormSection employeeId={id} />}
                 
                 <div className="glass-card p-6">
                   <div className="flex items-center justify-between gap-2 mb-6">

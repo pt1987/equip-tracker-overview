@@ -28,8 +28,6 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import Users from "./pages/admin/Users";
 import Roles from "./pages/admin/Roles";
 import Logs from "./pages/admin/Logs";
-import FormArchive from "./pages/FormArchive";
-import FormDetail from "./pages/FormDetail";
 
 const queryClient = new QueryClient();
 
@@ -85,8 +83,6 @@ const AppContent = () => {
                     <Route path="/employee/edit/:id" element={<CreateEditEmployee />} />
                     <Route path="/reporting" element={<Reporting />} />
                     <Route path="/hardware-order" element={<HardwareOrder />} />
-                    <Route path="/forms" element={<FormArchive />} />
-                    <Route path="/form/:id" element={<FormDetail />} />
                     
                     {/* Catch-all route */}
                     <Route path="*" element={<NotFound />} />
