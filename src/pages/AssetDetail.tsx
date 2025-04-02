@@ -1,4 +1,3 @@
-
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import PageTransition from "@/components/layout/PageTransition";
@@ -90,14 +89,13 @@ const AssetDetail = () => {
     setDocuments(documents.filter(doc => doc.id !== documentId));
     toast({
       title: "Dokument gelöscht",
-      description: "Das Dokument wurde erfolgreich gelöscht."
+      description: "Das Dokument wurde erfolgreich gelöscht"
     });
   };
   
   if (loading) {
     return (
       <div className="flex min-h-screen">
-        <Navbar />
         <div className="flex-1 md:ml-64 p-8 flex items-center justify-center">
           <div className="animate-pulse-soft">Loading asset details...</div>
         </div>
@@ -108,7 +106,6 @@ const AssetDetail = () => {
   if (!asset) {
     return (
       <div className="flex min-h-screen">
-        <Navbar />
         <div className="flex-1 md:ml-32 p-3 md:p-4 xl:p-6 space-y-6 max-w-full">
           <div className="glass-card p-12 text-center">
             <h2 className="text-xl font-medium mb-4">Asset not found</h2>
@@ -196,163 +193,157 @@ const AssetDetail = () => {
   };
 
   return (
-    <div className="flex min-h-screen">
-      <Navbar />
-      
-      <div className="flex-1 md:ml-32">
-        <PageTransition>
-          <div className="p-3 md:p-4 xl:p-6 space-y-6 max-w-full pb-24 mt-12 md:mt-0">
-            <div className="mb-6">
-              <Link 
-                to="/assets"
-                className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <ChevronLeft size={16} />
-                <span>Back to assets</span>
-              </Link>
+    <PageTransition>
+      <div className="p-3 md:p-4 xl:p-6 space-y-6 max-w-full pb-24 mt-12 md:mt-0">
+        <div className="mb-6">
+          <Link 
+            to="/assets"
+            className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ChevronLeft size={16} />
+            <span>Back to assets</span>
+          </Link>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <div className="glass-card p-6 mb-6">
+              {isEditing ? (
+                <AssetDetailEdit
+                  asset={asset}
+                  onSave={handleSave}
+                  onCancel={handleCancel}
+                />
+              ) : (
+                <AssetDetailView
+                  asset={asset}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              )}
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
+            {!isEditing && (
+              <>
                 <div className="glass-card p-6 mb-6">
-                  {isEditing ? (
-                    <AssetDetailEdit
-                      asset={asset}
-                      onSave={handleSave}
-                      onCancel={handleCancel}
-                    />
-                  ) : (
-                    <AssetDetailView
-                      asset={asset}
-                      onEdit={handleEdit}
-                      onDelete={handleDelete}
-                    />
-                  )}
-                </div>
-                
-                {!isEditing && (
-                  <>
-                    <div className="glass-card p-6 mb-6">
-                      <h2 className="text-lg font-semibold mb-4">Details</h2>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                        {renderAdditionalFields()}
-                      </div>
-                    </div>
-                    
-                    <div className="glass-card p-6 mb-6">
-                      <DocumentUpload
-                        assetId={asset.id}
-                        documents={documents}
-                        onAddDocument={handleAddDocument}
-                        onDeleteDocument={handleDeleteDocument}
-                      />
-                    </div>
-                  </>
-                )}
-                
-                <div className="glass-card p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <History size={18} />
-                    <h2 className="text-lg font-semibold">History</h2>
+                  <h2 className="text-lg font-semibold mb-4">Details</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                    {renderAdditionalFields()}
                   </div>
-                  
-                  {history.length > 0 ? (
-                    <div className="space-y-4">
-                      {history.map((entry, index) => (
-                        <motion.div 
-                          key={entry.id}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.3, delay: index * 0.05 }}
-                          className="flex gap-4"
-                        >
-                          <div className="flex flex-col items-center">
-                            <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-                              {entry.action === "purchase" && <Euro size={16} />}
-                              {entry.action === "assign" && <User size={16} />}
-                              {entry.action === "status_change" && <Tag size={16} />}
-                              {entry.action === "return" && <ArrowRight size={16} />}
-                            </div>
-                            {index < history.length - 1 && (
-                              <div className="w-0.5 h-full bg-border mt-2"></div>
-                            )}
-                          </div>
-                          
-                          <div className="pb-6">
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium">
-                                {entry.action === "purchase" && "Purchased"}
-                                {entry.action === "assign" && "Assigned"}
-                                {entry.action === "status_change" && "Status changed"}
-                                {entry.action === "return" && "Returned"}
-                              </span>
-                              <span className="text-sm text-muted-foreground">
-                                {formatDate(entry.date)}
-                              </span>
-                            </div>
-                            <p className="text-sm mt-1">{entry.notes}</p>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-center text-muted-foreground py-4">
-                      No history available for this asset.
-                    </p>
-                  )}
                 </div>
+                
+                <div className="glass-card p-6 mb-6">
+                  <DocumentUpload
+                    assetId={asset.id}
+                    documents={documents}
+                    onAddDocument={handleAddDocument}
+                    onDeleteDocument={handleDeleteDocument}
+                  />
+                </div>
+              </>
+            )}
+            
+            <div className="glass-card p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <History size={18} />
+                <h2 className="text-lg font-semibold">History</h2>
               </div>
               
-              <div>
-                <div className="glass-card p-6 mb-6">
-                  <h2 className="text-lg font-semibold mb-4">Asset QR Code</h2>
-                  <div className="flex justify-center">
-                    <QRCode 
-                      value={window.location.href}
-                      size={180}
-                      title="Scan to view asset details"
-                    />
-                  </div>
-                  <p className="text-center text-sm text-muted-foreground mt-4">
-                    Scan this QR code to access asset details quickly
-                  </p>
-                </div>
-                
-                {employee && (
-                  <div className="glass-card p-6 mb-6">
-                    <h3 className="text-lg font-semibold mb-4">Zugewiesen an</h3>
-                    <Link 
-                      to={`/employee/${employee.id}`}
-                      className="flex items-center gap-3 group"
+              {history.length > 0 ? (
+                <div className="space-y-4">
+                  {history.map((entry, index) => (
+                    <motion.div 
+                      key={entry.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: index * 0.05 }}
+                      className="flex gap-4"
                     >
-                      <div className="w-12 h-12 rounded-full overflow-hidden bg-muted">
-                        <img 
-                          src={employee.imageUrl} 
-                          alt={`${employee.firstName} ${employee.lastName}`}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = 'https://avatar.vercel.sh/' + employee.id;
-                          }}
-                        />
+                      <div className="flex flex-col items-center">
+                        <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
+                          {entry.action === "purchase" && <Euro size={16} />}
+                          {entry.action === "assign" && <User size={16} />}
+                          {entry.action === "status_change" && <Tag size={16} />}
+                          {entry.action === "return" && <ArrowRight size={16} />}
+                        </div>
+                        {index < history.length - 1 && (
+                          <div className="w-0.5 h-full bg-border mt-2"></div>
+                        )}
                       </div>
-                      <div>
-                        <p className="font-medium group-hover:text-primary transition-colors">
-                          {employee.firstName} {employee.lastName}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {employee.position} • {employee.cluster}
-                        </p>
+                      
+                      <div className="pb-6">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">
+                            {entry.action === "purchase" && "Purchased"}
+                            {entry.action === "assign" && "Assigned"}
+                            {entry.action === "status_change" && "Status changed"}
+                            {entry.action === "return" && "Returned"}
+                          </span>
+                          <span className="text-sm text-muted-foreground">
+                            {formatDate(entry.date)}
+                          </span>
+                        </div>
+                        <p className="text-sm mt-1">{entry.notes}</p>
                       </div>
-                      <ArrowRight size={16} className="ml-auto text-muted-foreground group-hover:text-primary transition-colors" />
-                    </Link>
-                  </div>
-                )}
-              </div>
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center text-muted-foreground py-4">
+                  No history available for this asset.
+                </p>
+              )}
             </div>
           </div>
-        </PageTransition>
+          
+          <div>
+            <div className="glass-card p-6 mb-6">
+              <h2 className="text-lg font-semibold mb-4">Asset QR Code</h2>
+              <div className="flex justify-center">
+                <QRCode 
+                  value={window.location.href}
+                  size={180}
+                  title="Scan to view asset details"
+                />
+              </div>
+              <p className="text-center text-sm text-muted-foreground mt-4">
+                Scan this QR code to access asset details quickly
+              </p>
+            </div>
+            
+            {employee && (
+              <div className="glass-card p-6 mb-6">
+                <h3 className="text-lg font-semibold mb-4">Zugewiesen an</h3>
+                <Link 
+                  to={`/employee/${employee.id}`}
+                  className="flex items-center gap-3 group"
+                >
+                  <div className="w-12 h-12 rounded-full overflow-hidden bg-muted">
+                    <img 
+                      src={employee.imageUrl} 
+                      alt={`${employee.firstName} ${employee.lastName}`}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://avatar.vercel.sh/' + employee.id;
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <p className="font-medium group-hover:text-primary transition-colors">
+                      {employee.firstName} {employee.lastName}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {employee.position} • {employee.cluster}
+                    </p>
+                  </div>
+                  <ArrowRight size={16} className="ml-auto text-muted-foreground group-hover:text-primary transition-colors" />
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    </PageTransition>
   );
 };
 
