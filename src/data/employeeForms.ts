@@ -1,6 +1,7 @@
+
 import { v4 as uuidv4 } from 'uuid';
 import { EmployeeForm, FormType, FormStatus, AssetFormEntry, Asset, Employee } from '@/lib/types';
-import { employees, getEmployeeById } from './employees';
+import { getEmployeeById } from './employees';
 import { getAssetsByEmployeeId, assets } from './assets';
 
 // Mock data for employee forms
@@ -77,8 +78,8 @@ export const createEmployeeForm = (
     // If specific assets are provided
     formAssets = assetIds
       .map(id => assets.find(asset => asset.id === id))
-      .filter(asset => asset !== undefined)
-      .map(asset => createAssetFormEntry(asset as Asset));
+      .filter((asset): asset is Asset => asset !== undefined)
+      .map(asset => createAssetFormEntry(asset));
   } else {
     // Otherwise, get all assets assigned to the employee
     const employeeAssets = getAssetsByEmployeeId(employeeId);
