@@ -1,4 +1,3 @@
-
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import PageTransition from "@/components/layout/PageTransition";
@@ -37,8 +36,6 @@ const AssetDetail = () => {
       const historyData = getAssetHistoryByAssetId(id);
       setHistory(historyData);
       
-      // In a real app, you would fetch documents from the server
-      // For this demo, we'll use an empty array
       setDocuments([]);
       
       setLoading(false);
@@ -54,10 +51,8 @@ const AssetDetail = () => {
   };
   
   const handleSave = (data: any) => {
-    // In a real app, this would update the data in the API
     console.log("Updated asset data:", data);
     
-    // Update local state
     if (asset) {
       const updatedAsset = {
         ...asset,
@@ -76,7 +71,6 @@ const AssetDetail = () => {
   };
   
   const handleDelete = () => {
-    // In a real app, this would delete the data from the API
     console.log("Delete asset:", id);
     
     toast({
@@ -84,7 +78,6 @@ const AssetDetail = () => {
       description: "Das Asset wurde erfolgreich gelöscht."
     });
     
-    // Navigate back to assets list
     navigate("/assets");
   };
 

@@ -43,13 +43,19 @@ export default function AssetDetailView({
     }
   };
 
-  // Use a placeholder image if the asset doesn't have a valid image
+  // Fix asset image display by ensuring a placeholder is shown when needed
   const getAssetImage = () => {
     if (!asset.imageUrl || asset.imageUrl.trim() === '') {
       // Return a default image based on asset type
       return `/placeholder.svg`;
     }
-    return asset.imageUrl;
+    // For empty strings or invalid URLs, use placeholder
+    try {
+      new URL(asset.imageUrl);
+      return asset.imageUrl;
+    } catch (e) {
+      return `/placeholder.svg`;
+    }
   };
 
   return (
@@ -63,6 +69,10 @@ export default function AssetDetailView({
             initial={{ opacity: 0, scale: 1.05 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
+            onError={(e) => {
+              // Fallback if the image fails to load
+              (e.target as HTMLImageElement).src = '/placeholder.svg';
+            }}
           />
         </div>
         <div className="mt-4 flex justify-center">

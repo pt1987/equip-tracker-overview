@@ -36,17 +36,29 @@ export default function EmployeeDetailView({
   // Calculate budget usage
   const budgetPercentage = Math.min(100, Math.round((employee.usedBudget / employee.budget) * 100));
 
+  // Ensure employee image is always displayed
+  const getEmployeeImage = () => {
+    if (!employee.imageUrl || employee.imageUrl.trim() === '') {
+      return 'https://avatar.vercel.sh/' + employee.id;
+    }
+    return employee.imageUrl;
+  };
+
   return (
     <div className="flex flex-col md:flex-row gap-6">
       <div className="w-full md:w-1/4 flex-shrink-0">
         <div className="aspect-square bg-muted rounded-full overflow-hidden">
           <motion.img 
-            src={employee.imageUrl} 
+            src={getEmployeeImage()} 
             alt={`${employee.firstName} ${employee.lastName}`}
             className="w-full h-full object-cover object-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
+            onError={(e) => {
+              // Fallback if the image fails to load
+              (e.target as HTMLImageElement).src = 'https://avatar.vercel.sh/' + employee.id;
+            }}
           />
         </div>
         

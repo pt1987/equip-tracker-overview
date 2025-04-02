@@ -1,4 +1,3 @@
-
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import PageTransition from "@/components/layout/PageTransition";
@@ -81,10 +80,8 @@ const EmployeeDetail = () => {
   };
   
   const handleSave = (data: any) => {
-    // In a real app, this would update the data in the API
     console.log("Updated employee data:", data);
     
-    // Update local state
     if (employee) {
       const updatedEmployee = {
         ...employee,
@@ -103,7 +100,6 @@ const EmployeeDetail = () => {
   };
   
   const handleDelete = () => {
-    // In a real app, this would delete the data from the API
     console.log("Delete employee:", id);
     
     toast({
@@ -111,7 +107,6 @@ const EmployeeDetail = () => {
       description: "Der Mitarbeiter wurde erfolgreich gelöscht."
     });
     
-    // Navigate back to employees list
     navigate("/employees");
   };
   
@@ -148,7 +143,6 @@ const EmployeeDetail = () => {
     );
   }
   
-  // Group assets by type
   const assetsByType: Record<string, Asset[]> = {};
   assets.forEach(asset => {
     if (!assetsByType[asset.type]) {
@@ -157,7 +151,6 @@ const EmployeeDetail = () => {
     assetsByType[asset.type].push(asset);
   });
   
-  // Calculate budget usage
   const budgetPercentage = Math.min(100, Math.round((employee.usedBudget / employee.budget) * 100));
 
   return (
