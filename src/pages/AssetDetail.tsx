@@ -1,3 +1,4 @@
+
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import PageTransition from "@/components/layout/PageTransition";
@@ -329,6 +330,9 @@ const AssetDetail = () => {
                           src={employee.imageUrl} 
                           alt={`${employee.firstName} ${employee.lastName}`}
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = 'https://avatar.vercel.sh/' + employee.id;
+                          }}
                         />
                       </div>
                       <div>

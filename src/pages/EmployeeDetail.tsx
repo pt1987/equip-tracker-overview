@@ -1,3 +1,4 @@
+
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import PageTransition from "@/components/layout/PageTransition";
@@ -272,6 +273,9 @@ const EmployeeDetail = () => {
                                           src={asset.imageUrl}
                                           alt={asset.name}
                                           className="w-full h-full object-cover"
+                                          onError={(e) => {
+                                            (e.target as HTMLImageElement).src = '/placeholder.svg';
+                                          }}
                                         />
                                       ) : (
                                         <div className="w-full h-full flex items-center justify-center">
