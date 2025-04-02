@@ -43,24 +43,27 @@ export default function AssetDetailView({
     }
   };
 
+  // Use a placeholder image if the asset doesn't have a valid image
+  const getAssetImage = () => {
+    if (!asset.imageUrl || asset.imageUrl.trim() === '') {
+      // Return a default image based on asset type
+      return `/placeholder.svg`;
+    }
+    return asset.imageUrl;
+  };
+
   return (
     <div className="flex flex-col md:flex-row gap-6">
       <div className="w-full md:w-1/3 flex-shrink-0">
         <div className="aspect-square bg-muted rounded-lg overflow-hidden">
-          {asset.imageUrl ? (
-            <motion.img
-              src={asset.imageUrl}
-              alt={asset.name}
-              className="w-full h-full object-cover object-center"
-              initial={{ opacity: 0, scale: 1.05 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <span className="text-muted-foreground">No image</span>
-            </div>
-          )}
+          <motion.img
+            src={getAssetImage()}
+            alt={asset.name}
+            className="w-full h-full object-cover object-center"
+            initial={{ opacity: 0, scale: 1.05 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+          />
         </div>
         <div className="mt-4 flex justify-center">
           <StatusBadge status={asset.status} size="lg" />

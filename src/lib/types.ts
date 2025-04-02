@@ -133,3 +133,36 @@ export type ReportType =
   | 'yearlyPurchases'
   | 'usageDuration'
   | 'warrantyDefects';
+
+export type EmployeeFormType = 'onboarding' | 'offboarding';
+export type EmployeeFormStatus = 'draft' | 'completed' | 'cancelled';
+
+export interface EmployeeFormChecklistItem {
+  id: string;
+  label: string;
+  checked: boolean;
+}
+
+export interface EmployeeFormAsset {
+  assetId: string;
+  assetName: string;
+  serialNumber: string;
+  condition: string;
+  accessories: string[];
+  checklistItems: EmployeeFormChecklistItem[];
+}
+
+export interface EmployeeForm {
+  id: string;
+  formType: EmployeeFormType;
+  employeeId: string;
+  employeeName: string;
+  createdDate: string;
+  completedDate?: string;
+  status: EmployeeFormStatus;
+  assets: EmployeeFormAsset[];
+  signature?: string;
+  notes?: string;
+  documentUrl?: string;
+  emailSent: boolean;
+}

@@ -115,7 +115,7 @@ const AssetDetail = () => {
     return (
       <div className="flex min-h-screen">
         <Navbar />
-        <div className="flex-1 md:ml-32 p-4 md:p-8">
+        <div className="flex-1 md:ml-32 p-3 md:p-4 xl:p-6 space-y-6 max-w-full">
           <div className="glass-card p-12 text-center">
             <h2 className="text-xl font-medium mb-4">Asset not found</h2>
             <p className="text-muted-foreground mb-6">
@@ -207,7 +207,7 @@ const AssetDetail = () => {
       
       <div className="flex-1 md:ml-32">
         <PageTransition>
-          <div className="p-4 md:p-8 pb-24 max-w-7xl mx-auto mt-12 md:mt-0">
+          <div className="p-3 md:p-4 xl:p-6 space-y-6 max-w-full pb-24 mt-12 md:mt-0">
             <div className="mb-6">
               <Link 
                 to="/assets"
