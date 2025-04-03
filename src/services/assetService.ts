@@ -1,7 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { Asset, AssetStatus, AssetTypeDistribution, AssetStatusDistribution, AssetHistoryEntry } from "@/lib/types";
-import { formatDateString } from "@/lib/utils";
+import { formatDateString as formatDate } from "@/lib/utils";
 
 // Function to get all assets
 export const getAllAssets = async (): Promise<Asset[]> => {
@@ -103,7 +103,7 @@ export const createAsset = async (asset: Omit<Asset, 'id'>): Promise<Asset> => {
   
   // Create an asset history entry for the purchase
   await createAssetHistoryEntry({
-    assetId: data.id,
+    assetId: data?.id || '',
     date: new Date().toISOString(),
     action: 'purchase',
     employeeId: null,
@@ -165,12 +165,12 @@ export const createAssetHistoryEntry = async (entry: Omit<AssetHistoryEntry, 'id
   }
   
   return {
-    id: data.id,
-    assetId: data.asset_id,
-    date: data.date,
-    action: data.action as 'purchase' | 'assign' | 'status_change' | 'return',
-    employeeId: data.employee_id,
-    notes: data.notes
+    id: data?.id || '',
+    assetId: data?.asset_id || '',
+    date: data?.date || '',
+    action: data?.action as AssetHistoryEntry['action'] || 'purchase',
+    employeeId: data?.employee_id,
+    notes: data?.notes || ''
   };
 };
 
@@ -178,17 +178,22 @@ export const createAssetHistoryEntry = async (entry: Omit<AssetHistoryEntry, 'id
 export const getAssetTypeDistribution = async (): Promise<AssetTypeDistribution[]> => {
   const { data, error } = await supabase
     .from('assets')
-    .select('type, count')
-    .group('type');
+    .select('type');
   
   if (error) {
     console.error('Error fetching asset type distribution:', error);
     throw error;
   }
   
-  return data.map(item => ({
-    type: item.type,
-    count: parseInt(item.count)
+  // Process the data to get distribution
+  const typeCount: Record<string, number> = {};
+  data.forEach(item => {
+    typeCount[item.type] = (typeCount[item.type] || 0) + 1;
+  });
+  
+  return Object.entries(typeCount).map(([type, count]) => ({
+    type: type as any,
+    count
   }));
 };
 
@@ -196,17 +201,22 @@ export const getAssetTypeDistribution = async (): Promise<AssetTypeDistribution[
 export const getAssetStatusDistribution = async (): Promise<AssetStatusDistribution[]> => {
   const { data, error } = await supabase
     .from('assets')
-    .select('status, count')
-    .group('status');
+    .select('status');
   
   if (error) {
     console.error('Error fetching asset status distribution:', error);
     throw error;
   }
   
-  return data.map(item => ({
-    status: item.status as AssetStatus,
-    count: parseInt(item.count)
+  // Process the data to get distribution
+  const statusCount: Record<string, number> = {};
+  data.forEach(item => {
+    statusCount[item.status] = (statusCount[item.status] || 0) + 1;
+  });
+  
+  return Object.entries(statusCount).map(([status, count]) => ({
+    status: status as AssetStatus,
+    count
   }));
 };
 
@@ -223,7 +233,7 @@ function transformAsset(dbAsset: any): Asset {
     type: dbAsset.type,
     manufacturer: dbAsset.manufacturer,
     model: dbAsset.model,
-    purchaseDate: formatDateString(dbAsset.purchase_date),
+    purchaseDate: formatDate(dbAsset.purchase_date),
     vendor: dbAsset.vendor,
     price: Number(dbAsset.price),
     status: dbAsset.status,
@@ -237,7 +247,7 @@ function transformAsset(dbAsset: any): Asset {
     imei: dbAsset.imei,
     phoneNumber: dbAsset.phone_number,
     provider: dbAsset.provider,
-    contractEndDate: dbAsset.contract_end_date ? formatDateString(dbAsset.contract_end_date) : undefined,
+    contractEndDate: dbAsset.contract_end_date ? formatDate(dbAsset.contract_end_date) : undefined,
     contractName: dbAsset.contract_name,
     contractDuration: dbAsset.contract_duration,
     connectedAssetId: dbAsset.connected_asset_id,
@@ -251,7 +261,7 @@ function transformAssetHistory(dbHistory: any[]): AssetHistoryEntry[] {
   return dbHistory.map(entry => ({
     id: entry.id,
     assetId: entry.asset_id,
-    date: formatDateString(entry.date),
+    date: formatDate(entry.date),
     action: entry.action as 'purchase' | 'assign' | 'status_change' | 'return',
     employeeId: entry.employee_id,
     notes: entry.notes
@@ -287,10 +297,4 @@ function transformAssetForDb(asset: Partial<Asset>): any {
   if (asset.imageUrl !== undefined) dbAsset.image_url = asset.imageUrl;
   
   return dbAsset;
-}
-
-// Helper function to format date strings
-function formatDateString(dateString: string | null): string {
-  if (!dateString) return '';
-  return new Date(dateString).toISOString();
 }

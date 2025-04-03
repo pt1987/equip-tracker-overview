@@ -46,12 +46,12 @@ export const uploadDocument = async (file: File, assetId: string, category: Docu
   }
   
   return {
-    id: documentData.id,
+    id: documentData?.id || '',
     name: file.name,
     type: file.type,
     size: file.size,
     url: url,
-    uploadDate: documentData.upload_date,
+    uploadDate: documentData?.upload_date || new Date().toISOString(),
     category: category
   };
 };
@@ -69,6 +69,8 @@ export const getDocumentsByAssetId = async (assetId: string): Promise<Document[]
     throw error;
   }
   
+  if (!data) return [];
+  
   return Promise.all(data.map(async (doc) => {
     // Get public URL for the file
     const { data: urlData } = supabase.storage
@@ -77,7 +79,7 @@ export const getDocumentsByAssetId = async (assetId: string): Promise<Document[]
     
     // Determine category based on file type or name (this is a simplification)
     let category: Document['category'] = 'other';
-    if (doc.file_type.includes('pdf')) {
+    if (doc.file_type && doc.file_type.includes('pdf')) {
       if (doc.name.toLowerCase().includes('invoice')) category = 'invoice';
       else if (doc.name.toLowerCase().includes('warranty')) category = 'warranty';
       else if (doc.name.toLowerCase().includes('repair')) category = 'repair';
@@ -108,6 +110,10 @@ export const deleteDocument = async (documentId: string): Promise<void> => {
   if (fetchError) {
     console.error('Error fetching document:', fetchError);
     throw fetchError;
+  }
+  
+  if (!document) {
+    throw new Error('Document not found');
   }
   
   // Delete from storage
