@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -28,6 +27,7 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import Users from "./pages/admin/Users";
 import Roles from "./pages/admin/Roles";
 import Logs from "./pages/admin/Logs";
+import DataMigration from "./pages/DataMigration";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +61,9 @@ const AppContent = () => {
           {/* Auth Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+
+          {/* Data Migration Utility */}
+          <Route path="/data-migration" element={<DataMigration />} />
 
           {/* Main App Routes with Navbar */}
           <Route
