@@ -1,3 +1,4 @@
+
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -69,4 +70,31 @@ export const formatDateString = (date: string | Date | null): string => {
     console.error('Error formatting date:', error);
     return '';
   }
+};
+
+// Localize asset category for display
+export const localizeCategory = (category: string): string => {
+  const categoryMap: Record<string, string> = {
+    notebook: 'Notebook',
+    smartphone: 'Smartphone',
+    tablet: 'Tablet',
+    peripheral: 'Peripheriegerät',
+    monitor: 'Monitor',
+    audio: 'Audio',
+    other: 'Sonstiges'
+  };
+  
+  return categoryMap[category] || category;
+};
+
+// Utility function to group an array by a key selector function
+export const groupBy = <T>(array: T[], keySelector: (item: T) => string): Record<string, T[]> => {
+  return array.reduce((groups: Record<string, T[]>, item) => {
+    const key = keySelector(item);
+    if (!groups[key]) {
+      groups[key] = [];
+    }
+    groups[key].push(item);
+    return groups;
+  }, {});
 };
