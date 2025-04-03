@@ -2,9 +2,10 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, CheckCircle, AlertCircle, DatabaseIcon } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
-import { migrateAllData, migrateEmployees, migrateAssets, migrateAssetHistory } from "@/scripts/dataMigration";
+import { Loader2, CheckCircle, AlertCircle, DatabaseIcon, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
+import { migrateAllData, migrateEmployees, migrateAssets, migrateAssetHistory, checkDataExists } from "@/scripts/dataMigration";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function DataMigration() {
   const [migrating, setMigrating] = useState<string | null>(null);
@@ -14,6 +15,57 @@ export default function DataMigration() {
     assetHistory: false,
     all: false
   });
+  const [dataStatus, setDataStatus] = useState<Record<string, number>>({
+    employees: 0,
+    assets: 0,
+    assetHistory: 0
+  });
+
+  // Check current data status
+  const checkDataStatus = async () => {
+    try {
+      // Check employees
+      const { count: empCount, error: empError } = await supabase
+        .from('employees')
+        .select('*', { count: 'exact' });
+      
+      if (!empError) {
+        setDataStatus(prev => ({ ...prev, employees: empCount || 0 }));
+        setCompleted(prev => ({ ...prev, employees: (empCount || 0) > 0 }));
+      }
+      
+      // Check assets
+      const { count: assetCount, error: assetError } = await supabase
+        .from('assets')
+        .select('*', { count: 'exact' });
+      
+      if (!assetError) {
+        setDataStatus(prev => ({ ...prev, assets: assetCount || 0 }));
+        setCompleted(prev => ({ ...prev, assets: (assetCount || 0) > 0 }));
+      }
+      
+      // Check asset history
+      const { count: historyCount, error: historyError } = await supabase
+        .from('asset_history')
+        .select('*', { count: 'exact' });
+      
+      if (!historyError) {
+        setDataStatus(prev => ({ ...prev, assetHistory: historyCount || 0 }));
+        setCompleted(prev => ({ ...prev, assetHistory: (historyCount || 0) > 0 }));
+      }
+      
+      // Set all as completed if all individual items are completed
+      if ((empCount || 0) > 0 && (assetCount || 0) > 0 && (historyCount || 0) > 0) {
+        setCompleted(prev => ({ ...prev, all: true }));
+      }
+    } catch (error) {
+      console.error("Error checking data status:", error);
+    }
+  };
+
+  useEffect(() => {
+    checkDataStatus();
+  }, []);
 
   const handleMigrate = async (type: 'employees' | 'assets' | 'assetHistory' | 'all') => {
     setMigrating(type);
@@ -43,17 +95,13 @@ export default function DataMigration() {
         setCompleted(prev => ({ ...prev, [type]: true }));
       }
       
-      toast({
-        title: "Migration Successful",
-        description: `${type === 'all' ? 'All data' : type} has been migrated to Supabase.`
-      });
+      // Refresh data status after migration
+      await checkDataStatus();
+      
+      toast.success(`${type === 'all' ? 'All data' : type} has been migrated to Supabase.`);
     } catch (error) {
       console.error(`Error migrating ${type}:`, error);
-      toast({
-        title: "Migration Failed",
-        description: `There was an error migrating ${type}.`,
-        variant: "destructive"
-      });
+      toast.error(`There was an error migrating ${type}.`);
     } finally {
       setMigrating(null);
     }
@@ -61,7 +109,14 @@ export default function DataMigration() {
 
   return (
     <div className="container py-8">
-      <h1 className="text-3xl font-bold mb-6">Data Migration to Supabase</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold">Data Migration to Supabase</h1>
+        <Button variant="outline" size="sm" onClick={checkDataStatus}>
+          <RefreshCw className="mr-2 h-4 w-4" />
+          Refresh Status
+        </Button>
+      </div>
+      
       <p className="text-muted-foreground mb-8">
         Use this utility to migrate mock data from the frontend to your Supabase database.
       </p>
@@ -78,13 +133,21 @@ export default function DataMigration() {
             <div className="flex items-center justify-center p-4">
               <DatabaseIcon size={48} className="text-primary opacity-80" />
             </div>
+            {completed.all && (
+              <div className="mt-2 p-2 bg-green-50 dark:bg-green-950 rounded-md text-sm text-green-600 dark:text-green-400">
+                <div className="flex items-center">
+                  <CheckCircle className="mr-2 h-4 w-4" />
+                  <span>Migration completed successfully</span>
+                </div>
+              </div>
+            )}
           </CardContent>
           <CardFooter>
             <Button 
               className="w-full" 
               size="lg" 
               onClick={() => handleMigrate('all')}
-              disabled={migrating !== null || completed.all}
+              disabled={migrating !== null}
             >
               {migrating === 'all' ? (
                 <>
@@ -94,7 +157,7 @@ export default function DataMigration() {
               ) : completed.all ? (
                 <>
                   <CheckCircle className="mr-2 h-4 w-4" />
-                  Completed
+                  Migrate Again
                 </>
               ) : (
                 "Migrate All Data"
@@ -114,13 +177,21 @@ export default function DataMigration() {
             <div className="flex items-center justify-center p-4">
               <DatabaseIcon size={48} className="text-blue-500 opacity-80" />
             </div>
+            {completed.employees && (
+              <div className="mt-2 p-2 bg-green-50 dark:bg-green-950 rounded-md text-sm text-green-600 dark:text-green-400">
+                <div className="flex items-center">
+                  <CheckCircle className="mr-2 h-4 w-4" />
+                  <span>{dataStatus.employees} employees in database</span>
+                </div>
+              </div>
+            )}
           </CardContent>
           <CardFooter>
             <Button 
               className="w-full" 
-              variant="outline"
+              variant={completed.employees ? "outline" : "default"}
               onClick={() => handleMigrate('employees')}
-              disabled={migrating !== null || completed.employees}
+              disabled={migrating !== null}
             >
               {migrating === 'employees' ? (
                 <>
@@ -130,7 +201,7 @@ export default function DataMigration() {
               ) : completed.employees ? (
                 <>
                   <CheckCircle className="mr-2 h-4 w-4" />
-                  Completed
+                  Migrate Again
                 </>
               ) : (
                 "Migrate Employees"
@@ -150,13 +221,21 @@ export default function DataMigration() {
             <div className="flex items-center justify-center p-4">
               <DatabaseIcon size={48} className="text-green-500 opacity-80" />
             </div>
+            {completed.assets && (
+              <div className="mt-2 p-2 bg-green-50 dark:bg-green-950 rounded-md text-sm text-green-600 dark:text-green-400">
+                <div className="flex items-center">
+                  <CheckCircle className="mr-2 h-4 w-4" />
+                  <span>{dataStatus.assets} assets in database</span>
+                </div>
+              </div>
+            )}
           </CardContent>
           <CardFooter>
             <Button 
               className="w-full" 
-              variant="outline"
+              variant={completed.assets ? "outline" : "default"}
               onClick={() => handleMigrate('assets')}
-              disabled={migrating !== null || completed.assets}
+              disabled={migrating !== null}
             >
               {migrating === 'assets' ? (
                 <>
@@ -166,7 +245,7 @@ export default function DataMigration() {
               ) : completed.assets ? (
                 <>
                   <CheckCircle className="mr-2 h-4 w-4" />
-                  Completed
+                  Migrate Again
                 </>
               ) : (
                 "Migrate Assets"
@@ -186,13 +265,21 @@ export default function DataMigration() {
             <div className="flex items-center justify-center p-4">
               <DatabaseIcon size={48} className="text-purple-500 opacity-80" />
             </div>
+            {completed.assetHistory && (
+              <div className="mt-2 p-2 bg-green-50 dark:bg-green-950 rounded-md text-sm text-green-600 dark:text-green-400">
+                <div className="flex items-center">
+                  <CheckCircle className="mr-2 h-4 w-4" />
+                  <span>{dataStatus.assetHistory} history records in database</span>
+                </div>
+              </div>
+            )}
           </CardContent>
           <CardFooter>
             <Button 
               className="w-full" 
-              variant="outline"
+              variant={completed.assetHistory ? "outline" : "default"}
               onClick={() => handleMigrate('assetHistory')}
-              disabled={migrating !== null || completed.assetHistory}
+              disabled={migrating !== null}
             >
               {migrating === 'assetHistory' ? (
                 <>
@@ -202,7 +289,7 @@ export default function DataMigration() {
               ) : completed.assetHistory ? (
                 <>
                   <CheckCircle className="mr-2 h-4 w-4" />
-                  Completed
+                  Migrate Again
                 </>
               ) : (
                 "Migrate Asset History"
@@ -218,7 +305,7 @@ export default function DataMigration() {
           <div>
             <h3 className="font-medium text-yellow-800 dark:text-yellow-300">Important Note</h3>
             <p className="text-sm text-yellow-700 dark:text-yellow-400 mt-1">
-              This is a one-time utility for migrating data. After successful migration, you should update your application to use the Supabase services directly instead of mock data files.
+              This is a one-time utility for migrating data. After successful migration, the application will automatically use Supabase for data storage instead of mock data files.
             </p>
           </div>
         </div>

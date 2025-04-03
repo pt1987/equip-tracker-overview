@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,6 +8,7 @@ import { AnimatePresence } from "framer-motion";
 import { ThemeProvider } from "@/hooks/use-theme";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { AuthProvider, ProtectedRoute } from "@/hooks/use-auth";
+import { useEffect } from "react";
 import Navbar from "@/components/layout/Navbar";
 import AdminLayout from "@/components/admin/AdminLayout";
 import Dashboard from "./pages/Index";
@@ -28,11 +30,17 @@ import Users from "./pages/admin/Users";
 import Roles from "./pages/admin/Roles";
 import Logs from "./pages/admin/Logs";
 import DataMigration from "./pages/DataMigration";
+import { autoMigrateData } from "./scripts/dataMigration";
 
 const queryClient = new QueryClient();
 
 const AppContent = () => {
   const isMobile = useIsMobile();
+  
+  // Run data migration check on app startup
+  useEffect(() => {
+    autoMigrateData();
+  }, []);
   
   return (
     <div className="relative min-h-screen">
