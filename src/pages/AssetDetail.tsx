@@ -1,8 +1,8 @@
+
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import PageTransition from "@/components/layout/PageTransition";
-import Navbar from "@/components/layout/Navbar";
-import { getAssetById, getEmployeeById, getAssetHistoryByAssetId } from "@/data/mockData";
 import { Asset, AssetHistoryEntry } from "@/lib/types";
 import QRCode from "@/components/shared/QRCode";
 import { motion } from "framer-motion";
@@ -12,35 +12,152 @@ import { toast } from "@/hooks/use-toast";
 import AssetDetailView from "@/components/assets/AssetDetailView";
 import AssetDetailEdit from "@/components/assets/AssetDetailEdit";
 import DocumentUpload, { Document } from "@/components/assets/DocumentUpload";
+import { getAssetById, getAssetHistoryByAssetId, updateAsset, deleteAsset } from "@/services/assetService";
+import { getEmployeeById } from "@/services/employeeService";
+import { getDocumentsByAssetId, uploadDocument, deleteDocument } from "@/services/documentService";
 
 const AssetDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [asset, setAsset] = useState<Asset | null>(null);
-  const [employee, setEmployee] = useState<any>(null);
-  const [history, setHistory] = useState<AssetHistoryEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
-  const [documents, setDocuments] = useState<Document[]>([]);
   
-  useEffect(() => {
-    if (id) {
-      const assetData = getAssetById(id);
-      setAsset(assetData || null);
-      
-      if (assetData?.employeeId) {
-        const employeeData = getEmployeeById(assetData.employeeId);
-        setEmployee(employeeData || null);
-      }
-      
-      const historyData = getAssetHistoryByAssetId(id);
-      setHistory(historyData);
-      
-      setDocuments([]);
-      
-      setLoading(false);
+  // Fetch asset data
+  const {
+    data: asset,
+    isLoading: assetLoading,
+    error: assetError
+  } = useQuery({
+    queryKey: ['asset', id],
+    queryFn: () => id ? getAssetById(id) : null,
+    enabled: !!id
+  });
+  
+  // Fetch employee data if asset is assigned
+  const {
+    data: employee,
+    isLoading: employeeLoading
+  } = useQuery({
+    queryKey: ['employee', asset?.employeeId],
+    queryFn: () => asset?.employeeId ? getEmployeeById(asset.employeeId) : null,
+    enabled: !!asset?.employeeId
+  });
+  
+  // Fetch asset history
+  const {
+    data: history = [],
+    isLoading: historyLoading
+  } = useQuery({
+    queryKey: ['assetHistory', id],
+    queryFn: () => id ? getAssetHistoryByAssetId(id) : [],
+    enabled: !!id
+  });
+  
+  // Fetch documents
+  const {
+    data: documents = [],
+    isLoading: documentsLoading
+  } = useQuery({
+    queryKey: ['documents', id],
+    queryFn: () => id ? getDocumentsByAssetId(id) : [],
+    enabled: !!id
+  });
+  
+  // Mutation for updating an asset
+  const updateAssetMutation = useMutation({
+    mutationFn: (data: Partial<Asset>) => {
+      if (!id) throw new Error("Asset ID is required");
+      return updateAsset(id, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['asset', id]
+      });
+      setIsEditing(false);
+      toast({
+        title: "Asset aktualisiert",
+        description: "Die Änderungen wurden erfolgreich gespeichert."
+      });
+    },
+    onError: (error) => {
+      console.error("Error updating asset:", error);
+      toast({
+        title: "Fehler",
+        description: "Das Asset konnte nicht aktualisiert werden.",
+        variant: "destructive"
+      });
     }
-  }, [id]);
+  });
+  
+  // Mutation for deleting an asset
+  const deleteAssetMutation = useMutation({
+    mutationFn: () => {
+      if (!id) throw new Error("Asset ID is required");
+      return deleteAsset(id);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Asset gelöscht",
+        description: "Das Asset wurde erfolgreich gelöscht."
+      });
+      navigate("/assets");
+    },
+    onError: (error) => {
+      console.error("Error deleting asset:", error);
+      toast({
+        title: "Fehler",
+        description: "Das Asset konnte nicht gelöscht werden.",
+        variant: "destructive"
+      });
+    }
+  });
+  
+  // Mutation for uploading a document
+  const uploadDocumentMutation = useMutation({
+    mutationFn: ({ file, category }: { file: File, category: Document['category'] }) => {
+      if (!id) throw new Error("Asset ID is required");
+      return uploadDocument(file, id, category);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['documents', id]
+      });
+      toast({
+        title: "Dokument hochgeladen",
+        description: "Das Dokument wurde erfolgreich hochgeladen."
+      });
+    },
+    onError: (error) => {
+      console.error("Error uploading document:", error);
+      toast({
+        title: "Fehler",
+        description: "Das Dokument konnte nicht hochgeladen werden.",
+        variant: "destructive"
+      });
+    }
+  });
+  
+  // Mutation for deleting a document
+  const deleteDocumentMutation = useMutation({
+    mutationFn: (documentId: string) => deleteDocument(documentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['documents', id]
+      });
+      toast({
+        title: "Dokument gelöscht",
+        description: "Das Dokument wurde erfolgreich gelöscht"
+      });
+    },
+    onError: (error) => {
+      console.error("Error deleting document:", error);
+      toast({
+        title: "Fehler",
+        description: "Das Dokument konnte nicht gelöscht werden.",
+        variant: "destructive"
+      });
+    }
+  });
   
   const handleEdit = () => {
     setIsEditing(true);
@@ -50,50 +167,31 @@ const AssetDetail = () => {
     setIsEditing(false);
   };
   
-  const handleSave = (data: any) => {
-    console.log("Updated asset data:", data);
-    
-    if (asset) {
-      const updatedAsset = {
-        ...asset,
-        ...data,
-        purchaseDate: data.purchaseDate.toISOString(),
-      };
-      setAsset(updatedAsset);
-    }
-    
-    setIsEditing(false);
-    
-    toast({
-      title: "Asset aktualisiert",
-      description: "Die Änderungen wurden erfolgreich gespeichert."
-    });
+  const handleSave = (data: Partial<Asset>) => {
+    updateAssetMutation.mutate(data);
   };
   
   const handleDelete = () => {
-    console.log("Delete asset:", id);
-    
-    toast({
-      title: "Asset gelöscht",
-      description: "Das Asset wurde erfolgreich gelöscht."
-    });
-    
-    navigate("/assets");
+    deleteAssetMutation.mutate();
   };
 
   const handleAddDocument = (document: Document) => {
-    setDocuments([...documents, document]);
+    if (document instanceof File) {
+      // This is a new file upload from the DocumentUpload component
+      uploadDocumentMutation.mutate({
+        file: document as unknown as File,
+        category: 'other' // Default category
+      });
+    }
   };
 
   const handleDeleteDocument = (documentId: string) => {
-    setDocuments(documents.filter(doc => doc.id !== documentId));
-    toast({
-      title: "Dokument gelöscht",
-      description: "Das Dokument wurde erfolgreich gelöscht"
-    });
+    deleteDocumentMutation.mutate(documentId);
   };
   
-  if (loading) {
+  const isLoading = assetLoading || employeeLoading || historyLoading || documentsLoading;
+  
+  if (isLoading) {
     return (
       <div className="flex min-h-screen">
         <div className="flex-1 md:ml-64 p-8 flex items-center justify-center">
@@ -103,7 +201,7 @@ const AssetDetail = () => {
     );
   }
   
-  if (!asset) {
+  if (assetError || !asset) {
     return (
       <div className="flex min-h-screen">
         <div className="flex-1 md:ml-32 p-3 md:p-4 xl:p-6 space-y-6 max-w-full">

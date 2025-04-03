@@ -100,3 +100,14 @@ export function localizeCluster(cluster: string): string {
   
   return clusterMap[cluster] || cluster;
 }
+
+// Format date string to ISO format for database operations
+export function formatDateString(dateString: string | null): string {
+  if (!dateString) return '';
+  return new Date(dateString).toISOString();
+}
+
+// Parse ISO date string to JavaScript Date object
+export function parseISODate(isoDateString: string): Date {
+  return new Date(isoDateString);
+}

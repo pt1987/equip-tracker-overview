@@ -29,7 +29,7 @@ export interface Document {
 interface DocumentUploadProps {
   assetId: string;
   documents: Document[];
-  onAddDocument: (document: Document) => void;
+  onAddDocument: (document: Document | File) => void;
   onDeleteDocument: (documentId: string) => void;
 }
 
@@ -65,29 +65,15 @@ export default function DocumentUpload({
     }
 
     // In a real app, we would upload the file to a server or storage service
-    // For this demo, we'll simulate the upload
+    // With Supabase integration, we pass the file to the parent component
     Array.from(selectedFiles).forEach(file => {
-      const newDocument: Document = {
-        id: Math.random().toString(36).substring(2, 11),
-        name: file.name,
-        type: file.type,
-        size: file.size,
-        url: URL.createObjectURL(file), // This is temporary and would be a server URL in a real app
-        uploadDate: new Date().toISOString(),
-        category: documentCategory,
-      };
-
-      onAddDocument(newDocument);
+      // Pass the file directly to the parent component for handling the upload
+      onAddDocument(file);
     });
 
     setSelectedFiles(null);
     setDocumentCategory("other");
     setIsDialogOpen(false);
-
-    toast({
-      title: "Dokument hochgeladen",
-      description: "Das Dokument wurde erfolgreich hochgeladen.",
-    });
   };
 
   const formatFileSize = (bytes: number): string => {
