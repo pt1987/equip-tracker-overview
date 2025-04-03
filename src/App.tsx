@@ -32,14 +32,26 @@ import Logs from "./pages/admin/Logs";
 import DataMigration from "./pages/DataMigration";
 import { autoMigrateData } from "./scripts/dataMigration";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const AppContent = () => {
   const isMobile = useIsMobile();
   
   // Run data migration check on app startup
   useEffect(() => {
-    autoMigrateData();
+    // Add a small delay to ensure the app is fully loaded
+    const timer = setTimeout(() => {
+      autoMigrateData();
+    }, 1000);
+    
+    return () => clearTimeout(timer);
   }, []);
   
   return (
