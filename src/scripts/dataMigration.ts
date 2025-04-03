@@ -1,12 +1,11 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { employees } from "@/data/employees";
-import { assets } from "@/data/assets";
-import { getAssetsHistory } from "@/data/assets"; 
+import { assets, assetHistory } from "@/data/assets";
 import { toast } from "sonner";
 
 // Function to check if data already exists in the database
-export const checkDataExists = async (tableName: string): Promise<boolean> => {
+export const checkDataExists = async (tableName: "employees" | "assets" | "asset_history"): Promise<boolean> => {
   const { count, error } = await supabase
     .from(tableName)
     .select('*', { count: 'exact', head: true });
@@ -89,9 +88,8 @@ export const migrateAssets = async (): Promise<void> => {
 // Function to migrate asset history data
 export const migrateAssetHistory = async (): Promise<void> => {
   try {
-    const history = getAssetsHistory();
     const { error } = await supabase.from('asset_history').insert(
-      history.map(item => ({
+      assetHistory.map(item => ({
         id: item.id,
         asset_id: item.assetId,
         date: item.date,
