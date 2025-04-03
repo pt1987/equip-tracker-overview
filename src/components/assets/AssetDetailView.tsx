@@ -30,6 +30,7 @@ export default function AssetDetailView({
   onDelete,
 }: AssetDetailViewProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   const getAssetTypeLabel = (type: Asset["type"]) => {
     switch (type) {
@@ -45,17 +46,11 @@ export default function AssetDetailView({
 
   // Fix asset image display by ensuring a placeholder is shown when needed
   const getAssetImage = () => {
-    if (!asset.imageUrl || asset.imageUrl.trim() === '') {
+    if (imageError || !asset.imageUrl || asset.imageUrl.trim() === '') {
       // Return a default image based on asset type
       return `/placeholder.svg`;
     }
-    // For empty strings or invalid URLs, use placeholder
-    try {
-      new URL(asset.imageUrl);
-      return asset.imageUrl;
-    } catch (e) {
-      return `/placeholder.svg`;
-    }
+    return asset.imageUrl;
   };
 
   return (
@@ -69,10 +64,7 @@ export default function AssetDetailView({
             initial={{ opacity: 0, scale: 1.05 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
-            onError={(e) => {
-              // Fallback if the image fails to load
-              (e.target as HTMLImageElement).src = '/placeholder.svg';
-            }}
+            onError={() => setImageError(true)}
           />
         </div>
         <div className="mt-4 flex justify-center">

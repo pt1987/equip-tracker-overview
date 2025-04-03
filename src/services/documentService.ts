@@ -46,12 +46,12 @@ export const uploadDocument = async (file: File, assetId: string, category: Docu
   }
   
   return {
-    id: documentData?.id || '',
+    id: documentData?.id ?? '',
     name: file.name,
     type: file.type,
     size: file.size,
     url: url,
-    uploadDate: documentData?.upload_date || new Date().toISOString(),
+    uploadDate: documentData?.upload_date ?? new Date().toISOString(),
     category: category
   };
 };
