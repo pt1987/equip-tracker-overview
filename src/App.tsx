@@ -8,7 +8,6 @@ import { AnimatePresence } from "framer-motion";
 import { ThemeProvider } from "@/hooks/use-theme";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { AuthProvider, ProtectedRoute } from "@/hooks/use-auth";
-import { useEffect } from "react";
 import Navbar from "@/components/layout/Navbar";
 import AdminLayout from "@/components/admin/AdminLayout";
 import Dashboard from "./pages/Index";
@@ -29,30 +28,11 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import Users from "./pages/admin/Users";
 import Roles from "./pages/admin/Roles";
 import Logs from "./pages/admin/Logs";
-import DataMigration from "./pages/DataMigration";
-import { autoMigrateData } from "./scripts/dataMigration";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-    },
-  },
-});
+const queryClient = new QueryClient();
 
 const AppContent = () => {
   const isMobile = useIsMobile();
-  
-  // Run data migration check on app startup
-  useEffect(() => {
-    // Add a small delay to ensure the app is fully loaded
-    const timer = setTimeout(() => {
-      autoMigrateData();
-    }, 1000);
-    
-    return () => clearTimeout(timer);
-  }, []);
   
   return (
     <div className="relative min-h-screen">
@@ -81,9 +61,6 @@ const AppContent = () => {
           {/* Auth Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-
-          {/* Data Migration Utility */}
-          <Route path="/data-migration" element={<DataMigration />} />
 
           {/* Main App Routes with Navbar */}
           <Route

@@ -1,100 +1,102 @@
-
-import { type ClassValue, clsx } from "clsx"
+import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-// Format currency helper function for consistency across the app
-export const formatCurrency = (amount: number) => {
+export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('de-DE', {
     style: 'currency',
     currency: 'EUR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
   }).format(amount);
-};
+}
 
-// Format date helper function for consistency across the app
-export const formatDate = (date: string) => {
+export function groupBy<T>(array: T[], key: (item: T) => string): Record<string, T[]> {
+  return array.reduce((result, currentItem) => {
+    const groupKey = key(currentItem);
+    if (!result[groupKey]) {
+      result[groupKey] = [];
+    }
+    result[groupKey].push(currentItem);
+    return result;
+  }, {} as Record<string, T[]>);
+}
+
+export function formatDate(date: string | Date): string {
   return new Date(date).toLocaleDateString('de-DE', {
     year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+    month: 'short',
+    day: 'numeric'
   });
-};
+}
 
-// Calculate age in months
-export const calculateAgeInMonths = (date: string) => {
+export function calculateAgeInMonths(date: string | Date): number {
   const purchaseDate = new Date(date);
-  const today = new Date();
-  let months = (today.getFullYear() - purchaseDate.getFullYear()) * 12;
-  months -= purchaseDate.getMonth();
-  months += today.getMonth();
+  const now = new Date();
   
-  return months <= 0 ? 0 : months;
-};
+  const yearDiff = now.getFullYear() - purchaseDate.getFullYear();
+  const monthDiff = now.getMonth() - purchaseDate.getMonth();
+  
+  return yearDiff * 12 + monthDiff;
+}
 
-// Calculate employment duration
-export const calculateEmploymentDuration = (startDate: string) => {
+export function calculateEmploymentDuration(startDate: string | Date): string {
   const start = new Date(startDate);
-  const today = new Date();
-  let years = today.getFullYear() - start.getFullYear();
-  let months = today.getMonth() - start.getMonth();
-
-  if (months < 0) {
-    years--;
-    months += 12;
-  }
-
-  const yearText = years === 1 ? 'Jahr' : 'Jahre';
-  const monthText = months === 1 ? 'Monat' : 'Monate';
-
-  if (years > 0) {
-    return `${years} ${yearText}, ${months} ${monthText}`;
-  } else {
-    return `${months} ${monthText}`;
-  }
-};
-
-// Format date helper function for consistency across the app
-export const formatDateString = (date: string | Date | null): string => {
-  if (!date) return '';
+  const now = new Date();
   
-  try {
-    const d = new Date(date);
-    if (isNaN(d.getTime())) return '';
-    
-    // Format: YYYY-MM-DD
-    return d.toISOString().split('T')[0];
-  } catch (error) {
-    console.error('Error formatting date:', error);
-    return '';
+  const yearDiff = now.getFullYear() - start.getFullYear();
+  const monthDiff = now.getMonth() - start.getMonth();
+  
+  const totalMonths = yearDiff * 12 + monthDiff;
+  const years = Math.floor(totalMonths / 12);
+  const months = totalMonths % 12;
+  
+  if (years > 0 && months > 0) {
+    return `${years} Jahr${years !== 1 ? 'e' : ''}, ${months} Monat${months !== 1 ? 'e' : ''}`;
+  } else if (years > 0) {
+    return `${years} Jahr${years !== 1 ? 'e' : ''}`;
+  } else {
+    return `${months} Monat${months !== 1 ? 'e' : ''}`;
   }
-};
+}
 
-// Localize asset category for display
-export const localizeCategory = (category: string): string => {
+export function localizeStatus(status: string): string {
+  const statusMap: Record<string, string> = {
+    ordered: "Bestellt",
+    delivered: "Geliefert",
+    in_use: "In Gebrauch",
+    defective: "Defekt",
+    in_repair: "In Reparatur",
+    pool: "Pool"
+  };
+  
+  return statusMap[status] || status;
+}
+
+export function localizeCategory(category: string): string {
   const categoryMap: Record<string, string> = {
-    notebook: 'Notebook',
-    smartphone: 'Smartphone',
-    tablet: 'Tablet',
-    peripheral: 'Peripheriegerät',
-    monitor: 'Monitor',
-    audio: 'Audio',
-    other: 'Sonstiges'
+    notebook: "Notebook",
+    smartphone: "Smartphone",
+    tablet: "Tablet",
+    mouse: "Maus",
+    keyboard: "Tastatur",
+    accessory: "Zubehör"
   };
   
   return categoryMap[category] || category;
-};
+}
 
-// Utility function to group an array by a key selector function
-export const groupBy = <T>(array: T[], keySelector: (item: T) => string): Record<string, T[]> => {
-  return array.reduce((groups: Record<string, T[]>, item) => {
-    const key = keySelector(item);
-    if (!groups[key]) {
-      groups[key] = [];
-    }
-    groups[key].push(item);
-    return groups;
-  }, {});
-};
+export function localizeCluster(cluster: string): string {
+  const clusterMap: Record<string, string> = {
+    development: "Entwicklung",
+    design: "Design",
+    operations: "Betrieb",
+    management: "Management",
+    sales: "Vertrieb"
+  };
+  
+  return clusterMap[cluster] || cluster;
+}
