@@ -7,18 +7,22 @@ import { v5 as uuidv5, v4 as uuidv4 } from "uuid";
 
 // Check if data already exists in the database
 const checkDataExists = async (table: string): Promise<boolean> => {
-  // Use type assertion to handle the table name as a valid table identifier
-  // This ensures TypeScript knows we're providing a valid table name
-  const { count, error } = await supabase
-    .from(table as "assets" | "employees" | "asset_history")
-    .select('*', { count: 'exact', head: true });
-  
-  if (error) {
-    console.error(`Error checking ${table}:`, error);
-    return true; // Assume data exists to prevent duplicate imports
+  try {
+    // Use type assertion to handle the table name as a valid table identifier
+    const { count, error } = await supabase
+      .from(table as "assets" | "employees" | "asset_history")
+      .select('*', { count: 'exact', head: true });
+    
+    if (error) {
+      console.error(`Error checking ${table}:`, error);
+      return true; // Assume data exists to prevent duplicate imports
+    }
+    
+    return count !== null && count > 0;
+  } catch (err) {
+    console.error(`Exception checking ${table}:`, err);
+    return true; // Safety mechanism to prevent duplicate imports
   }
-  
-  return count !== null && count > 0;
 };
 
 // Convert string IDs to UUIDs
@@ -141,10 +145,14 @@ const prepareAssetHistoryForMigration = (): AssetHistoryEntry[] => {
 // Migrate data to Supabase
 export const migrateDataToSupabase = async (): Promise<boolean> => {
   try {
+    console.log("Starting data migration check...");
+    
     // Check if data already exists
     const assetsExist = await checkDataExists('assets');
     const employeesExist = await checkDataExists('employees');
     const historyExists = await checkDataExists('asset_history');
+    
+    console.log("Data check results:", { assetsExist, employeesExist, historyExists });
     
     if (assetsExist && employeesExist && historyExists) {
       console.log('Data already exists in Supabase, skipping migration');
@@ -152,12 +160,14 @@ export const migrateDataToSupabase = async (): Promise<boolean> => {
     }
     
     // Prepare data
+    console.log("Preparing data for migration...");
     const preparedEmployees = prepareEmployeesForMigration();
     const preparedAssets = prepareAssetsForMigration();
     const preparedHistory = prepareAssetHistoryForMigration();
     
     // Insert employees first (as assets depend on them)
     if (!employeesExist) {
+      console.log("Migrating employees...");
       const dbEmployees = preparedEmployees.map(mapEmployeeToDbEmployee);
       const { error: employeeError } = await supabase
         .from('employees')
@@ -165,13 +175,15 @@ export const migrateDataToSupabase = async (): Promise<boolean> => {
       
       if (employeeError) {
         console.error('Error migrating employees:', employeeError);
-        throw new Error(`Employee migration failed: ${employeeError.message}`);
+        toast.error(`Employee migration failed: ${employeeError.message}`);
+        return false;
       }
       console.log('Employees migrated successfully');
     }
     
     // Insert assets
     if (!assetsExist) {
+      console.log("Migrating assets...");
       const dbAssets = preparedAssets.map(mapAssetToDbAsset);
       const { error: assetError } = await supabase
         .from('assets')
@@ -179,13 +191,15 @@ export const migrateDataToSupabase = async (): Promise<boolean> => {
       
       if (assetError) {
         console.error('Error migrating assets:', assetError);
-        throw new Error(`Asset migration failed: ${assetError.message}`);
+        toast.error(`Asset migration failed: ${assetError.message}`);
+        return false;
       }
       console.log('Assets migrated successfully');
     }
     
     // Insert history
     if (!historyExists) {
+      console.log("Migrating asset history...");
       const dbHistory = preparedHistory.map(mapHistoryEntryToDbHistory);
       const { error: historyError } = await supabase
         .from('asset_history')
@@ -193,7 +207,8 @@ export const migrateDataToSupabase = async (): Promise<boolean> => {
       
       if (historyError) {
         console.error('Error migrating asset history:', historyError);
-        throw new Error(`Asset history migration failed: ${historyError.message}`);
+        toast.error(`Asset history migration failed: ${historyError.message}`);
+        return false;
       }
       console.log('Asset history migrated successfully');
     }
