@@ -229,21 +229,21 @@ export default function Dashboard() {
             title="Total Assets"
             value={stats.totalAssets.toString()}
             description="All assets in inventory"
-            icon={<Package2 />}
+            icon={<Package2 size={20} />}
             loading={assetsLoading}
           />
           <StatCard 
             title="Total Value"
             value={formatCurrency(stats.totalValue)}
             description="Value of all assets"
-            icon={<CreditCard />}
+            icon={<CreditCard size={20} />}
             loading={assetsLoading}
           />
           <StatCard 
             title="Employees"
             value={stats.totalEmployees.toString()}
             description="Active employees"
-            icon={<Users />}
+            icon={<Users size={20} />}
             loading={employeesLoading}
           />
           <StatCard 
@@ -252,7 +252,7 @@ export default function Dashboard() {
               ? formatCurrency(stats.totalValue / stats.totalEmployees) 
               : formatCurrency(0)}
             description="Average asset value"
-            icon={<Calendar />}
+            icon={<Calendar size={20} />}
             loading={assetsLoading || employeesLoading}
           />
         </div>
@@ -268,11 +268,12 @@ export default function Dashboard() {
               ) : (
                 <OverviewChart 
                   data={[
-                    { name: "Laptops", value: stats.assetTypes.laptop },
-                    { name: "Smartphones", value: stats.assetTypes.smartphone },
-                    { name: "Tablets", value: stats.assetTypes.tablet },
-                    { name: "Other", value: stats.assetTypes.other },
+                    { name: "Laptops", value: stats.assetTypes.laptop, color: "#4C9EFF" },
+                    { name: "Smartphones", value: stats.assetTypes.smartphone, color: "#65D4AC" },
+                    { name: "Tablets", value: stats.assetTypes.tablet, color: "#FF7A50" },
+                    { name: "Other", value: stats.assetTypes.other, color: "#8655FC" },
                   ]} 
+                  title="Asset Distribution"
                 />
               )}
             </CardContent>

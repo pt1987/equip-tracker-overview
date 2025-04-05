@@ -7,7 +7,7 @@ interface StatCardProps {
   title: string;
   value: string | number;
   description?: string;
-  icon: LucideIcon;
+  icon: React.ReactNode;  // Changed from LucideIcon to React.ReactNode
   colorClass?: string;
   trend?: "up" | "down" | "neutral";
   trendValue?: string;
@@ -18,7 +18,7 @@ export default function StatCard({
   title,
   value,
   description,
-  icon: Icon,
+  icon,
   colorClass = "text-primary",
   trend,
   trendValue,
@@ -41,7 +41,7 @@ export default function StatCard({
           )}
         </div>
         <div className={cn("p-3 rounded-lg bg-primary/10", colorClass)}>
-          <Icon size={20} className={colorClass} />
+          {icon}
         </div>
       </div>
       
