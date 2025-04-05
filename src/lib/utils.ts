@@ -1,3 +1,4 @@
+
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -61,6 +62,36 @@ export function calculateEmploymentDuration(startDate: string | Date): string {
   } else {
     return `${months} Monat${months !== 1 ? 'e' : ''}`;
   }
+}
+
+// Convert ISO dates to JavaScript Date objects and back for Supabase compatibility
+export function parseDateFields<T extends Record<string, any>>(obj: T): T {
+  const result = { ...obj };
+  
+  for (const key in result) {
+    // If the key contains 'date' or 'Date', and the value is a string that looks like a date
+    if ((key.toLowerCase().includes('date') || key.toLowerCase().includes('time')) && 
+        typeof result[key] === 'string' && 
+        /\d{4}-\d{2}-\d{2}/.test(result[key])) {
+      
+      result[key] = new Date(result[key]);
+    }
+  }
+  
+  return result;
+}
+
+export function stringifyDateFields<T extends Record<string, any>>(obj: T): T {
+  const result = { ...obj };
+  
+  for (const key in result) {
+    // If the value is a Date object
+    if (result[key] instanceof Date) {
+      result[key] = result[key].toISOString();
+    }
+  }
+  
+  return result;
 }
 
 export function localizeStatus(status: string): string {

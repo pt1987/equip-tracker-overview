@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import PageTransition from "@/components/layout/PageTransition";
-import { assets } from "@/data/mockData";
 import { Asset, AssetStatus, AssetType } from "@/lib/types";
 import AssetCard from "@/components/assets/AssetCard";
 import SearchFilter from "@/components/shared/SearchFilter";
@@ -21,6 +22,7 @@ import {
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import StatusBadge from "@/components/assets/StatusBadge";
+import { getAssets } from "@/services/assetService";
 
 const AssetTypeIcon = ({ type }: { type: AssetType }) => {
   switch (type) {
@@ -69,10 +71,18 @@ const AssetsPage = () => {
   const [selectedTypes, setSelectedTypes] = useState<AssetType[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<AssetStatus[]>([]);
   const [showFilters, setShowFilters] = useState(false);
-  const [filteredAssets, setFilteredAssets] = useState<Asset[]>(assets);
+  const [filteredAssets, setFilteredAssets] = useState<Asset[]>([]);
   const [view, setView] = useState<"grid" | "list">("grid");
   
+  // Fetch assets from Supabase using React Query
+  const { data: assets, isLoading, isError } = useQuery({
+    queryKey: ['assets'],
+    queryFn: getAssets
+  });
+  
   useEffect(() => {
+    if (!assets) return;
+    
     let filtered = assets;
     
     // Apply search filter
@@ -96,7 +106,7 @@ const AssetsPage = () => {
     }
     
     setFilteredAssets(filtered);
-  }, [searchTerm, selectedTypes, selectedStatuses]);
+  }, [searchTerm, selectedTypes, selectedStatuses, assets]);
   
   const toggleTypeFilter = (type: AssetType) => {
     if (selectedTypes.includes(type)) {
@@ -225,7 +235,29 @@ const AssetsPage = () => {
           </motion.div>
         )}
         
-        {filteredAssets.length === 0 ? (
+        {/* Loading state */}
+        {isLoading && (
+          <div className="glass-card p-12 text-center">
+            <div className="animate-spin mx-auto w-8 h-8 border-4 border-primary border-t-transparent rounded-full mb-4"></div>
+            <p className="text-muted-foreground">Loading assets...</p>
+          </div>
+        )}
+        
+        {/* Error state */}
+        {isError && (
+          <div className="glass-card p-12 text-center">
+            <div className="mx-auto w-16 h-16 mb-4 rounded-full bg-red-100 flex items-center justify-center">
+              <X className="h-8 w-8 text-red-500" />
+            </div>
+            <h3 className="text-lg font-medium mb-2">Failed to load assets</h3>
+            <p className="text-muted-foreground mb-6">
+              There was a problem loading the assets data.
+            </p>
+          </div>
+        )}
+        
+        {/* No results state */}
+        {!isLoading && !isError && filteredAssets.length === 0 && (
           <div className="glass-card p-12 text-center">
             <div className="mx-auto w-16 h-16 mb-4 rounded-full bg-muted flex items-center justify-center">
               <PackageIcon size={32} className="text-muted-foreground" />
@@ -241,61 +273,66 @@ const AssetsPage = () => {
               Clear filters
             </button>
           </div>
-        ) : view === "grid" ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredAssets.map((asset, index) => (
-              <AssetCard 
-                key={asset.id} 
-                asset={asset} 
-                index={index} 
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {filteredAssets.map((asset) => (
-              <Link
-                key={asset.id}
-                to={`/asset/${asset.id}`}
-                className="glass-card p-4 flex items-center gap-4 hover:bg-secondary/10 transition-colors"
-              >
-                <div className="w-12 h-12 rounded-md overflow-hidden bg-muted flex-shrink-0">
-                  {asset.imageUrl ? (
-                    <img
-                      src={asset.imageUrl}
-                      alt={asset.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <AssetTypeIcon type={asset.type} />
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-medium">{asset.name}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {asset.manufacturer} {asset.model}
-                  </p>
-                </div>
-                <div className="hidden md:block w-32">
-                  <StatusBadge status={asset.status} />
-                </div>
-                <div className="hidden md:block w-36">
-                  <p className="text-sm">
-                    <span className="text-muted-foreground">Type: </span>
-                    {asset.type}
-                  </p>
-                </div>
-                <div className="hidden md:block w-32">
-                  <p className="text-sm font-medium">
-                    {formatCurrency(asset.price)}
-                  </p>
-                </div>
-                <ArrowRight size={16} className="text-muted-foreground" />
-              </Link>
-            ))}
-          </div>
+        )}
+        
+        {/* Asset grid/list */}
+        {!isLoading && !isError && filteredAssets.length > 0 && (
+          view === "grid" ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredAssets.map((asset, index) => (
+                <AssetCard 
+                  key={asset.id} 
+                  asset={asset} 
+                  index={index} 
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredAssets.map((asset) => (
+                <Link
+                  key={asset.id}
+                  to={`/asset/${asset.id}`}
+                  className="glass-card p-4 flex items-center gap-4 hover:bg-secondary/10 transition-colors"
+                >
+                  <div className="w-12 h-12 rounded-md overflow-hidden bg-muted flex-shrink-0">
+                    {asset.imageUrl ? (
+                      <img
+                        src={asset.imageUrl}
+                        alt={asset.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <AssetTypeIcon type={asset.type} />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-medium">{asset.name}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {asset.manufacturer} {asset.model}
+                    </p>
+                  </div>
+                  <div className="hidden md:block w-32">
+                    <StatusBadge status={asset.status} />
+                  </div>
+                  <div className="hidden md:block w-36">
+                    <p className="text-sm">
+                      <span className="text-muted-foreground">Type: </span>
+                      {asset.type}
+                    </p>
+                  </div>
+                  <div className="hidden md:block w-32">
+                    <p className="text-sm font-medium">
+                      {formatCurrency(asset.price)}
+                    </p>
+                  </div>
+                  <ArrowRight size={16} className="text-muted-foreground" />
+                </Link>
+              ))}
+            </div>
+          )
         )}
       </div>
     </PageTransition>

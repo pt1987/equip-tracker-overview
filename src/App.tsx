@@ -8,6 +8,8 @@ import { AnimatePresence } from "framer-motion";
 import { ThemeProvider } from "@/hooks/use-theme";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { AuthProvider, ProtectedRoute } from "@/hooks/use-auth";
+import { useEffect } from "react";
+import { migrateDataToSupabase } from "@/utils/dataMigration";
 import Navbar from "@/components/layout/Navbar";
 import AdminLayout from "@/components/admin/AdminLayout";
 import Dashboard from "./pages/Index";
@@ -29,10 +31,37 @@ import Users from "./pages/admin/Users";
 import Roles from "./pages/admin/Roles";
 import Logs from "./pages/admin/Logs";
 
-const queryClient = new QueryClient();
+// Configure the query client with better error handling
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 30000,
+      refetchOnWindowFocus: false,
+      onError: (error) => {
+        console.error('Query error:', error);
+      }
+    },
+    mutations: {
+      onError: (error) => {
+        console.error('Mutation error:', error);
+      }
+    }
+  }
+});
 
 const AppContent = () => {
   const isMobile = useIsMobile();
+  
+  // Migrate data on app startup
+  useEffect(() => {
+    // Add a small delay to ensure authentication is initialized
+    const timer = setTimeout(() => {
+      migrateDataToSupabase().catch(console.error);
+    }, 2000);
+    
+    return () => clearTimeout(timer);
+  }, []);
   
   return (
     <div className="relative min-h-screen">
