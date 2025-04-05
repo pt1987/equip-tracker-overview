@@ -1,18 +1,14 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import PageTransition from "@/components/layout/PageTransition";
-import Navbar from "@/components/layout/Navbar";
-import { getEmployeeById } from "@/data/employees";
-import { getAssetsByEmployeeId } from "@/data/assets";
 import { Asset, Employee } from "@/lib/types";
 import QRCode from "@/components/shared/QRCode";
 import { motion } from "framer-motion";
-import { formatCurrency, formatDate, calculateEmploymentDuration } from "@/lib/utils";
+import { formatCurrency, formatDate } from "@/lib/utils";
 import AssetCard from "@/components/assets/AssetCard";
 import ViewToggle from "@/components/shared/ViewToggle";
 import { 
   ChevronLeft, 
-  CalendarClock, 
   Euro, 
   LaptopIcon,
   SmartphoneIcon,
@@ -20,14 +16,13 @@ import {
   MouseIcon,
   KeyboardIcon,
   PackageIcon,
-  Briefcase,
-  User,
-  Users,
   ArrowRight
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import EmployeeDetailView from "@/components/employees/EmployeeDetailView";
 import EmployeeDetailEdit from "@/components/employees/EmployeeDetailEdit";
+import { getEmployeeById, getEmployeeAssetsSummary } from "@/services/employeeService";
+import { getAssetsByEmployeeId } from "@/services/assetService";
 
 const AssetTypeIcon = ({ type }: { type: Asset["type"] }) => {
   switch (type) {
@@ -58,17 +53,27 @@ const EmployeeDetail = () => {
   const [assetView, setAssetView] = useState<"grid" | "list">("grid");
   
   useEffect(() => {
-    if (id) {
-      const employeeData = getEmployeeById(id);
-      setEmployee(employeeData || null);
-      
-      if (employeeData) {
-        const employeeAssets = getAssetsByEmployeeId(employeeData.id);
-        setAssets(employeeAssets);
+    const fetchData = async () => {
+      if (id) {
+        setLoading(true);
+        try {
+          const employeeData = await getEmployeeById(id);
+          setEmployee(employeeData);
+          
+          if (employeeData) {
+            const employeeAssets = await getAssetsByEmployeeId(employeeData.id);
+            setAssets(employeeAssets);
+          }
+        } catch (error) {
+          console.error("Error fetching employee details:", error);
+          toast.error("Failed to load employee details");
+        } finally {
+          setLoading(false);
+        }
       }
-      
-      setLoading(false);
-    }
+    };
+    
+    fetchData();
   }, [id]);
   
   const handleEdit = () => {
@@ -79,27 +84,35 @@ const EmployeeDetail = () => {
     setIsEditing(false);
   };
   
-  const handleSave = (data: any) => {
+  const handleSave = async (data: any) => {
     console.log("Updated employee data:", data);
     
-    if (employee) {
-      const updatedEmployee = {
-        ...employee,
-        ...data,
-        startDate: data.startDate.toISOString(),
-      };
-      setEmployee(updatedEmployee);
+    if (employee && id) {
+      try {
+        const updatedEmployee = {
+          ...employee,
+          ...data,
+          startDate: data.startDate.toISOString(),
+        };
+        setEmployee(updatedEmployee);
+        setIsEditing(false);
+        
+        toast({
+          title: "Mitarbeiter aktualisiert",
+          description: "Die Änderungen wurden erfolgreich gespeichert."
+        });
+      } catch (error) {
+        console.error("Error updating employee:", error);
+        toast({
+          title: "Error",
+          description: "Failed to update employee.",
+          variant: "destructive"
+        });
+      }
     }
-    
-    setIsEditing(false);
-    
-    toast({
-      title: "Mitarbeiter aktualisiert",
-      description: "Die Änderungen wurden erfolgreich gespeichert."
-    });
   };
   
-  const handleDelete = () => {
+  const handleDelete = async () => {
     console.log("Delete employee:", id);
     
     toast({
@@ -112,18 +125,29 @@ const EmployeeDetail = () => {
   
   if (loading) {
     return (
-      <div className="flex min-h-screen">
-        <div className="flex-1 md:ml-64 p-8 flex items-center justify-center">
-          <div className="animate-pulse-soft">Loading employee details...</div>
+      <PageTransition>
+        <div className="p-3 md:p-4 xl:p-6 space-y-6 max-w-full pb-24 mt-12 md:mt-0">
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-pulse-soft">Loading employee details...</div>
+          </div>
         </div>
-      </div>
+      </PageTransition>
     );
   }
   
   if (!employee) {
     return (
-      <div className="flex min-h-screen">
-        <div className="flex-1 md:ml-32 p-3 md:p-4 xl:p-6 space-y-6 max-w-full">
+      <PageTransition>
+        <div className="p-3 md:p-4 xl:p-6 space-y-6 max-w-full pb-24 mt-12 md:mt-0">
+          <div className="mb-6">
+            <Link 
+              to="/employees"
+              className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ChevronLeft size={16} />
+              <span>Back to employees</span>
+            </Link>
+          </div>
           <div className="glass-card p-12 text-center">
             <h2 className="text-xl font-medium mb-4">Employee not found</h2>
             <p className="text-muted-foreground mb-6">
@@ -137,7 +161,7 @@ const EmployeeDetail = () => {
             </Link>
           </div>
         </div>
-      </div>
+      </PageTransition>
     );
   }
   
