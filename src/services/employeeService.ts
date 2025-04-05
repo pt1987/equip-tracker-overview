@@ -21,18 +21,20 @@ function mapDbEmployeeToEmployee(dbEmployee: any): Employee {
 
 // Helper to convert Employee model to database object
 function mapEmployeeToDbEmployee(employee: Partial<Employee>): any {
-  return {
-    first_name: employee.firstName,
-    last_name: employee.lastName,
-    image_url: employee.imageUrl,
-    start_date: employee.startDate,
-    entry_date: employee.entryDate,
-    cluster: employee.cluster,
-    position: employee.position,
-    budget: employee.budget,
-    used_budget: employee.usedBudget,
-    profile_image: employee.profileImage,
-  };
+  const dbEmployee: Record<string, any> = {};
+  
+  if (employee.firstName !== undefined) dbEmployee.first_name = employee.firstName;
+  if (employee.lastName !== undefined) dbEmployee.last_name = employee.lastName;
+  if (employee.imageUrl !== undefined) dbEmployee.image_url = employee.imageUrl;
+  if (employee.startDate !== undefined) dbEmployee.start_date = employee.startDate;
+  if (employee.entryDate !== undefined) dbEmployee.entry_date = employee.entryDate;
+  if (employee.cluster !== undefined) dbEmployee.cluster = employee.cluster;
+  if (employee.position !== undefined) dbEmployee.position = employee.position;
+  if (employee.budget !== undefined) dbEmployee.budget = employee.budget;
+  if (employee.usedBudget !== undefined) dbEmployee.used_budget = employee.usedBudget;
+  if (employee.profileImage !== undefined) dbEmployee.profile_image = employee.profileImage;
+  
+  return dbEmployee;
 }
 
 // Helper to convert database asset to our Asset model
@@ -82,14 +84,26 @@ export const getEmployees = async (): Promise<Employee[]> => {
 
 export const getEmployeeById = async (id: string): Promise<Employee | null> => {
   try {
+    console.log("Fetching employee with ID:", id);
+    
     const { data, error } = await supabase
       .from('employees')
       .select('*')
       .eq('id', id)
       .single();
     
-    if (error) throw error;
-    return data ? mapDbEmployeeToEmployee(data) : null;
+    if (error) {
+      console.error("Supabase error:", error);
+      throw error;
+    }
+    
+    if (!data) {
+      console.log("No employee found with ID:", id);
+      return null;
+    }
+    
+    console.log("Employee found:", data);
+    return mapDbEmployeeToEmployee(data);
   } catch (error) {
     console.error(`Error fetching employee ${id}:`, error);
     toast.error("Failed to fetch employee details");
@@ -99,6 +113,7 @@ export const getEmployeeById = async (id: string): Promise<Employee | null> => {
 
 export const createEmployee = async (employee: Omit<Employee, 'id'>): Promise<Employee | null> => {
   try {
+    console.log("Creating employee:", employee);
     const dbEmployee = mapEmployeeToDbEmployee(employee);
     
     const { data, error } = await supabase
@@ -107,9 +122,18 @@ export const createEmployee = async (employee: Omit<Employee, 'id'>): Promise<Em
       .select()
       .single();
     
-    if (error) throw error;
+    if (error) {
+      console.error("Supabase error:", error);
+      throw error;
+    }
+    
+    if (!data) {
+      throw new Error("No data returned after insert");
+    }
+    
+    console.log("Employee created:", data);
     toast.success("Employee created successfully");
-    return data ? mapDbEmployeeToEmployee(data) : null;
+    return mapDbEmployeeToEmployee(data);
   } catch (error) {
     console.error("Error creating employee:", error);
     toast.error("Failed to create employee");
@@ -119,6 +143,9 @@ export const createEmployee = async (employee: Omit<Employee, 'id'>): Promise<Em
 
 export const updateEmployee = async (id: string, employee: Partial<Employee>): Promise<Employee | null> => {
   try {
+    console.log("Updating employee with ID:", id);
+    console.log("Update data:", employee);
+    
     const dbEmployee = mapEmployeeToDbEmployee(employee);
     
     const { data, error } = await supabase
@@ -128,9 +155,18 @@ export const updateEmployee = async (id: string, employee: Partial<Employee>): P
       .select()
       .single();
     
-    if (error) throw error;
+    if (error) {
+      console.error("Supabase update error:", error);
+      throw error;
+    }
+    
+    if (!data) {
+      throw new Error("No data returned after update");
+    }
+    
+    console.log("Update successful, returned data:", data);
     toast.success("Employee updated successfully");
-    return data ? mapDbEmployeeToEmployee(data) : null;
+    return mapDbEmployeeToEmployee(data);
   } catch (error) {
     console.error(`Error updating employee ${id}:`, error);
     toast.error("Failed to update employee");

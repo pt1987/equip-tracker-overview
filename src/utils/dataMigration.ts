@@ -1,16 +1,18 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { assets, employees, assetHistory } from "@/data/mockData";
 import { Asset, AssetHistoryEntry, Employee } from "@/lib/types";
 import { toast } from "sonner";
 import { v5 as uuidv5, v4 as uuidv4 } from "uuid";
 
+// Define valid table names
+type ValidTableName = "assets" | "employees" | "asset_history";
+
 // Check if data already exists in the database
 const checkDataExists = async (table: string): Promise<boolean> => {
   try {
     // Use type assertion to handle the table name as a valid table identifier
     const { count, error } = await supabase
-      .from(table as "assets" | "employees" | "asset_history")
+      .from(table as ValidTableName)
       .select('*', { count: 'exact', head: true });
     
     if (error) {
@@ -145,7 +147,7 @@ const prepareAssetHistoryForMigration = (): AssetHistoryEntry[] => {
 // Migrate data to Supabase
 export const migrateDataToSupabase = async (): Promise<boolean> => {
   try {
-    console.log("Starting data migration check...");
+    console.log("Starting data migration...");
     
     // Check if data already exists
     const assetsExist = await checkDataExists('assets');

@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Asset, AssetHistoryEntry, AssetStatus, AssetType } from "@/lib/types";
 import { toast } from "sonner";
@@ -35,31 +34,33 @@ function mapDbAssetToAsset(dbAsset: any): Asset {
 
 // Helper to convert Asset model to database object
 function mapAssetToDbAsset(asset: Partial<Asset>): any {
-  return {
-    name: asset.name,
-    type: asset.type,
-    manufacturer: asset.manufacturer,
-    model: asset.model,
-    purchase_date: asset.purchaseDate,
-    vendor: asset.vendor,
-    price: asset.price,
-    status: asset.status,
-    employee_id: asset.employeeId,
-    category: asset.category,
-    serial_number: asset.serialNumber,
-    inventory_number: asset.inventoryNumber,
-    additional_warranty: asset.additionalWarranty,
-    has_warranty: asset.hasWarranty,
-    imei: asset.imei,
-    phone_number: asset.phoneNumber,
-    provider: asset.provider,
-    contract_end_date: asset.contractEndDate,
-    contract_name: asset.contractName,
-    contract_duration: asset.contractDuration,
-    connected_asset_id: asset.connectedAssetId,
-    related_asset_id: asset.relatedAssetId,
-    image_url: asset.imageUrl,
-  };
+  const dbAsset: Record<string, any> = {};
+  
+  if (asset.name !== undefined) dbAsset.name = asset.name;
+  if (asset.type !== undefined) dbAsset.type = asset.type;
+  if (asset.manufacturer !== undefined) dbAsset.manufacturer = asset.manufacturer;
+  if (asset.model !== undefined) dbAsset.model = asset.model;
+  if (asset.purchaseDate !== undefined) dbAsset.purchase_date = asset.purchaseDate;
+  if (asset.vendor !== undefined) dbAsset.vendor = asset.vendor;
+  if (asset.price !== undefined) dbAsset.price = asset.price;
+  if (asset.status !== undefined) dbAsset.status = asset.status;
+  if (asset.employeeId !== undefined) dbAsset.employee_id = asset.employeeId;
+  if (asset.category !== undefined) dbAsset.category = asset.category;
+  if (asset.serialNumber !== undefined) dbAsset.serial_number = asset.serialNumber;
+  if (asset.inventoryNumber !== undefined) dbAsset.inventory_number = asset.inventoryNumber;
+  if (asset.additionalWarranty !== undefined) dbAsset.additional_warranty = asset.additionalWarranty;
+  if (asset.hasWarranty !== undefined) dbAsset.has_warranty = asset.hasWarranty;
+  if (asset.imei !== undefined) dbAsset.imei = asset.imei;
+  if (asset.phoneNumber !== undefined) dbAsset.phone_number = asset.phoneNumber;
+  if (asset.provider !== undefined) dbAsset.provider = asset.provider;
+  if (asset.contractEndDate !== undefined) dbAsset.contract_end_date = asset.contractEndDate;
+  if (asset.contractName !== undefined) dbAsset.contract_name = asset.contractName;
+  if (asset.contractDuration !== undefined) dbAsset.contract_duration = asset.contractDuration;
+  if (asset.connectedAssetId !== undefined) dbAsset.connected_asset_id = asset.connectedAssetId;
+  if (asset.relatedAssetId !== undefined) dbAsset.related_asset_id = asset.relatedAssetId;
+  if (asset.imageUrl !== undefined) dbAsset.image_url = asset.imageUrl;
+  
+  return dbAsset;
 }
 
 // Helper to convert database history entry to our AssetHistoryEntry model
@@ -230,6 +231,9 @@ export const createAsset = async (asset: Omit<Asset, 'id'>): Promise<Asset | nul
 
 export const updateAsset = async (id: string, asset: Partial<Asset>): Promise<Asset | null> => {
   try {
+    console.log("Updating asset with ID:", id);
+    console.log("Update data:", asset);
+    
     const dbAsset = mapAssetToDbAsset(asset);
     
     const { data, error } = await supabase
@@ -239,9 +243,18 @@ export const updateAsset = async (id: string, asset: Partial<Asset>): Promise<As
       .select()
       .single();
     
-    if (error) throw error;
+    if (error) {
+      console.error("Supabase update error:", error);
+      throw error;
+    }
+    
+    if (!data) {
+      throw new Error("No data returned after update");
+    }
+    
+    console.log("Update successful, returned data:", data);
     toast.success("Asset updated successfully");
-    return data ? mapDbAssetToAsset(data) : null;
+    return mapDbAssetToAsset(data);
   } catch (error) {
     console.error(`Error updating asset ${id}:`, error);
     toast.error("Failed to update asset");
@@ -268,7 +281,13 @@ export const deleteAsset = async (id: string): Promise<boolean> => {
 
 export const createAssetHistoryEntry = async (entry: Omit<AssetHistoryEntry, 'id'>): Promise<AssetHistoryEntry | null> => {
   try {
-    const dbHistoryEntry = mapHistoryEntryToDbHistory(entry);
+    const dbHistoryEntry = {
+      asset_id: entry.assetId,
+      date: entry.date,
+      action: entry.action,
+      employee_id: entry.employeeId,
+      notes: entry.notes || '',
+    };
     
     const { data, error } = await supabase
       .from('asset_history')
@@ -277,7 +296,19 @@ export const createAssetHistoryEntry = async (entry: Omit<AssetHistoryEntry, 'id
       .single();
     
     if (error) throw error;
-    return data ? mapDbHistoryToHistoryEntry(data) : null;
+    
+    if (!data) {
+      throw new Error("No data returned after insert");
+    }
+    
+    return {
+      id: data.id,
+      assetId: data.asset_id,
+      date: data.date,
+      action: data.action,
+      employeeId: data.employee_id,
+      notes: data.notes || '',
+    };
   } catch (error) {
     console.error("Error creating asset history entry:", error);
     toast.error("Failed to record asset history");
