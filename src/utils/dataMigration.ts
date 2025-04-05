@@ -7,8 +7,10 @@ import { v5 as uuidv5, v4 as uuidv4 } from "uuid";
 
 // Check if data already exists in the database
 const checkDataExists = async (table: string): Promise<boolean> => {
+  // Use type assertion to handle the table name as a valid table identifier
+  // This ensures TypeScript knows we're providing a valid table name
   const { count, error } = await supabase
-    .from(table)
+    .from(table as "assets" | "employees" | "asset_history")
     .select('*', { count: 'exact', head: true });
   
   if (error) {
@@ -159,7 +161,7 @@ export const migrateDataToSupabase = async (): Promise<boolean> => {
       const dbEmployees = preparedEmployees.map(mapEmployeeToDbEmployee);
       const { error: employeeError } = await supabase
         .from('employees')
-        .insert(dbEmployees);
+        .insert(dbEmployees as any);
       
       if (employeeError) {
         console.error('Error migrating employees:', employeeError);
@@ -173,7 +175,7 @@ export const migrateDataToSupabase = async (): Promise<boolean> => {
       const dbAssets = preparedAssets.map(mapAssetToDbAsset);
       const { error: assetError } = await supabase
         .from('assets')
-        .insert(dbAssets);
+        .insert(dbAssets as any);
       
       if (assetError) {
         console.error('Error migrating assets:', assetError);
@@ -187,7 +189,7 @@ export const migrateDataToSupabase = async (): Promise<boolean> => {
       const dbHistory = preparedHistory.map(mapHistoryEntryToDbHistory);
       const { error: historyError } = await supabase
         .from('asset_history')
-        .insert(dbHistory);
+        .insert(dbHistory as any);
       
       if (historyError) {
         console.error('Error migrating asset history:', historyError);

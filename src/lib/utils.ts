@@ -1,3 +1,4 @@
+
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -85,8 +86,9 @@ export function stringifyDateFields<T extends Record<string, any>>(obj: T): T {
   const result = { ...obj };
   
   for (const key in result) {
-    // Fix the instanceof check by checking the object type
-    if (result[key] && result[key] instanceof Date) {
+    // Fix the instanceof check by checking the object type properly
+    if (result[key] && 
+        Object.prototype.toString.call(result[key]) === '[object Date]') {
       result[key] = (result[key] as Date).toISOString() as any;
     }
   }
