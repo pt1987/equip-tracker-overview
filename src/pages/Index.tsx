@@ -8,7 +8,18 @@ import StatCard from "@/components/dashboard/StatCard";
 import AssetCard from "@/components/assets/AssetCard";
 import EmployeeCard from "@/components/employees/EmployeeCard";
 import { Button } from "@/components/ui/button";
-import { Calendar, CreditCard, Package2, Users, Monitor, SmartphoneIcon, TabletIcon, Alert, CheckCircle2, ArrowRight } from "lucide-react";
+import { 
+  Calendar, 
+  CreditCard, 
+  Package2, 
+  Users, 
+  Monitor, 
+  SmartphoneIcon, 
+  TabletIcon, 
+  AlertTriangle, 
+  CheckCircle2, 
+  ArrowRight 
+} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Asset, Employee } from "@/lib/types";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -122,7 +133,7 @@ function PendingActions() {
         <div className="space-y-3">
           <div className="p-3 bg-yellow-50 dark:bg-yellow-950/50 rounded-lg border border-yellow-200 dark:border-yellow-900/50">
             <div className="flex items-start gap-3">
-              <Alert className="text-yellow-600 dark:text-yellow-400 mt-0.5" size={18} />
+              <AlertTriangle className="text-yellow-600 dark:text-yellow-400 mt-0.5" size={18} />
               <div>
                 <p className="font-medium text-yellow-800 dark:text-yellow-300">3 warranties expire next month</p>
                 <p className="text-sm text-yellow-700 dark:text-yellow-400">Review and extend if needed</p>
