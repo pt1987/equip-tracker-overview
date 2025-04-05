@@ -38,7 +38,7 @@ const queryClient = new QueryClient({
       retry: 1,
       staleTime: 30000,
       refetchOnWindowFocus: false,
-      // Using meta.onError instead of onSettled
+      // Using meta instead of onError/onSettled
       meta: {
         onError: (error: Error) => {
           console.error('Query error:', error);
@@ -62,11 +62,18 @@ const AppContent = () => {
   // Migrate data on app startup
   useEffect(() => {
     // Add a small delay to ensure authentication is initialized
-    const timer = setTimeout(() => {
-      migrateDataToSupabase().catch(console.error);
-    }, 2000);
-    
-    return () => clearTimeout(timer);
+    console.log("Starting data migration...");
+    migrateDataToSupabase()
+      .then(result => {
+        if (result) {
+          console.log("Migration completed successfully");
+        } else {
+          console.log("Migration skipped or failed");
+        }
+      })
+      .catch(error => {
+        console.error("Migration error:", error);
+      });
   }, []);
   
   return (

@@ -3,11 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { assets, employees, assetHistory } from "@/data/mockData";
 import { Asset, AssetHistoryEntry, Employee } from "@/lib/types";
 import { toast } from "sonner";
+import { v5 as uuidv5, v4 as uuidv4 } from "uuid";
 
 // Check if data already exists in the database
 const checkDataExists = async (table: string): Promise<boolean> => {
   const { count, error } = await supabase
-    .from(table as any)
+    .from(table)
     .select('*', { count: 'exact', head: true });
   
   if (error) {
@@ -20,23 +21,10 @@ const checkDataExists = async (table: string): Promise<boolean> => {
 
 // Convert string IDs to UUIDs
 const convertToUuid = (id: string): string => {
-  // Create a deterministic UUID based on the ID
+  // Use UUID v5 to generate a deterministic UUID from the string ID
   // This ensures the same string ID always maps to the same UUID
-  const namespace = '6ba7b810-9dad-11d1-80b4-00c04fd430c8'; // A random UUID as namespace
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = ((hash << 5) - hash) + id.charCodeAt(i);
-    hash |= 0; // Convert to 32bit integer
-  }
-  
-  // Create a simple UUID format based on the hash (this is not crypto-secure but works for migration)
-  const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    const r = (hash + Math.random() * 16) % 16 | 0;
-    hash = Math.floor(hash / 16);
-    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-  });
-  
-  return uuid;
+  const namespace = '6ba7b810-9dad-11d1-80b4-00c04fd430c8'; // A predefined namespace UUID
+  return uuidv5(id, namespace);
 };
 
 // Helper to convert Asset model to database object
