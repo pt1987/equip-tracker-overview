@@ -281,10 +281,13 @@ export const deleteAsset = async (id: string): Promise<boolean> => {
 
 export const createAssetHistoryEntry = async (entry: Omit<AssetHistoryEntry, 'id'>): Promise<AssetHistoryEntry | null> => {
   try {
+    // Ensure the action is of the correct type
+    const validAction = entry.action as 'purchase' | 'assign' | 'status_change' | 'return';
+    
     const dbHistoryEntry = {
       asset_id: entry.assetId,
       date: entry.date,
-      action: entry.action,
+      action: validAction,
       employee_id: entry.employeeId,
       notes: entry.notes || '',
     };
@@ -305,7 +308,7 @@ export const createAssetHistoryEntry = async (entry: Omit<AssetHistoryEntry, 'id
       id: data.id,
       assetId: data.asset_id,
       date: data.date,
-      action: data.action,
+      action: data.action as 'purchase' | 'assign' | 'status_change' | 'return',
       employeeId: data.employee_id,
       notes: data.notes || '',
     };
