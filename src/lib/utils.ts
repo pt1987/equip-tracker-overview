@@ -86,8 +86,8 @@ export function stringifyDateFields<T extends Record<string, any>>(obj: T): T {
   const result = { ...obj };
   
   for (const key in result) {
-    // If the value is a Date object
-    if (result[key] && result[key] instanceof Date) {
+    // Fix the instanceof check by first checking for non-null values
+    if (result[key] && Object.prototype.toString.call(result[key]) === '[object Date]') {
       result[key] = (result[key] as Date).toISOString() as any;
     }
   }

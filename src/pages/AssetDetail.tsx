@@ -1,11 +1,10 @@
-
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import PageTransition from "@/components/layout/PageTransition";
 import AssetDetailView from "@/components/assets/AssetDetailView";
 import AssetDetailEdit from "@/components/assets/AssetDetailEdit";
-import { getAssetById, getAssetHistoryByAssetId, deleteAsset } from "@/services/assetService";
+import { getAssetById, getAssetHistoryByAssetId, deleteAsset, updateAsset } from "@/services/assetService";
 import { getEmployeeById } from "@/services/employeeService";
 import { Asset, AssetHistoryEntry, Employee } from "@/lib/types";
 import { toast } from "sonner";
@@ -16,7 +15,6 @@ const AssetDetail = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [employee, setEmployee] = useState<Employee | null>(null);
 
-  // Fetch asset data
   const { 
     data: asset,
     isLoading: assetLoading,
@@ -27,7 +25,6 @@ const AssetDetail = () => {
     enabled: !!id
   });
 
-  // Fetch asset history
   const { 
     data: assetHistory,
     isLoading: historyLoading,
@@ -38,7 +35,6 @@ const AssetDetail = () => {
     enabled: !!id
   });
 
-  // Fetch employee data if asset is assigned
   useEffect(() => {
     const fetchEmployee = async () => {
       if (asset && asset.employeeId) {
@@ -54,6 +50,21 @@ const AssetDetail = () => {
 
   const handleEditToggle = () => {
     setIsEditMode(!isEditMode);
+  };
+
+  const handleSave = async (updatedAsset: Partial<Asset>) => {
+    if (!id) return;
+    
+    try {
+      const result = await updateAsset(id, updatedAsset);
+      if (result) {
+        toast.success("Asset successfully updated");
+        setIsEditMode(false);
+      }
+    } catch (error) {
+      toast.error("Failed to update asset");
+      console.error("Error updating asset:", error);
+    }
   };
 
   const handleDelete = async () => {
@@ -103,12 +114,12 @@ const AssetDetail = () => {
     );
   }
 
-  // Pass only expected props to child components
   return (
     <PageTransition>
       {isEditMode ? (
         <AssetDetailEdit 
           asset={asset}
+          onSave={handleSave}
           onCancel={handleEditToggle}
         />
       ) : (

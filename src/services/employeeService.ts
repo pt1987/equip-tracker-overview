@@ -1,6 +1,5 @@
-
 import { supabase } from "@/integrations/supabase/client";
-import { Employee } from "@/lib/types";
+import { Employee, Asset } from "@/lib/types";
 import { toast } from "sonner";
 
 // Helper to convert database object to our Employee model
@@ -33,6 +32,36 @@ function mapEmployeeToDbEmployee(employee: Partial<Employee>): any {
     budget: employee.budget,
     used_budget: employee.usedBudget,
     profile_image: employee.profileImage,
+  };
+}
+
+// Helper to convert database asset to our Asset model
+function mapDbAssetToAsset(dbAsset: any): Asset {
+  return {
+    id: dbAsset.id,
+    name: dbAsset.name,
+    type: dbAsset.type,
+    manufacturer: dbAsset.manufacturer,
+    model: dbAsset.model,
+    purchaseDate: dbAsset.purchase_date,
+    vendor: dbAsset.vendor,
+    price: dbAsset.price,
+    status: dbAsset.status,
+    employeeId: dbAsset.employee_id,
+    category: dbAsset.category,
+    serialNumber: dbAsset.serial_number,
+    inventoryNumber: dbAsset.inventory_number,
+    additionalWarranty: dbAsset.additional_warranty,
+    hasWarranty: dbAsset.has_warranty,
+    imei: dbAsset.imei,
+    phoneNumber: dbAsset.phone_number,
+    provider: dbAsset.provider,
+    contractEndDate: dbAsset.contract_end_date,
+    contractName: dbAsset.contract_name,
+    contractDuration: dbAsset.contract_duration,
+    connectedAssetId: dbAsset.connected_asset_id,
+    relatedAssetId: dbAsset.related_asset_id,
+    imageUrl: dbAsset.image_url,
   };
 }
 
@@ -135,8 +164,10 @@ export const getEmployeeAssetsSummary = async (employeeId: string) => {
     
     if (error) throw error;
     
-    const mappedAssets = employeeAssets.map(mapDbAssetToAsset);
+    const mappedAssets = employeeAssets.map(asset => mapDbAssetToAsset(asset));
     const totalValue = mappedAssets.reduce((sum, asset) => sum + asset.price, 0);
+    
+    // Define asset types with proper type casting
     const assetsByType = {
       laptop: mappedAssets.filter(asset => asset.type === 'laptop'),
       smartphone: mappedAssets.filter(asset => asset.type === 'smartphone'),

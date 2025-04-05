@@ -38,15 +38,17 @@ const queryClient = new QueryClient({
       retry: 1,
       staleTime: 30000,
       refetchOnWindowFocus: false,
-      onSettled: (data, error) => {
-        if (error) {
+      // Using meta.onError instead of onSettled
+      meta: {
+        onError: (error: Error) => {
           console.error('Query error:', error);
         }
       }
     },
     mutations: {
-      onSettled: (data, error) => {
-        if (error) {
+      // Using meta.onError for mutations too
+      meta: {
+        onError: (error: Error) => {
           console.error('Mutation error:', error);
         }
       }
