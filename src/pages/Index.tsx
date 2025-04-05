@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import PageTransition from "@/components/layout/PageTransition";
@@ -230,21 +229,21 @@ export default function Dashboard() {
             value={stats.totalAssets.toString()}
             description="All assets in inventory"
             icon={<Package2 size={20} />}
-            loading={assetsLoading}
+            isLoading={assetsLoading}
           />
           <StatCard 
             title="Total Value"
             value={formatCurrency(stats.totalValue)}
             description="Value of all assets"
             icon={<CreditCard size={20} />}
-            loading={assetsLoading}
+            isLoading={assetsLoading}
           />
           <StatCard 
             title="Employees"
             value={stats.totalEmployees.toString()}
             description="Active employees"
             icon={<Users size={20} />}
-            loading={employeesLoading}
+            isLoading={employeesLoading}
           />
           <StatCard 
             title="Avg. per Employee"
@@ -253,7 +252,7 @@ export default function Dashboard() {
               : formatCurrency(0)}
             description="Average asset value"
             icon={<Calendar size={20} />}
-            loading={assetsLoading || employeesLoading}
+            isLoading={assetsLoading || employeesLoading}
           />
         </div>
         

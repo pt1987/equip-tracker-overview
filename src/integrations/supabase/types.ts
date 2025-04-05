@@ -339,6 +339,7 @@ export type Database = {
           budget: number
           cluster: string
           created_at: string | null
+          entry_date: string
           first_name: string
           id: string
           image_url: string | null
@@ -353,6 +354,7 @@ export type Database = {
           budget?: number
           cluster: string
           created_at?: string | null
+          entry_date: string
           first_name: string
           id?: string
           image_url?: string | null
@@ -367,6 +369,7 @@ export type Database = {
           budget?: number
           cluster?: string
           created_at?: string | null
+          entry_date?: string
           first_name?: string
           id?: string
           image_url?: string | null

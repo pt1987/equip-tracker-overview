@@ -103,19 +103,17 @@ const AssetDetail = () => {
     );
   }
 
+  // Pass only expected props to child components
   return (
     <PageTransition>
       {isEditMode ? (
         <AssetDetailEdit 
           asset={asset}
           onCancel={handleEditToggle}
-          employee={employee}
         />
       ) : (
         <AssetDetailView 
           asset={asset}
-          assetHistory={assetHistory || []}
-          employee={employee}
           onEdit={handleEditToggle}
           onDelete={handleDelete}
         />

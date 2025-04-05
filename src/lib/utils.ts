@@ -74,7 +74,8 @@ export function parseDateFields<T extends Record<string, any>>(obj: T): T {
         typeof result[key] === 'string' && 
         /\d{4}-\d{2}-\d{2}/.test(result[key])) {
       
-      result[key] = new Date(result[key]);
+      // Create a new Date object from the string
+      result[key] = new Date(result[key]) as any;
     }
   }
   
@@ -86,8 +87,8 @@ export function stringifyDateFields<T extends Record<string, any>>(obj: T): T {
   
   for (const key in result) {
     // If the value is a Date object
-    if (result[key] instanceof Date) {
-      result[key] = result[key].toISOString();
+    if (result[key] && result[key] instanceof Date) {
+      result[key] = (result[key] as Date).toISOString() as any;
     }
   }
   

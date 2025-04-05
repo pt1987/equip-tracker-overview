@@ -7,7 +7,7 @@ import { toast } from "sonner";
 // Check if data already exists in the database
 const checkDataExists = async (table: string): Promise<boolean> => {
   const { count, error } = await supabase
-    .from(table)
+    .from(table as any)
     .select('*', { count: 'exact', head: true });
   
   if (error) {
@@ -38,6 +38,65 @@ const convertToUuid = (id: string): string => {
   
   return uuid;
 };
+
+// Helper to convert Asset model to database object
+function mapAssetToDbAsset(asset: Asset): any {
+  return {
+    id: asset.id,
+    name: asset.name,
+    type: asset.type,
+    manufacturer: asset.manufacturer,
+    model: asset.model,
+    purchase_date: asset.purchaseDate,
+    vendor: asset.vendor,
+    price: asset.price,
+    status: asset.status,
+    employee_id: asset.employeeId,
+    category: asset.category,
+    serial_number: asset.serialNumber,
+    inventory_number: asset.inventoryNumber,
+    additional_warranty: asset.additionalWarranty,
+    has_warranty: asset.hasWarranty,
+    imei: asset.imei,
+    phone_number: asset.phoneNumber,
+    provider: asset.provider,
+    contract_end_date: asset.contractEndDate,
+    contract_name: asset.contractName,
+    contract_duration: asset.contractDuration,
+    connected_asset_id: asset.connectedAssetId,
+    related_asset_id: asset.relatedAssetId,
+    image_url: asset.imageUrl,
+  };
+}
+
+// Helper to convert Employee model to database object
+function mapEmployeeToDbEmployee(employee: Employee): any {
+  return {
+    id: employee.id,
+    first_name: employee.firstName,
+    last_name: employee.lastName,
+    image_url: employee.imageUrl,
+    start_date: employee.startDate,
+    entry_date: employee.entryDate || employee.startDate,
+    cluster: employee.cluster,
+    position: employee.position,
+    budget: employee.budget,
+    used_budget: employee.usedBudget,
+    profile_image: employee.profileImage,
+  };
+}
+
+// Helper to convert AssetHistoryEntry model to database object
+function mapHistoryEntryToDbHistory(entry: AssetHistoryEntry): any {
+  return {
+    id: entry.id,
+    asset_id: entry.assetId,
+    date: entry.date,
+    action: entry.action,
+    employee_id: entry.employeeId,
+    notes: entry.notes,
+  };
+}
 
 // Convert all mock data to use UUIDs
 const prepareAssetsForMigration = (): Asset[] => {
@@ -109,9 +168,10 @@ export const migrateDataToSupabase = async (): Promise<boolean> => {
     
     // Insert employees first (as assets depend on them)
     if (!employeesExist) {
+      const dbEmployees = preparedEmployees.map(mapEmployeeToDbEmployee);
       const { error: employeeError } = await supabase
         .from('employees')
-        .insert(preparedEmployees);
+        .insert(dbEmployees);
       
       if (employeeError) {
         console.error('Error migrating employees:', employeeError);
@@ -122,9 +182,10 @@ export const migrateDataToSupabase = async (): Promise<boolean> => {
     
     // Insert assets
     if (!assetsExist) {
+      const dbAssets = preparedAssets.map(mapAssetToDbAsset);
       const { error: assetError } = await supabase
         .from('assets')
-        .insert(preparedAssets);
+        .insert(dbAssets);
       
       if (assetError) {
         console.error('Error migrating assets:', assetError);
@@ -135,9 +196,10 @@ export const migrateDataToSupabase = async (): Promise<boolean> => {
     
     // Insert history
     if (!historyExists) {
+      const dbHistory = preparedHistory.map(mapHistoryEntryToDbHistory);
       const { error: historyError } = await supabase
         .from('asset_history')
-        .insert(preparedHistory);
+        .insert(dbHistory);
       
       if (historyError) {
         console.error('Error migrating asset history:', historyError);

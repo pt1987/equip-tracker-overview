@@ -3,6 +3,39 @@ import { supabase } from "@/integrations/supabase/client";
 import { Employee } from "@/lib/types";
 import { toast } from "sonner";
 
+// Helper to convert database object to our Employee model
+function mapDbEmployeeToEmployee(dbEmployee: any): Employee {
+  return {
+    id: dbEmployee.id,
+    firstName: dbEmployee.first_name,
+    lastName: dbEmployee.last_name,
+    imageUrl: dbEmployee.image_url || '',
+    startDate: dbEmployee.start_date,
+    entryDate: dbEmployee.entry_date,
+    cluster: dbEmployee.cluster,
+    position: dbEmployee.position,
+    budget: dbEmployee.budget,
+    usedBudget: dbEmployee.used_budget,
+    profileImage: dbEmployee.profile_image,
+  };
+}
+
+// Helper to convert Employee model to database object
+function mapEmployeeToDbEmployee(employee: Partial<Employee>): any {
+  return {
+    first_name: employee.firstName,
+    last_name: employee.lastName,
+    image_url: employee.imageUrl,
+    start_date: employee.startDate,
+    entry_date: employee.entryDate,
+    cluster: employee.cluster,
+    position: employee.position,
+    budget: employee.budget,
+    used_budget: employee.usedBudget,
+    profile_image: employee.profileImage,
+  };
+}
+
 export const getEmployees = async (): Promise<Employee[]> => {
   try {
     const { data, error } = await supabase
@@ -10,7 +43,7 @@ export const getEmployees = async (): Promise<Employee[]> => {
       .select('*');
     
     if (error) throw error;
-    return data || [];
+    return (data || []).map(mapDbEmployeeToEmployee);
   } catch (error) {
     console.error("Error fetching employees:", error);
     toast.error("Failed to fetch employees");
@@ -27,7 +60,7 @@ export const getEmployeeById = async (id: string): Promise<Employee | null> => {
       .single();
     
     if (error) throw error;
-    return data;
+    return data ? mapDbEmployeeToEmployee(data) : null;
   } catch (error) {
     console.error(`Error fetching employee ${id}:`, error);
     toast.error("Failed to fetch employee details");
@@ -37,15 +70,17 @@ export const getEmployeeById = async (id: string): Promise<Employee | null> => {
 
 export const createEmployee = async (employee: Omit<Employee, 'id'>): Promise<Employee | null> => {
   try {
+    const dbEmployee = mapEmployeeToDbEmployee(employee);
+    
     const { data, error } = await supabase
       .from('employees')
-      .insert([employee])
+      .insert([dbEmployee])
       .select()
       .single();
     
     if (error) throw error;
     toast.success("Employee created successfully");
-    return data;
+    return data ? mapDbEmployeeToEmployee(data) : null;
   } catch (error) {
     console.error("Error creating employee:", error);
     toast.error("Failed to create employee");
@@ -55,16 +90,18 @@ export const createEmployee = async (employee: Omit<Employee, 'id'>): Promise<Em
 
 export const updateEmployee = async (id: string, employee: Partial<Employee>): Promise<Employee | null> => {
   try {
+    const dbEmployee = mapEmployeeToDbEmployee(employee);
+    
     const { data, error } = await supabase
       .from('employees')
-      .update(employee)
+      .update(dbEmployee)
       .eq('id', id)
       .select()
       .single();
     
     if (error) throw error;
     toast.success("Employee updated successfully");
-    return data;
+    return data ? mapDbEmployeeToEmployee(data) : null;
   } catch (error) {
     console.error(`Error updating employee ${id}:`, error);
     toast.error("Failed to update employee");
@@ -98,18 +135,19 @@ export const getEmployeeAssetsSummary = async (employeeId: string) => {
     
     if (error) throw error;
     
-    const totalValue = employeeAssets.reduce((sum, asset) => sum + asset.price, 0);
+    const mappedAssets = employeeAssets.map(mapDbAssetToAsset);
+    const totalValue = mappedAssets.reduce((sum, asset) => sum + asset.price, 0);
     const assetsByType = {
-      laptop: employeeAssets.filter(asset => asset.type === 'laptop'),
-      smartphone: employeeAssets.filter(asset => asset.type === 'smartphone'),
-      tablet: employeeAssets.filter(asset => asset.type === 'tablet'),
-      mouse: employeeAssets.filter(asset => asset.type === 'mouse'),
-      keyboard: employeeAssets.filter(asset => asset.type === 'keyboard'),
-      accessory: employeeAssets.filter(asset => asset.type === 'accessory')
+      laptop: mappedAssets.filter(asset => asset.type === 'laptop'),
+      smartphone: mappedAssets.filter(asset => asset.type === 'smartphone'),
+      tablet: mappedAssets.filter(asset => asset.type === 'tablet'),
+      mouse: mappedAssets.filter(asset => asset.type === 'mouse'),
+      keyboard: mappedAssets.filter(asset => asset.type === 'keyboard'),
+      accessory: mappedAssets.filter(asset => asset.type === 'accessory')
     };
     
     return {
-      totalAssets: employeeAssets.length,
+      totalAssets: mappedAssets.length,
       totalValue,
       assetsByType
     };
