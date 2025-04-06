@@ -1,3 +1,4 @@
+
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import PageTransition from "@/components/layout/PageTransition";
@@ -66,7 +67,11 @@ const EmployeeDetail = () => {
           }
         } catch (error) {
           console.error("Error fetching employee details:", error);
-          toast.error("Failed to load employee details");
+          toast({
+            title: "Error",
+            description: "Failed to load employee details",
+            variant: "destructive"
+          });
         } finally {
           setLoading(false);
         }
