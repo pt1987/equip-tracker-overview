@@ -13,14 +13,25 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Employee } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
-import { getEmployeeAssetsSummary } from "@/data/employees";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Badge } from "@/components/ui/badge";
 
 interface EmployeeCardProps {
   employee: Employee;
   index?: number; // Added this optional prop to match usage in Employees.tsx
 }
+
+type AssetSummary = {
+  laptop: number;
+  smartphone: number;
+  tablet: number;
+  mouse: number;
+  keyboard: number;
+  accessory: number;
+  totalCount: number;
+  totalValue: number;
+};
 
 const EmployeeCard: React.FC<EmployeeCardProps> = ({ employee }) => {
   // Use React Query to get asset counts from Supabase
@@ -32,7 +43,7 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ employee }) => {
       // Get all assets assigned to this employee
       const { data, error } = await supabase
         .from('assets')
-        .select('type')
+        .select('type, price')
         .eq('employee_id', employee.id);
       
       if (error) {
@@ -40,15 +51,24 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ employee }) => {
         return null;
       }
 
-      // Count assets by type
-      const summary = {
-        laptop: data.filter(asset => asset.type === 'laptop').length,
-        smartphone: data.filter(asset => asset.type === 'smartphone').length,
-        tablet: data.filter(asset => asset.type === 'tablet').length,
-        mouse: data.filter(asset => asset.type === 'mouse').length,
-        keyboard: data.filter(asset => asset.type === 'keyboard').length,
-        accessory: data.filter(asset => asset.type === 'accessory').length,
+      // Initialize summary
+      const summary: AssetSummary = {
+        laptop: 0,
+        smartphone: 0,
+        tablet: 0,
+        mouse: 0,
+        keyboard: 0,
+        accessory: 0,
+        totalCount: data.length,
+        totalValue: data.reduce((sum, asset) => sum + asset.price, 0)
       };
+      
+      // Count assets by type
+      data.forEach(asset => {
+        if (summary[asset.type as keyof Omit<AssetSummary, 'totalCount' | 'totalValue'>] !== undefined) {
+          summary[asset.type as keyof Omit<AssetSummary, 'totalCount' | 'totalValue'>]++;
+        }
+      });
       
       return summary;
     },
@@ -120,33 +140,51 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ employee }) => {
                 Loading asset data...
               </div>
             ) : assetSummary ? (
-              <>
-                <div>
-                  <span className="text-muted-foreground">Laptops:</span>
-                  <p>{assetSummary.laptop}</p>
+              <div className="col-span-2 mt-2">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium">Assets ({assetSummary.totalCount})</span>
+                  <Badge variant="outline" className="text-xs">
+                    Value: ${assetSummary.totalValue.toLocaleString()}
+                  </Badge>
                 </div>
-                <div>
-                  <span className="text-muted-foreground">Smartphones:</span>
-                  <p>{assetSummary.smartphone}</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {assetSummary.laptop > 0 && (
+                    <Badge variant="secondary" className="flex justify-between">
+                      Laptops <span className="font-bold">{assetSummary.laptop}</span>
+                    </Badge>
+                  )}
+                  {assetSummary.smartphone > 0 && (
+                    <Badge variant="secondary" className="flex justify-between">
+                      Phones <span className="font-bold">{assetSummary.smartphone}</span>
+                    </Badge>
+                  )}
+                  {assetSummary.tablet > 0 && (
+                    <Badge variant="secondary" className="flex justify-between">
+                      Tablets <span className="font-bold">{assetSummary.tablet}</span>
+                    </Badge>
+                  )}
+                  {assetSummary.mouse > 0 && (
+                    <Badge variant="secondary" className="flex justify-between">
+                      Mice <span className="font-bold">{assetSummary.mouse}</span>
+                    </Badge>
+                  )}
+                  {assetSummary.keyboard > 0 && (
+                    <Badge variant="secondary" className="flex justify-between">
+                      Keyboards <span className="font-bold">{assetSummary.keyboard}</span>
+                    </Badge>
+                  )}
+                  {assetSummary.accessory > 0 && (
+                    <Badge variant="secondary" className="flex justify-between">
+                      Accessories <span className="font-bold">{assetSummary.accessory}</span>
+                    </Badge>
+                  )}
                 </div>
-                <div>
-                  <span className="text-muted-foreground">Tablets:</span>
-                  <p>{assetSummary.tablet}</p>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Mice:</span>
-                  <p>{assetSummary.mouse}</p>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Keyboards:</span>
-                  <p>{assetSummary.keyboard}</p>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Accessories:</span>
-                  <p>{assetSummary.accessory}</p>
-                </div>
-              </>
-            ) : null}
+              </div>
+            ) : (
+              <div className="col-span-2 text-center text-sm text-muted-foreground">
+                No assets found
+              </div>
+            )}
           </div>
         </CardDescription>
       </CardContent>
