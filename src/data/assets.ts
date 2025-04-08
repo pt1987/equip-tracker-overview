@@ -1,3 +1,4 @@
+
 import { Asset, AssetHistoryEntry, AssetStatus, AssetType } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -223,7 +224,7 @@ export const getAssetStatusDistribution = async () => {
   }));
 };
 
-// New function to update an asset in the database
+// Function to update an asset in the database
 export const updateAsset = async (asset: Asset): Promise<Asset> => {
   console.log("Updating asset in Supabase:", asset);
   
@@ -254,7 +255,7 @@ export const updateAsset = async (asset: Asset): Promise<Asset> => {
       connected_asset_id: asset.connectedAssetId,
       related_asset_id: asset.relatedAssetId,
       image_url: asset.imageUrl,
-      updated_at: new Date()
+      updated_at: new Date().toISOString() // Convert Date to string format
     };
     
     const { data, error } = await supabase
