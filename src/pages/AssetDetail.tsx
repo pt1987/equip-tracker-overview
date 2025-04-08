@@ -1,7 +1,6 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import PageTransition from "@/components/layout/PageTransition";
-import Navbar from "@/components/layout/Navbar";
 import { getAssetById, getEmployeeById, getAssetHistoryByAssetId } from "@/data/mockData";
 import { Asset, AssetHistoryEntry } from "@/lib/types";
 import QRCode from "@/components/shared/QRCode";
@@ -12,35 +11,33 @@ import { toast } from "@/hooks/use-toast";
 import AssetDetailView from "@/components/assets/AssetDetailView";
 import AssetDetailEdit from "@/components/assets/AssetDetailEdit";
 import DocumentUpload, { Document } from "@/components/assets/DocumentUpload";
+import { useQuery } from "@tanstack/react-query";
 
 const AssetDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [asset, setAsset] = useState<Asset | null>(null);
-  const [employee, setEmployee] = useState<any>(null);
-  const [history, setHistory] = useState<AssetHistoryEntry[]>([]);
-  const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [documents, setDocuments] = useState<Document[]>([]);
   
-  useEffect(() => {
-    if (id) {
-      const assetData = getAssetById(id);
-      setAsset(assetData || null);
-      
-      if (assetData?.employeeId) {
-        const employeeData = getEmployeeById(assetData.employeeId);
-        setEmployee(employeeData || null);
-      }
-      
-      const historyData = getAssetHistoryByAssetId(id);
-      setHistory(historyData);
-      
-      setDocuments([]);
-      
-      setLoading(false);
-    }
-  }, [id]);
+  const { data: asset, isLoading: assetLoading } = useQuery({
+    queryKey: ['asset', id],
+    queryFn: () => id ? getAssetById(id) : null,
+    enabled: !!id,
+  });
+  
+  const { data: employee, isLoading: employeeLoading } = useQuery({
+    queryKey: ['employee', asset?.employeeId],
+    queryFn: () => asset?.employeeId ? getEmployeeById(asset.employeeId) : null,
+    enabled: !!asset?.employeeId,
+  });
+  
+  const { data: history = [], isLoading: historyLoading } = useQuery({
+    queryKey: ['assetHistory', id],
+    queryFn: () => id ? getAssetHistoryByAssetId(id) : [],
+    enabled: !!id,
+  });
+  
+  const loading = assetLoading || employeeLoading || historyLoading;
   
   const handleEdit = () => {
     setIsEditing(true);
@@ -53,14 +50,7 @@ const AssetDetail = () => {
   const handleSave = (data: any) => {
     console.log("Updated asset data:", data);
     
-    if (asset) {
-      const updatedAsset = {
-        ...asset,
-        ...data,
-        purchaseDate: data.purchaseDate.toISOString(),
-      };
-      setAsset(updatedAsset);
-    }
+    // In a real application, we would save to Supabase here
     
     setIsEditing(false);
     

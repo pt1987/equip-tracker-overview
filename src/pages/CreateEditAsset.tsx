@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import PageTransition from "@/components/layout/PageTransition";
@@ -30,12 +29,12 @@ import {
 } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { assets, employees } from "@/data/mockData";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "@/hooks/use-toast";
+import { getAssets, getEmployees } from "@/data/mockData";
 
 // Schema for the form
 const assetFormSchema = z.object({
@@ -67,19 +66,17 @@ export default function CreateEditAsset() {
   const isEditing = !!id;
   const [activeTab, setActiveTab] = useState("basic");
 
-  const { data: assetData = [] } = useQuery({
+  const { data: assets = [] } = useQuery({
     queryKey: ["assets"],
-    queryFn: () => assets,
-    initialData: assets,
+    queryFn: getAssets
   });
 
-  const { data: employeeData = [] } = useQuery({
+  const { data: employees = [] } = useQuery({
     queryKey: ["employees"],
-    queryFn: () => employees,
-    initialData: employees,
+    queryFn: getEmployees
   });
 
-  const asset = isEditing ? assetData.find(a => a.id === id) : null;
+  const asset = isEditing ? assets.find(a => a.id === id) : null;
 
   const form = useForm<AssetFormValues>({
     resolver: zodResolver(assetFormSchema),
@@ -333,7 +330,7 @@ export default function CreateEditAsset() {
                                 </FormControl>
                                 <SelectContent>
                                   <SelectItem value="pool">Nicht zugewiesen (Pool)</SelectItem>
-                                  {employeeData.map(employee => (
+                                  {employees.map(employee => (
                                     <SelectItem key={employee.id} value={employee.id}>
                                       {employee.firstName} {employee.lastName}
                                     </SelectItem>
@@ -508,7 +505,7 @@ export default function CreateEditAsset() {
                                 </FormControl>
                                 <SelectContent>
                                   <SelectItem value="none">Kein zugehöriges Gerät</SelectItem>
-                                  {assetData
+                                  {assets
                                     .filter(a => ["notebook", "smartphone", "tablet"].includes(a.category))
                                     .map(asset => (
                                       <SelectItem key={asset.id} value={asset.id}>

@@ -1,6 +1,6 @@
+
 import { useState, useEffect } from "react";
 import PageTransition from "@/components/layout/PageTransition";
-import { employees } from "@/data/mockData";
 import { Employee } from "@/lib/types";
 import EmployeeCard from "@/components/employees/EmployeeCard";
 import SearchFilter from "@/components/shared/SearchFilter";
@@ -9,6 +9,8 @@ import { motion } from "framer-motion";
 import { SlidersHorizontal, X, Check, Users, ArrowRight } from "lucide-react";
 import { formatDate, calculateEmploymentDuration } from "@/lib/utils";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { getEmployees } from "@/data/mockData";
 
 interface FilterOption {
   label: string;
@@ -19,9 +21,14 @@ const EmployeesPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedClusters, setSelectedClusters] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
-  const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>(employees);
+  const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
   const [view, setView] = useState<"grid" | "list">("grid");
   
+  const { data: employees = [] } = useQuery({
+    queryKey: ['employees'],
+    queryFn: getEmployees,
+  });
+
   // Get unique clusters
   const clusters = [...new Set(employees.map(emp => emp.cluster))];
   
@@ -45,7 +52,7 @@ const EmployeesPage = () => {
     }
     
     setFilteredEmployees(filtered);
-  }, [searchTerm, selectedClusters]);
+  }, [searchTerm, selectedClusters, employees]);
   
   const toggleClusterFilter = (cluster: string) => {
     if (selectedClusters.includes(cluster)) {

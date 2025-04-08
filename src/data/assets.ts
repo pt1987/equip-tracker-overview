@@ -1,852 +1,134 @@
-import { Asset, AssetHistoryEntry, AssetStatus, AssetType, AssetTypeDistribution, AssetStatusDistribution } from "@/lib/types";
-import { getEmployeeById } from "./employees";
 
-// Asset mock data
-export const assets: Asset[] = [
-  {
-    id: "ast001",
-    name: "MacBook Pro 16",
-    type: "laptop",
-    category: "notebook",
-    manufacturer: "Apple",
-    model: "MacBook Pro 16 M1 Pro",
-    purchaseDate: "2022-03-15",
-    vendor: "Apple Store",
-    price: 2499,
-    status: "in_use",
-    employeeId: "emp001",
-    assignedTo: "emp001",
-    serialNumber: "C02F134RXXXX",
-    inventoryNumber: "PHAT-L-001",
-    additionalWarranty: true,
-    hasWarranty: true,
-    imageUrl: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/mbp16-spacegray-select-202110?wid=904&hei=840&fmt=jpeg&qlt=90&.v=1632788574000"
-  },
-  {
-    id: "ast002",
-    name: "iPhone 14 Pro",
-    type: "smartphone",
-    category: "smartphone",
-    manufacturer: "Apple",
-    model: "iPhone 14 Pro",
-    purchaseDate: "2022-11-10",
-    vendor: "Telekom",
-    price: 1299,
-    status: "in_use",
-    employeeId: "emp001",
-    assignedTo: "emp001",
-    serialNumber: "FVFXC1XXXXXX",
-    inventoryNumber: "PHAT-S-001",
-    imei: "35123456789012X",
-    phoneNumber: "+4915123456789",
-    provider: "Telekom",
-    contractEndDate: "2024-11-09",
-    contractDuration: "24 Monate",
-    contractName: "Business Mobile L",
-    imageUrl: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/iphone-14-pro-finish-select-202209-6-1inch-deeppurple?wid=5120&hei=2880&fmt=p-jpg&qlt=80&.v=1663703841896"
-  },
-  {
-    id: "ast003",
-    name: "Magic Mouse",
-    type: "mouse",
-    category: "peripheral",
-    manufacturer: "Apple",
-    model: "Magic Mouse 2",
-    purchaseDate: "2022-03-15",
-    vendor: "Apple Store",
-    price: 79,
-    status: "in_use",
-    employeeId: "emp001",
-    inventoryNumber: "PHAT-A-001",
-    connectedAssetId: "ast001",
-    imageUrl: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/MK2E3?wid=2000&hei=2000&fmt=jpeg&qlt=95&.v=1626468075000"
-  },
-  {
-    id: "ast004",
-    name: "Dell XPS 15",
-    type: "laptop",
-    category: "notebook",
-    manufacturer: "Dell",
-    model: "XPS 15 9510",
-    purchaseDate: "2021-08-22",
-    vendor: "Dell Online Store",
-    price: 1899,
-    status: "in_use",
-    employeeId: "emp002",
-    serialNumber: "JH2F5XX",
-    inventoryNumber: "PHAT-L-002",
-    additionalWarranty: true,
-    imageUrl: "https://i.dell.com/is/image/DellContent/content/dam/ss2/product-images/dell-client-products/notebooks/xps-notebooks/xps-15-9520/media-gallery/black/non-touch/notebook-xps-15-9520-nt-black-gallery-4.psd?fmt=png-alpha&pscan=auto&scl=1&wid=5000&hei=5000&qlt=100,0&resMode=sharp2&size=5000,5000"
-  },
-  {
-    id: "ast005",
-    name: "Samsung Galaxy S23",
-    type: "smartphone",
-    category: "smartphone",
-    manufacturer: "Samsung",
-    model: "Galaxy S23 Ultra",
-    purchaseDate: "2023-02-28",
-    vendor: "Vodafone",
-    price: 1199,
-    status: "in_use",
-    employeeId: "emp002",
-    serialNumber: "R58N70XXXXX",
-    inventoryNumber: "PHAT-S-002",
-    imei: "35298765432109X",
-    phoneNumber: "+4917123456789",
-    provider: "Vodafone",
-    contractEndDate: "2025-02-27",
-    contractName: "Red Business XL",
-    imageUrl: "https://images.samsung.com/is/image/samsung/p6pim/de/2302/gallery/de-galaxy-s23-s918-sm-s918bzkcgxx-thumb-534863317"
-  },
-  {
-    id: "ast006",
-    name: "iPad Pro 11",
-    type: "tablet",
-    category: "tablet",
-    manufacturer: "Apple",
-    model: "iPad Pro 11 M2",
-    purchaseDate: "2023-04-15",
-    vendor: "Apple Store",
-    price: 899,
-    status: "in_use",
-    employeeId: "emp003",
-    serialNumber: "DLXFP2XXXXXX",
-    inventoryNumber: "PHAT-T-001",
-    imageUrl: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/ipad-pro-11-select-wifi-spacegray-202210?wid=940&hei=1112&fmt=p-jpg&qlt=95&.v=1664412792014"
-  },
-  {
-    id: "ast007",
-    name: "Magic Keyboard",
-    type: "keyboard",
-    category: "peripheral",
-    manufacturer: "Apple",
-    model: "Magic Keyboard",
-    purchaseDate: "2023-04-15",
-    vendor: "Apple Store",
-    price: 149,
-    status: "in_use",
-    employeeId: "emp003",
-    inventoryNumber: "PHAT-A-002",
-    connectedAssetId: "ast006",
-    imageUrl: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/MMMR3?wid=2000&hei=2000&fmt=jpeg&qlt=95&.v=1645719947833"
-  },
-  {
-    id: "ast008",
-    name: "ThinkPad X1 Carbon",
-    type: "laptop",
-    category: "notebook",
-    manufacturer: "Lenovo",
-    model: "ThinkPad X1 Carbon Gen 10",
-    purchaseDate: "2022-09-01",
-    vendor: "Lenovo Online",
-    price: 1799,
-    status: "in_use",
-    employeeId: "emp004",
-    serialNumber: "PF3F5XXX",
-    inventoryNumber: "PHAT-L-003",
-    additionalWarranty: true,
-    imageUrl: "https://p1-ofp.static.pub/medias/bWFzdGVyfHJvb3R8MjM4NTY0fGltYWdlL3BuZ3xoMjMvaGZkLzE0OTMxODkxOTQwMzgyLnBuZ3wxYjdlNjhiZTdjMmM5ZjcwOGEyNzY1ZjY5ZmQ3ZGQxYzhhZmVkOGZkODJiYzE1MjVkYjRjNTZjOTZhMjQ1NDNi/lenovo-laptops-thinkpad-x1-carbon-gen10-14-intel-hero.png"
-  },
-  {
-    id: "ast009",
-    name: "Magic Mouse",
-    type: "mouse",
-    category: "peripheral",
-    manufacturer: "Apple",
-    model: "Magic Mouse 2",
-    purchaseDate: "2022-05-10",
-    vendor: "Apple Store",
-    price: 79,
-    status: "pool",
-    employeeId: null,
-    inventoryNumber: "PHAT-A-003",
-    imageUrl: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/MK2E3?wid=2000&hei=2000&fmt=jpeg&qlt=95&.v=1626468075000"
-  },
-  {
-    id: "ast010",
-    name: "Logitech MX Master 3S",
-    type: "mouse",
-    category: "peripheral",
-    manufacturer: "Logitech",
-    model: "MX Master 3S",
-    purchaseDate: "2023-01-20",
-    vendor: "Amazon",
-    price: 119,
-    status: "in_use",
-    employeeId: "emp005",
-    inventoryNumber: "PHAT-A-004",
-    connectedAssetId: "ast012",
-    imageUrl: "https://resource.logitech.com/content/dam/logitech/en/products/mice/mx-master-3s/gallery/mx-master-3s-mouse-top-view-graphite.png"
-  },
-  {
-    id: "ast011",
-    name: "iPad Air",
-    type: "tablet",
-    category: "tablet",
-    manufacturer: "Apple",
-    model: "iPad Air 5",
-    purchaseDate: "2022-08-10",
-    vendor: "Apple Store",
-    price: 699,
-    status: "repair",
-    employeeId: "emp005",
-    serialNumber: "GHXCP2XXXXXX",
-    inventoryNumber: "PHAT-T-002",
-    imageUrl: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/ipad-air-select-wifi-blue-202203?wid=940&hei=1112&fmt=png-alpha&.v=1645065732688"
-  },
-  {
-    id: "ast012",
-    name: "MacBook Air M2",
-    type: "laptop",
-    category: "notebook",
-    manufacturer: "Apple",
-    model: "MacBook Air M2",
-    purchaseDate: "2022-07-15",
-    vendor: "Apple Store",
-    price: 1499,
-    status: "in_use",
-    employeeId: "emp005",
-    serialNumber: "C02G134RXXXX",
-    inventoryNumber: "PHAT-L-004",
-    additionalWarranty: false,
-    imageUrl: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/macbook-air-midnight-select-20220606?wid=904&hei=840&fmt=jpeg&qlt=90&.v=1653084303665"
-  },
-  {
-    id: "ast013",
-    name: "iPhone 13",
-    type: "smartphone",
-    category: "smartphone",
-    manufacturer: "Apple",
-    model: "iPhone 13",
-    purchaseDate: "2021-12-10",
-    vendor: "O2",
-    price: 899,
-    status: "defective",
-    employeeId: null,
-    serialNumber: "FVDXC1XXXXXX",
-    inventoryNumber: "PHAT-S-003",
-    imei: "35123456789013X",
-    phoneNumber: "+4917923456789",
-    provider: "O2",
-    contractEndDate: "2023-12-09",
-    contractName: "Free Business M",
-    imageUrl: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/iphone-13-blue-select-2021?wid=940&hei=1112&fmt=png-alpha&.v=1645572386470"
-  },
-  {
-    id: "ast014",
-    name: "Dell UltraSharp 27",
-    type: "accessory",
-    category: "monitor",
-    manufacturer: "Dell",
-    model: "UltraSharp 27 U2720Q",
-    purchaseDate: "2022-03-15",
-    vendor: "Dell Online Store",
-    price: 599,
-    status: "pool",
-    employeeId: null,
-    inventoryNumber: "PHAT-A-005",
-    imageUrl: "https://i.dell.com/is/image/DellContent/content/dam/ss2/product-images/dell-client-products/peripherals/monitors/u-series/u2720q/pdp/monitor-u2720q-pdp-5.jpg?fmt=png-alpha&wid=1000&hei=1000"
-  },
-  {
-    id: "ast015",
-    name: "Bose QuietComfort 45",
-    type: "accessory",
-    category: "audio",
-    manufacturer: "Bose",
-    model: "QuietComfort 45",
-    purchaseDate: "2022-07-28",
-    vendor: "Bose Online",
-    price: 329,
-    status: "ordered",
-    employeeId: "emp001",
-    inventoryNumber: "PHAT-A-006",
-    imageUrl: "https://assets.bose.com/content/dam/Bose_DAM/Web/consumer_electronics/global/products/headphones/qc45/product_silo_images/QC45_PDP_HERO_Midnight_Blue_1200x1022.png/jcr:content/renditions/cq5dam.web.1280.1280.png"
-  },
-  {
-    id: "ast016",
-    name: "MacBook Air M2",
-    type: "laptop",
-    category: "notebook",
-    manufacturer: "Apple",
-    model: "MacBook Air M2",
-    purchaseDate: "2023-03-10",
-    vendor: "Apple Store",
-    price: 1299,
-    status: "in_use",
-    employeeId: "emp006",
-    serialNumber: "C02G234RXXXX",
-    inventoryNumber: "PHAT-L-005",
-    additionalWarranty: true,
-    hasWarranty: true,
-    imageUrl: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/macbook-air-midnight-select-20220606?wid=904&hei=840&fmt=jpeg&qlt=90&.v=1653084303665"
-  },
-  {
-    id: "ast017",
-    name: "iPhone 13 Mini",
-    type: "smartphone",
-    category: "smartphone",
-    manufacturer: "Apple",
-    model: "iPhone 13 Mini",
-    purchaseDate: "2023-03-15",
-    vendor: "Vodafone",
-    price: 799,
-    status: "in_use",
-    employeeId: "emp006",
-    serialNumber: "FVGXC1XXXXXX",
-    inventoryNumber: "PHAT-S-004",
-    imei: "35123456789013X",
-    phoneNumber: "+4915123456799",
-    provider: "Vodafone",
-    contractEndDate: "2025-03-14",
-    contractDuration: "24 Monate",
-    contractName: "Red Business M",
-    imageUrl: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/iphone-13-mini-blue-select-2021?wid=940&hei=1112&fmt=png-alpha&.v=1645572315986"
-  },
-  {
-    id: "ast018",
-    name: "Logitech MX Keys",
-    type: "keyboard",
-    category: "peripheral",
-    manufacturer: "Logitech",
-    model: "MX Keys",
-    purchaseDate: "2023-03-20",
-    vendor: "Amazon",
-    price: 109,
-    status: "in_use",
-    employeeId: "emp006",
-    inventoryNumber: "PHAT-A-007",
-    connectedAssetId: "ast016",
-    imageUrl: "https://resource.logitech.com/content/dam/logitech/en/products/keyboards/mx-keys/gallery/mx-keys-gallery-graphite-front.png"
-  },
-  {
-    id: "ast019",
-    name: "Dell XPS 13",
-    type: "laptop",
-    category: "notebook",
-    manufacturer: "Dell",
-    model: "XPS 13 9310",
-    purchaseDate: "2023-01-15",
-    vendor: "Dell Online Store",
-    price: 1599,
-    status: "in_use",
-    employeeId: "emp007",
-    serialNumber: "JK2G5XX",
-    inventoryNumber: "PHAT-L-006",
-    additionalWarranty: true,
-    imageUrl: "https://i.dell.com/is/image/DellContent/content/dam/ss2/product-images/dell-client-products/notebooks/xps-notebooks/xps-13-9310/general/xps-13-laptop-looks-icy-white-palmrest-open-up-left-generic-hero-504x350-ng.png"
-  },
-  {
-    id: "ast020",
-    name: "Samsung Galaxy S22",
-    type: "smartphone",
-    category: "smartphone",
-    manufacturer: "Samsung",
-    model: "Galaxy S22",
-    purchaseDate: "2023-01-20",
-    vendor: "O2",
-    price: 899,
-    status: "in_use",
-    employeeId: "emp007",
-    serialNumber: "R59N70XXXXX",
-    inventoryNumber: "PHAT-S-005",
-    imei: "35298765432119X",
-    phoneNumber: "+4917623456789",
-    provider: "O2",
-    contractEndDate: "2025-01-19",
-    contractName: "Free Business S",
-    imageUrl: "https://images.samsung.com/is/image/samsung/p6pim/de/2202/gallery/de-galaxy-s22-s901-sm-s901bzkgeub-530960409"
-  },
-  {
-    id: "ast021",
-    name: "iPad Pro 12.9",
-    type: "tablet",
-    category: "tablet",
-    manufacturer: "Apple",
-    model: "iPad Pro 12.9 M2",
-    purchaseDate: "2023-05-10",
-    vendor: "Apple Store",
-    price: 1199,
-    status: "in_use",
-    employeeId: "emp008",
-    serialNumber: "DLXGP2XXXXXX",
-    inventoryNumber: "PHAT-T-003",
-    imageUrl: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/ipad-pro-13-select-wifi-spacegray-202210?wid=940&hei=1112&fmt=p-jpg&qlt=95&.v=1664411207456"
-  },
-  {
-    id: "ast022",
-    name: "MacBook Pro 14",
-    type: "laptop",
-    category: "notebook",
-    manufacturer: "Apple",
-    model: "MacBook Pro 14 M1 Pro",
-    purchaseDate: "2023-05-15",
-    vendor: "Apple Store",
-    price: 1999,
-    status: "in_use",
-    employeeId: "emp008",
-    serialNumber: "C02H134RXXXX",
-    inventoryNumber: "PHAT-L-007",
-    additionalWarranty: true,
-    hasWarranty: true,
-    imageUrl: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/mbp14-spacegray-select-202110?wid=904&hei=840&fmt=jpeg&qlt=90&.v=1632788573000"
-  },
-  {
-    id: "ast023",
-    name: "Lenovo ThinkPad P1",
-    type: "laptop",
-    category: "notebook",
-    manufacturer: "Lenovo",
-    model: "ThinkPad P1 Gen 5",
-    purchaseDate: "2023-02-20",
-    vendor: "Lenovo Online",
-    price: 2199,
-    status: "in_use",
-    employeeId: "emp009",
-    serialNumber: "PF4F5XXX",
-    inventoryNumber: "PHAT-L-008",
-    additionalWarranty: true,
-    imageUrl: "https://p1-ofp.static.pub/medias/26233_Thinkpad_P1_Gen_5_Front_Facing_Left-2-1659433935717.png"
-  },
-  {
-    id: "ast024",
-    name: "Samsung Galaxy Tab S8",
-    type: "tablet",
-    category: "tablet",
-    manufacturer: "Samsung",
-    model: "Galaxy Tab S8+",
-    purchaseDate: "2023-02-25",
-    vendor: "Samsung Store",
-    price: 899,
-    status: "in_use",
-    employeeId: "emp009",
-    serialNumber: "TB8S7XXXXX",
-    inventoryNumber: "PHAT-T-004",
-    imageUrl: "https://images.samsung.com/is/image/samsung/p6pim/de/sm-x800nzaaeub/gallery/de-galaxy-tab-s8-plus-x800-sm-x800nzaaeub-530765604"
-  },
-  {
-    id: "ast025",
-    name: "Google Pixel 7 Pro",
-    type: "smartphone",
-    category: "smartphone",
-    manufacturer: "Google",
-    model: "Pixel 7 Pro",
-    purchaseDate: "2023-02-28",
-    vendor: "Google Store",
-    price: 899,
-    status: "in_use",
-    employeeId: "emp009",
-    serialNumber: "GP7PXXXXXXX",
-    inventoryNumber: "PHAT-S-006",
-    imei: "35323456789012X",
-    phoneNumber: "+4915723456789",
-    provider: "Telekom",
-    contractEndDate: "2025-02-27",
-    contractName: "Business Mobile M",
-    imageUrl: "https://lh3.googleusercontent.com/spp/AE3-xA5JMXHyciAr4ojbJiZfvMX7nCY8Fu9ztF-kPw_k_UxWkN4n0nFNXtUd1Q42sbqG1BcZMPosVM3QRUJLjZ0wCuUHwHLOvQ6v7RFf_2i5P4AcjfQXYQ=s512-rw-pd-pc0x0"
-  },
-  {
-    id: "ast026",
-    name: "Microsoft Surface Laptop 5",
-    type: "laptop",
-    category: "notebook",
-    manufacturer: "Microsoft",
-    model: "Surface Laptop 5",
-    purchaseDate: "2023-04-05",
-    vendor: "Microsoft Store",
-    price: 1299,
-    status: "in_use",
-    employeeId: "emp010",
-    serialNumber: "MS5LXXXXXXX",
-    inventoryNumber: "PHAT-L-009",
-    additionalWarranty: false,
-    hasWarranty: true,
-    imageUrl: "https://img-prod-cms-rt-microsoft-com.akamaized.net/cms/api/am/imageFileData/RE4OXzi"
-  },
-  {
-    id: "ast027",
-    name: "iPhone SE",
-    type: "smartphone",
-    category: "smartphone",
-    manufacturer: "Apple",
-    model: "iPhone SE 2022",
-    purchaseDate: "2023-04-10",
-    vendor: "Apple Store",
-    price: 529,
-    status: "in_use",
-    employeeId: "emp010",
-    serialNumber: "FVSEC1XXXXXX",
-    inventoryNumber: "PHAT-S-007",
-    imei: "35123456789015X",
-    phoneNumber: "+4915823456789",
-    provider: "Vodafone",
-    contractEndDate: "2025-04-09",
-    contractName: "Red Business S",
-    imageUrl: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/iphone-se-midnight-select-202203?wid=940&hei=1112&fmt=png-alpha&.v=1646839498147"
-  },
-  {
-    id: "ast028",
-    name: "Dell UltraSharp 32",
-    type: "accessory",
-    category: "monitor",
-    manufacturer: "Dell",
-    model: "UltraSharp 32 U3223QE",
-    purchaseDate: "2023-04-15",
-    vendor: "Dell Online Store",
-    price: 899,
-    status: "in_use",
-    employeeId: "emp010",
-    inventoryNumber: "PHAT-A-008",
-    imageUrl: "https://i.dell.com/is/image/DellContent/content/dam/ss2/product-images/dell-client-products/peripherals/monitors/u-series/u3223qe/media-gallery/monitor-u3223qe-gallery-1.psd?fmt=png-alpha&wid=5000&hei=5000"
-  },
-  {
-    id: "ast029",
-    name: "HP EliteBook 840",
-    type: "laptop",
-    category: "notebook",
-    manufacturer: "HP",
-    model: "EliteBook 840 G9",
-    purchaseDate: "2023-06-01",
-    vendor: "HP Store",
-    price: 1399,
-    status: "in_use",
-    employeeId: "emp011",
-    serialNumber: "HP840XXXXXXX",
-    inventoryNumber: "PHAT-L-010",
-    additionalWarranty: true,
-    hasWarranty: true,
-    imageUrl: "https://ssl-product-images.www8-hp.com/digmedialib/prodimg/lowres/c08141126.png"
-  },
-  {
-    id: "ast030",
-    name: "OnePlus 10 Pro",
-    type: "smartphone",
-    category: "smartphone",
-    manufacturer: "OnePlus",
-    model: "10 Pro",
-    purchaseDate: "2023-06-05",
-    vendor: "OnePlus Store",
-    price: 799,
-    status: "in_use",
-    employeeId: "emp011",
-    serialNumber: "OP10PXXXXXXX",
-    inventoryNumber: "PHAT-S-008",
-    imei: "35423456789012X",
-    phoneNumber: "+4916923456789",
-    provider: "O2",
-    contractEndDate: "2025-06-04",
-    contractName: "Free Business M",
-    imageUrl: "https://images.ctfassets.net/ooa29xqb8tix/7z29OXlQvpKR7hPFFoLEON/a9a6cba2fcb371ae61cd5243c3e24c64/op10p-g-phone-normarlizer.png"
-  },
-  {
-    id: "ast031",
-    name: "Acer Predator X32",
-    type: "accessory",
-    category: "monitor",
-    manufacturer: "Acer",
-    model: "Predator X32",
-    purchaseDate: "2023-06-10",
-    vendor: "Acer Store",
-    price: 1299,
-    status: "in_use",
-    employeeId: "emp011",
-    inventoryNumber: "PHAT-A-009",
-    imageUrl: "https://static.acer.com/up/Resource/Acer/Monitors/Predator/Predator_X32/Images/20191218/Predator-X32-FP-Black-modelmain.png"
-  },
-  {
-    id: "ast032",
-    name: "MacBook Air M1",
-    type: "laptop",
-    category: "notebook",
-    manufacturer: "Apple",
-    model: "MacBook Air M1",
-    purchaseDate: "2023-01-10",
-    vendor: "Apple Store",
-    price: 999,
-    status: "in_use",
-    employeeId: "emp012",
-    serialNumber: "C02A134RXXXX",
-    inventoryNumber: "PHAT-L-011",
-    additionalWarranty: false,
-    hasWarranty: true,
-    imageUrl: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/macbook-air-space-gray-select-201810?wid=904&hei=840&fmt=jpeg&qlt=90&.v=1664472289661"
-  },
-  {
-    id: "ast033",
-    name: "iPhone 14",
-    type: "smartphone",
-    category: "smartphone",
-    manufacturer: "Apple",
-    model: "iPhone 14",
-    purchaseDate: "2023-01-15",
-    vendor: "Apple Store",
-    price: 899,
-    status: "in_use",
-    employeeId: "emp012",
-    serialNumber: "FV14C1XXXXXX",
-    inventoryNumber: "PHAT-S-009",
-    imei: "35123456789016X",
-    phoneNumber: "+4917023456789",
-    provider: "Telekom",
-    contractEndDate: "2025-01-14",
-    contractDuration: "24 Monate",
-    contractName: "Business Mobile S",
-    imageUrl: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/iphone-14-model-unselect-gallery-1-202209?wid=5120&hei=2880&fmt=p-jpg&qlt=80&.v=1660689596977"
-  },
-  {
-    id: "ast034",
-    name: "Lenovo ThinkPad X1 Yoga",
-    type: "laptop",
-    category: "notebook",
-    manufacturer: "Lenovo",
-    model: "ThinkPad X1 Yoga Gen 7",
-    purchaseDate: "2023-03-20",
-    vendor: "Lenovo Online",
-    price: 1899,
-    status: "in_use",
-    employeeId: "emp013",
-    serialNumber: "LTX1YXXXXXXX",
-    inventoryNumber: "PHAT-L-012",
-    additionalWarranty: true,
-    hasWarranty: true,
-    imageUrl: "https://p1-ofp.static.pub/medias/26229_X1_Yoga_Gen_7_Front_Facing_Left-1659434088493.png"
-  },
-  {
-    id: "ast035",
-    name: "Samsung Galaxy S23+",
-    type: "smartphone",
-    category: "smartphone",
-    manufacturer: "Samsung",
-    model: "Galaxy S23+",
-    purchaseDate: "2023-03-25",
-    vendor: "Samsung Store",
-    price: 1199,
-    status: "in_use",
-    employeeId: "emp013",
-    serialNumber: "S23PXXXXXXXX",
-    inventoryNumber: "PHAT-S-010",
-    imei: "35298765432120X",
-    phoneNumber: "+4917223456789",
-    provider: "Vodafone",
-    contractEndDate: "2025-03-24",
-    contractName: "Red Business L",
-    imageUrl: "https://images.samsung.com/is/image/samsung/p6pim/de/sm-s916bzkcgxx/gallery/de-galaxy-s23-plusx-s916-sm-s916bzkcgxx-534863325"
-  },
-  {
-    id: "ast036",
-    name: "Sony WH-1000XM5",
-    type: "accessory",
-    category: "audio",
-    manufacturer: "Sony",
-    model: "WH-1000XM5",
-    purchaseDate: "2023-03-30",
-    vendor: "Sony Store",
-    price: 399,
-    status: "in_use",
-    employeeId: "emp013",
-    inventoryNumber: "PHAT-A-010",
-    imageUrl: "https://www.sony.de/image/5d02da5df552836db894cead8a68f5f3?fmt=pjpeg&wid=1014&hei=396&bgcolor=F1F5F9&bgc=F1F5F9"
-  },
-  {
-    id: "ast037",
-    name: "HP Spectre x360",
-    type: "laptop",
-    category: "notebook",
-    manufacturer: "HP",
-    model: "Spectre x360 14",
-    purchaseDate: "2023-02-10",
-    vendor: "HP Store",
-    price: 1599,
-    status: "in_use",
-    employeeId: "emp014",
-    serialNumber: "HPSX3XXXXXXX",
-    inventoryNumber: "PHAT-L-013",
-    additionalWarranty: true,
-    hasWarranty: true,
-    imageUrl: "https://ssl-product-images.www8-hp.com/digmedialib/prodimg/lowres/c08026654.png"
-  },
-  {
-    id: "ast038",
-    name: "iPhone 14 Plus",
-    type: "smartphone",
-    category: "smartphone",
-    manufacturer: "Apple",
-    model: "iPhone 14 Plus",
-    purchaseDate: "2023-02-15",
-    vendor: "Apple Store",
-    price: 1099,
-    status: "in_use",
-    employeeId: "emp014",
-    serialNumber: "FV14P1XXXXXX",
-    inventoryNumber: "PHAT-S-011",
-    imei: "35123456789017X",
-    phoneNumber: "+4917323456789",
-    provider: "Telekom",
-    contractEndDate: "2025-02-14",
-    contractDuration: "24 Monate",
-    contractName: "Business Mobile L",
-    imageUrl: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/iphone-14-plus-model-unselect-gallery-1-202209?wid=5120&hei=2880&fmt=p-jpg&qlt=80&.v=1660689596976"
-  },
-  {
-    id: "ast039",
-    name: "ASUS ROG Swift",
-    type: "accessory",
-    category: "monitor",
-    manufacturer: "ASUS",
-    model: "ROG Swift PG32UQX",
-    purchaseDate: "2023-02-20",
-    vendor: "ASUS Store",
-    price: 1499,
-    status: "in_use",
-    employeeId: "emp014",
-    inventoryNumber: "PHAT-A-011",
-    imageUrl: "https://dlcdnwebimgs.asus.com/gain/79F42CAF-7EA3-4776-B6E2-8C38BB63252C/w1000/h732"
-  },
-  {
-    id: "ast040",
-    name: "ASUS ZenBook Pro",
-    type: "laptop",
-    category: "notebook",
-    manufacturer: "ASUS",
-    model: "ZenBook Pro 16X",
-    purchaseDate: "2023-05-15",
-    vendor: "ASUS Store",
-    price: 2499,
-    status: "in_use",
-    employeeId: "emp015",
-    serialNumber: "AZPXXXXXXXX",
-    inventoryNumber: "PHAT-L-014",
-    additionalWarranty: true,
-    hasWarranty: true,
-    imageUrl: "https://dlcdnwebimgs.asus.com/gain/0A9AAA9A-3EC4-4062-B374-D8B5EA79D5FC/w1000/h732"
-  }
-];
+import { Asset, AssetHistoryEntry } from "@/lib/types";
+import { supabase } from "@/integrations/supabase/client";
 
-// Asset history mock data
-export const assetHistory: AssetHistoryEntry[] = [
-  {
-    id: "hist001",
-    assetId: "ast001",
-    date: "2022-03-15",
-    action: "purchase",
-    employeeId: null,
-    notes: "Initial purchase"
-  },
-  {
-    id: "hist002",
-    assetId: "ast001",
-    date: "2022-03-20",
-    action: "assign",
-    employeeId: "emp001",
-    notes: "Assigned to Max Mustermann"
-  },
-  {
-    id: "hist003",
-    assetId: "ast002",
-    date: "2022-11-10",
-    action: "purchase",
-    employeeId: null,
-    notes: "Initial purchase"
-  },
-  {
-    id: "hist004",
-    assetId: "ast002",
-    date: "2022-11-15",
-    action: "assign",
-    employeeId: "emp001",
-    notes: "Assigned to Max Mustermann"
-  },
-  {
-    id: "hist005",
-    assetId: "ast013",
-    date: "2021-12-10",
-    action: "purchase",
-    employeeId: null,
-    notes: "Initial purchase"
-  },
-  {
-    id: "hist006",
-    assetId: "ast013",
-    date: "2021-12-15",
-    action: "assign",
-    employeeId: "emp004",
-    notes: "Assigned to Laura Müller"
-  },
-  {
-    id: "hist007",
-    assetId: "ast013",
-    date: "2023-06-10",
-    action: "status_change",
-    employeeId: "emp004",
-    notes: "Reported as defective - screen cracked"
-  },
-  {
-    id: "hist008",
-    assetId: "ast013",
-    date: "2023-06-15",
-    action: "return",
-    employeeId: null,
-    notes: "Returned to IT department"
-  },
-  {
-    id: "hist009",
-    assetId: "ast011",
-    date: "2022-08-10",
-    action: "purchase",
-    employeeId: null,
-    notes: "Initial purchase"
-  },
-  {
-    id: "hist010",
-    assetId: "ast011",
-    date: "2022-08-15",
-    action: "assign",
-    employeeId: "emp005",
-    notes: "Assigned to Michael Fischer"
-  },
-  {
-    id: "hist011",
-    assetId: "ast011",
-    date: "2023-07-05",
-    action: "status_change",
-    employeeId: "emp005",
-    notes: "Sent for repair - battery issues"
-  }
-];
+// Helper function to get an asset by ID
+export const getAssetById = async (id: string): Promise<Asset | null> => {
+  const { data, error } = await supabase
+    .from('assets')
+    .select('*')
+    .eq('id', id)
+    .single();
+  
+  if (error || !data) return null;
+  
+  return {
+    id: data.id,
+    name: data.name,
+    type: data.type,
+    manufacturer: data.manufacturer,
+    model: data.model,
+    purchaseDate: data.purchase_date,
+    vendor: data.vendor,
+    price: data.price,
+    status: data.status,
+    employeeId: data.employee_id,
+    category: data.category,
+    serialNumber: data.serial_number,
+    inventoryNumber: data.inventory_number,
+    additionalWarranty: data.additional_warranty,
+    hasWarranty: data.has_warranty,
+    imei: data.imei,
+    phoneNumber: data.phone_number,
+    provider: data.provider,
+    contractEndDate: data.contract_end_date,
+    contractName: data.contract_name,
+    contractDuration: data.contract_duration,
+    connectedAssetId: data.connected_asset_id,
+    relatedAssetId: data.related_asset_id,
+    imageUrl: data.image_url
+  };
+};
 
-// Asset type distribution
-export const getAssetTypeDistribution = (): AssetTypeDistribution[] => {
-  const types: AssetType[] = ['laptop', 'smartphone', 'tablet', 'mouse', 'keyboard', 'accessory'];
-  return types.map(type => ({
-    type,
-    count: assets.filter(asset => asset.type === type).length
+// Helper function to get all assets
+export const getAssets = async (): Promise<Asset[]> => {
+  const { data, error } = await supabase
+    .from('assets')
+    .select('*');
+  
+  if (error || !data) return [];
+  
+  return data.map(item => ({
+    id: item.id,
+    name: item.name,
+    type: item.type,
+    manufacturer: item.manufacturer,
+    model: item.model,
+    purchaseDate: item.purchase_date,
+    vendor: item.vendor,
+    price: item.price,
+    status: item.status,
+    employeeId: item.employee_id,
+    category: item.category,
+    serialNumber: item.serial_number,
+    inventoryNumber: item.inventory_number,
+    additionalWarranty: item.additional_warranty,
+    hasWarranty: item.has_warranty,
+    imei: item.imei,
+    phoneNumber: item.phone_number,
+    provider: item.provider,
+    contractEndDate: item.contract_end_date,
+    contractName: item.contract_name,
+    contractDuration: item.contract_duration,
+    connectedAssetId: item.connected_asset_id,
+    relatedAssetId: item.related_asset_id,
+    imageUrl: item.image_url
   }));
 };
 
-// Asset status distribution
-export const getAssetStatusDistribution = (): AssetStatusDistribution[] => {
-  const statuses: AssetStatus[] = ['ordered', 'delivered', 'in_use', 'defective', 'repair', 'pool'];
-  return statuses.map(status => ({
-    status,
-    count: assets.filter(asset => asset.status === status).length
+// Helper function to get assets by employee ID
+export const getAssetsByEmployeeId = async (employeeId: string): Promise<Asset[]> => {
+  const { data, error } = await supabase
+    .from('assets')
+    .select('*')
+    .eq('employee_id', employeeId);
+  
+  if (error || !data) return [];
+  
+  return data.map(item => ({
+    id: item.id,
+    name: item.name,
+    type: item.type,
+    manufacturer: item.manufacturer,
+    model: item.model,
+    purchaseDate: item.purchase_date,
+    vendor: item.vendor,
+    price: item.price,
+    status: item.status,
+    employeeId: item.employee_id,
+    category: item.category,
+    serialNumber: item.serial_number,
+    inventoryNumber: item.inventory_number,
+    additionalWarranty: item.additional_warranty,
+    hasWarranty: item.has_warranty,
+    imei: item.imei,
+    phoneNumber: item.phone_number,
+    provider: item.provider,
+    contractEndDate: item.contract_end_date,
+    contractName: item.contract_name,
+    contractDuration: item.contract_duration,
+    connectedAssetId: item.connected_asset_id,
+    relatedAssetId: item.related_asset_id,
+    imageUrl: item.image_url
   }));
 };
 
-// Asset-related helper functions
-export const getAssetById = (id: string): Asset | undefined => {
-  return assets.find(asset => asset.id === id);
-};
-
-export const getAssetsByEmployeeId = (employeeId: string): Asset[] => {
-  return assets.filter(asset => asset.employeeId === employeeId);
-};
-
-export const getAssetHistoryByAssetId = (assetId: string): AssetHistoryEntry[] => {
-  return assetHistory.filter(entry => entry.assetId === assetId).sort((a, b) => {
-    return new Date(b.date).getTime() - new Date(a.date).getTime();
-  });
-};
-
-export const getAssetsByStatus = (status: AssetStatus): Asset[] => {
-  return assets.filter(asset => asset.status === status);
+// Helper function to get asset history by asset ID
+export const getAssetHistoryByAssetId = async (assetId: string): Promise<AssetHistoryEntry[]> => {
+  const { data, error } = await supabase
+    .from('asset_history')
+    .select('*')
+    .eq('asset_id', assetId)
+    .order('date', { ascending: false });
+  
+  if (error || !data) return [];
+  
+  return data.map(item => ({
+    id: item.id,
+    assetId: item.asset_id,
+    date: item.date,
+    action: item.action,
+    employeeId: item.employee_id,
+    notes: item.notes || ""
+  }));
 };
