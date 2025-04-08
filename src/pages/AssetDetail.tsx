@@ -26,9 +26,10 @@ import {
 import {
   ChevronLeft,
   Download,
-  Share,
   FileText,
   AlertCircle,
+  FileText2,
+  Share,
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { Asset } from "@/lib/types";
@@ -200,8 +201,9 @@ export default function AssetDetail() {
             </div>
           </div>
 
-          <Card>
-            <CardHeader className="pb-0">
+          {/* Main asset information card */}
+          <Card className="overflow-hidden">
+            <CardHeader className="bg-muted/50 pb-2">
               <CardTitle>Asset Information</CardTitle>
               <CardDescription>Grundlegende und technische Details</CardDescription>
             </CardHeader>
@@ -222,10 +224,15 @@ export default function AssetDetail() {
             </CardContent>
           </Card>
 
+          {/* Extra information in two columns */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* QR Code */}
             <Card>
-              <CardHeader>
-                <CardTitle>QR Code</CardTitle>
+              <CardHeader className="bg-muted/50 pb-2">
+                <CardTitle className="text-lg flex items-center">
+                  <FileText2 className="mr-2 h-5 w-5" />
+                  QR Code
+                </CardTitle>
                 <CardDescription>
                   Scannen Sie diesen Code, um schnell auf die Asset-Details zuzugreifen
                 </CardDescription>
@@ -239,9 +246,13 @@ export default function AssetDetail() {
               </CardContent>
             </Card>
 
+            {/* Documents */}
             <Card>
-              <CardHeader>
-                <CardTitle>Dokumente</CardTitle>
+              <CardHeader className="bg-muted/50 pb-2">
+                <CardTitle className="text-lg flex items-center">
+                  <FileText className="mr-2 h-5 w-5" />
+                  Dokumente
+                </CardTitle>
                 <CardDescription>
                   Verwalten Sie alle mit diesem Asset verbundenen Dokumente
                 </CardDescription>
@@ -257,14 +268,18 @@ export default function AssetDetail() {
             </Card>
           </div>
 
+          {/* Asset history card */}
           <Card>
-            <CardHeader>
-              <CardTitle>Asset Historie</CardTitle>
+            <CardHeader className="bg-muted/50 pb-2">
+              <CardTitle className="text-lg flex items-center">
+                <FileText className="mr-2 h-5 w-5" />
+                Asset Historie
+              </CardTitle>
               <CardDescription>Chronologische Aufzeichnung aller Änderungen und Ereignisse</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-4">
               {isHistoryLoading ? (
-                <div className="space-y-2">
+                <div className="space-y-2 py-4">
                   <Skeleton className="h-12 w-full" />
                   <Skeleton className="h-12 w-full" />
                   <Skeleton className="h-12 w-full" />
