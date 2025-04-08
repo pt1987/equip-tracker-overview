@@ -1,14 +1,9 @@
+
 import { useEffect, useState } from "react";
 import PageTransition from "@/components/layout/PageTransition";
 import { DashboardStats, AssetTypeDistribution, AssetStatusDistribution } from "@/lib/types";
-import { 
-  getDashboardStats,
-} from "@/data/helpers";
-import { 
-  getAssets, 
-  getAssetTypeDistribution,
-  getAssetStatusDistribution 
-} from "@/data/assets";
+import { getDashboardStats } from "@/data/helpers";
+import { getAssets } from "@/data/assets";
 import { getEmployees } from "@/data/employees";
 import StatCard from "@/components/dashboard/StatCard";
 import { 
@@ -23,6 +18,41 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+
+// Helper functions to get distribution data
+const getAssetTypeDistribution = async () => {
+  const assets = await getAssets();
+  const typeCount: Record<string, number> = {};
+  
+  assets.forEach(asset => {
+    if (!typeCount[asset.type]) {
+      typeCount[asset.type] = 0;
+    }
+    typeCount[asset.type]++;
+  });
+  
+  return Object.entries(typeCount).map(([type, count]) => ({
+    type: type as AssetType,
+    count
+  }));
+};
+
+const getAssetStatusDistribution = async () => {
+  const assets = await getAssets();
+  const statusCount: Record<string, number> = {};
+  
+  assets.forEach(asset => {
+    if (!statusCount[asset.status]) {
+      statusCount[asset.status] = 0;
+    }
+    statusCount[asset.status]++;
+  });
+  
+  return Object.entries(statusCount).map(([status, count]) => ({
+    status: status as AssetStatus,
+    count
+  }));
+};
 
 const IndexPage = () => {
   const [dashboardStats, setDashboardStats] = useState<DashboardStats>({
@@ -78,25 +108,21 @@ const IndexPage = () => {
             title="Total Assets"
             value={dashboardStats.totalAssets}
             icon={Package}
-            className="bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300"
           />
           <StatCard
             title="Assigned Assets"
             value={dashboardStats.assignedAssets}
             icon={Users}
-            className="bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300"
           />
           <StatCard
             title="Pool Assets"
             value={dashboardStats.poolAssets}
             icon={Coins}
-            className="bg-yellow-50 dark:bg-yellow-950 text-yellow-700 dark:text-yellow-300"
           />
           <StatCard
             title="Defective Assets"
             value={dashboardStats.defectiveAssets}
             icon={AlertTriangle}
-            className="bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300"
           />
         </div>
 
@@ -109,15 +135,25 @@ const IndexPage = () => {
             </CardHeader>
             <CardContent>
               {assetTypeDistribution.length > 0 ? (
-                <PieChart
-                  className="h-72 w-full"
-                  data={assetTypeDistribution.map((item) => ({
-                    name: item.type,
-                    value: item.count,
-                    label: `${item.type} (${item.count})`,
-                  }))}
-                  strokeWidth={1}
-                />
+                <div className="h-72 w-full">
+                  {/* Custom chart display here */}
+                  {assetTypeDistribution.map(item => (
+                    <div key={item.type} className="mb-2">
+                      <div className="flex justify-between mb-1">
+                        <span>{item.type}</span>
+                        <span>{item.count}</span>
+                      </div>
+                      <div className="w-full bg-muted rounded-full h-2">
+                        <div 
+                          className="bg-primary h-full rounded-full" 
+                          style={{ 
+                            width: `${(item.count / assetTypeDistribution.reduce((acc, curr) => acc + curr.count, 0)) * 100}%` 
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               ) : (
                 <div className="text-center text-muted-foreground">
                   No asset type data available.

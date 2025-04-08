@@ -10,8 +10,8 @@ export default function WarrantyDefectsReport() {
   const [warrantyData, setWarrantyData] = useState<WarrantyDefectReport | null>(null);
 
   useEffect(() => {
-    const fetchData = () => {
-      const data = getWarrantyDefectReport();
+    const fetchData = async () => {
+      const data = await getWarrantyDefectReport();
       setWarrantyData(data);
     };
     

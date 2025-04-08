@@ -34,14 +34,12 @@ export default function History() {
 
   const { data: assetData = [] } = useQuery({
     queryKey: ["assets"],
-    queryFn: () => getAssets(),
-    initialData: getAssets(),
+    queryFn: getAssets,
   });
 
   const { data: employeeData = [] } = useQuery({
     queryKey: ["employees"],
-    queryFn: () => getEmployees(),
-    initialData: getEmployees(),
+    queryFn: getEmployees,
   });
 
   // Sort assets by purchase date, newest first

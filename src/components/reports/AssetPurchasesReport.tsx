@@ -10,8 +10,8 @@ export default function AssetPurchasesReport() {
   const [purchaseData, setPurchaseData] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchData = () => {
-      const data = getYearlyAssetPurchasesReport();
+    const fetchData = async () => {
+      const data = await getYearlyAssetPurchasesReport();
       
       // Transform data for the stacked bar chart
       const formattedData = data.map(item => {

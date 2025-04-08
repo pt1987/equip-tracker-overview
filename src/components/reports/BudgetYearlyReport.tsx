@@ -10,8 +10,8 @@ export default function BudgetYearlyReport() {
   const [budgetData, setBudgetData] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchData = () => {
-      const data = getYearlyBudgetReport();
+    const fetchData = async () => {
+      const data = await getYearlyBudgetReport();
       setBudgetData(data);
     };
     

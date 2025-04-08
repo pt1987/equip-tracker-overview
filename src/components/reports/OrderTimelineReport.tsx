@@ -10,12 +10,22 @@ import * as echarts from 'echarts';
 export default function OrderTimelineReport() {
   const [selectedEmployee, setSelectedEmployee] = useState<string>("all");
   const [timelineData, setTimelineData] = useState<any[]>([]);
+  const [employees, setEmployees] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchData = () => {
+    const fetchEmployees = async () => {
+      const employeeData = await getEmployees();
+      setEmployees(employeeData);
+    };
+    
+    fetchEmployees();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
       const employeeData = selectedEmployee !== "all" 
-        ? getOrderTimelineByEmployee(selectedEmployee)
-        : getOrderTimelineByEmployee();
+        ? await getOrderTimelineByEmployee(selectedEmployee)
+        : await getOrderTimelineByEmployee();
         
       // Format data for timeline chart
       const formattedData: any[] = [];
@@ -188,7 +198,7 @@ export default function OrderTimelineReport() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Alle Mitarbeiter</SelectItem>
-              {getEmployees().map((employee) => (
+              {employees.map((employee) => (
                 <SelectItem key={employee.id} value={employee.id}>
                   {`${employee.firstName} ${employee.lastName}`}
                 </SelectItem>

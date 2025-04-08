@@ -1,160 +1,141 @@
-
 import { useEffect, useState } from "react";
-import { Employee } from "@/lib/types";
-import { getEmployeeAssetsSummary } from "@/data/employees";
-import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { MoreHorizontal } from "lucide-react";
 import { 
-  Briefcase, 
-  Calendar, 
-  LaptopIcon,
-  SmartphoneIcon
-} from "lucide-react";
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import { Employee } from "@/lib/types";
+import { formatDate } from "@/lib/utils";
+import { getEmployeeAssetsSummary } from "@/data/employees";
 
 interface EmployeeCardProps {
   employee: Employee;
-  index: number;
 }
 
-interface AssetSummary {
-  totalAssets: number;
-  totalValue: number;
-  assetsByType: {
-    laptop: any[];
-    smartphone: any[];
-    tablet: any[];
-    mouse: any[];
-    keyboard: any[];
-    accessory: any[];
-  };
-}
+const EmployeeCard: React.FC<EmployeeCardProps> = ({ employee }) => {
+  const [laptopCount, setLaptopCount] = useState(0);
+  const [phoneCount, setPhoneCount] = useState(0);
+  const [tabletCount, setTabletCount] = useState(0);
+  const [mouseCount, setMouseCount] = useState(0);
+  const [keyboardCount, setKeyboardCount] = useState(0);
+  const [accessoryCount, setAccessoryCount] = useState(0);
 
-export default function EmployeeCard({ employee, index }: EmployeeCardProps) {
-  const [employeeAssets, setEmployeeAssets] = useState<AssetSummary>({
-    totalAssets: 0,
-    totalValue: 0,
-    assetsByType: {
-      laptop: [],
-      smartphone: [],
-      tablet: [],
-      mouse: [],
-      keyboard: [],
-      accessory: []
-    }
-  });
-  
-  const budgetPercentage = Math.min(100, Math.round((employee.usedBudget / employee.budget) * 100));
-  
-  // Load employee assets
   useEffect(() => {
-    const loadAssets = async () => {
-      const assets = await getEmployeeAssetsSummary(employee.id);
-      setEmployeeAssets(assets);
+    const fetchAssetSummary = async () => {
+      if (employee.id) {
+        const summary = await getEmployeeAssetsSummary(employee.id);
+        // Now set the state with the summary data or use it directly
+        setLaptopCount(summary.assetsByType.laptop.length);
+        setPhoneCount(summary.assetsByType.smartphone.length);
+        setTabletCount(summary.assetsByType.tablet.length);
+        setMouseCount(summary.assetsByType.mouse.length);
+        setKeyboardCount(summary.assetsByType.keyboard.length);
+        setAccessoryCount(summary.assetsByType.accessory.length);
+      }
     };
-    loadAssets();
+    
+    fetchAssetSummary();
   }, [employee.id]);
 
-  // Format date to display nicely
-  const startDate = new Date(employee.startDate).toLocaleDateString("de-DE", {
-    year: "numeric",
-    month: "short",
-    day: "numeric"
-  });
-
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.05 }}
-    >
-      <Link to={`/employee/${employee.id}`} className="block w-full group">
-        <div className="glass-card overflow-hidden hover:shadow-card transition-all duration-300 group-hover:border-primary/20">
-          <div className="flex justify-between p-5">
-            <div className="flex space-x-4">
-              <div className="relative h-16 w-16 flex-shrink-0">
-                <div className="absolute inset-0 rounded-full overflow-hidden">
-                  <img 
-                    src={employee.imageUrl} 
-                    alt={`${employee.firstName} ${employee.lastName}`}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                </div>
-              </div>
-              
+    <Card className="glass-card">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>
+            <div className="flex items-center gap-4">
+              <Avatar>
+                <AvatarImage src={employee.profileImage || employee.imageUrl} alt={`${employee.firstName} ${employee.lastName}`} />
+                <AvatarFallback>{employee.firstName[0]}{employee.lastName[0]}</AvatarFallback>
+              </Avatar>
               <div>
-                <h3 className="font-medium group-hover:text-primary transition-colors">
-                  {employee.firstName} {employee.lastName}
-                </h3>
-                <div className="flex items-center mt-1 text-muted-foreground text-sm">
-                  <Briefcase size={14} className="mr-1.5" />
-                  <span>{employee.position}</span>
-                </div>
-                <div className="flex items-center mt-1 text-muted-foreground text-sm">
-                  <Calendar size={14} className="mr-1.5" />
-                  <span>{startDate}</span>
-                </div>
+                {employee.firstName} {employee.lastName}
               </div>
             </div>
-            
-            <div className="flex flex-col items-end">
-              <div className="mb-2 text-xs font-medium text-muted-foreground">
-                Cluster
-              </div>
-              <div className="rounded-full px-2.5 py-1 text-xs font-medium bg-secondary">
-                {employee.cluster}
-              </div>
-            </div>
-          </div>
-          
-          <div className="px-5 pb-5 pt-2">
-            <div className="text-sm font-medium mb-1.5 flex justify-between">
-              <span>Budget</span>
-              <span>{budgetPercentage}%</span>
-            </div>
-            
-            <div className="budget-progress-track">
-              <motion.div 
-                className="budget-progress-bar"
-                initial={{ width: 0 }}
-                animate={{ width: `${budgetPercentage}%` }}
-                transition={{ duration: 1, delay: 0.2 }}
-              />
-            </div>
-            
-            <div className="flex justify-between text-xs text-muted-foreground mt-1">
-              <span>{employee.usedBudget} €</span>
-              <span>{employee.budget} €</span>
-            </div>
-            
-            <div className="mt-4 pt-4 border-t border-border grid grid-cols-2 gap-3">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-full bg-blue-100">
-                  <LaptopIcon size={14} className="text-blue-700" />
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Laptops</div>
-                  <div className="text-sm font-medium">
-                    {employeeAssets.assetsByType.laptop.length}
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-full bg-purple-100">
-                  <SmartphoneIcon size={14} className="text-purple-700" />
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Phones</div>
-                  <div className="text-sm font-medium">
-                    {employeeAssets.assetsByType.smartphone.length}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          </CardTitle>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link to={`/employee/${employee.id}`}>
+                  View Details
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to={`/employee/edit/${employee.id}`}>
+                  Edit Employee
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                Deactivate
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-      </Link>
-    </motion.div>
+      </CardHeader>
+      <CardContent>
+        <CardDescription>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <span className="text-muted-foreground">Position:</span>
+              <p>{employee.position}</p>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Cluster:</span>
+              <p>{employee.cluster}</p>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Start Date:</span>
+              <p>{formatDate(employee.startDate)}</p>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Budget:</span>
+              <p>{employee.budget}</p>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Laptops:</span>
+              <p>{laptopCount}</p>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Smartphones:</span>
+              <p>{phoneCount}</p>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Tablets:</span>
+              <p>{tabletCount}</p>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Mice:</span>
+              <p>{mouseCount}</p>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Keyboards:</span>
+              <p>{keyboardCount}</p>
+            </div>
+             <div>
+              <span className="text-muted-foreground">Accessories:</span>
+              <p>{accessoryCount}</p>
+            </div>
+          </div>
+        </CardDescription>
+      </CardContent>
+      <CardFooter className="flex justify-between">
+        <Link to={`/employee/${employee.id}`}>
+          <Button>View Details</Button>
+        </Link>
+      </CardFooter>
+    </Card>
   );
-}
+};
+
+export default EmployeeCard;

@@ -31,23 +31,23 @@ export default function Reporting() {
   const [activeReport, setActiveReport] = useState<ReportType>("orderTimeline");
   const { toast } = useToast();
 
-  const exportReport = (format: 'excel' | 'pdf') => {
+  const exportReport = async (format: 'excel' | 'pdf') => {
     try {
       switch (activeReport) {
         case 'orderTimeline':
-          exportOrderTimeline(getOrderTimelineByEmployee(), format);
+          exportOrderTimeline(await getOrderTimelineByEmployee(), format);
           break;
         case 'yearlyBudget':
-          exportYearlyBudget(getYearlyBudgetReport(), format);
+          exportYearlyBudget(await getYearlyBudgetReport(), format);
           break;
         case 'yearlyPurchases':
-          exportYearlyPurchases(getYearlyAssetPurchasesReport(), format);
+          exportYearlyPurchases(await getYearlyAssetPurchasesReport(), format);
           break;
         case 'usageDuration':
-          exportUsageDuration(getAssetUsageDurationReport(), format);
+          exportUsageDuration(await getAssetUsageDurationReport(), format);
           break;
         case 'warrantyDefects':
-          exportWarrantyDefects(getWarrantyDefectReport(), format);
+          exportWarrantyDefects(await getWarrantyDefectReport(), format);
           break;
       }
       

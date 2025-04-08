@@ -11,8 +11,8 @@ export default function AssetUsageDurationReport() {
   const [usageData, setUsageData] = useState<AssetUsageReport[]>([]);
 
   useEffect(() => {
-    const fetchData = () => {
-      const data = getAssetUsageDurationReport();
+    const fetchData = async () => {
+      const data = await getAssetUsageDurationReport();
       // Sort data by average months descending for better visualization
       data.sort((a, b) => b.averageMonths - a.averageMonths);
       setUsageData(data);
