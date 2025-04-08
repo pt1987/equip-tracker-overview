@@ -2,8 +2,10 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { Session, User } from "@supabase/supabase-js";
 
-interface User {
+interface UserProfile {
   id: string;
   email: string;
   name: string;
@@ -11,53 +13,116 @@ interface User {
 }
 
 interface AuthContextType {
-  user: User | null;
+  user: UserProfile | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  signup: (email: string, password: string, name: string) => Promise<boolean>;
+  logout: () => Promise<void>;
   loading: boolean;
+  session: Session | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Check if user is already logged in on mount
+  // Initialisiere Authentifizierungsstatus bei Komponenten-Mount
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem("isAuthenticated");
-    const userData = localStorage.getItem("user");
-    
-    if (isAuthenticated === "true" && userData) {
-      try {
-        setUser(JSON.parse(userData));
-      } catch (error) {
-        console.error("Failed to parse user data:", error);
-        logout();
-      }
-    }
-    
-    setLoading(false);
+    // Zuerst Auth-State-Listener einrichten
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, currentSession) => {
+        setSession(currentSession);
+        
+        if (currentSession?.user) {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', currentSession.user.id)
+            .single();
 
-    // Set up session timeout
+          if (data && !error) {
+            setUser({
+              id: data.id,
+              email: data.email,
+              name: data.name || '',
+              role: data.role
+            });
+          } else {
+            // Fallback, falls Profil nicht gefunden wird
+            setUser({
+              id: currentSession.user.id,
+              email: currentSession.user.email || '',
+              name: currentSession.user.user_metadata?.name || '',
+              role: 'user'
+            });
+          }
+        } else {
+          setUser(null);
+        }
+        
+        setLoading(false);
+      }
+    );
+
+    // Dann vorhandene Session prüfen
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      setSession(currentSession);
+      
+      if (currentSession?.user) {
+        // Benutzerprofile abrufen
+        supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', currentSession.user.id)
+          .single()
+          .then(({ data, error }) => {
+            if (data && !error) {
+              setUser({
+                id: data.id,
+                email: data.email,
+                name: data.name || '',
+                role: data.role
+              });
+            } else {
+              // Fallback auf Auth-User-Daten
+              setUser({
+                id: currentSession.user.id,
+                email: currentSession.user.email || '',
+                name: currentSession.user.user_metadata?.name || '',
+                role: 'user'
+              });
+            }
+            setLoading(false);
+          });
+      } else {
+        setLoading(false);
+      }
+    });
+
+    // Setze Inaktivitäts-Timeout auf
     const cleanup = setupInactivityTimeout();
     
-    return cleanup;
+    return () => {
+      subscription.unsubscribe();
+      cleanup();
+    };
   }, []);
 
-  // Function to handle inactivity timeout
+  // Funktion zum Handhaben von Inaktivitäts-Timeout
   const setupInactivityTimeout = () => {
     let inactivityTimer: number | null = null;
     
     const resetTimer = () => {
       if (inactivityTimer) clearTimeout(inactivityTimer);
       
-      // 15 minutes inactivity timeout
+      // 15 Minuten Inaktivitäts-Timeout
       inactivityTimer = window.setTimeout(() => {
-        if (localStorage.getItem("isAuthenticated") === "true") {
+        if (session) {
           logout();
           toast({
             title: "Session abgelaufen",
@@ -67,19 +132,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }, 15 * 60 * 1000);
     };
     
-    // Create the reset timer function
+    // Erstelle die Reset-Timer-Funktion
     const resetInactivityTimer = () => {
       resetTimer();
     };
     
-    // Set up event listeners
+    // Event-Listener einrichten
     window.addEventListener("mousemove", resetInactivityTimer);
     window.addEventListener("keypress", resetInactivityTimer);
     
-    // Initial timer setup
+    // Initialer Timer-Setup
     resetTimer();
     
-    // Return cleanup function
+    // Cleanup-Funktion zurückgeben
     return () => {
       if (inactivityTimer) clearTimeout(inactivityTimer);
       window.removeEventListener("mousemove", resetInactivityTimer);
@@ -87,44 +152,88 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   };
 
+  // Login mit Supabase
   const login = async (email: string, password: string): Promise<boolean> => {
     setLoading(true);
     
     try {
-      // In a real app, this would be an API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
       
-      // For demo: simple validation
-      if (email === "admin@example.com" && password === "password123") {
-        const userData: User = {
-          id: "1",
-          email,
-          name: "Admin User",
-          role: "admin"
-        };
-        
-        localStorage.setItem("isAuthenticated", "true");
-        localStorage.setItem("user", JSON.stringify(userData));
-        setUser(userData);
-        
-        setupInactivityTimeout();
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Anmeldung fehlgeschlagen",
+          description: error.message,
+        });
         setLoading(false);
-        return true;
+        return false;
       }
-      
+
+      // Erfolgreiche Anmeldung wird durch onAuthStateChange verarbeitet
       setLoading(false);
-      return false;
-    } catch (error) {
+      return true;
+    } catch (error: any) {
       console.error("Login error:", error);
+      toast({
+        variant: "destructive",
+        title: "Fehler bei der Anmeldung",
+        description: error.message || "Bitte versuchen Sie es später erneut.",
+      });
       setLoading(false);
       return false;
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem("isAuthenticated");
-    localStorage.removeItem("user");
-    setUser(null);
+  // Registrierung mit Supabase
+  const signup = async (email: string, password: string, name: string): Promise<boolean> => {
+    setLoading(true);
+    
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name: name,
+          },
+        },
+      });
+      
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Registrierung fehlgeschlagen",
+          description: error.message,
+        });
+        setLoading(false);
+        return false;
+      }
+      
+      toast({
+        title: "Registrierung erfolgreich",
+        description: "Bitte überprüfen Sie Ihre E-Mails für den Bestätigungslink.",
+      });
+      
+      setLoading(false);
+      return true;
+    } catch (error: any) {
+      console.error("Signup error:", error);
+      toast({
+        variant: "destructive",
+        title: "Fehler bei der Registrierung",
+        description: error.message || "Bitte versuchen Sie es später erneut.",
+      });
+      setLoading(false);
+      return false;
+    }
+  };
+
+  // Abmeldung mit Supabase
+  const logout = async () => {
+    await supabase.auth.signOut();
     navigate("/login");
   };
 
@@ -132,8 +241,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     <AuthContext.Provider
       value={{
         user,
+        session,
         isAuthenticated: !!user,
         login,
+        signup,
         logout,
         loading
       }}
