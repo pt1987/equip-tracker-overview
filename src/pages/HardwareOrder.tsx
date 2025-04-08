@@ -3,7 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { PackageIcon, ArrowLeft } from "lucide-react";
 import PageTransition from "@/components/layout/PageTransition";
-import HardwareOrderForm from "@/components/hardware-order/HardwareOrderForm";
+import { HardwareOrderForm } from "@/components/hardware-order/HardwareOrderForm";
 import { Button } from "@/components/ui/button";
 
 export default function HardwareOrder() {

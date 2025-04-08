@@ -1,11 +1,32 @@
+
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getAssets } from "@/data/assets";
+import { Asset } from "@/lib/types";
+import PageTransition from "@/components/layout/PageTransition";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Folder, PlusCircle } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import SearchFilter from "@/components/shared/SearchFilter";
 
 export default function AssetGroups() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("category");
+  
   const { data: assets = [] } = useQuery({
     queryKey: ["assets"],
     queryFn: getAssets,
   });
+
+  const groupBy = <T extends Record<string, any>>(array: T[], key: keyof T | ((item: T) => string)) => {
+    return array.reduce((result: Record<string, T[]>, currentValue: T) => {
+      const groupKey = typeof key === 'function' ? key(currentValue) : String(currentValue[key]);
+      result[groupKey] = result[groupKey] || [];
+      result[groupKey].push(currentValue);
+      return result;
+    }, {});
+  };
 
   const assetsByCategory = groupBy(assets, (asset: Asset) => asset.category);
   const assetsByManufacturer = groupBy(assets, (asset: Asset) => asset.manufacturer);

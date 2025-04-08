@@ -1,3 +1,4 @@
+
 import {
   Card,
   CardContent,
@@ -26,7 +27,7 @@ import {
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
-import { forwardRef, useState } from "react";
+import { forwardRef, useState, useEffect } from "react";
 import { DayPicker } from "react-day-picker";
 import { Controller, useFormContext } from "react-hook-form";
 import { getEmployees } from "@/data/employees";
@@ -37,14 +38,25 @@ const HardwareOrderForm = forwardRef<HTMLFormElement, HardwareOrderFormProps>(
   ({}, ref) => {
     const { control } = useFormContext();
     const [date, setDate] = useState<Date>();
+    const [employeeOptions, setEmployeeOptions] = useState<{label: string, value: string}[]>([]);
 
-    const employeeOptions = async () => {
-      const employeeData = await getEmployees();
-      return employeeData.map(employee => ({
-        label: `${employee.firstName} ${employee.lastName}`,
-        value: employee.id
-      }));
-    };
+    useEffect(() => {
+      const fetchEmployees = async () => {
+        try {
+          const employeeData = await getEmployees();
+          const options = employeeData.map(employee => ({
+            label: `${employee.firstName} ${employee.lastName}`,
+            value: employee.id
+          }));
+          setEmployeeOptions(options);
+        } catch (error) {
+          console.error("Error loading employees:", error);
+          setEmployeeOptions([]);
+        }
+      };
+      
+      fetchEmployees();
+    }, []);
 
     return (
       <CardContent className="grid gap-6">
@@ -132,14 +144,11 @@ const HardwareOrderForm = forwardRef<HTMLFormElement, HardwareOrderFormProps>(
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">Kein Mitarbeiter</SelectItem>
-                  {/* @ts-expect-error */}
-                  {employeeOptions().then(options =>
-                    options.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))
-                  )}
+                  {employeeOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             )}

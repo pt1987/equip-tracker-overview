@@ -18,6 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { Asset, AssetType, AssetStatus } from "@/lib/types";
 
 // Helper functions to get distribution data
 const getAssetTypeDistribution = async () => {
