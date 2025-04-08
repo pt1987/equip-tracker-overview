@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -16,14 +15,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   ChevronLeft,
   Download,
   FileText,
@@ -34,6 +25,7 @@ import { formatDate } from "@/lib/utils";
 import { Asset } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import DocumentUpload, { Document } from "@/components/assets/DocumentUpload";
+import AssetHistoryTimeline from "@/components/assets/AssetHistoryTimeline";
 
 export default function AssetDetail() {
   const { id = "" } = useParams();
@@ -243,7 +235,7 @@ export default function AssetDetail() {
               </CardTitle>
               <CardDescription>Chronologische Aufzeichnung aller Änderungen und Ereignisse</CardDescription>
             </CardHeader>
-            <CardContent className="pt-4">
+            <CardContent className="pt-6">
               {isHistoryLoading ? (
                 <div className="space-y-2 py-4">
                   <Skeleton className="h-12 w-full" />
@@ -255,43 +247,7 @@ export default function AssetDetail() {
                   <p className="text-muted-foreground">Keine Historieneinträge vorhanden.</p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Datum</TableHead>
-                        <TableHead>Aktion</TableHead>
-                        <TableHead>Mitarbeiter</TableHead>
-                        <TableHead>Notiz</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {assetHistory.map((entry) => (
-                        <TableRow key={entry.id}>
-                          <TableCell>{formatDate(entry.date)}</TableCell>
-                          <TableCell>
-                            <div className="flex items-center">
-                              <span className="capitalize">
-                                {entry.action === "purchase" && "Kauf"}
-                                {entry.action === "assign" && "Zugewiesen"}
-                                {entry.action === "status_change" && "Status geändert"}
-                                {entry.action === "return" && "Zurückgegeben"}
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            {entry.employeeId ? entry.employeeId : "-"}
-                          </TableCell>
-                          <TableCell>
-                            <div className="max-w-xs truncate">
-                              {entry.notes || "-"}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                <AssetHistoryTimeline history={assetHistory} />
               )}
             </CardContent>
           </Card>
