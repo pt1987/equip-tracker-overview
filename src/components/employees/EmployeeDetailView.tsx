@@ -86,18 +86,35 @@ export default function EmployeeDetailView({
               </Tooltip>
             </TooltipProvider>
             
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <AlertDialogTrigger asChild>
-                    <button className="p-2 rounded-md hover:bg-muted transition-colors">
-                      <Trash size={18} className="text-muted-foreground hover:text-destructive" />
-                    </button>
-                  </AlertDialogTrigger>
-                </TooltipTrigger>
-                <TooltipContent>Löschen</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <AlertDialogTrigger asChild>
+                      <button className="p-2 rounded-md hover:bg-muted transition-colors">
+                        <Trash size={18} className="text-muted-foreground hover:text-destructive" />
+                      </button>
+                    </AlertDialogTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>Löschen</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Sind Sie sicher?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Diese Aktion kann nicht rückgängig gemacht werden. Der Mitarbeiter und alle zugehörigen Daten werden dauerhaft gelöscht.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                  <AlertDialogAction onClick={onDelete}>
+                    Löschen bestätigen
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
           
           <div className="inline-flex items-center px-2 py-1 mb-2 rounded-full bg-secondary text-xs font-medium">
@@ -151,23 +168,6 @@ export default function EmployeeDetailView({
           </div>
         </div>
       </div>
-      
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Sind Sie sicher?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Diese Aktion kann nicht rückgängig gemacht werden. Der Mitarbeiter und alle zugehörigen Daten werden dauerhaft gelöscht.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-            <AlertDialogAction onClick={onDelete}>
-              Löschen bestätigen
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
