@@ -1,6 +1,6 @@
+
 import { useState, useEffect } from "react";
 import PageTransition from "@/components/layout/PageTransition";
-import { assets } from "@/data/mockData";
 import { Asset, AssetStatus, AssetType } from "@/lib/types";
 import AssetCard from "@/components/assets/AssetCard";
 import SearchFilter from "@/components/shared/SearchFilter";
@@ -21,6 +21,9 @@ import {
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import StatusBadge from "@/components/assets/StatusBadge";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const AssetTypeIcon = ({ type }: { type: AssetType }) => {
   switch (type) {
@@ -69,34 +72,74 @@ const AssetsPage = () => {
   const [selectedTypes, setSelectedTypes] = useState<AssetType[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<AssetStatus[]>([]);
   const [showFilters, setShowFilters] = useState(false);
-  const [filteredAssets, setFilteredAssets] = useState<Asset[]>(assets);
   const [view, setView] = useState<"grid" | "list">("grid");
+  const { toast } = useToast();
   
-  useEffect(() => {
-    let filtered = assets;
+  // Fetch assets from Supabase
+  const { data: allAssets = [], isLoading } = useQuery({
+    queryKey: ["assets"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('assets')
+        .select('*');
+      
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Fehler beim Laden der Assets",
+          description: error.message
+        });
+        throw error;
+      }
+      
+      // Map database fields to our Asset type
+      return data.map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        type: item.type,
+        manufacturer: item.manufacturer,
+        model: item.model,
+        purchaseDate: item.purchase_date,
+        vendor: item.vendor,
+        price: item.price,
+        status: item.status,
+        employeeId: item.employee_id,
+        category: item.category,
+        serialNumber: item.serial_number,
+        inventoryNumber: item.inventory_number,
+        additionalWarranty: item.additional_warranty,
+        hasWarranty: item.has_warranty,
+        imei: item.imei,
+        phoneNumber: item.phone_number,
+        provider: item.provider,
+        contractEndDate: item.contract_end_date,
+        contractName: item.contract_name,
+        contractDuration: item.contract_duration,
+        connectedAssetId: item.connected_asset_id,
+        relatedAssetId: item.related_asset_id,
+        imageUrl: item.image_url
+      })) as Asset[];
+    },
+  });
+
+  // Filter assets based on search term, types, and statuses
+  const filteredAssets = allAssets.filter((asset) => {
+    // Check if asset matches search term
+    const matchesSearch = searchTerm === "" || 
+      asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      asset.manufacturer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      asset.model.toLowerCase().includes(searchTerm.toLowerCase());
     
-    // Apply search filter
-    if (searchTerm) {
-      const lowerSearchTerm = searchTerm.toLowerCase();
-      filtered = filtered.filter(asset => 
-        asset.name.toLowerCase().includes(lowerSearchTerm) ||
-        asset.manufacturer.toLowerCase().includes(lowerSearchTerm) ||
-        asset.model.toLowerCase().includes(lowerSearchTerm)
-      );
-    }
+    // Check if asset matches selected types
+    const matchesType = selectedTypes.length === 0 || 
+      selectedTypes.includes(asset.type);
     
-    // Apply type filters
-    if (selectedTypes.length > 0) {
-      filtered = filtered.filter(asset => selectedTypes.includes(asset.type));
-    }
+    // Check if asset matches selected statuses
+    const matchesStatus = selectedStatuses.length === 0 || 
+      selectedStatuses.includes(asset.status);
     
-    // Apply status filters
-    if (selectedStatuses.length > 0) {
-      filtered = filtered.filter(asset => selectedStatuses.includes(asset.status));
-    }
-    
-    setFilteredAssets(filtered);
-  }, [searchTerm, selectedTypes, selectedStatuses]);
+    return matchesSearch && matchesType && matchesStatus;
+  });
   
   const toggleTypeFilter = (type: AssetType) => {
     if (selectedTypes.includes(type)) {
@@ -225,7 +268,13 @@ const AssetsPage = () => {
           </motion.div>
         )}
         
-        {filteredAssets.length === 0 ? (
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="h-64 bg-muted animate-pulse rounded-lg"></div>
+            ))}
+          </div>
+        ) : filteredAssets.length === 0 ? (
           <div className="glass-card p-12 text-center">
             <div className="mx-auto w-16 h-16 mb-4 rounded-full bg-muted flex items-center justify-center">
               <PackageIcon size={32} className="text-muted-foreground" />

@@ -1,5 +1,4 @@
 
-// This file re-exports everything from the individual files to maintain backward compatibility
-export * from './assets';
-export * from './employees';
+// This file is now empty as we're using Supabase database instead of mock data
+// Re-export any helper functions that might still be useful
 export * from './helpers';

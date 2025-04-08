@@ -4,7 +4,8 @@ import { cn, formatCurrency } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import StatusBadge from "./StatusBadge";
-import { getEmployeeById } from "@/data/employees";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   CalendarClock, 
   Euro,
@@ -22,7 +23,29 @@ interface AssetCardProps {
 }
 
 export default function AssetCard({ asset, index = 0 }: AssetCardProps) {
-  const employee = asset.employeeId ? getEmployeeById(asset.employeeId) : null;
+  // Fetch employee data from Supabase if there is an employeeId
+  const { data: employee } = useQuery({
+    queryKey: ["employee", asset.employeeId],
+    queryFn: async () => {
+      if (!asset.employeeId) return null;
+      
+      const { data, error } = await supabase
+        .from('employees')
+        .select('*')
+        .eq('id', asset.employeeId)
+        .single();
+      
+      if (error || !data) return null;
+      
+      return {
+        id: data.id,
+        firstName: data.first_name,
+        lastName: data.last_name,
+        imageUrl: data.image_url
+      };
+    },
+    enabled: !!asset.employeeId,
+  });
   
   const getAssetTypeLabel = (type: Asset["type"]) => {
     switch (type) {
@@ -120,7 +143,7 @@ export default function AssetCard({ asset, index = 0 }: AssetCardProps) {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-primary/10 text-xs font-medium">
-                        {employee.firstName.charAt(0)}{employee.lastName.charAt(0)}
+                        {employee.firstName?.charAt(0)}{employee.lastName?.charAt(0)}
                       </div>
                     )}
                   </div>
