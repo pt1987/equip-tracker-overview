@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -185,12 +186,8 @@ export default function AssetDetail() {
             </div>
           </div>
 
-          <Card className="overflow-hidden">
-            <CardHeader className="bg-muted/50 pb-2">
-              <CardTitle>Asset Information</CardTitle>
-              <CardDescription>Grundlegende und technische Details</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6">
+          <Card>
+            <CardContent className="p-6">
               {isEditing ? (
                 <AssetDetailEdit
                   asset={asset}
@@ -208,7 +205,7 @@ export default function AssetDetail() {
           </Card>
 
           <Card>
-            <CardHeader className="bg-muted/50 pb-2">
+            <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center">
                 <FileText className="mr-2 h-5 w-5" />
                 Dokumente
@@ -228,7 +225,7 @@ export default function AssetDetail() {
           </Card>
 
           <Card>
-            <CardHeader className="bg-muted/50 pb-2">
+            <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center">
                 <FileText className="mr-2 h-5 w-5" />
                 Asset Historie
