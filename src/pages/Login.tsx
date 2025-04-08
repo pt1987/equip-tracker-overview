@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -98,6 +97,11 @@ export default function Login() {
       const success = await signup(data.email, data.password, data.name);
       
       if (success) {
+        toast({
+          title: "Registrierung erfolgreich",
+          description: "Sie können sich jetzt anmelden.",
+        });
+        
         setActiveTab("login");
         signupForm.reset();
       }

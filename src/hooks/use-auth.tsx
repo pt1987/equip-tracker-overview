@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -31,9 +30,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Initialisiere Authentifizierungsstatus bei Komponenten-Mount
   useEffect(() => {
-    // Zuerst Auth-State-Listener einrichten
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
         setSession(currentSession);
@@ -53,7 +50,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               role: data.role
             });
           } else {
-            // Fallback, falls Profil nicht gefunden wird
             setUser({
               id: currentSession.user.id,
               email: currentSession.user.email || '',
@@ -69,12 +65,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     );
 
-    // Dann vorhandene Session prüfen
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
       
       if (currentSession?.user) {
-        // Benutzerprofile abrufen
         supabase
           .from('profiles')
           .select('*')
@@ -89,7 +83,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 role: data.role
               });
             } else {
-              // Fallback auf Auth-User-Daten
               setUser({
                 id: currentSession.user.id,
                 email: currentSession.user.email || '',
@@ -104,7 +97,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     });
 
-    // Setze Inaktivitäts-Timeout auf
     const cleanup = setupInactivityTimeout();
     
     return () => {
@@ -113,14 +105,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  // Funktion zum Handhaben von Inaktivitäts-Timeout
   const setupInactivityTimeout = () => {
     let inactivityTimer: number | null = null;
     
     const resetTimer = () => {
       if (inactivityTimer) clearTimeout(inactivityTimer);
       
-      // 15 Minuten Inaktivitäts-Timeout
       inactivityTimer = window.setTimeout(() => {
         if (session) {
           logout();
@@ -132,19 +122,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }, 15 * 60 * 1000);
     };
     
-    // Erstelle die Reset-Timer-Funktion
     const resetInactivityTimer = () => {
       resetTimer();
     };
     
-    // Event-Listener einrichten
     window.addEventListener("mousemove", resetInactivityTimer);
     window.addEventListener("keypress", resetInactivityTimer);
     
-    // Initialer Timer-Setup
     resetTimer();
     
-    // Cleanup-Funktion zurückgeben
     return () => {
       if (inactivityTimer) clearTimeout(inactivityTimer);
       window.removeEventListener("mousemove", resetInactivityTimer);
@@ -152,7 +138,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   };
 
-  // Login mit Supabase
   const login = async (email: string, password: string): Promise<boolean> => {
     setLoading(true);
     
@@ -172,7 +157,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return false;
       }
 
-      // Erfolgreiche Anmeldung wird durch onAuthStateChange verarbeitet
       setLoading(false);
       return true;
     } catch (error: any) {
@@ -187,7 +171,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Registrierung mit Supabase
   const signup = async (email: string, password: string, name: string): Promise<boolean> => {
     setLoading(true);
     
@@ -214,7 +197,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       toast({
         title: "Registrierung erfolgreich",
-        description: "Bitte überprüfen Sie Ihre E-Mails für den Bestätigungslink.",
+        description: "Sie können sich jetzt anmelden.",
       });
       
       setLoading(false);
@@ -231,7 +214,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Abmeldung mit Supabase
   const logout = async () => {
     await supabase.auth.signOut();
     navigate("/login");
