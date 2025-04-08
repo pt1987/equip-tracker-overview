@@ -42,14 +42,19 @@ export default function Login() {
   const [activeTab, setActiveTab] = useState("login");
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { login, signup, isAuthenticated } = useAuth();
+  const { login, signup, isAuthenticated, loading: authLoading } = useAuth();
+
+  // Log authentication state for debugging
+  console.log("Login page - Auth state:", { isAuthenticated, authLoading });
 
   // Weiterleitung zum Dashboard, falls bereits authentifiziert
   useEffect(() => {
-    if (isAuthenticated) {
+    console.log("Login page - Checking auth state for redirect:", { isAuthenticated, authLoading });
+    if (!authLoading && isAuthenticated) {
+      console.log("Login page - User is authenticated, redirecting to dashboard");
       navigate("/admin/dashboard");
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, authLoading, navigate]);
 
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -70,10 +75,12 @@ export default function Login() {
   });
 
   const onLoginSubmit = async (data: LoginFormValues) => {
+    console.log("Attempting login with:", data.email);
     setIsLoading(true);
     
     try {
       const success = await login(data.email, data.password);
+      console.log("Login result:", success);
       
       if (success) {
         toast({
@@ -81,10 +88,21 @@ export default function Login() {
           description: "Willkommen im Admin-Bereich.",
         });
         
-        navigate("/admin/dashboard");
+        // The redirect will happen in the useEffect when isAuthenticated updates
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Anmeldung fehlgeschlagen",
+          description: "Bitte überprüfen Sie Ihre Anmeldedaten und versuchen Sie es erneut.",
+        });
       }
     } catch (error) {
       console.error("Login error:", error);
+      toast({
+        variant: "destructive",
+        title: "Anmeldung fehlgeschlagen",
+        description: error instanceof Error ? error.message : "Ein unbekannter Fehler ist aufgetreten",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -207,7 +225,7 @@ export default function Login() {
                       </Button>
                     </div>
 
-                    <Button type="submit" className="w-full" disabled={isLoading}>
+                    <Button type="submit" className="w-full" disabled={isLoading || authLoading}>
                       {isLoading ? (
                         <div className="flex items-center">
                           <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

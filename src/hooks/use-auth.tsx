@@ -34,52 +34,62 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     console.log("Setting up auth state listener");
     
+    // First: Set up the auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
+      (event, currentSession) => {
         console.log(`Auth state changed. Event: ${event}. Session: ${currentSession ? 'exists' : 'null'}`);
         setSession(currentSession);
         
         if (currentSession?.user) {
           console.log("User is authenticated. Fetching profile data.");
           
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', currentSession.user.id)
-            .single();
+          // Use setTimeout to prevent deadlocks with Supabase auth
+          setTimeout(async () => {
+            try {
+              const { data, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', currentSession.user.id)
+                .single();
 
-          if (data && !error) {
-            console.log("User profile found:", data);
-            setUser({
-              id: data.id,
-              email: data.email,
-              name: data.name,
-              role: data.role
-            });
-          } else {
-            console.log("Profile not found. Using auth data as fallback.");
-            if (error) {
-              console.error("Error fetching profile:", error);
+              if (data && !error) {
+                console.log("User profile found:", data);
+                setUser({
+                  id: data.id,
+                  email: data.email,
+                  name: data.name,
+                  role: data.role
+                });
+              } else {
+                console.log("Profile not found. Using auth data as fallback.");
+                if (error) {
+                  console.error("Error fetching profile:", error);
+                }
+                
+                setUser({
+                  id: currentSession.user.id,
+                  email: currentSession.user.email || '',
+                  name: currentSession.user.user_metadata?.name || null,
+                  role: 'user'
+                });
+              }
+              setLoading(false);
+            } catch (err) {
+              console.error("Error in auth state change handler:", err);
+              setLoading(false);
             }
-            
-            setUser({
-              id: currentSession.user.id,
-              email: currentSession.user.email || '',
-              name: currentSession.user.user_metadata?.name || null,
-              role: 'user'
-            });
-          }
+          }, 0);
         } else {
           console.log("No authenticated user.");
           setUser(null);
+          setLoading(false);
         }
-        
-        setLoading(false);
       }
     );
 
     console.log("Checking for existing session");
     
+    // Second: Check for an existing session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       console.log("Initial session check:", currentSession ? 'Session exists' : 'No session');
       setSession(currentSession);
@@ -87,12 +97,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (currentSession?.user) {
         console.log("User is logged in, fetching profile data");
         
-        supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', currentSession.user.id)
-          .single()
-          .then(({ data, error }) => {
+        // Use setTimeout to prevent deadlocks with Supabase auth
+        setTimeout(async () => {
+          try {
+            const { data, error } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', currentSession.user.id)
+              .single();
+
             if (data && !error) {
               console.log("User profile loaded:", data);
               setUser({
@@ -114,11 +127,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 role: 'user'
               });
             }
+          } catch (err) {
+            console.error("Error in session check:", err);
+          } finally {
             setLoading(false);
-          });
+          }
+        }, 0);
       } else {
         setLoading(false);
       }
+    }).catch(error => {
+      console.error("Error checking session:", error);
+      setLoading(false);
     });
 
     const cleanup = setupInactivityTimeout();
@@ -168,7 +188,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -184,8 +204,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return false;
       }
 
-      console.log("Login successful");
-      setLoading(false);
+      console.log("Login successful, session:", data.session ? "exists" : "null");
+      
+      // No need to navigate here, the onAuthStateChange handler will update the state
+      // and the component will redirect based on the isAuthenticated state
+      
       return true;
     } catch (error: any) {
       console.error("Login error:", error);
@@ -264,7 +287,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   console.log("Auth context current state:", {
     isAuthenticated: !!user,
     loading,
-    hasSession: !!session
+    hasSession: !!session,
+    userInfo: user ? { id: user.id, email: user.email, role: user.role } : null
   });
 
   return (
