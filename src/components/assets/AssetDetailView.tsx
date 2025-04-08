@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Asset } from "@/lib/types";
 import { formatDate, formatCurrency, calculateAgeInMonths } from "@/lib/utils";
@@ -17,13 +16,11 @@ import QRCode from "@/components/shared/QRCode";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-
 interface AssetDetailViewProps {
   asset: Asset;
   onEdit: () => void;
   onDelete: () => void;
 }
-
 export default function AssetDetailView({
   asset,
   onEdit,
@@ -33,8 +30,9 @@ export default function AssetDetailView({
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
   const [employeeData, setEmployeeData] = useState<any | null>(null);
   const [isLoadingEmployee, setIsLoadingEmployee] = useState(false);
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   useEffect(() => {
     const fetchEmployee = async () => {
       if (asset.employeeId) {
@@ -51,7 +49,6 @@ export default function AssetDetailView({
     };
     fetchEmployee();
   }, [asset.employeeId]);
-
   const getAssetTypeLabel = (type: Asset["type"]) => {
     switch (type) {
       case "laptop":
@@ -70,7 +67,6 @@ export default function AssetDetailView({
         return "Other";
     }
   };
-
   const getAssetImage = () => {
     if (!asset.imageUrl || asset.imageUrl.trim() === '') {
       return `/placeholder.svg`;
@@ -82,7 +78,6 @@ export default function AssetDetailView({
       return `/placeholder.svg`;
     }
   };
-
   const handleDeleteConfirm = async () => {
     try {
       const {
@@ -110,9 +105,7 @@ export default function AssetDetailView({
       });
     }
   };
-
-  return (
-    <div className="space-y-8">
+  return <div className="space-y-8">
       {/* Header section with badges, actions and basic info */}
       <div className="flex flex-col gap-4">
         <div className="flex items-start justify-between">
@@ -251,17 +244,17 @@ export default function AssetDetailView({
           <div className="bg-background rounded-lg flex flex-col h-full">
             <h3 className="font-medium p-4 text-lg">Asset Bild</h3>
             <div className="flex-grow bg-muted/30 rounded-lg overflow-hidden p-6">
-              <motion.img 
-                src={getAssetImage()} 
-                alt={asset.name} 
-                className="w-full h-full object-contain object-center" 
-                initial={{ opacity: 0, scale: 1.05 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-                onError={e => {
-                  (e.target as HTMLImageElement).src = '/placeholder.svg';
-                }}
-              />
+              <motion.img src={getAssetImage()} alt={asset.name} className="w-full h-full object-contain object-center" initial={{
+              opacity: 0,
+              scale: 1.05
+            }} animate={{
+              opacity: 1,
+              scale: 1
+            }} transition={{
+              duration: 0.5
+            }} onError={e => {
+              (e.target as HTMLImageElement).src = '/placeholder.svg';
+            }} />
             </div>
           </div>
         </div>
@@ -269,14 +262,13 @@ export default function AssetDetailView({
         {/* Tech details and employee - right column */}
         <div className="lg:col-span-2 space-y-8">
           {/* Technical Details */}
-          <div className="bg-background rounded-lg">
+          <div className="rounded-lg bg-transparent">
             <h3 className="text-lg font-medium p-4 pb-2">Technische Details</h3>
             <Separator className="mb-4" />
             
             <div className="px-4 pb-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {asset.serialNumber && (
-                  <div className="flex items-center gap-3">
+                {asset.serialNumber && <div className="flex items-center gap-3">
                     <div className="p-2.5 rounded-full bg-cyan-100">
                       <Cpu size={16} className="text-cyan-700" />
                     </div>
@@ -284,11 +276,9 @@ export default function AssetDetailView({
                       <p className="text-xs text-muted-foreground">Seriennummer</p>
                       <p className="font-medium font-mono text-sm">{asset.serialNumber}</p>
                     </div>
-                  </div>
-                )}
+                  </div>}
                 
-                {asset.inventoryNumber && (
-                  <div className="flex items-center gap-3">
+                {asset.inventoryNumber && <div className="flex items-center gap-3">
                     <div className="p-2.5 rounded-full bg-teal-100">
                       <QrCode size={16} className="text-teal-700" />
                     </div>
@@ -296,11 +286,9 @@ export default function AssetDetailView({
                       <p className="text-xs text-muted-foreground">Inventar-Nr.</p>
                       <p className="font-medium">{asset.inventoryNumber}</p>
                     </div>
-                  </div>
-                )}
+                  </div>}
                 
-                {asset.imei && (
-                  <div className="flex items-center gap-3">
+                {asset.imei && <div className="flex items-center gap-3">
                     <div className="p-2.5 rounded-full bg-orange-100">
                       <Cpu size={16} className="text-orange-700" />
                     </div>
@@ -308,11 +296,9 @@ export default function AssetDetailView({
                       <p className="text-xs text-muted-foreground">IMEI</p>
                       <p className="font-medium font-mono text-sm">{asset.imei}</p>
                     </div>
-                  </div>
-                )}
+                  </div>}
                 
-                {asset.hasWarranty !== undefined && (
-                  <div className="flex items-center gap-3">
+                {asset.hasWarranty !== undefined && <div className="flex items-center gap-3">
                     <div className="p-2.5 rounded-full bg-rose-100">
                       <Wrench size={16} className="text-rose-700" />
                     </div>
@@ -323,53 +309,42 @@ export default function AssetDetailView({
                         {asset.additionalWarranty && ", erweitert"}
                       </p>
                     </div>
-                  </div>
-                )}
+                  </div>}
               </div>
               
-              {asset.type === "smartphone" && (
-                <>
+              {asset.type === "smartphone" && <>
                   <Separator className="my-4" />
                   <h4 className="font-medium mb-3">Vertragsdaten</h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {asset.phoneNumber && (
-                      <div className="flex items-start gap-3">
+                    {asset.phoneNumber && <div className="flex items-start gap-3">
                         <div>
                           <p className="text-xs text-muted-foreground">Telefonnummer</p>
                           <p className="font-medium">{asset.phoneNumber}</p>
                         </div>
-                      </div>
-                    )}
+                      </div>}
                     
-                    {asset.provider && (
-                      <div className="flex items-start gap-3">
+                    {asset.provider && <div className="flex items-start gap-3">
                         <div>
                           <p className="text-xs text-muted-foreground">Provider</p>
                           <p className="font-medium">{asset.provider}</p>
                         </div>
-                      </div>
-                    )}
+                      </div>}
                     
-                    {asset.contractName && (
-                      <div className="flex items-start gap-3">
+                    {asset.contractName && <div className="flex items-start gap-3">
                         <div>
                           <p className="text-xs text-muted-foreground">Vertrag</p>
                           <p className="font-medium">{asset.contractName}</p>
                         </div>
-                      </div>
-                    )}
+                      </div>}
                     
-                    {asset.contractEndDate && (
-                      <div className="flex items-start gap-3">
+                    {asset.contractEndDate && <div className="flex items-start gap-3">
                         <div>
                           <p className="text-xs text-muted-foreground">Vertragsende</p>
                           <p className="font-medium">{formatDate(asset.contractEndDate)}</p>
                         </div>
-                      </div>
-                    )}
+                      </div>}
                   </div>
-                </>
-              )}
+                </>}
             </div>
           </div>
 
@@ -379,14 +354,10 @@ export default function AssetDetailView({
             <Separator className="mb-4" />
             
             <div className="px-4 pb-4">
-              {asset.employeeId ? (
-                <>
-                  {isLoadingEmployee ? (
-                    <div className="p-4 flex justify-center">
+              {asset.employeeId ? <>
+                  {isLoadingEmployee ? <div className="p-4 flex justify-center">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                    </div>
-                  ) : employeeData ? (
-                    <div className="flex items-center gap-4">
+                    </div> : employeeData ? <div className="flex items-center gap-4">
                       <Avatar className="h-16 w-16">
                         <AvatarImage src={employeeData.imageUrl || `https://avatar.vercel.sh/${employeeData.id}`} alt={`${employeeData.firstName} ${employeeData.lastName}`} />
                         <AvatarFallback>
@@ -405,25 +376,18 @@ export default function AssetDetailView({
                           </Link>
                         </Button>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="p-4 text-center bg-muted/30 rounded-lg">
+                    </div> : <div className="p-4 text-center bg-muted/30 rounded-lg">
                       <p>Mitarbeiterdaten konnten nicht geladen werden.</p>
                       <p className="text-sm text-muted-foreground">ID: {asset.employeeId}</p>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="p-4 text-center bg-muted/30 rounded-lg">
+                    </div>}
+                </> : <div className="p-4 text-center bg-muted/30 rounded-lg">
                   <User size={32} className="mx-auto text-muted-foreground mb-2 opacity-50" />
                   <p className="text-muted-foreground">
                     Dieses Asset ist keinem Mitarbeiter zugewiesen.
                   </p>
-                </div>
-              )}
+                </div>}
               
-              {asset.connectedAssetId && (
-                <>
+              {asset.connectedAssetId && <>
                   <Separator className="my-4" />
                   <div>
                     <h4 className="font-medium mb-3">Verbundenes Asset</h4>
@@ -436,13 +400,10 @@ export default function AssetDetailView({
                       </Button>
                     </div>
                   </div>
-                </>
-              )}
+                </>}
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 }
-
