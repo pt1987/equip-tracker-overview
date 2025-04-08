@@ -29,6 +29,8 @@ import {
 import { CalendarIcon, SaveIcon, X } from "lucide-react";
 import { format } from "date-fns";
 import { useState } from "react";
+import { uploadAssetImage } from "@/data/assets";
+import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name wird benötigt"),
@@ -57,6 +59,8 @@ export default function AssetDetailEdit({
   onCancel,
 }: AssetDetailEditProps) {
   const [imagePreview, setImagePreview] = useState(asset.imageUrl || "");
+  const [isUploading, setIsUploading] = useState(false);
+  const { toast } = useToast();
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -76,22 +80,58 @@ export default function AssetDetailEdit({
     },
   });
   
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        setImagePreview(result);
-        form.setValue("imageUrl", result);
-      };
-      reader.readAsDataURL(file);
+      try {
+        setIsUploading(true);
+        
+        // Create local preview
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const result = reader.result as string;
+          setImagePreview(result);
+        };
+        reader.readAsDataURL(file);
+        
+        // Upload to Supabase
+        const imageUrl = await uploadAssetImage(file, asset.id);
+        form.setValue("imageUrl", imageUrl);
+        
+        toast({
+          title: "Bild hochgeladen",
+          description: "Das Bild wurde erfolgreich hochgeladen.",
+        });
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        toast({
+          variant: "destructive",
+          title: "Fehler beim Hochladen",
+          description: "Das Bild konnte nicht hochgeladen werden.",
+        });
+      } finally {
+        setIsUploading(false);
+      }
+    }
+  };
+  
+  const handleSubmit = async (data: z.infer<typeof formSchema>) => {
+    try {
+      // Pass the form data to the parent component's onSave function
+      onSave(data);
+    } catch (error) {
+      console.error("Error saving asset:", error);
+      toast({
+        variant: "destructive",
+        title: "Fehler beim Speichern",
+        description: "Das Asset konnte nicht gespeichert werden.",
+      });
     }
   };
   
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSave)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <div className="flex flex-col md:flex-row gap-6">
           <div className="w-full md:w-1/3 flex-shrink-0">
             <div className="aspect-square bg-muted rounded-lg overflow-hidden relative group">
@@ -102,18 +142,19 @@ export default function AssetDetailEdit({
               />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                 <label className="cursor-pointer px-3 py-2 bg-background rounded-md text-sm font-medium">
-                  Bild ändern
+                  {isUploading ? "Wird hochgeladen..." : "Bild ändern"}
                   <input
                     type="file"
                     accept="image/*"
                     className="hidden"
                     onChange={handleImageChange}
+                    disabled={isUploading}
                   />
                 </label>
               </div>
             </div>
             <div className="mt-4 flex gap-2 justify-center">
-              <Button type="submit" size="sm">
+              <Button type="submit" size="sm" disabled={isUploading}>
                 <SaveIcon size={16} className="mr-2" />
                 Speichern
               </Button>
@@ -122,6 +163,7 @@ export default function AssetDetailEdit({
                 variant="outline"
                 size="sm"
                 onClick={onCancel}
+                disabled={isUploading}
               >
                 <X size={16} className="mr-2" />
                 Abbrechen

@@ -1,208 +1,204 @@
-import { useParams, Link, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import PageTransition from "@/components/layout/PageTransition";
-import { getAssetById, getEmployeeById, getAssetHistoryByAssetId } from "@/data/mockData";
-import { Asset, AssetHistoryEntry } from "@/lib/types";
-import QRCode from "@/components/shared/QRCode";
-import { motion } from "framer-motion";
-import { formatCurrency, formatDate, calculateAgeInMonths } from "@/lib/utils";
-import { ChevronLeft, CalendarClock, Euro, Tag, User, History, ArrowRight } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
 import AssetDetailView from "@/components/assets/AssetDetailView";
 import AssetDetailEdit from "@/components/assets/AssetDetailEdit";
-import DocumentUpload, { Document } from "@/components/assets/DocumentUpload";
-import { useQuery } from "@tanstack/react-query";
+import { getAssetById, updateAsset, getAssetHistoryByAssetId } from "@/data/assets";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  ChevronLeft,
+  Download,
+  Share,
+  FileText,
+  AlertCircle,
+} from "lucide-react";
+import { formatDate } from "@/lib/utils";
+import { Asset } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
 
-const AssetDetail = () => {
-  const { id } = useParams<{ id: string }>();
+export default function AssetDetail() {
+  const { id = "" } = useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
-  const [documents, setDocuments] = useState<Document[]>([]);
+  const { toast } = useToast();
   
-  const { data: asset, isLoading: assetLoading } = useQuery({
-    queryKey: ['asset', id],
-    queryFn: () => id ? getAssetById(id) : null,
+  // Fetch asset details
+  const {
+    data: asset,
+    isLoading: isAssetLoading,
+    error: assetError,
+  } = useQuery({
+    queryKey: ["asset", id],
+    queryFn: () => getAssetById(id),
     enabled: !!id,
   });
-  
-  const { data: employee, isLoading: employeeLoading } = useQuery({
-    queryKey: ['employee', asset?.employeeId],
-    queryFn: () => asset?.employeeId ? getEmployeeById(asset.employeeId) : null,
-    enabled: !!asset?.employeeId,
-  });
-  
-  const { data: history = [], isLoading: historyLoading } = useQuery({
-    queryKey: ['assetHistory', id],
-    queryFn: () => id ? getAssetHistoryByAssetId(id) : [],
+
+  // Fetch asset history
+  const {
+    data: assetHistory = [],
+    isLoading: isHistoryLoading,
+  } = useQuery({
+    queryKey: ["assetHistory", id],
+    queryFn: () => getAssetHistoryByAssetId(id),
     enabled: !!id,
   });
-  
-  const loading = assetLoading || employeeLoading || historyLoading;
-  
+
   const handleEdit = () => {
     setIsEditing(true);
   };
-  
-  const handleCancel = () => {
+
+  const handleCancelEdit = () => {
     setIsEditing(false);
   };
-  
-  const handleSave = (data: any) => {
-    console.log("Updated asset data:", data);
-    
-    // In a real application, we would save to Supabase here
-    
-    setIsEditing(false);
-    
-    toast({
-      title: "Asset aktualisiert",
-      description: "Die Änderungen wurden erfolgreich gespeichert."
-    });
-  };
-  
-  const handleDelete = () => {
-    console.log("Delete asset:", id);
-    
-    toast({
-      title: "Asset gelöscht",
-      description: "Das Asset wurde erfolgreich gelöscht."
-    });
-    
+
+  const handleDelete = async () => {
+    // After successful deletion, navigate back
+    queryClient.invalidateQueries({ queryKey: ["assets"] });
     navigate("/assets");
   };
 
-  const handleAddDocument = (document: Document) => {
-    setDocuments([...documents, document]);
-  };
-
-  const handleDeleteDocument = (documentId: string) => {
-    setDocuments(documents.filter(doc => doc.id !== documentId));
-    toast({
-      title: "Dokument gelöscht",
-      description: "Das Dokument wurde erfolgreich gelöscht"
-    });
-  };
-  
-  if (loading) {
-    return (
-      <div className="flex min-h-screen">
-        <div className="flex-1 md:ml-64 p-8 flex items-center justify-center">
-          <div className="animate-pulse-soft">Loading asset details...</div>
-        </div>
-      </div>
-    );
-  }
-  
-  if (!asset) {
-    return (
-      <div className="flex min-h-screen">
-        <div className="flex-1 md:ml-32 p-3 md:p-4 xl:p-6 space-y-6 max-w-full">
-          <div className="glass-card p-12 text-center">
-            <h2 className="text-xl font-medium mb-4">Asset not found</h2>
-            <p className="text-muted-foreground mb-6">
-              The asset you're looking for doesn't exist or has been removed.
-            </p>
-            <Link 
-              to="/assets"
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg"
-            >
-              Back to assets
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-  
-  const renderAdditionalFields = () => {
-    if (isEditing) return null;
-    
-    switch (asset.type) {
-      case "laptop":
-        return (
-          <>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Serial Number</p>
-              <p className="font-medium">{asset.serialNumber || "—"}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Inventory Number</p>
-              <p className="font-medium">{asset.inventoryNumber || "—"}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Additional Warranty</p>
-              <p className="font-medium">{asset.additionalWarranty ? "Yes" : "No"}</p>
-            </div>
-          </>
-        );
-      case "smartphone":
-        return (
-          <>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Serial Number</p>
-              <p className="font-medium">{asset.serialNumber || "—"}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Inventory Number</p>
-              <p className="font-medium">{asset.inventoryNumber || "—"}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">IMEI</p>
-              <p className="font-medium">{asset.imei || "—"}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Phone Number</p>
-              <p className="font-medium">{asset.phoneNumber || "—"}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Provider</p>
-              <p className="font-medium">{asset.provider || "—"}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Contract</p>
-              <p className="font-medium">{asset.contractName || "—"}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Contract End Date</p>
-              <p className="font-medium">
-                {asset.contractEndDate ? formatDate(asset.contractEndDate) : "—"}
-              </p>
-            </div>
-          </>
-        );
-      default:
-        return (
-          <>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Inventory Number</p>
-              <p className="font-medium">{asset.inventoryNumber || "—"}</p>
-            </div>
-          </>
-        );
+  const handleSave = async (formData: any) => {
+    try {
+      if (!asset) return;
+      
+      const updatedAsset: Asset = {
+        ...asset,
+        name: formData.name,
+        manufacturer: formData.manufacturer,
+        model: formData.model,
+        type: formData.type,
+        vendor: formData.vendor,
+        status: formData.status,
+        purchaseDate: formData.purchaseDate.toISOString().split('T')[0],
+        price: formData.price,
+        serialNumber: formData.serialNumber || null,
+        inventoryNumber: formData.inventoryNumber || null,
+        additionalWarranty: formData.additionalWarranty || false,
+        imageUrl: formData.imageUrl || null,
+      };
+      
+      console.log("Saving updated asset:", updatedAsset);
+      
+      // Update in database
+      await updateAsset(updatedAsset);
+      
+      // Update cache and UI
+      queryClient.invalidateQueries({ queryKey: ["asset", id] });
+      queryClient.invalidateQueries({ queryKey: ["assets"] });
+      
+      setIsEditing(false);
+      
+      toast({
+        title: "Asset aktualisiert",
+        description: "Die Änderungen wurden erfolgreich gespeichert.",
+      });
+    } catch (error) {
+      console.error("Error saving asset:", error);
+      toast({
+        variant: "destructive",
+        title: "Fehler beim Speichern",
+        description: "Die Änderungen konnten nicht gespeichert werden.",
+      });
     }
   };
 
+  if (isAssetLoading) {
+    return (
+      <PageTransition>
+        <div className="container mx-auto px-4 py-8">
+          <Skeleton className="h-8 w-48 mb-4" />
+          <Skeleton className="h-[400px] w-full rounded-lg" />
+        </div>
+      </PageTransition>
+    );
+  }
+
+  if (assetError || !asset) {
+    return (
+      <PageTransition>
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex flex-col items-center justify-center text-center py-12">
+            <AlertCircle size={64} className="text-muted-foreground mb-4" />
+            <h2 className="text-2xl font-bold mb-2">Asset nicht gefunden</h2>
+            <p className="text-muted-foreground mb-6">
+              Das angeforderte Asset konnte nicht gefunden werden.
+            </p>
+            <Button onClick={() => navigate("/assets")}>
+              <ChevronLeft size={16} className="mr-2" />
+              Zurück zur Übersicht
+            </Button>
+          </div>
+        </div>
+      </PageTransition>
+    );
+  }
+
   return (
     <PageTransition>
-      <div className="p-3 md:p-4 xl:p-6 space-y-6 max-w-full pb-24 mt-12 md:mt-0">
-        <div className="mb-6">
-          <Link 
-            to="/assets"
-            className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ChevronLeft size={16} />
-            <span>Back to assets</span>
-          </Link>
-        </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <div className="glass-card p-6 mb-6">
+      <div className="container mx-auto px-4 py-6 md:py-8">
+        <div className="flex flex-col gap-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <Button
+                variant="ghost"
+                onClick={() => navigate(-1)}
+                className="mb-2 -ml-3 h-9 px-2"
+              >
+                <ChevronLeft size={16} className="mr-1" />
+                Zurück
+              </Button>
+              <h1 className="text-3xl font-bold tracking-tight">Asset Details</h1>
+              <p className="text-muted-foreground">
+                Vollständige Informationen und Historie des ausgewählten Assets
+              </p>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Button variant="outline" size="sm" onClick={() => {}}>
+                <FileText className="mr-1.5 h-4 w-4" />
+                Report
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => {}}>
+                <Download className="mr-1.5 h-4 w-4" />
+                Export
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => {}}>
+                <Share className="mr-1.5 h-4 w-4" />
+                Teilen
+              </Button>
+            </div>
+          </div>
+
+          <Card>
+            <CardHeader className="pb-0">
+              <CardTitle>Asset Information</CardTitle>
+              <CardDescription>Grundlegende und technische Details</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">
               {isEditing ? (
                 <AssetDetailEdit
                   asset={asset}
                   onSave={handleSave}
-                  onCancel={handleCancel}
+                  onCancel={handleCancelEdit}
                 />
               ) : (
                 <AssetDetailView
@@ -211,130 +207,68 @@ const AssetDetail = () => {
                   onDelete={handleDelete}
                 />
               )}
-            </div>
-            
-            {!isEditing && (
-              <>
-                <div className="glass-card p-6 mb-6">
-                  <h2 className="text-lg font-semibold mb-4">Details</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                    {renderAdditionalFields()}
-                  </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Asset Historie</CardTitle>
+              <CardDescription>Chronologische Aufzeichnung aller Änderungen und Ereignisse</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isHistoryLoading ? (
+                <div className="space-y-2">
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
                 </div>
-                
-                <div className="glass-card p-6 mb-6">
-                  <DocumentUpload
-                    assetId={asset.id}
-                    documents={documents}
-                    onAddDocument={handleAddDocument}
-                    onDeleteDocument={handleDeleteDocument}
-                  />
-                </div>
-              </>
-            )}
-            
-            <div className="glass-card p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <History size={18} />
-                <h2 className="text-lg font-semibold">History</h2>
-              </div>
-              
-              {history.length > 0 ? (
-                <div className="space-y-4">
-                  {history.map((entry, index) => (
-                    <motion.div 
-                      key={entry.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, delay: index * 0.05 }}
-                      className="flex gap-4"
-                    >
-                      <div className="flex flex-col items-center">
-                        <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-                          {entry.action === "purchase" && <Euro size={16} />}
-                          {entry.action === "assign" && <User size={16} />}
-                          {entry.action === "status_change" && <Tag size={16} />}
-                          {entry.action === "return" && <ArrowRight size={16} />}
-                        </div>
-                        {index < history.length - 1 && (
-                          <div className="w-0.5 h-full bg-border mt-2"></div>
-                        )}
-                      </div>
-                      
-                      <div className="pb-6">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">
-                            {entry.action === "purchase" && "Purchased"}
-                            {entry.action === "assign" && "Assigned"}
-                            {entry.action === "status_change" && "Status changed"}
-                            {entry.action === "return" && "Returned"}
-                          </span>
-                          <span className="text-sm text-muted-foreground">
-                            {formatDate(entry.date)}
-                          </span>
-                        </div>
-                        <p className="text-sm mt-1">{entry.notes}</p>
-                      </div>
-                    </motion.div>
-                  ))}
+              ) : assetHistory.length === 0 ? (
+                <div className="py-8 text-center">
+                  <p className="text-muted-foreground">Keine Historieneinträge vorhanden.</p>
                 </div>
               ) : (
-                <p className="text-center text-muted-foreground py-4">
-                  No history available for this asset.
-                </p>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Datum</TableHead>
+                        <TableHead>Aktion</TableHead>
+                        <TableHead>Mitarbeiter</TableHead>
+                        <TableHead>Notiz</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {assetHistory.map((entry) => (
+                        <TableRow key={entry.id}>
+                          <TableCell>{formatDate(entry.date)}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center">
+                              <span className="capitalize">
+                                {entry.action === "purchase" && "Kauf"}
+                                {entry.action === "assign" && "Zugewiesen"}
+                                {entry.action === "status_change" && "Status geändert"}
+                                {entry.action === "return" && "Zurückgegeben"}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {entry.employeeId ? entry.employeeId : "-"}
+                          </TableCell>
+                          <TableCell>
+                            <div className="max-w-xs truncate">
+                              {entry.notes || "-"}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               )}
-            </div>
-          </div>
-          
-          <div>
-            <div className="glass-card p-6 mb-6">
-              <h2 className="text-lg font-semibold mb-4">Asset QR Code</h2>
-              <div className="flex justify-center">
-                <QRCode 
-                  value={window.location.href}
-                  size={180}
-                  title="Scan to view asset details"
-                />
-              </div>
-              <p className="text-center text-sm text-muted-foreground mt-4">
-                Scan this QR code to access asset details quickly
-              </p>
-            </div>
-            
-            {employee && (
-              <div className="glass-card p-6 mb-6">
-                <h3 className="text-lg font-semibold mb-4">Zugewiesen an</h3>
-                <Link 
-                  to={`/employee/${employee.id}`}
-                  className="flex items-center gap-3 group"
-                >
-                  <div className="w-12 h-12 rounded-full overflow-hidden bg-muted">
-                    <img 
-                      src={employee.imageUrl} 
-                      alt={`${employee.firstName} ${employee.lastName}`}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = 'https://avatar.vercel.sh/' + employee.id;
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <p className="font-medium group-hover:text-primary transition-colors">
-                      {employee.firstName} {employee.lastName}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {employee.position} • {employee.cluster}
-                    </p>
-                  </div>
-                  <ArrowRight size={16} className="ml-auto text-muted-foreground group-hover:text-primary transition-colors" />
-                </Link>
-              </div>
-            )}
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </PageTransition>
   );
-};
-
-export default AssetDetail;
+}

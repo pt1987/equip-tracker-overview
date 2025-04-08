@@ -222,3 +222,130 @@ export const getAssetStatusDistribution = async () => {
     count
   }));
 };
+
+// New function to update an asset in the database
+export const updateAsset = async (asset: Asset): Promise<Asset> => {
+  console.log("Updating asset in Supabase:", asset);
+  
+  try {
+    // Convert from frontend model to database model
+    const dbAsset = {
+      id: asset.id,
+      name: asset.name,
+      type: asset.type,
+      manufacturer: asset.manufacturer,
+      model: asset.model,
+      purchase_date: asset.purchaseDate,
+      vendor: asset.vendor,
+      price: asset.price,
+      status: asset.status,
+      employee_id: asset.employeeId,
+      category: asset.category,
+      serial_number: asset.serialNumber,
+      inventory_number: asset.inventoryNumber,
+      additional_warranty: asset.additionalWarranty,
+      has_warranty: asset.hasWarranty,
+      imei: asset.imei,
+      phone_number: asset.phoneNumber,
+      provider: asset.provider,
+      contract_end_date: asset.contractEndDate,
+      contract_name: asset.contractName,
+      contract_duration: asset.contractDuration,
+      connected_asset_id: asset.connectedAssetId,
+      related_asset_id: asset.relatedAssetId,
+      image_url: asset.imageUrl,
+      updated_at: new Date()
+    };
+    
+    const { data, error } = await supabase
+      .from('assets')
+      .update(dbAsset)
+      .eq('id', asset.id)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error("Error updating asset:", error);
+      throw error;
+    }
+    
+    if (!data) {
+      throw new Error(`No asset returned after update for ID: ${asset.id}`);
+    }
+    
+    console.log("Asset updated successfully:", data);
+    
+    // Return the updated asset
+    return {
+      id: data.id,
+      name: data.name,
+      type: data.type as AssetType,
+      manufacturer: data.manufacturer,
+      model: data.model,
+      purchaseDate: data.purchase_date,
+      vendor: data.vendor,
+      price: data.price,
+      status: data.status as AssetStatus,
+      employeeId: data.employee_id,
+      category: data.category,
+      serialNumber: data.serial_number,
+      inventoryNumber: data.inventory_number,
+      additionalWarranty: data.additional_warranty,
+      hasWarranty: data.has_warranty,
+      imei: data.imei,
+      phoneNumber: data.phone_number,
+      provider: data.provider,
+      contractEndDate: data.contract_end_date,
+      contractName: data.contract_name,
+      contractDuration: data.contract_duration,
+      connectedAssetId: data.connected_asset_id,
+      relatedAssetId: data.related_asset_id,
+      imageUrl: data.image_url
+    };
+  } catch (error) {
+    console.error(`Error in updateAsset for ${asset.id}:`, error);
+    throw error;
+  }
+};
+
+// New function to upload an image to Supabase storage
+export const uploadAssetImage = async (file: File, assetId: string): Promise<string> => {
+  console.log(`Uploading image for asset ${assetId}...`);
+  
+  try {
+    // Create a unique file path
+    const fileExt = file.name.split('.').pop();
+    const filePath = `${assetId}-${Date.now()}.${fileExt}`;
+    
+    // Upload to the default bucket
+    const { data, error } = await supabase.storage
+      .from('assets')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: true
+      });
+    
+    if (error) {
+      console.error("Error uploading file:", error);
+      throw error;
+    }
+    
+    if (!data) {
+      throw new Error('No data returned from upload');
+    }
+    
+    console.log("File uploaded successfully:", data);
+    
+    // Get public URL
+    const { data: publicUrlData } = supabase.storage
+      .from('assets')
+      .getPublicUrl(filePath);
+    
+    console.log("Public URL:", publicUrlData.publicUrl);
+    
+    return publicUrlData.publicUrl;
+  } catch (error) {
+    console.error("Error in uploadAssetImage:", error);
+    throw error;
+  }
+};
