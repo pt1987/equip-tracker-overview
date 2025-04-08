@@ -241,7 +241,7 @@ export default function AssetDetailView({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Asset image - left column */}
         <div className="lg:col-span-1">
-          <div className="bg-background rounded-lg flex flex-col h-full">
+          <div className="rounded-lg flex flex-col h-full bg-transparent">
             <h3 className="font-medium p-4 text-lg">Asset Bild</h3>
             <div className="flex-grow bg-muted/30 rounded-lg overflow-hidden p-6">
               <motion.img src={getAssetImage()} alt={asset.name} className="w-full h-full object-contain object-center" initial={{
