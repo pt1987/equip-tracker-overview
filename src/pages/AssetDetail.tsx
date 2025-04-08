@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -14,17 +15,15 @@ import { Asset } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import DocumentUpload, { Document } from "@/components/assets/DocumentUpload";
 import AssetHistoryTimeline from "@/components/assets/AssetHistoryTimeline";
+
 export default function AssetDetail() {
-  const {
-    id = ""
-  } = useParams();
+  const { id = "" } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
   const [documents, setDocuments] = useState<Document[]>([]);
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+
   const {
     data: asset,
     isLoading: isAssetLoading,
@@ -34,6 +33,7 @@ export default function AssetDetail() {
     queryFn: () => getAssetById(id),
     enabled: !!id
   });
+
   const {
     data: assetHistory = [],
     isLoading: isHistoryLoading
@@ -42,18 +42,22 @@ export default function AssetDetail() {
     queryFn: () => getAssetHistoryByAssetId(id),
     enabled: !!id
   });
+
   const handleEdit = () => {
     setIsEditing(true);
   };
+
   const handleCancelEdit = () => {
     setIsEditing(false);
   };
+
   const handleDelete = async () => {
     queryClient.invalidateQueries({
       queryKey: ["assets"]
     });
     navigate("/assets");
   };
+
   const handleSave = async (formData: any) => {
     try {
       if (!asset) return;
@@ -94,22 +98,29 @@ export default function AssetDetail() {
       });
     }
   };
+
   const handleAddDocument = (document: Document) => {
     setDocuments([...documents, document]);
   };
+
   const handleDeleteDocument = (documentId: string) => {
     setDocuments(documents.filter(doc => doc.id !== documentId));
   };
+
   if (isAssetLoading) {
-    return <PageTransition>
+    return (
+      <PageTransition>
         <div className="container mx-auto px-4 py-8">
           <Skeleton className="h-8 w-48 mb-4" />
           <Skeleton className="h-[400px] w-full rounded-lg" />
         </div>
-      </PageTransition>;
+      </PageTransition>
+    );
   }
+
   if (assetError || !asset) {
-    return <PageTransition>
+    return (
+      <PageTransition>
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col items-center justify-center text-center py-12">
             <AlertCircle size={64} className="text-muted-foreground mb-4" />
@@ -123,68 +134,82 @@ export default function AssetDetail() {
             </Button>
           </div>
         </div>
-      </PageTransition>;
+      </PageTransition>
+    );
   }
-  return <PageTransition>
+
+  return (
+    <PageTransition>
       <div className="container mx-auto px-4 py-6 md:py-8">
-        <div className="flex flex-col gap-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <Button variant="ghost" onClick={() => navigate(-1)} className="mb-2 -ml-3 h-9 px-2">
-                <ChevronLeft size={16} className="mr-1" />
-                Zurück
-              </Button>
-              <h1 className="text-3xl font-bold tracking-tight">Asset Details</h1>
-              
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              
-              
-              
-            </div>
+        <div className="flex flex-col gap-12">
+          {/* Navigation header */}
+          <div>
+            <Button variant="ghost" onClick={() => navigate(-1)} className="mb-2 -ml-3 h-9 px-2">
+              <ChevronLeft size={16} className="mr-1" />
+              Zurück
+            </Button>
+            <h1 className="text-3xl font-bold tracking-tight">Asset Details</h1>
           </div>
 
-          <Card className="border-0">
-            <CardContent className="p-6">
-              {isEditing ? <AssetDetailEdit asset={asset} onSave={handleSave} onCancel={handleCancelEdit} /> : <AssetDetailView asset={asset} onEdit={handleEdit} onDelete={handleDelete} />}
-            </CardContent>
-          </Card>
+          {/* Main content */}
+          <div>
+            {isEditing ? 
+              <AssetDetailEdit 
+                asset={asset} 
+                onSave={handleSave} 
+                onCancel={handleCancelEdit} 
+              /> : 
+              <AssetDetailView 
+                asset={asset} 
+                onEdit={handleEdit} 
+                onDelete={handleDelete} 
+              />
+            }
+          </div>
 
-          <Card className="border-0">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex items-center">
-                <FileText className="mr-2 h-5 w-5" />
-                Dokumente
-              </CardTitle>
-              <CardDescription>
-                Verwalten Sie alle mit diesem Asset verbundenen Dokumente
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <DocumentUpload assetId={asset.id} documents={documents} onAddDocument={handleAddDocument} onDeleteDocument={handleDeleteDocument} />
-            </CardContent>
-          </Card>
+          {/* Document section */}
+          <section>
+            <h2 className="text-xl font-medium mb-6 flex items-center">
+              <FileText className="mr-2 h-5 w-5" />
+              Dokumente
+            </h2>
+            <p className="text-sm text-muted-foreground mb-6">
+              Verwalten Sie alle mit diesem Asset verbundenen Dokumente
+            </p>
+            <DocumentUpload 
+              assetId={asset.id} 
+              documents={documents} 
+              onAddDocument={handleAddDocument} 
+              onDeleteDocument={handleDeleteDocument} 
+            />
+          </section>
 
-          <Card className="border-0">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex items-center">
-                <FileText className="mr-2 h-5 w-5" />
-                Asset Historie
-              </CardTitle>
-              <CardDescription>Chronologische Aufzeichnung aller Änderungen und Ereignisse</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6">
-              {isHistoryLoading ? <div className="space-y-2 py-4">
-                  <Skeleton className="h-12 w-full" />
-                  <Skeleton className="h-12 w-full" />
-                  <Skeleton className="h-12 w-full" />
-                </div> : assetHistory.length === 0 ? <div className="py-8 text-center">
-                  <p className="text-muted-foreground">Keine Historieneinträge vorhanden.</p>
-                </div> : <AssetHistoryTimeline history={assetHistory} />}
-            </CardContent>
-          </Card>
+          {/* History section */}
+          <section>
+            <h2 className="text-xl font-medium mb-6 flex items-center">
+              <FileText className="mr-2 h-5 w-5" />
+              Asset Historie
+            </h2>
+            <p className="text-sm text-muted-foreground mb-6">
+              Chronologische Aufzeichnung aller Änderungen und Ereignisse
+            </p>
+            
+            {isHistoryLoading ? (
+              <div className="space-y-2 py-4">
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+            ) : assetHistory.length === 0 ? (
+              <div className="py-8 text-center">
+                <p className="text-muted-foreground">Keine Historieneinträge vorhanden.</p>
+              </div>
+            ) : (
+              <AssetHistoryTimeline history={assetHistory} />
+            )}
+          </section>
         </div>
       </div>
-    </PageTransition>;
+    </PageTransition>
+  );
 }
