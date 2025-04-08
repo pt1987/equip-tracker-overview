@@ -8,8 +8,6 @@ import { AnimatePresence } from "framer-motion";
 import { ThemeProvider } from "@/hooks/use-theme";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { AuthProvider, ProtectedRoute } from "@/hooks/use-auth";
-import { useEffect } from "react";
-import { migrateDataToSupabase } from "@/utils/dataMigration";
 import Navbar from "@/components/layout/Navbar";
 import AdminLayout from "@/components/admin/AdminLayout";
 import Dashboard from "./pages/Index";
@@ -31,50 +29,10 @@ import Users from "./pages/admin/Users";
 import Roles from "./pages/admin/Roles";
 import Logs from "./pages/admin/Logs";
 
-// Configure the query client with better error handling
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      staleTime: 30000,
-      refetchOnWindowFocus: false,
-      // Using meta instead of onError/onSettled
-      meta: {
-        onError: (error: Error) => {
-          console.error('Query error:', error);
-        }
-      }
-    },
-    mutations: {
-      // Using meta.onError for mutations too
-      meta: {
-        onError: (error: Error) => {
-          console.error('Mutation error:', error);
-        }
-      }
-    }
-  }
-});
+const queryClient = new QueryClient();
 
 const AppContent = () => {
   const isMobile = useIsMobile();
-  
-  // Migrate data on app startup
-  useEffect(() => {
-    // Add a small delay to ensure authentication is initialized
-    console.log("Starting data migration...");
-    migrateDataToSupabase()
-      .then(result => {
-        if (result) {
-          console.log("Migration completed successfully");
-        } else {
-          console.log("Migration skipped or failed");
-        }
-      })
-      .catch(error => {
-        console.error("Migration error:", error);
-      });
-  }, []);
   
   return (
     <div className="relative min-h-screen">

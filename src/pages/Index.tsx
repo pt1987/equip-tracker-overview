@@ -1,290 +1,243 @@
-import { useState, useEffect } from "react";
-import { useQueries, useQuery } from "@tanstack/react-query";
+
+import { useState } from "react";
 import PageTransition from "@/components/layout/PageTransition";
-import { Card, CardContent } from "@/components/ui/card";
-import OverviewChart from "@/components/dashboard/OverviewChart";
 import StatCard from "@/components/dashboard/StatCard";
-import AssetCard from "@/components/assets/AssetCard";
-import EmployeeCard from "@/components/employees/EmployeeCard";
-import { Button } from "@/components/ui/button";
 import { 
-  Calendar, 
-  CreditCard, 
-  Package2, 
-  Users, 
+  getDashboardStats, 
+} from "@/data/helpers";
+import { 
+  getAssetTypeDistribution, 
+  getAssetStatusDistribution,
+  assets
+} from "@/data/assets";
+import { employees } from "@/data/employees";
+import OverviewChart from "@/components/dashboard/OverviewChart";
+import { 
   Monitor, 
-  SmartphoneIcon, 
-  TabletIcon, 
+  Users, 
+  CircleDot, 
   AlertTriangle, 
-  CheckCircle2, 
-  ArrowRight 
+  Euro,
+  Package,
+  Search,
+  SmartphoneIcon,
+  TabletIcon,
+  MouseIcon,
+  KeyboardIcon,
+  PackageIcon
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import { Asset, Employee } from "@/lib/types";
-import { formatCurrency, formatDate } from "@/lib/utils";
-import StatusBadge from "@/components/assets/StatusBadge";
-import { getAssets } from "@/services/assetService";
-import { getEmployees } from "@/services/employeeService";
+import { formatCurrency } from "@/lib/utils";
+import { motion } from "framer-motion";
+import AssetCard from "@/components/assets/AssetCard";
+import { Link } from "react-router-dom";
 
-const TopEmployees = ({ employees }: { employees: Employee[] }) => {
-  const navigate = useNavigate();
+const Dashboard = () => {
+  const stats = getDashboardStats();
+  const assetTypeData = getAssetTypeDistribution();
+  const assetStatusData = getAssetStatusDistribution();
   
-  if (!employees || employees.length === 0) {
-    return (
-      <Card>
-        <CardContent className="p-6 text-center">
-          <p className="text-muted-foreground">No employees found</p>
-        </CardContent>
-      </Card>
-    );
-  }
+  // Get the 4 most recent assets
+  const recentAssets = [...assets]
+    .sort((a, b) => new Date(b.purchaseDate).getTime() - new Date(a.purchaseDate).getTime())
+    .slice(0, 4);
   
-  return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-medium">Top Employees</h3>
-          <Button variant="ghost" size="sm" onClick={() => navigate('/employees')}>
-            View all
-            <ArrowRight size={16} className="ml-1" />
-          </Button>
-        </div>
-        <div className="space-y-4">
-          {employees.slice(0, 4).map((employee, i) => (
-            <Link 
-              key={employee.id}
-              to={`/employee/${employee.id}`}
-              className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors"
-            >
-              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary font-medium">
-                {employee.firstName.charAt(0)}{employee.lastName.charAt(0)}
-              </div>
-              <div>
-                <p className="font-medium">{employee.firstName} {employee.lastName}</p>
-                <p className="text-sm text-muted-foreground">{employee.position}</p>
-              </div>
-              <div className="ml-auto text-sm">
-                <p className="font-medium">{formatCurrency(employee.budget)}</p>
-                <p className="text-xs text-muted-foreground">Budget</p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-const RecentAssets = ({ assets }: { assets: Asset[] }) => {
-  const navigate = useNavigate();
+  // Status chart data
+  const statusChartData = [
+    { name: "In Use", value: assetStatusData.find(item => item.status === "in_use")?.count || 0, color: "#22c55e" },
+    { name: "Pool", value: assetStatusData.find(item => item.status === "pool")?.count || 0, color: "#64748b" },
+    { name: "Ordered", value: assetStatusData.find(item => item.status === "ordered")?.count || 0, color: "#3b82f6" },
+    { name: "Delivered", value: assetStatusData.find(item => item.status === "delivered")?.count || 0, color: "#8b5cf6" },
+    { name: "Defective", value: assetStatusData.find(item => item.status === "defective")?.count || 0, color: "#ef4444" },
+    { name: "Repair", value: assetStatusData.find(item => item.status === "repair")?.count || 0, color: "#f59e0b" },
+  ];
   
-  if (!assets || assets.length === 0) {
-    return (
-      <Card>
-        <CardContent className="p-6 text-center">
-          <p className="text-muted-foreground">No assets found</p>
-        </CardContent>
-      </Card>
-    );
-  }
+  // Type chart data
+  const typeChartData = [
+    { name: "Laptops", value: assetTypeData.find(item => item.type === "laptop")?.count || 0, color: "#3b82f6" },
+    { name: "Smartphones", value: assetTypeData.find(item => item.type === "smartphone")?.count || 0, color: "#8b5cf6" },
+    { name: "Tablets", value: assetTypeData.find(item => item.type === "tablet")?.count || 0, color: "#22c55e" },
+    { name: "Mice", value: assetTypeData.find(item => item.type === "mouse")?.count || 0, color: "#f59e0b" },
+    { name: "Keyboards", value: assetTypeData.find(item => item.type === "keyboard")?.count || 0, color: "#64748b" },
+    { name: "Accessories", value: assetTypeData.find(item => item.type === "accessory")?.count || 0, color: "#ec4899" },
+  ];
   
-  return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-medium">Recent Assets</h3>
-          <Button variant="ghost" size="sm" onClick={() => navigate('/assets')}>
-            View all
-            <ArrowRight size={16} className="ml-1" />
-          </Button>
-        </div>
-        <div className="space-y-3">
-          {assets.slice(0, 5).map((asset, i) => (
-            <Link 
-              key={asset.id}
-              to={`/asset/${asset.id}`}
-              className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors"
-            >
-              <div className="w-10 h-10 bg-muted rounded-md flex items-center justify-center overflow-hidden">
-                {asset.type === 'laptop' && <Monitor size={20} />}
-                {asset.type === 'smartphone' && <SmartphoneIcon size={20} />}
-                {asset.type === 'tablet' && <TabletIcon size={20} />}
-              </div>
-              <div className="flex-1">
-                <p className="font-medium">{asset.name}</p>
-                <p className="text-sm text-muted-foreground">{asset.manufacturer} {asset.model}</p>
-              </div>
-              <StatusBadge status={asset.status} />
-            </Link>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-function PendingActions() {
-  // This is just a placeholder - you can implement this with real data later
-  return (
-    <Card>
-      <CardContent className="p-6">
-        <h3 className="text-lg font-medium mb-4">Pending Actions</h3>
-        <div className="space-y-3">
-          <div className="p-3 bg-yellow-50 dark:bg-yellow-950/50 rounded-lg border border-yellow-200 dark:border-yellow-900/50">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="text-yellow-600 dark:text-yellow-400 mt-0.5" size={18} />
-              <div>
-                <p className="font-medium text-yellow-800 dark:text-yellow-300">3 warranties expire next month</p>
-                <p className="text-sm text-yellow-700 dark:text-yellow-400">Review and extend if needed</p>
-              </div>
-              <Button variant="outline" size="sm" className="ml-auto">
-                Review
-              </Button>
-            </div>
-          </div>
-          <div className="p-3 bg-blue-50 dark:bg-blue-950/50 rounded-lg border border-blue-200 dark:border-blue-900/50">
-            <div className="flex items-start gap-3">
-              <Package2 className="text-blue-600 dark:text-blue-400 mt-0.5" size={18} />
-              <div>
-                <p className="font-medium text-blue-800 dark:text-blue-300">5 assets in transit</p>
-                <p className="text-sm text-blue-700 dark:text-blue-400">Expected delivery this week</p>
-              </div>
-              <Button variant="outline" size="sm" className="ml-auto">
-                Track
-              </Button>
-            </div>
-          </div>
-          <div className="p-3 bg-green-50 dark:bg-green-950/50 rounded-lg border border-green-200 dark:border-green-900/50">
-            <div className="flex items-start gap-3">
-              <CheckCircle2 className="text-green-600 dark:text-green-400 mt-0.5" size={18} />
-              <div>
-                <p className="font-medium text-green-800 dark:text-green-300">8 onboarding forms pending</p>
-                <p className="text-sm text-green-700 dark:text-green-400">Need your approval</p>
-              </div>
-              <Button variant="outline" size="sm" className="ml-auto">
-                Review
-              </Button>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-export default function Dashboard() {
-  // Fetch data from Supabase using React Query
-  const { data: assets, isLoading: assetsLoading } = useQuery({
-    queryKey: ['assets'],
-    queryFn: getAssets
-  });
-  
-  const { data: employees, isLoading: employeesLoading } = useQuery({
-    queryKey: ['employees'],
-    queryFn: getEmployees
-  });
-  
-  // Calculate stats once we have data
-  const stats = {
-    totalAssets: assets?.length || 0,
-    totalEmployees: employees?.length || 0,
-    totalValue: assets?.reduce((sum, asset) => sum + asset.price, 0) || 0,
-    assetTypes: {
-      laptop: assets?.filter(a => a.type === 'laptop').length || 0,
-      smartphone: assets?.filter(a => a.type === 'smartphone').length || 0,
-      tablet: assets?.filter(a => a.type === 'tablet').length || 0,
-      other: assets?.filter(a => !['laptop', 'smartphone', 'tablet'].includes(a.type)).length || 0
+  const getIconForType = (type: string) => {
+    switch (type) {
+      case "Laptops": return <Monitor size={20} />;
+      case "Smartphones": return <SmartphoneIcon size={20} />;
+      case "Tablets": return <TabletIcon size={20} />;
+      case "Mice": return <MouseIcon size={20} />;
+      case "Keyboards": return <KeyboardIcon size={20} />;
+      default: return <PackageIcon size={20} />;
     }
   };
-  
-  // Sort recent assets by purchase date
-  const recentAssets = assets ? 
-    [...assets].sort((a, b) => {
-      const dateA = new Date(a.purchaseDate).getTime();
-      const dateB = new Date(b.purchaseDate).getTime();
-      return dateB - dateA;  // Sort descending (newest first)
-    }) : [];
-  
-  // Sort employees by budget utilization
-  const topEmployees = employees ?
-    [...employees].sort((a, b) => {
-      const percentA = a.budget > 0 ? (a.usedBudget / a.budget) : 0;
-      const percentB = b.budget > 0 ? (b.usedBudget / b.budget) : 0;
-      return percentB - percentA;  // Sort descending (highest utilization first)
-    }) : [];
 
   return (
     <PageTransition>
-      <div className="p-6 space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground mt-1">
-            Overview of your assets and employees
-          </p>
+      <div className="p-3 md:p-4 xl:p-6 space-y-6 max-w-full">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold">Dashboard</h1>
+            <p className="text-muted-foreground mt-1">
+              Overview of all assets and employees
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Link 
+              to="/assets" 
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-background hover:bg-secondary transition-colors"
+            >
+              <Package size={18} />
+              <span>All Assets</span>
+            </Link>
+            <Link 
+              to="/employees" 
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+            >
+              <Users size={18} />
+              <span>All Employees</span>
+            </Link>
+          </div>
         </div>
         
-        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-          <StatCard 
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          <StatCard
             title="Total Assets"
-            value={stats.totalAssets.toString()}
-            description="All assets in inventory"
-            icon={<Package2 size={20} />}
-            isLoading={assetsLoading}
+            value={stats.totalAssets}
+            icon={Package}
+            colorClass="text-blue-500"
           />
-          <StatCard 
-            title="Total Value"
-            value={formatCurrency(stats.totalValue)}
-            description="Value of all assets"
-            icon={<CreditCard size={20} />}
-            isLoading={assetsLoading}
+          <StatCard
+            title="Assets in Use"
+            value={stats.assignedAssets}
+            icon={Monitor}
+            colorClass="text-green-500"
           />
-          <StatCard 
-            title="Employees"
-            value={stats.totalEmployees.toString()}
-            description="Active employees"
-            icon={<Users size={20} />}
-            isLoading={employeesLoading}
+          <StatCard
+            title="Pool Assets"
+            value={stats.poolAssets}
+            icon={CircleDot}
+            colorClass="text-gray-500"
           />
-          <StatCard 
-            title="Avg. per Employee"
-            value={stats.totalEmployees > 0 
-              ? formatCurrency(stats.totalValue / stats.totalEmployees) 
-              : formatCurrency(0)}
-            description="Average asset value"
-            icon={<Calendar size={20} />}
-            isLoading={assetsLoading || employeesLoading}
+          <StatCard
+            title="Defective/Repair"
+            value={stats.defectiveAssets}
+            icon={AlertTriangle}
+            colorClass="text-amber-500"
+          />
+          <StatCard
+            title="Total Employees"
+            value={employees.length}
+            icon={Users}
+            colorClass="text-purple-500"
           />
         </div>
         
-        <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="text-lg font-medium mb-4">Asset Distribution</h3>
-              {assetsLoading ? (
-                <div className="h-64 flex items-center justify-center">
-                  <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
+        <div className="glass-card p-4 lg:p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="font-semibold text-lg">Budget Overview</h2>
+            <div className="text-sm text-muted-foreground">
+              <span className="font-medium text-foreground">
+                {formatCurrency(stats.totalBudgetUsed)}
+              </span>
+              {" "}/{" "}
+              {formatCurrency(stats.totalBudget)}
+            </div>
+          </div>
+          
+          <div className="budget-progress-track mb-1">
+            <motion.div 
+              className="budget-progress-bar"
+              initial={{ width: 0 }}
+              animate={{ width: `${Math.min(100, (stats.totalBudgetUsed / stats.totalBudget) * 100)}%` }}
+              transition={{ duration: 1, delay: 0.2 }}
+            />
+          </div>
+          
+          <div className="text-xs text-muted-foreground">
+            {Math.round((stats.totalBudgetUsed / stats.totalBudget) * 100)}% of total budget used
+          </div>
+          
+          <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {employees.slice(0, 4).map((employee, index) => (
+              <div key={employee.id} className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                  <img
+                    src={employee.imageUrl}
+                    alt={`${employee.firstName} ${employee.lastName}`}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-              ) : (
-                <OverviewChart 
-                  data={[
-                    { name: "Laptops", value: stats.assetTypes.laptop, color: "#4C9EFF" },
-                    { name: "Smartphones", value: stats.assetTypes.smartphone, color: "#65D4AC" },
-                    { name: "Tablets", value: stats.assetTypes.tablet, color: "#FF7A50" },
-                    { name: "Other", value: stats.assetTypes.other, color: "#8655FC" },
-                  ]} 
-                  title="Asset Distribution"
-                />
-              )}
-            </CardContent>
-          </Card>
-          <PendingActions />
+                <div className="min-w-0 flex-1">
+                  <div className="flex justify-between items-baseline mb-1">
+                    <p className="text-sm font-medium truncate">
+                      {employee.firstName} {employee.lastName}
+                    </p>
+                    <p className="text-xs ml-2 whitespace-nowrap">
+                      {formatCurrency(employee.usedBudget)} / {formatCurrency(employee.budget)}
+                    </p>
+                  </div>
+                  <div className="budget-progress-track h-1.5 mb-0">
+                    <motion.div 
+                      className="budget-progress-bar"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min(100, (employee.usedBudget / employee.budget) * 100)}%` }}
+                      transition={{ duration: 1, delay: 0.3 + (index * 0.1) }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          {employees.length > 4 && (
+            <div className="mt-4 text-center">
+              <Link 
+                to="/employees"
+                className="text-sm text-primary hover:underline"
+              >
+                View all employees
+              </Link>
+            </div>
+          )}
         </div>
         
-        <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
-          <RecentAssets assets={recentAssets} />
-          <TopEmployees employees={topEmployees} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <OverviewChart 
+            data={statusChartData} 
+            title="Assets by Status" 
+          />
+          <OverviewChart 
+            data={typeChartData} 
+            title="Assets by Type" 
+          />
+        </div>
+        
+        <div>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="font-semibold text-lg">Recent Purchases</h2>
+            <Link 
+              to="/assets" 
+              className="text-sm text-primary hover:underline"
+            >
+              View all assets
+            </Link>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {recentAssets.map((asset, index) => (
+              <AssetCard 
+                key={asset.id} 
+                asset={asset} 
+                index={index} 
+              />
+            ))}
+          </div>
         </div>
       </div>
     </PageTransition>
   );
-}
+};
+
+export default Dashboard;

@@ -7,22 +7,22 @@ interface StatCardProps {
   title: string;
   value: string | number;
   description?: string;
-  icon: React.ReactNode;  // Changed from LucideIcon to React.ReactNode
+  icon: LucideIcon;
   colorClass?: string;
   trend?: "up" | "down" | "neutral";
   trendValue?: string;
-  isLoading?: boolean;  // Changed from loading to isLoading
+  isLoading?: boolean;
 }
 
 export default function StatCard({
   title,
   value,
   description,
-  icon,
+  icon: Icon,
   colorClass = "text-primary",
   trend,
   trendValue,
-  isLoading = false,  // Changed from loading to isLoading
+  isLoading = false,
 }: StatCardProps) {
   return (
     <motion.div 
@@ -34,14 +34,14 @@ export default function StatCard({
       <div className="flex justify-between items-start mb-4">
         <div>
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          {isLoading ? (  // Changed from loading to isLoading
+          {isLoading ? (
             <div className="h-8 w-24 bg-muted rounded-md animate-pulse my-1" />
           ) : (
             <h3 className="text-2xl font-semibold mt-1">{value}</h3>
           )}
         </div>
         <div className={cn("p-3 rounded-lg bg-primary/10", colorClass)}>
-          {icon}
+          <Icon size={20} className={colorClass} />
         </div>
       </div>
       
