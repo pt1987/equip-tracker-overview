@@ -9,6 +9,216 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      asset_history: {
+        Row: {
+          action: string
+          asset_id: string
+          created_at: string | null
+          date: string
+          employee_id: string | null
+          id: string
+          notes: string | null
+        }
+        Insert: {
+          action: string
+          asset_id: string
+          created_at?: string | null
+          date?: string
+          employee_id?: string | null
+          id?: string
+          notes?: string | null
+        }
+        Update: {
+          action?: string
+          asset_id?: string
+          created_at?: string | null
+          date?: string
+          employee_id?: string | null
+          id?: string
+          notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_history_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_history_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assets: {
+        Row: {
+          additional_warranty: boolean | null
+          category: string
+          connected_asset_id: string | null
+          contract_duration: string | null
+          contract_end_date: string | null
+          contract_name: string | null
+          created_at: string | null
+          employee_id: string | null
+          has_warranty: boolean | null
+          id: string
+          image_url: string | null
+          imei: string | null
+          inventory_number: string | null
+          manufacturer: string
+          model: string
+          name: string
+          phone_number: string | null
+          price: number
+          provider: string | null
+          purchase_date: string
+          related_asset_id: string | null
+          serial_number: string | null
+          status: string
+          type: string
+          updated_at: string | null
+          vendor: string
+        }
+        Insert: {
+          additional_warranty?: boolean | null
+          category: string
+          connected_asset_id?: string | null
+          contract_duration?: string | null
+          contract_end_date?: string | null
+          contract_name?: string | null
+          created_at?: string | null
+          employee_id?: string | null
+          has_warranty?: boolean | null
+          id?: string
+          image_url?: string | null
+          imei?: string | null
+          inventory_number?: string | null
+          manufacturer: string
+          model: string
+          name: string
+          phone_number?: string | null
+          price: number
+          provider?: string | null
+          purchase_date: string
+          related_asset_id?: string | null
+          serial_number?: string | null
+          status: string
+          type: string
+          updated_at?: string | null
+          vendor: string
+        }
+        Update: {
+          additional_warranty?: boolean | null
+          category?: string
+          connected_asset_id?: string | null
+          contract_duration?: string | null
+          contract_end_date?: string | null
+          contract_name?: string | null
+          created_at?: string | null
+          employee_id?: string | null
+          has_warranty?: boolean | null
+          id?: string
+          image_url?: string | null
+          imei?: string | null
+          inventory_number?: string | null
+          manufacturer?: string
+          model?: string
+          name?: string
+          phone_number?: string | null
+          price?: number
+          provider?: string | null
+          purchase_date?: string
+          related_asset_id?: string | null
+          serial_number?: string | null
+          status?: string
+          type?: string
+          updated_at?: string | null
+          vendor?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assets_connected_asset_id_fkey"
+            columns: ["connected_asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assets_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assets_related_asset_id_fkey"
+            columns: ["related_asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employees: {
+        Row: {
+          budget: number
+          cluster: string
+          created_at: string | null
+          entry_date: string | null
+          first_name: string
+          id: string
+          image_url: string | null
+          last_name: string
+          position: string
+          profile_image: string | null
+          start_date: string
+          updated_at: string | null
+          used_budget: number
+        }
+        Insert: {
+          budget?: number
+          cluster: string
+          created_at?: string | null
+          entry_date?: string | null
+          first_name: string
+          id: string
+          image_url?: string | null
+          last_name: string
+          position: string
+          profile_image?: string | null
+          start_date: string
+          updated_at?: string | null
+          used_budget?: number
+        }
+        Update: {
+          budget?: number
+          cluster?: string
+          created_at?: string | null
+          entry_date?: string | null
+          first_name?: string
+          id?: string
+          image_url?: string | null
+          last_name?: string
+          position?: string
+          profile_image?: string | null
+          start_date?: string
+          updated_at?: string | null
+          used_budget?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employees_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string | null

@@ -17,6 +17,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AssetDetailViewProps {
   asset: Asset;
@@ -30,6 +32,7 @@ export default function AssetDetailView({
   onDelete,
 }: AssetDetailViewProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const { toast } = useToast();
 
   const getAssetTypeLabel = (type: Asset["type"]) => {
     switch (type) {
@@ -55,6 +58,40 @@ export default function AssetDetailView({
       return asset.imageUrl;
     } catch (e) {
       return `/placeholder.svg`;
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      // Delete from Supabase
+      const { error } = await supabase
+        .from('assets')
+        .delete()
+        .eq('id', asset.id);
+      
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Fehler beim Löschen",
+          description: error.message,
+        });
+        return;
+      }
+      
+      // Call onDelete callback to update UI
+      onDelete();
+      
+      toast({
+        title: "Asset gelöscht",
+        description: `${asset.name} wurde erfolgreich gelöscht.`,
+      });
+    } catch (err: any) {
+      console.error("Delete error:", err);
+      toast({
+        variant: "destructive",
+        title: "Fehler beim Löschen",
+        description: err.message || "Ein unbekannter Fehler ist aufgetreten.",
+      });
     }
   };
 
@@ -109,7 +146,7 @@ export default function AssetDetailView({
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-                <AlertDialogAction onClick={onDelete}>
+                <AlertDialogAction onClick={handleDeleteConfirm}>
                   Löschen bestätigen
                 </AlertDialogAction>
               </AlertDialogFooter>

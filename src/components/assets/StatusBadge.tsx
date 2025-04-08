@@ -14,31 +14,31 @@ export default function StatusBadge({ status, size = "md" }: StatusBadgeProps) {
         return {
           bg: "bg-blue-100",
           text: "text-blue-800",
-          label: "Ordered"
+          label: "Bestellt"
         };
       case "delivered":
         return {
           bg: "bg-purple-100",
           text: "text-purple-800",
-          label: "Delivered"
+          label: "Geliefert"
         };
       case "in_use":
         return {
           bg: "bg-green-100",
           text: "text-green-800",
-          label: "In Use"
+          label: "In Gebrauch"
         };
       case "defective":
         return {
           bg: "bg-red-100",
           text: "text-red-800",
-          label: "Defective"
+          label: "Defekt"
         };
       case "repair":
         return {
           bg: "bg-amber-100",
           text: "text-amber-800",
-          label: "Repair"
+          label: "Reparatur"
         };
       case "pool":
         return {
@@ -50,7 +50,7 @@ export default function StatusBadge({ status, size = "md" }: StatusBadgeProps) {
         return {
           bg: "bg-gray-100",
           text: "text-gray-800",
-          label: "Unknown"
+          label: "Unbekannt"
         };
     }
   };
