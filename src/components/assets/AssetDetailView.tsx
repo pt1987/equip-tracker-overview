@@ -108,7 +108,7 @@ export default function AssetDetailView({
   return <div className="space-y-8">
       {/* Header section with badges, actions and basic info */}
       <div className="flex flex-col gap-4">
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between my-0 py-0">
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Badge variant="secondary" className="font-medium">
@@ -242,7 +242,7 @@ export default function AssetDetailView({
         {/* Asset image - left column */}
         <div className="lg:col-span-1">
           <div className="rounded-lg flex flex-col h-full bg-transparent">
-            <h3 className="font-medium p-4 text-lg">Asset Bild</h3>
+            
             <div className="flex-grow rounded-lg overflow-hidden p-6 bg-transparent">
               <motion.img src={getAssetImage()} alt={asset.name} className="w-full h-full object-contain object-center" initial={{
               opacity: 0,
