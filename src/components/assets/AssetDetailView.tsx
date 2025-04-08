@@ -132,7 +132,7 @@ export default function AssetDetailView({
   return (
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* Left Column - Image and actions */}
+        {/* Left Column - Image and status */}
         <div className="w-full lg:w-1/3 flex-shrink-0 space-y-4">
           <div className="aspect-square bg-muted rounded-lg overflow-hidden">
             <motion.img
@@ -154,80 +154,55 @@ export default function AssetDetailView({
               ID: <span className="font-mono text-xs">{asset.id.split('-')[0]}...</span>
             </div>
           </div>
-          
-          <div className="flex gap-2 justify-between">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={onEdit}
-              className="flex-1"
-            >
-              <Pencil size={14} className="mr-1.5" />
-              Bearbeiten
-            </Button>
-            
-            <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-              <AlertDialogTrigger asChild>
-                <Button 
-                  variant="destructive" 
-                  size="sm"
-                  className="flex-1"
-                >
-                  <Trash size={14} className="mr-1.5" />
-                  Löschen
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Sind Sie sicher?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Diese Aktion kann nicht rückgängig gemacht werden. Das Asset und alle zugehörigen Daten werden dauerhaft gelöscht.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDeleteConfirm}>
-                    Löschen bestätigen
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
-
-          {/* QR Code Dialog */}
-          <Dialog open={qrDialogOpen} onOpenChange={setQrDialogOpen}>
-            <DialogTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="w-full"
-              >
-                <QrCode size={14} className="mr-1.5" />
-                QR-Code anzeigen
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Asset QR-Code</DialogTitle>
-                <DialogDescription>
-                  Scannen Sie diesen Code, um schnell auf die Asset-Details zuzugreifen
-                </DialogDescription>
-              </DialogHeader>
-              <div className="flex justify-center py-4">
-                <QRCode 
-                  value={`${window.location.origin}/asset/${asset.id}`}
-                  size={200}
-                  title={`${asset.manufacturer} ${asset.model}`}
-                />
-              </div>
-            </DialogContent>
-          </Dialog>
         </div>
 
         {/* Right Column - Asset Details */}
         <div className="flex-1 space-y-6">
-          {/* General Information */}
-          <div>
+          {/* General Information with action icons */}
+          <div className="relative">
+            <div className="absolute top-0 right-0 flex items-center gap-2">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button 
+                      onClick={() => setQrDialogOpen(true)} 
+                      className="p-2 rounded-md hover:bg-muted transition-colors"
+                    >
+                      <QrCode size={18} className="text-muted-foreground hover:text-foreground" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>QR-Code anzeigen</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button 
+                      onClick={onEdit} 
+                      className="p-2 rounded-md hover:bg-muted transition-colors"
+                    >
+                      <Pencil size={18} className="text-muted-foreground hover:text-foreground" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>Bearbeiten</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <AlertDialogTrigger asChild>
+                      <button className="p-2 rounded-md hover:bg-muted transition-colors">
+                        <Trash size={18} className="text-muted-foreground hover:text-destructive" />
+                      </button>
+                    </AlertDialogTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>Löschen</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+
             <div className="inline-flex items-center px-2 py-1 mb-2 rounded-full bg-secondary text-xs font-medium">
               {getAssetTypeLabel(asset.type)}
             </div>
@@ -461,6 +436,43 @@ export default function AssetDetailView({
           </div>
         </div>
       </div>
+      
+      {/* QR Code Dialog */}
+      <Dialog open={qrDialogOpen} onOpenChange={setQrDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Asset QR-Code</DialogTitle>
+            <DialogDescription>
+              Scannen Sie diesen Code, um schnell auf die Asset-Details zuzugreifen
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center py-4">
+            <QRCode 
+              value={`${window.location.origin}/asset/${asset.id}`}
+              size={160}
+              title={`${asset.manufacturer} ${asset.model}`}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Delete Confirm Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Sind Sie sicher?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Diese Aktion kann nicht rückgängig gemacht werden. Das Asset und alle zugehörigen Daten werden dauerhaft gelöscht.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm}>
+              Löschen bestätigen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

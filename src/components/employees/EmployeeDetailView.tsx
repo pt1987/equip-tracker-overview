@@ -17,6 +17,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface EmployeeDetailViewProps {
   employee: Employee;
@@ -61,55 +67,47 @@ export default function EmployeeDetailView({
             }}
           />
         </div>
-        
-        <div className="mt-4 flex gap-2 justify-center">
-          <Button 
-            variant="outline" 
-            size="xs" 
-            onClick={onEdit}
-            className="h-8 px-2 text-xs"
-          >
-            <Pencil size={14} className="mr-1.5" />
-            Bearbeiten
-          </Button>
-          
-          <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-            <AlertDialogTrigger asChild>
-              <Button 
-                variant="destructive" 
-                size="xs"
-                className="h-8 px-2 text-xs"
-              >
-                <Trash size={14} className="mr-1.5" />
-                Löschen
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Sind Sie sicher?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Diese Aktion kann nicht rückgängig gemacht werden. Der Mitarbeiter und alle zugehörigen Daten werden dauerhaft gelöscht.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-                <AlertDialogAction onClick={onDelete}>
-                  Löschen bestätigen
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
       </div>
       
       <div className="flex-1">
-        <div className="inline-flex items-center px-2 py-1 mb-2 rounded-full bg-secondary text-xs font-medium">
-          {employee.cluster}
+        <div className="relative">
+          <div className="absolute top-0 right-0 flex items-center gap-2">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button 
+                    onClick={onEdit} 
+                    className="p-2 rounded-md hover:bg-muted transition-colors"
+                  >
+                    <Pencil size={18} className="text-muted-foreground hover:text-foreground" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>Bearbeiten</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <AlertDialogTrigger asChild>
+                    <button className="p-2 rounded-md hover:bg-muted transition-colors">
+                      <Trash size={18} className="text-muted-foreground hover:text-destructive" />
+                    </button>
+                  </AlertDialogTrigger>
+                </TooltipTrigger>
+                <TooltipContent>Löschen</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          
+          <div className="inline-flex items-center px-2 py-1 mb-2 rounded-full bg-secondary text-xs font-medium">
+            {employee.cluster}
+          </div>
+          <h1 className="text-2xl font-bold mb-1">
+            {employee.firstName} {employee.lastName}
+          </h1>
+          <p className="text-muted-foreground mb-6">{employee.position}</p>
         </div>
-        <h1 className="text-2xl font-bold mb-1">
-          {employee.firstName} {employee.lastName}
-        </h1>
-        <p className="text-muted-foreground mb-6">{employee.position}</p>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="flex items-center gap-3">
@@ -153,6 +151,23 @@ export default function EmployeeDetailView({
           </div>
         </div>
       </div>
+      
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Sind Sie sicher?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Diese Aktion kann nicht rückgängig gemacht werden. Der Mitarbeiter und alle zugehörigen Daten werden dauerhaft gelöscht.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction onClick={onDelete}>
+              Löschen bestätigen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
