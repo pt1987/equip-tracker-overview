@@ -36,7 +36,33 @@ export default function PoolAssets() {
         throw error;
       }
       
-      return data as Asset[];
+      // Map database fields to our Asset type
+      return data.map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        type: item.type,
+        manufacturer: item.manufacturer,
+        model: item.model,
+        purchaseDate: item.purchase_date,
+        vendor: item.vendor,
+        price: item.price,
+        status: item.status,
+        employeeId: item.employee_id,
+        category: item.category,
+        serialNumber: item.serial_number,
+        inventoryNumber: item.inventory_number,
+        additionalWarranty: item.additional_warranty,
+        hasWarranty: item.has_warranty,
+        imei: item.imei,
+        phoneNumber: item.phone_number,
+        provider: item.provider,
+        contractEndDate: item.contract_end_date,
+        contractName: item.contract_name,
+        contractDuration: item.contract_duration,
+        connectedAssetId: item.connected_asset_id,
+        relatedAssetId: item.related_asset_id,
+        imageUrl: item.image_url
+      })) as Asset[];
     },
   });
 
