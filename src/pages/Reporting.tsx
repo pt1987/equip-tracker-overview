@@ -34,21 +34,31 @@ export default function Reporting() {
   const exportReport = async (format: 'excel' | 'pdf') => {
     try {
       switch (activeReport) {
-        case 'orderTimeline':
-          exportOrderTimeline(await getOrderTimelineByEmployee(), format);
+        case 'orderTimeline': {
+          const data = await getOrderTimelineByEmployee();
+          exportOrderTimeline(data, format);
           break;
-        case 'yearlyBudget':
-          exportYearlyBudget(await getYearlyBudgetReport(), format);
+        }
+        case 'yearlyBudget': {
+          const data = await getYearlyBudgetReport();
+          exportYearlyBudget(data, format);
           break;
-        case 'yearlyPurchases':
-          exportYearlyPurchases(await getYearlyAssetPurchasesReport(), format);
+        }
+        case 'yearlyPurchases': {
+          const data = await getYearlyAssetPurchasesReport();
+          exportYearlyPurchases(data, format);
           break;
-        case 'usageDuration':
-          exportUsageDuration(await getAssetUsageDurationReport(), format);
+        }
+        case 'usageDuration': {
+          const data = await getAssetUsageDurationReport();
+          exportUsageDuration(data, format);
           break;
-        case 'warrantyDefects':
-          exportWarrantyDefects(await getWarrantyDefectReport(), format);
+        }
+        case 'warrantyDefects': {
+          const data = await getWarrantyDefectReport();
+          exportWarrantyDefects(data, format);
           break;
+        }
       }
       
       toast({

@@ -8,25 +8,44 @@ import * as echarts from 'echarts';
 
 export default function WarrantyDefectsReport() {
   const [warrantyData, setWarrantyData] = useState<WarrantyDefectReport | null>(null);
-
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  
   useEffect(() => {
     const fetchData = async () => {
-      const data = await getWarrantyDefectReport();
-      setWarrantyData(data);
+      setIsLoading(true);
+      try {
+        const data = await getWarrantyDefectReport();
+        setWarrantyData(data);
+      } catch (error) {
+        console.error("Error fetching warranty data:", error);
+        setWarrantyData(null);
+      } finally {
+        setIsLoading(false);
+      }
     };
     
     fetchData();
   }, []);
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-pulse text-muted-foreground">Loading data...</div>
+      </div>
+    );
+  }
+
   if (!warrantyData) {
-    return <div className="flex items-center justify-center h-64">
-      <div className="animate-pulse text-muted-foreground">Lade Daten...</div>
-    </div>;
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-muted-foreground">No data available.</div>
+      </div>
+    );
   }
 
   const pieData = [
-    { name: "Mit Garantie", value: warrantyData.withWarranty.count },
-    { name: "Ohne Garantie", value: warrantyData.withoutWarranty.count }
+    { name: "With Warranty", value: warrantyData.withWarranty.count },
+    { name: "Without Warranty", value: warrantyData.withoutWarranty.count }
   ];
 
   const COLORS = ["#16a34a", "#dc2626"];

@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import ReactECharts from "echarts-for-react";
 import { getAssetUsageDurationReport } from "@/data/reports";
@@ -9,13 +8,26 @@ import * as echarts from 'echarts';
 
 export default function AssetUsageDurationReport() {
   const [usageData, setUsageData] = useState<AssetUsageReport[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await getAssetUsageDurationReport();
-      // Sort data by average months descending for better visualization
-      data.sort((a, b) => b.averageMonths - a.averageMonths);
-      setUsageData(data);
+      setIsLoading(true);
+      try {
+        const data = await getAssetUsageDurationReport();
+        
+        // Make sure data is an array before sorting
+        let formattedData: AssetUsageReport[] = Array.isArray(data) ? [...data] : [];
+        
+        // Sort data by average months descending for better visualization
+        formattedData.sort((a, b) => b.averageMonths - a.averageMonths);
+        setUsageData(formattedData);
+      } catch (error) {
+        console.error("Error fetching usage duration data:", error);
+        setUsageData([]);
+      } finally {
+        setIsLoading(false);
+      }
     };
     
     fetchData();
@@ -151,6 +163,22 @@ export default function AssetUsageDurationReport() {
     
     return options;
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-pulse text-muted-foreground">Loading data...</div>
+      </div>
+    );
+  }
+
+  if (usageData.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-muted-foreground">No usage data available.</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

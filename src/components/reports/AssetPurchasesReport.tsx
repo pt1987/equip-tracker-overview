@@ -1,31 +1,39 @@
-
 import { useEffect, useState } from "react";
 import ReactECharts from "echarts-for-react";
 import { getYearlyAssetPurchasesReport } from "@/data/reports";
-import { AssetType } from "@/lib/types";
+import { AssetType, YearlyAssetPurchaseReport } from "@/lib/types";
 import { getCommonOptions, getAxisOptions, getColorOptions } from "@/lib/echarts-theme";
 import * as echarts from 'echarts';
 
 export default function AssetPurchasesReport() {
   const [purchaseData, setPurchaseData] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await getYearlyAssetPurchasesReport();
-      
-      // Transform data for the stacked bar chart
-      const formattedData = data.map(item => {
-        const result: any = { year: item.year };
+      setIsLoading(true);
+      try {
+        const data = await getYearlyAssetPurchasesReport();
         
-        // Add each asset type count
-        Object.entries(item.assetsByType).forEach(([type, count]) => {
-          result[type] = count;
-        });
+        // Transform data for the stacked bar chart
+        const formattedData = Array.isArray(data) ? data.map(item => {
+          const result: any = { year: item.year };
+          
+          // Add each asset type count
+          Object.entries(item.assetsByType).forEach(([type, count]) => {
+            result[type] = count;
+          });
+          
+          return result;
+        }) : [];
         
-        return result;
-      });
-      
-      setPurchaseData(formattedData);
+        setPurchaseData(formattedData);
+      } catch (error) {
+        console.error("Error fetching purchase data:", error);
+        setPurchaseData([]);
+      } finally {
+        setIsLoading(false);
+      }
     };
     
     fetchData();
@@ -136,6 +144,22 @@ export default function AssetPurchasesReport() {
     
     return options;
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-pulse text-muted-foreground">Loading data...</div>
+      </div>
+    );
+  }
+
+  if (purchaseData.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-muted-foreground">No purchase data available.</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

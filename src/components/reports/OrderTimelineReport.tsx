@@ -11,11 +11,17 @@ export default function OrderTimelineReport() {
   const [selectedEmployee, setSelectedEmployee] = useState<string>("all");
   const [timelineData, setTimelineData] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchEmployees = async () => {
-      const employeeData = await getEmployees();
-      setEmployees(employeeData);
+      try {
+        const employeeData = await getEmployees();
+        setEmployees(employeeData || []);
+      } catch (error) {
+        console.error("Error fetching employees:", error);
+        setEmployees([]);
+      }
     };
     
     fetchEmployees();
@@ -23,29 +29,41 @@ export default function OrderTimelineReport() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const employeeData = selectedEmployee !== "all" 
-        ? await getOrderTimelineByEmployee(selectedEmployee)
-        : await getOrderTimelineByEmployee();
+      setIsLoading(true);
+      try {
+        const employeeData = selectedEmployee !== "all" 
+          ? await getOrderTimelineByEmployee(selectedEmployee)
+          : await getOrderTimelineByEmployee();
+          
+        // Format data for timeline chart
+        const formattedData: any[] = [];
         
-      // Format data for timeline chart
-      const formattedData: any[] = [];
-      
-      employeeData.forEach(employee => {
-        employee.orders.forEach(order => {
-          formattedData.push({
-            date: order.date,
-            price: order.price,
-            name: order.assetName,
-            employee: employee.employeeName,
-            type: order.assetType
+        if (employeeData && Array.isArray(employeeData)) {
+          employeeData.forEach(employee => {
+            if (employee && employee.orders && Array.isArray(employee.orders)) {
+              employee.orders.forEach(order => {
+                formattedData.push({
+                  date: order.date,
+                  price: order.price,
+                  name: order.assetName,
+                  employee: employee.employeeName,
+                  type: order.assetType
+                });
+              });
+            }
           });
-        });
-      });
-      
-      // Sort by date
-      formattedData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-      
-      setTimelineData(formattedData);
+        }
+        
+        // Sort by date
+        formattedData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        
+        setTimelineData(formattedData);
+      } catch (error) {
+        console.error("Error fetching timeline data:", error);
+        setTimelineData([]);
+      } finally {
+        setIsLoading(false);
+      }
     };
     
     fetchData();
@@ -64,7 +82,6 @@ export default function OrderTimelineReport() {
     return colors[type as keyof typeof colors] || "#8884d8";
   };
 
-  // Calculate average price for reference line
   const averagePrice = timelineData.length > 0
     ? timelineData.reduce((sum, item) => sum + item.price, 0) / timelineData.length
     : 0;
@@ -188,17 +205,25 @@ export default function OrderTimelineReport() {
     return options;
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-pulse text-muted-foreground">Loading data...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center flex-wrap gap-4">
         <div className="w-full md:w-64">
           <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
             <SelectTrigger>
-              <SelectValue placeholder="Mitarbeiter auswählen" />
+              <SelectValue placeholder="Choose employee" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Alle Mitarbeiter</SelectItem>
-              {employees.map((employee) => (
+              <SelectItem value="all">All Employees</SelectItem>
+              {Array.isArray(employees) && employees.map((employee) => (
                 <SelectItem key={employee.id} value={employee.id}>
                   {`${employee.firstName} ${employee.lastName}`}
                 </SelectItem>
@@ -207,50 +232,58 @@ export default function OrderTimelineReport() {
           </Select>
         </div>
         <div className="text-sm text-muted-foreground ml-auto">
-          {timelineData.length} Käufe angezeigt
+          {timelineData.length} purchases displayed
         </div>
       </div>
       
-      <div className="h-[350px] md:h-[400px] w-full border rounded-lg p-4">
-        <ReactECharts
-          option={getOption()}
-          style={{ height: '100%', width: '100%' }}
-          opts={{ renderer: 'canvas' }}
-          className="echarts-for-react"
-          notMerge={true}
-        />
-      </div>
-      
-      <div className="overflow-x-auto border rounded-lg">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="border-b bg-muted/50">
-              <th className="text-left py-3 px-4 font-medium">Datum</th>
-              <th className="text-left py-3 px-4 font-medium">Mitarbeiter</th>
-              <th className="text-left py-3 px-4 font-medium">Asset</th>
-              <th className="text-left py-3 px-4 font-medium">Typ</th>
-              <th className="text-right py-3 px-4 font-medium">Preis</th>
-            </tr>
-          </thead>
-          <tbody>
-            {timelineData.map((item, index) => (
-              <tr key={index} className="border-b hover:bg-muted/30">
-                <td className="py-3 px-4">{formatDate(item.date)}</td>
-                <td className="py-3 px-4">{item.employee}</td>
-                <td className="py-3 px-4">{item.name}</td>
-                <td className="py-3 px-4 capitalize">{item.type}</td>
-                <td className="py-3 px-4 text-right font-medium">{formatCurrency(item.price)}</td>
-              </tr>
-            ))}
-            {timelineData.length > 0 && (
-              <tr className="font-medium bg-muted/20">
-                <td colSpan={4} className="py-3 px-4">Durchschnitt</td>
-                <td className="py-3 px-4 text-right">{formatCurrency(averagePrice)}</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      {timelineData.length > 0 ? (
+        <>
+          <div className="h-[350px] md:h-[400px] w-full border rounded-lg p-4">
+            <ReactECharts
+              option={getOption()}
+              style={{ height: '100%', width: '100%' }}
+              opts={{ renderer: 'canvas' }}
+              className="echarts-for-react"
+              notMerge={true}
+            />
+          </div>
+          
+          <div className="overflow-x-auto border rounded-lg">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="border-b bg-muted/50">
+                  <th className="text-left py-3 px-4 font-medium">Date</th>
+                  <th className="text-left py-3 px-4 font-medium">Employee</th>
+                  <th className="text-left py-3 px-4 font-medium">Asset</th>
+                  <th className="text-left py-3 px-4 font-medium">Type</th>
+                  <th className="text-right py-3 px-4 font-medium">Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                {timelineData.map((item, index) => (
+                  <tr key={index} className="border-b hover:bg-muted/30">
+                    <td className="py-3 px-4">{formatDate(item.date)}</td>
+                    <td className="py-3 px-4">{item.employee}</td>
+                    <td className="py-3 px-4">{item.name}</td>
+                    <td className="py-3 px-4 capitalize">{item.type}</td>
+                    <td className="py-3 px-4 text-right font-medium">{formatCurrency(item.price)}</td>
+                  </tr>
+                ))}
+                {timelineData.length > 0 && (
+                  <tr className="font-medium bg-muted/20">
+                    <td colSpan={4} className="py-3 px-4">Average</td>
+                    <td className="py-3 px-4 text-right">{formatCurrency(averagePrice)}</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </>
+      ) : (
+        <div className="flex items-center justify-center h-64 border rounded-lg">
+          <div className="text-muted-foreground">No data available.</div>
+        </div>
+      )}
     </div>
   );
 }

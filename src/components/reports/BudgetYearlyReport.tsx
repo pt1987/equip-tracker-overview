@@ -1,18 +1,27 @@
-
 import { useEffect, useState } from "react";
 import ReactECharts from "echarts-for-react";
 import { getYearlyBudgetReport } from "@/data/reports";
 import { formatCurrency } from "@/lib/utils";
 import { getCommonOptions, getAxisOptions, getColorOptions, gradients, formatters } from "@/lib/echarts-theme";
+import { YearlyBudgetReport } from "@/lib/types";
 import * as echarts from 'echarts';
 
 export default function BudgetYearlyReport() {
-  const [budgetData, setBudgetData] = useState<any[]>([]);
+  const [budgetData, setBudgetData] = useState<YearlyBudgetReport[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await getYearlyBudgetReport();
-      setBudgetData(data);
+      setIsLoading(true);
+      try {
+        const data = await getYearlyBudgetReport();
+        setBudgetData(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Error fetching budget data:", error);
+        setBudgetData([]);
+      } finally {
+        setIsLoading(false);
+      }
     };
     
     fetchData();
@@ -108,6 +117,22 @@ export default function BudgetYearlyReport() {
     
     return options;
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-pulse text-muted-foreground">Loading data...</div>
+      </div>
+    );
+  }
+
+  if (budgetData.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-muted-foreground">No budget data available.</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 md:space-y-6">
