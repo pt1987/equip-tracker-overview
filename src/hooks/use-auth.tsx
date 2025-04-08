@@ -8,8 +8,8 @@ import { Session, User } from "@supabase/supabase-js";
 interface UserProfile {
   id: string;
   email: string;
-  name: string;
-  role: string;
+  name: string | null;
+  role: string | null;
 }
 
 interface AuthContextType {
@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setUser({
               id: data.id,
               email: data.email,
-              name: data.name || '',
+              name: data.name,
               role: data.role
             });
           } else {
@@ -57,7 +57,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setUser({
               id: currentSession.user.id,
               email: currentSession.user.email || '',
-              name: currentSession.user.user_metadata?.name || '',
+              name: currentSession.user.user_metadata?.name || null,
               role: 'user'
             });
           }
@@ -85,7 +85,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               setUser({
                 id: data.id,
                 email: data.email,
-                name: data.name || '',
+                name: data.name,
                 role: data.role
               });
             } else {
@@ -93,7 +93,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               setUser({
                 id: currentSession.user.id,
                 email: currentSession.user.email || '',
-                name: currentSession.user.user_metadata?.name || '',
+                name: currentSession.user.user_metadata?.name || null,
                 role: 'user'
               });
             }
