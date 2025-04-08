@@ -16,6 +16,7 @@ import { formatDate } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "@/hooks/use-toast";
 
 interface EmployeeCardProps {
   employee: Employee;
@@ -33,7 +34,7 @@ type AssetSummary = {
   totalValue: number;
 };
 
-const EmployeeCard: React.FC<EmployeeCardProps> = ({ employee }) => {
+const EmployeeCard: React.FC<EmployeeCardProps> = ({ employee, index }) => {
   // Use React Query to get asset counts from Supabase
   const { data: assetSummary, isLoading } = useQuery({
     queryKey: ['employee-assets', employee.id],
@@ -48,7 +49,25 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ employee }) => {
       
       if (error) {
         console.error("Error fetching employee assets:", error);
+        toast({
+          title: "Error fetching assets",
+          description: "Could not retrieve employee assets data",
+          variant: "destructive"
+        });
         return null;
+      }
+
+      if (!data?.length) {
+        return {
+          laptop: 0,
+          smartphone: 0,
+          tablet: 0,
+          mouse: 0,
+          keyboard: 0,
+          accessory: 0,
+          totalCount: 0,
+          totalValue: 0
+        };
       }
 
       // Initialize summary
@@ -60,12 +79,12 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ employee }) => {
         keyboard: 0,
         accessory: 0,
         totalCount: data.length,
-        totalValue: data.reduce((sum, asset) => sum + asset.price, 0)
+        totalValue: data.reduce((sum, asset) => sum + (asset.price || 0), 0)
       };
       
       // Count assets by type
       data.forEach(asset => {
-        if (summary[asset.type as keyof Omit<AssetSummary, 'totalCount' | 'totalValue'>] !== undefined) {
+        if (asset.type && summary[asset.type as keyof Omit<AssetSummary, 'totalCount' | 'totalValue'>] !== undefined) {
           summary[asset.type as keyof Omit<AssetSummary, 'totalCount' | 'totalValue'>]++;
         }
       });
@@ -83,7 +102,7 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ employee }) => {
             <div className="flex items-center gap-4">
               <Avatar>
                 <AvatarImage src={employee.profileImage || employee.imageUrl} alt={`${employee.firstName} ${employee.lastName}`} />
-                <AvatarFallback>{employee.firstName[0]}{employee.lastName[0]}</AvatarFallback>
+                <AvatarFallback>{employee.firstName?.[0]}{employee.lastName?.[0]}</AvatarFallback>
               </Avatar>
               <div>
                 {employee.firstName} {employee.lastName}
