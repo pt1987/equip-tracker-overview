@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -16,6 +17,7 @@ import { getEmployeeAssetsSummary } from "@/data/employees";
 
 interface EmployeeCardProps {
   employee: Employee;
+  index?: number; // Added this optional prop to match usage in Employees.tsx
 }
 
 const EmployeeCard: React.FC<EmployeeCardProps> = ({ employee }) => {

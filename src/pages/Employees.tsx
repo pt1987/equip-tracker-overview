@@ -23,13 +23,11 @@ const EmployeesPage = () => {
     queryFn: getEmployees
   });
 
-  // Get unique clusters
   const clusters = [...new Set(employees.map(emp => emp.cluster))];
   
   useEffect(() => {
     let filtered = employees;
     
-    // Apply search filter
     if (searchTerm) {
       const lowerSearchTerm = searchTerm.toLowerCase();
       filtered = filtered.filter(employee => 
@@ -40,7 +38,6 @@ const EmployeesPage = () => {
       );
     }
     
-    // Apply cluster filters
     if (selectedClusters.length > 0) {
       filtered = filtered.filter(employee => selectedClusters.includes(employee.cluster));
     }
@@ -116,7 +113,6 @@ const EmployeesPage = () => {
           </button>
         </div>
         
-        {/* Filters */}
         {showFilters && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -177,17 +173,16 @@ const EmployeesPage = () => {
           </div>
         ) : view === "grid" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredEmployees.map((employee, index) => (
+            {filteredEmployees.map((employee) => (
               <EmployeeCard 
                 key={employee.id} 
                 employee={employee} 
-                index={index} 
               />
             ))}
           </div>
         ) : (
           <div className="space-y-4">
-            {filteredEmployees.map((employee, index) => (
+            {filteredEmployees.map((employee) => (
               <Link
                 key={employee.id}
                 to={`/employee/${employee.id}`}
