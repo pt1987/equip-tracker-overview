@@ -1,4 +1,5 @@
 
+import { useEffect, useState } from "react";
 import { Employee } from "@/lib/types";
 import { getEmployeeAssetsSummary } from "@/data/employees";
 import { cn } from "@/lib/utils";
@@ -16,10 +17,44 @@ interface EmployeeCardProps {
   index: number;
 }
 
+interface AssetSummary {
+  totalAssets: number;
+  totalValue: number;
+  assetsByType: {
+    laptop: any[];
+    smartphone: any[];
+    tablet: any[];
+    mouse: any[];
+    keyboard: any[];
+    accessory: any[];
+  };
+}
+
 export default function EmployeeCard({ employee, index }: EmployeeCardProps) {
-  const employeeAssets = getEmployeeAssetsSummary(employee.id);
+  const [employeeAssets, setEmployeeAssets] = useState<AssetSummary>({
+    totalAssets: 0,
+    totalValue: 0,
+    assetsByType: {
+      laptop: [],
+      smartphone: [],
+      tablet: [],
+      mouse: [],
+      keyboard: [],
+      accessory: []
+    }
+  });
+  
   const budgetPercentage = Math.min(100, Math.round((employee.usedBudget / employee.budget) * 100));
   
+  // Load employee assets
+  useEffect(() => {
+    const loadAssets = async () => {
+      const assets = await getEmployeeAssetsSummary(employee.id);
+      setEmployeeAssets(assets);
+    };
+    loadAssets();
+  }, [employee.id]);
+
   // Format date to display nicely
   const startDate = new Date(employee.startDate).toLocaleDateString("de-DE", {
     year: "numeric",

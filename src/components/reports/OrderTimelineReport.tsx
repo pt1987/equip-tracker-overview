@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from "react";
 import ReactECharts from "echarts-for-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getOrderTimelineByEmployee } from "@/data/reports";
-import { employees } from "@/data/employees";
+import { getEmployees } from "@/data/employees";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { getCommonOptions, getAxisOptions, getColorOptions, gradients } from "@/lib/echarts-theme";
 import * as echarts from 'echarts';
@@ -189,7 +188,7 @@ export default function OrderTimelineReport() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Alle Mitarbeiter</SelectItem>
-              {employees.map((employee) => (
+              {getEmployees().map((employee) => (
                 <SelectItem key={employee.id} value={employee.id}>
                   {`${employee.firstName} ${employee.lastName}`}
                 </SelectItem>

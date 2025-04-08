@@ -57,7 +57,20 @@ export const getEmployeeAssetsSummary = async (employeeId: string) => {
     .select('*')
     .eq('employee_id', employeeId);
   
-  if (error || !employeeAssets) return { totalAssets: 0, totalValue: 0, assetsByType: {} };
+  if (error || !employeeAssets) {
+    return {
+      totalAssets: 0,
+      totalValue: 0,
+      assetsByType: {
+        laptop: [],
+        smartphone: [],
+        tablet: [],
+        mouse: [],
+        keyboard: [],
+        accessory: []
+      }
+    };
+  }
   
   const totalValue = employeeAssets.reduce((sum, asset) => sum + asset.price, 0);
   const assetsByType = {

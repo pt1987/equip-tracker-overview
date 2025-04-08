@@ -7,30 +7,42 @@ import {
   WarrantyDefectReport,
   AssetType
 } from "@/lib/types";
-import { assets } from "./assets";
-import { employees } from "./employees";
-import { assetHistory } from "./assets";
+import { getAssets, getAssetHistoryByAssetId } from "./assets";
+import { getEmployees } from "./employees";
 import { calculateAgeInMonths, groupBy } from "@/lib/utils";
 
 // Helper function to get employee name
-const getEmployeeName = (id: string): string => {
+const getEmployeeName = async (id: string): Promise<string> => {
+  const employees = await getEmployees();
   const employee = employees.find(emp => emp.id === id);
   return employee ? `${employee.firstName} ${employee.lastName}` : 'Unknown';
 };
 
 // Order Timeline per employee
-export const getOrderTimelineByEmployee = (employeeId?: string): OrderTimeline[] => {
+export const getOrderTimelineByEmployee = async (employeeId?: string): Promise<OrderTimeline[]> => {
+  const employees = await getEmployees();
+  const assets = await getAssets();
+  const allAssetHistory: any[] = [];
+  
+  // Get all asset history entries
+  for (const asset of assets) {
+    const history = await getAssetHistoryByAssetId(asset.id);
+    allAssetHistory.push(...history);
+  }
+  
   const filteredEmployees = employeeId 
     ? employees.filter(emp => emp.id === employeeId)
     : employees;
 
-  return filteredEmployees.map(employee => {
-    // Get all purchase history entries for assets that were assigned to this employee
+  const result: OrderTimeline[] = [];
+  
+  for (const employee of filteredEmployees) {
+    // Get all assets that were assigned to this employee
     const employeeAssets = assets.filter(asset => asset.employeeId === employee.id);
     
     // Get purchase dates from history or fallback to asset.purchaseDate
     const orders = employeeAssets.map(asset => {
-      const purchaseEntry = assetHistory.find(
+      const purchaseEntry = allAssetHistory.find(
         history => history.assetId === asset.id && history.action === 'purchase'
       );
 
@@ -45,16 +57,20 @@ export const getOrderTimelineByEmployee = (employeeId?: string): OrderTimeline[]
     // Sort by date
     orders.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-    return {
+    result.push({
       employeeId: employee.id,
       employeeName: `${employee.firstName} ${employee.lastName}`,
       orders
-    };
-  });
+    });
+  }
+
+  return result;
 };
 
 // Yearly budget report
-export const getYearlyBudgetReport = (): YearlyBudgetReport[] => {
+export const getYearlyBudgetReport = async (): Promise<YearlyBudgetReport[]> => {
+  const assets = await getAssets();
+  
   // Group assets by purchase year
   const assetsByYear = groupBy(assets, asset => {
     const date = new Date(asset.purchaseDate);
@@ -71,7 +87,9 @@ export const getYearlyBudgetReport = (): YearlyBudgetReport[] => {
 };
 
 // Yearly asset purchases report
-export const getYearlyAssetPurchasesReport = (): YearlyAssetPurchaseReport[] => {
+export const getYearlyAssetPurchasesReport = async (): Promise<YearlyAssetPurchaseReport[]> => {
+  const assets = await getAssets();
+  
   // Group assets by purchase year
   const assetsByYear = groupBy(assets, asset => {
     const date = new Date(asset.purchaseDate);
@@ -81,7 +99,7 @@ export const getYearlyAssetPurchasesReport = (): YearlyAssetPurchaseReport[] => 
   // Calculate assets by type per year
   return Object.entries(assetsByYear).map(([yearStr, yearAssets]) => {
     const year = parseInt(yearStr);
-    const assetsByType: Record<string, number> = {};
+    const assetsByType = {} as Record<AssetType, number>;
     
     yearAssets.forEach(asset => {
       if (!assetsByType[asset.type]) {
@@ -97,7 +115,9 @@ export const getYearlyAssetPurchasesReport = (): YearlyAssetPurchaseReport[] => 
 };
 
 // Average usage duration by asset category
-export const getAssetUsageDurationReport = (): AssetUsageDurationReport[] => {
+export const getAssetUsageDurationReport = async (): Promise<AssetUsageDurationReport[]> => {
+  const assets = await getAssets();
+  
   // Group assets by category
   const assetsByCategory = groupBy(assets, asset => asset.category);
 
@@ -115,7 +135,9 @@ export const getAssetUsageDurationReport = (): AssetUsageDurationReport[] => {
 };
 
 // Warranty defect report
-export const getWarrantyDefectReport = (): WarrantyDefectReport => {
+export const getWarrantyDefectReport = async (): Promise<WarrantyDefectReport> => {
+  const assets = await getAssets();
+  
   // Filter defective or in repair assets
   const defectiveAssets = assets.filter(
     asset => asset.status === 'defective' || asset.status === 'repair'

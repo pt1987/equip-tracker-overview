@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import PageTransition from "@/components/layout/PageTransition";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SearchFilter from "@/components/shared/SearchFilter";
 import { useState } from "react";
 import { groupBy } from "@/data/helpers";
-import { assets } from "@/data/assets";
+import { getAssets } from "@/data/assets";
 import { Asset } from "@/lib/types";
 
 export default function AssetGroups() {
@@ -17,11 +16,10 @@ export default function AssetGroups() {
 
   const { data: assetData = [] } = useQuery({
     queryKey: ["assets"],
-    queryFn: () => assets,
-    initialData: assets,
+    queryFn: () => getAssets(),
+    initialData: getAssets(),
   });
 
-  // Group assets by category and manufacturer
   const assetsByCategory = groupBy(assetData, (asset: Asset) => asset.category);
   const assetsByManufacturer = groupBy(assetData, (asset: Asset) => asset.manufacturer);
 

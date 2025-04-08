@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import PageTransition from "@/components/layout/PageTransition";
 import { Employee } from "@/lib/types";
@@ -10,12 +9,7 @@ import { SlidersHorizontal, X, Check, Users, ArrowRight } from "lucide-react";
 import { formatDate, calculateEmploymentDuration } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { getEmployees } from "@/data/mockData";
-
-interface FilterOption {
-  label: string;
-  value: string;
-}
+import { getEmployees } from "@/data/employees";
 
 const EmployeesPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -24,9 +18,9 @@ const EmployeesPage = () => {
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
   const [view, setView] = useState<"grid" | "list">("grid");
   
-  const { data: employees = [] } = useQuery({
+  const { data: employees = [], isLoading } = useQuery({
     queryKey: ['employees'],
-    queryFn: getEmployees,
+    queryFn: getEmployees
   });
 
   // Get unique clusters
@@ -66,6 +60,24 @@ const EmployeesPage = () => {
     setSelectedClusters([]);
     setSearchTerm("");
   };
+
+  if (isLoading) {
+    return (
+      <PageTransition>
+        <div className="p-3 md:p-4 xl:p-6 space-y-6 max-w-full">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold">Employees</h1>
+              <p className="text-muted-foreground mt-1">Loading...</p>
+            </div>
+          </div>
+          <div className="glass-card p-12 flex items-center justify-center">
+            <div className="animate-pulse-soft">Loading employees...</div>
+          </div>
+        </div>
+      </PageTransition>
+    );
+  }
 
   return (
     <PageTransition>
@@ -186,6 +198,9 @@ const EmployeesPage = () => {
                     src={employee.imageUrl}
                     alt={`${employee.firstName} ${employee.lastName}`}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'https://avatar.vercel.sh/' + employee.id;
+                    }}
                   />
                 </div>
                 <div className="flex-1">

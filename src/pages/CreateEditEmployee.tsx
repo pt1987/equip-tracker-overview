@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import PageTransition from "@/components/layout/PageTransition";
@@ -12,7 +11,7 @@ import {
   CardTitle 
 } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
-import { employees } from "@/data/employees";
+import { getEmployees } from "@/data/employees";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@/hooks/use-toast";
@@ -26,8 +25,7 @@ export default function CreateEditEmployee() {
 
   const { data: employeeData = [] } = useQuery({
     queryKey: ["employees"],
-    queryFn: () => employees,
-    initialData: employees,
+    queryFn: getEmployees,
   });
 
   const employee = isEditing ? employeeData.find(e => e.id === id) : null;

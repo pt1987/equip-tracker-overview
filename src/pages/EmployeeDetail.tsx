@@ -1,7 +1,7 @@
+
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import PageTransition from "@/components/layout/PageTransition";
-import Navbar from "@/components/layout/Navbar";
 import { getEmployeeById } from "@/data/employees";
 import { getAssetsByEmployeeId } from "@/data/assets";
 import { Asset, Employee } from "@/lib/types";
@@ -59,15 +59,19 @@ const EmployeeDetail = () => {
   
   useEffect(() => {
     if (id) {
-      const employeeData = getEmployeeById(id);
-      setEmployee(employeeData || null);
+      const fetchData = async () => {
+        const employeeData = await getEmployeeById(id);
+        setEmployee(employeeData);
+        
+        if (employeeData) {
+          const employeeAssets = await getAssetsByEmployeeId(employeeData.id);
+          setAssets(employeeAssets);
+        }
+        
+        setLoading(false);
+      };
       
-      if (employeeData) {
-        const employeeAssets = getAssetsByEmployeeId(employeeData.id);
-        setAssets(employeeAssets);
-      }
-      
-      setLoading(false);
+      fetchData();
     }
   }, [id]);
   

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,7 +29,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { InfoIcon, AlertTriangleIcon } from "lucide-react";
 
-import { employees } from "@/data/employees";
+import { getEmployees } from "@/data/employees";
 import { 
   HardwareCategory, 
   HardwareOrderFormData, 
@@ -72,7 +71,7 @@ export default function HardwareOrderForm() {
   
   const { data: employeesData = [] } = useQuery({
     queryKey: ["employees"],
-    queryFn: () => employees,
+    queryFn: () => getEmployees(),
     initialData: employees,
   });
   

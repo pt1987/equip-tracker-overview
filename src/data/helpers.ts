@@ -1,10 +1,13 @@
 
 import { DashboardStats } from "@/lib/types";
-import { assets } from "./assets";
-import { employees } from "./employees";
+import { getAssets } from "./assets";
+import { getEmployees } from "./employees";
 
 // Dashboard statistics
-export const getDashboardStats = (): DashboardStats => {
+export const getDashboardStats = async (): Promise<DashboardStats> => {
+  const assets = await getAssets();
+  const employees = await getEmployees();
+  
   const totalAssets = assets.length;
   const assignedAssets = assets.filter(asset => asset.employeeId !== null).length;
   const poolAssets = assets.filter(asset => asset.status === 'pool').length;

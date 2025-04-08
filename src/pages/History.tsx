@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import PageTransition from "@/components/layout/PageTransition";
 import { 
@@ -13,8 +12,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { formatDate, formatCurrency } from "@/lib/utils";
 import SearchFilter from "@/components/shared/SearchFilter";
 import { useState } from "react";
-import { assets } from "@/data/assets";
-import { employees } from "@/data/employees";
+import { getAssets } from "@/data/assets";
+import { getEmployees } from "@/data/employees";
 import StatusBadge from "@/components/assets/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Download, FileSpreadsheet, FileText, Check } from "lucide-react";
@@ -35,14 +34,14 @@ export default function History() {
 
   const { data: assetData = [] } = useQuery({
     queryKey: ["assets"],
-    queryFn: () => assets,
-    initialData: assets,
+    queryFn: () => getAssets(),
+    initialData: getAssets(),
   });
 
   const { data: employeeData = [] } = useQuery({
     queryKey: ["employees"],
-    queryFn: () => employees,
-    initialData: employees,
+    queryFn: () => getEmployees(),
+    initialData: getEmployees(),
   });
 
   // Sort assets by purchase date, newest first
