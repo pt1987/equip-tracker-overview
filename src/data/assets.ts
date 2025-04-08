@@ -1,4 +1,3 @@
-
 import { Asset, AssetHistoryEntry, AssetStatus, AssetType } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -62,7 +61,6 @@ export const getAssets = async (): Promise<Asset[]> => {
   console.log("Getting all assets from Supabase...");
   
   try {
-    // Check auth state first
     const { data: { session } } = await supabase.auth.getSession();
     console.log("Auth session state:", session ? "User is authenticated" : "No active session");
     
@@ -229,7 +227,6 @@ export const updateAsset = async (asset: Asset): Promise<Asset> => {
   console.log("Updating asset in Supabase:", asset);
   
   try {
-    // Convert from frontend model to database model
     const dbAsset = {
       id: asset.id,
       name: asset.name,
@@ -255,7 +252,7 @@ export const updateAsset = async (asset: Asset): Promise<Asset> => {
       connected_asset_id: asset.connectedAssetId,
       related_asset_id: asset.relatedAssetId,
       image_url: asset.imageUrl,
-      updated_at: new Date().toISOString() // Convert Date to string format
+      updated_at: new Date().toISOString()
     };
     
     const { data, error } = await supabase
@@ -276,7 +273,6 @@ export const updateAsset = async (asset: Asset): Promise<Asset> => {
     
     console.log("Asset updated successfully:", data);
     
-    // Return the updated asset
     return {
       id: data.id,
       name: data.name,
@@ -309,16 +305,16 @@ export const updateAsset = async (asset: Asset): Promise<Asset> => {
   }
 };
 
-// New function to upload an image to Supabase storage
+// Function to upload an image to Supabase storage
 export const uploadAssetImage = async (file: File, assetId: string): Promise<string> => {
   console.log(`Uploading image for asset ${assetId}...`);
   
   try {
-    // Create a unique file path
     const fileExt = file.name.split('.').pop();
-    const filePath = `${assetId}-${Date.now()}.${fileExt}`;
+    const filePath = `${assetId}/${Date.now()}.${fileExt}`;
     
-    // Upload to the default bucket
+    console.log(`Uploading to bucket 'assets', path: ${filePath}`);
+    
     const { data, error } = await supabase.storage
       .from('assets')
       .upload(filePath, file, {
@@ -337,7 +333,6 @@ export const uploadAssetImage = async (file: File, assetId: string): Promise<str
     
     console.log("File uploaded successfully:", data);
     
-    // Get public URL
     const { data: publicUrlData } = supabase.storage
       .from('assets')
       .getPublicUrl(filePath);
