@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -27,14 +28,12 @@ import {
   Download,
   FileText,
   AlertCircle,
-  FileText as FileTextIcon,
   Share,
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { Asset } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import DocumentUpload, { Document } from "@/components/assets/DocumentUpload";
-import QRCode from "@/components/shared/QRCode";
 
 export default function AssetDetail() {
   const { id = "" } = useParams();
@@ -180,7 +179,7 @@ export default function AssetDetail() {
             
             <div className="flex items-center space-x-2">
               <Button variant="outline" size="sm" onClick={() => {}}>
-                <FileTextIcon className="mr-1.5 h-4 w-4" />
+                <FileText className="mr-1.5 h-4 w-4" />
                 Report
               </Button>
               <Button variant="outline" size="sm" onClick={() => {}}>
@@ -216,51 +215,30 @@ export default function AssetDetail() {
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Card>
-              <CardHeader className="bg-muted/50 pb-2">
-                <CardTitle className="text-lg flex items-center">
-                  <FileTextIcon className="mr-2 h-5 w-5" />
-                  QR Code
-                </CardTitle>
-                <CardDescription>
-                  Scannen Sie diesen Code, um schnell auf die Asset-Details zuzugreifen
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex justify-center py-6">
-                <QRCode 
-                  value={`${window.location.origin}/asset/${asset.id}`}
-                  size={200}
-                  title={`${asset.manufacturer} ${asset.model}`}
-                />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="bg-muted/50 pb-2">
-                <CardTitle className="text-lg flex items-center">
-                  <FileTextIcon className="mr-2 h-5 w-5" />
-                  Dokumente
-                </CardTitle>
-                <CardDescription>
-                  Verwalten Sie alle mit diesem Asset verbundenen Dokumente
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <DocumentUpload
-                  assetId={asset.id}
-                  documents={documents}
-                  onAddDocument={handleAddDocument}
-                  onDeleteDocument={handleDeleteDocument}
-                />
-              </CardContent>
-            </Card>
-          </div>
+          <Card>
+            <CardHeader className="bg-muted/50 pb-2">
+              <CardTitle className="text-lg flex items-center">
+                <FileText className="mr-2 h-5 w-5" />
+                Dokumente
+              </CardTitle>
+              <CardDescription>
+                Verwalten Sie alle mit diesem Asset verbundenen Dokumente
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DocumentUpload
+                assetId={asset.id}
+                documents={documents}
+                onAddDocument={handleAddDocument}
+                onDeleteDocument={handleDeleteDocument}
+              />
+            </CardContent>
+          </Card>
 
           <Card>
             <CardHeader className="bg-muted/50 pb-2">
               <CardTitle className="text-lg flex items-center">
-                <FileTextIcon className="mr-2 h-5 w-5" />
+                <FileText className="mr-2 h-5 w-5" />
                 Asset Historie
               </CardTitle>
               <CardDescription>Chronologische Aufzeichnung aller Änderungen und Ereignisse</CardDescription>
