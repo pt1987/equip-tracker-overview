@@ -33,12 +33,15 @@ import {
 import { formatDate } from "@/lib/utils";
 import { Asset } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
+import DocumentUpload, { Document } from "@/components/assets/DocumentUpload";
+import QRCode from "@/components/shared/QRCode";
 
 export default function AssetDetail() {
   const { id = "" } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
+  const [documents, setDocuments] = useState<Document[]>([]);
   const { toast } = useToast();
   
   // Fetch asset details
@@ -119,6 +122,15 @@ export default function AssetDetail() {
         description: "Die Änderungen konnten nicht gespeichert werden.",
       });
     }
+  };
+
+  // Document handling functions
+  const handleAddDocument = (document: Document) => {
+    setDocuments([...documents, document]);
+  };
+
+  const handleDeleteDocument = (documentId: string) => {
+    setDocuments(documents.filter(doc => doc.id !== documentId));
   };
 
   if (isAssetLoading) {
@@ -209,6 +221,41 @@ export default function AssetDetail() {
               )}
             </CardContent>
           </Card>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>QR Code</CardTitle>
+                <CardDescription>
+                  Scannen Sie diesen Code, um schnell auf die Asset-Details zuzugreifen
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex justify-center py-6">
+                <QRCode 
+                  value={`${window.location.origin}/asset/${asset.id}`}
+                  size={200}
+                  title={`${asset.manufacturer} ${asset.model}`}
+                />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Dokumente</CardTitle>
+                <CardDescription>
+                  Verwalten Sie alle mit diesem Asset verbundenen Dokumente
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <DocumentUpload
+                  assetId={asset.id}
+                  documents={documents}
+                  onAddDocument={handleAddDocument}
+                  onDeleteDocument={handleDeleteDocument}
+                />
+              </CardContent>
+            </Card>
+          </div>
 
           <Card>
             <CardHeader>
