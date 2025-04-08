@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { Asset } from "@/lib/types";
 import { formatDate, formatCurrency, calculateAgeInMonths } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { CalendarClock, Euro, Tag, User, Tool, Pencil, Trash, Cpu, QrCode, FileText } from "lucide-react";
+import { CalendarClock, Euro, Tag, User, Wrench, Pencil, Trash, Cpu, QrCode, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import StatusBadge from "./StatusBadge";
@@ -40,7 +39,6 @@ export default function AssetDetailView({
   const [isLoadingEmployee, setIsLoadingEmployee] = useState(false);
   const { toast } = useToast();
 
-  // Fetch employee data if asset has an employee assigned
   useEffect(() => {
     const fetchEmployee = async () => {
       if (asset.employeeId) {
@@ -71,13 +69,10 @@ export default function AssetDetailView({
     }
   };
 
-  // Fix asset image display by ensuring a placeholder is shown when needed
   const getAssetImage = () => {
     if (!asset.imageUrl || asset.imageUrl.trim() === '') {
-      // Return a default image based on asset type
       return `/placeholder.svg`;
     }
-    // For empty strings or invalid URLs, use placeholder
     try {
       new URL(asset.imageUrl);
       return asset.imageUrl;
@@ -88,7 +83,6 @@ export default function AssetDetailView({
 
   const handleDeleteConfirm = async () => {
     try {
-      // Delete from Supabase
       const { error } = await supabase
         .from('assets')
         .delete()
@@ -103,7 +97,6 @@ export default function AssetDetailView({
         return;
       }
       
-      // Call onDelete callback to update UI
       onDelete();
       
       toast({
@@ -123,7 +116,6 @@ export default function AssetDetailView({
   return (
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* Left column with image and primary info */}
         <div className="w-full lg:w-1/3 flex-shrink-0 space-y-4">
           <div className="aspect-square bg-muted rounded-lg overflow-hidden">
             <motion.img
@@ -134,7 +126,6 @@ export default function AssetDetailView({
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5 }}
               onError={(e) => {
-                // Fallback if the image fails to load
                 (e.target as HTMLImageElement).src = '/placeholder.svg';
               }}
             />
@@ -187,7 +178,6 @@ export default function AssetDetailView({
           </div>
         </div>
 
-        {/* Right column with tabs */}
         <div className="flex-1">
           <Tabs defaultValue="general" className="w-full">
             <TabsList className="grid grid-cols-3 mb-4">
@@ -196,7 +186,6 @@ export default function AssetDetailView({
               <TabsTrigger value="assignment">Zuweisung</TabsTrigger>
             </TabsList>
             
-            {/* General Information Tab */}
             <TabsContent value="general" className="space-y-4">
               <div className="inline-flex items-center px-2 py-1 mb-2 rounded-full bg-secondary text-xs font-medium">
                 {getAssetTypeLabel(asset.type)}
@@ -261,7 +250,6 @@ export default function AssetDetailView({
               </div>
             </TabsContent>
             
-            {/* Technical Details Tab */}
             <TabsContent value="technical" className="space-y-4">
               <h2 className="text-xl font-semibold mb-4">Technische Details</h2>
               
@@ -305,7 +293,7 @@ export default function AssetDetailView({
                 {asset.hasWarranty !== undefined && (
                   <div className="flex items-center gap-3">
                     <div className="p-2.5 rounded-full bg-rose-100">
-                      <Tool size={16} className="text-rose-700" />
+                      <Wrench size={16} className="text-rose-700" />
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Garantie</p>
@@ -362,7 +350,6 @@ export default function AssetDetailView({
               )}
             </TabsContent>
             
-            {/* Assignment Tab */}
             <TabsContent value="assignment" className="space-y-4">
               <h2 className="text-xl font-semibold mb-4">Zugewiesener Mitarbeiter</h2>
               

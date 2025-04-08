@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -28,7 +27,7 @@ import {
   Download,
   FileText,
   AlertCircle,
-  FileText2,
+  FileText as FileTextIcon,
   Share,
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
@@ -45,7 +44,6 @@ export default function AssetDetail() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const { toast } = useToast();
   
-  // Fetch asset details
   const {
     data: asset,
     isLoading: isAssetLoading,
@@ -56,7 +54,6 @@ export default function AssetDetail() {
     enabled: !!id,
   });
 
-  // Fetch asset history
   const {
     data: assetHistory = [],
     isLoading: isHistoryLoading,
@@ -75,7 +72,6 @@ export default function AssetDetail() {
   };
 
   const handleDelete = async () => {
-    // After successful deletion, navigate back
     queryClient.invalidateQueries({ queryKey: ["assets"] });
     navigate("/assets");
   };
@@ -102,10 +98,8 @@ export default function AssetDetail() {
       
       console.log("Saving updated asset:", updatedAsset);
       
-      // Update in database
       await updateAsset(updatedAsset);
       
-      // Update cache and UI
       queryClient.invalidateQueries({ queryKey: ["asset", id] });
       queryClient.invalidateQueries({ queryKey: ["assets"] });
       
@@ -125,7 +119,6 @@ export default function AssetDetail() {
     }
   };
 
-  // Document handling functions
   const handleAddDocument = (document: Document) => {
     setDocuments([...documents, document]);
   };
@@ -187,7 +180,7 @@ export default function AssetDetail() {
             
             <div className="flex items-center space-x-2">
               <Button variant="outline" size="sm" onClick={() => {}}>
-                <FileText className="mr-1.5 h-4 w-4" />
+                <FileTextIcon className="mr-1.5 h-4 w-4" />
                 Report
               </Button>
               <Button variant="outline" size="sm" onClick={() => {}}>
@@ -201,7 +194,6 @@ export default function AssetDetail() {
             </div>
           </div>
 
-          {/* Main asset information card */}
           <Card className="overflow-hidden">
             <CardHeader className="bg-muted/50 pb-2">
               <CardTitle>Asset Information</CardTitle>
@@ -224,13 +216,11 @@ export default function AssetDetail() {
             </CardContent>
           </Card>
 
-          {/* Extra information in two columns */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* QR Code */}
             <Card>
               <CardHeader className="bg-muted/50 pb-2">
                 <CardTitle className="text-lg flex items-center">
-                  <FileText2 className="mr-2 h-5 w-5" />
+                  <FileTextIcon className="mr-2 h-5 w-5" />
                   QR Code
                 </CardTitle>
                 <CardDescription>
@@ -246,11 +236,10 @@ export default function AssetDetail() {
               </CardContent>
             </Card>
 
-            {/* Documents */}
             <Card>
               <CardHeader className="bg-muted/50 pb-2">
                 <CardTitle className="text-lg flex items-center">
-                  <FileText className="mr-2 h-5 w-5" />
+                  <FileTextIcon className="mr-2 h-5 w-5" />
                   Dokumente
                 </CardTitle>
                 <CardDescription>
@@ -268,11 +257,10 @@ export default function AssetDetail() {
             </Card>
           </div>
 
-          {/* Asset history card */}
           <Card>
             <CardHeader className="bg-muted/50 pb-2">
               <CardTitle className="text-lg flex items-center">
-                <FileText className="mr-2 h-5 w-5" />
+                <FileTextIcon className="mr-2 h-5 w-5" />
                 Asset Historie
               </CardTitle>
               <CardDescription>Chronologische Aufzeichnung aller Änderungen und Ereignisse</CardDescription>
