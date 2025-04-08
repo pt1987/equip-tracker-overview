@@ -161,19 +161,38 @@ export default function AssetDetailView({
           {/* General Information with action icons */}
           <div className="relative">
             <div className="absolute top-0 right-0 flex items-center gap-2">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button 
-                      onClick={() => setQrDialogOpen(true)} 
-                      className="p-2 rounded-md hover:bg-muted transition-colors"
-                    >
-                      <QrCode size={18} className="text-muted-foreground hover:text-foreground" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>QR-Code anzeigen</TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <Dialog open={qrDialogOpen} onOpenChange={setQrDialogOpen}>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <DialogTrigger asChild>
+                        <button 
+                          className="p-2 rounded-md hover:bg-muted transition-colors"
+                        >
+                          <QrCode size={18} className="text-muted-foreground hover:text-foreground" />
+                        </button>
+                      </DialogTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent>QR-Code anzeigen</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Asset QR-Code</DialogTitle>
+                    <DialogDescription>
+                      Scannen Sie diesen Code, um schnell auf die Asset-Details zuzugreifen
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="flex justify-center py-4">
+                    <QRCode 
+                      value={`${window.location.origin}/asset/${asset.id}`}
+                      size={160}
+                      title={`${asset.manufacturer} ${asset.model}`}
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
               
               <TooltipProvider>
                 <Tooltip>
@@ -189,18 +208,35 @@ export default function AssetDetailView({
                 </Tooltip>
               </TooltipProvider>
               
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <AlertDialogTrigger asChild>
-                      <button className="p-2 rounded-md hover:bg-muted transition-colors">
-                        <Trash size={18} className="text-muted-foreground hover:text-destructive" />
-                      </button>
-                    </AlertDialogTrigger>
-                  </TooltipTrigger>
-                  <TooltipContent>Löschen</TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <AlertDialogTrigger asChild>
+                        <button className="p-2 rounded-md hover:bg-muted transition-colors">
+                          <Trash size={18} className="text-muted-foreground hover:text-destructive" />
+                        </button>
+                      </AlertDialogTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent>Löschen</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Sind Sie sicher?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Diese Aktion kann nicht rückgängig gemacht werden. Das Asset und alle zugehörigen Daten werden dauerhaft gelöscht.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDeleteConfirm}>
+                      Löschen bestätigen
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
 
             <div className="inline-flex items-center px-2 py-1 mb-2 rounded-full bg-secondary text-xs font-medium">
@@ -436,43 +472,6 @@ export default function AssetDetailView({
           </div>
         </div>
       </div>
-      
-      {/* QR Code Dialog */}
-      <Dialog open={qrDialogOpen} onOpenChange={setQrDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Asset QR-Code</DialogTitle>
-            <DialogDescription>
-              Scannen Sie diesen Code, um schnell auf die Asset-Details zuzugreifen
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-center py-4">
-            <QRCode 
-              value={`${window.location.origin}/asset/${asset.id}`}
-              size={160}
-              title={`${asset.manufacturer} ${asset.model}`}
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
-      
-      {/* Delete Confirm Dialog */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Sind Sie sicher?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Diese Aktion kann nicht rückgängig gemacht werden. Das Asset und alle zugehörigen Daten werden dauerhaft gelöscht.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm}>
-              Löschen bestätigen
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
