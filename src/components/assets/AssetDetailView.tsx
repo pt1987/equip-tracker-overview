@@ -248,7 +248,7 @@ export default function AssetDetailView({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Asset image - left column */}
         <div className="lg:col-span-1">
-          <div className="bg-background rounded-lg shadow-sm flex flex-col h-full">
+          <div className="bg-background rounded-lg flex flex-col h-full">
             <h3 className="font-medium p-4 text-lg">Asset Bild</h3>
             <div className="flex-grow bg-muted/30 rounded-lg overflow-hidden p-6">
               <motion.img 
@@ -269,7 +269,7 @@ export default function AssetDetailView({
         {/* Tech details and employee - right column */}
         <div className="lg:col-span-2 space-y-8">
           {/* Technical Details */}
-          <div className="bg-background rounded-lg shadow-sm">
+          <div className="bg-background rounded-lg">
             <h3 className="text-lg font-medium p-4 pb-2">Technische Details</h3>
             <Separator className="mb-4" />
             
@@ -374,7 +374,7 @@ export default function AssetDetailView({
           </div>
 
           {/* Assigned Employee */}
-          <div className="bg-background rounded-lg shadow-sm">
+          <div className="bg-background rounded-lg">
             <h3 className="text-lg font-medium p-4 pb-2">Zugewiesener Mitarbeiter</h3>
             <Separator className="mb-4" />
             
@@ -445,3 +445,4 @@ export default function AssetDetailView({
     </div>
   );
 }
+

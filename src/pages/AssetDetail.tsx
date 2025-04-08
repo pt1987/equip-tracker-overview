@@ -186,7 +186,7 @@ export default function AssetDetail() {
             </div>
           </div>
 
-          <Card>
+          <Card className="border-0">
             <CardContent className="p-6">
               {isEditing ? (
                 <AssetDetailEdit
@@ -204,7 +204,7 @@ export default function AssetDetail() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-0">
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center">
                 <FileText className="mr-2 h-5 w-5" />
@@ -224,7 +224,7 @@ export default function AssetDetail() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-0">
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center">
                 <FileText className="mr-2 h-5 w-5" />
@@ -253,3 +253,4 @@ export default function AssetDetail() {
     </PageTransition>
   );
 }
+
