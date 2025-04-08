@@ -24,6 +24,7 @@ import StatusBadge from "@/components/assets/StatusBadge";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { getAssets } from "@/data/assets";
 
 const AssetTypeIcon = ({ type }: { type: AssetType }) => {
   switch (type) {
@@ -75,52 +76,32 @@ const AssetsPage = () => {
   const [view, setView] = useState<"grid" | "list">("grid");
   const { toast } = useToast();
   
-  // Fetch assets from Supabase
-  const { data: allAssets = [], isLoading } = useQuery({
+  // Use the centralized getAssets function from data/assets.ts
+  const { data: allAssets = [], isLoading, error } = useQuery({
     queryKey: ["assets"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('assets')
-        .select('*');
-      
-      if (error) {
+      console.log("Fetching assets data...");
+      try {
+        const assets = await getAssets();
+        console.log(`Successfully retrieved ${assets.length} assets:`, assets);
+        return assets;
+      } catch (error) {
+        console.error("Error fetching assets:", error);
         toast({
           variant: "destructive",
           title: "Fehler beim Laden der Assets",
-          description: error.message
+          description: error instanceof Error ? error.message : "Ein unbekannter Fehler ist aufgetreten"
         });
         throw error;
       }
-      
-      // Map database fields to our Asset type
-      return data.map((item: any) => ({
-        id: item.id,
-        name: item.name,
-        type: item.type,
-        manufacturer: item.manufacturer,
-        model: item.model,
-        purchaseDate: item.purchase_date,
-        vendor: item.vendor,
-        price: item.price,
-        status: item.status,
-        employeeId: item.employee_id,
-        category: item.category,
-        serialNumber: item.serial_number,
-        inventoryNumber: item.inventory_number,
-        additionalWarranty: item.additional_warranty,
-        hasWarranty: item.has_warranty,
-        imei: item.imei,
-        phoneNumber: item.phone_number,
-        provider: item.provider,
-        contractEndDate: item.contract_end_date,
-        contractName: item.contract_name,
-        contractDuration: item.contract_duration,
-        connectedAssetId: item.connected_asset_id,
-        relatedAssetId: item.related_asset_id,
-        imageUrl: item.image_url
-      })) as Asset[];
     },
   });
+
+  useEffect(() => {
+    if (allAssets && allAssets.length) {
+      console.log("Assets loaded in component:", allAssets.length);
+    }
+  }, [allAssets]);
 
   // Filter assets based on search term, types, and statuses
   const filteredAssets = allAssets.filter((asset) => {
@@ -163,6 +144,22 @@ const AssetsPage = () => {
     setSearchTerm("");
   };
 
+  // Show more detailed error if one occurs
+  if (error) {
+    return (
+      <PageTransition>
+        <div className="p-3 md:p-4 xl:p-6 space-y-6 max-w-full">
+          <h1 className="text-2xl md:text-3xl font-bold">Assets</h1>
+          <div className="p-4 rounded-lg bg-destructive/10 border border-destructive text-destructive">
+            <h3 className="font-semibold mb-2">Fehler beim Laden der Assets</h3>
+            <p>{error instanceof Error ? error.message : "Ein unbekannter Fehler ist aufgetreten"}</p>
+            <p className="mt-2 text-sm">Bitte stellen Sie sicher, dass Sie angemeldet sind und über die entsprechenden Berechtigungen verfügen.</p>
+          </div>
+        </div>
+      </PageTransition>
+    );
+  }
+
   return (
     <PageTransition>
       <div className="p-3 md:p-4 xl:p-6 space-y-6 max-w-full">
@@ -171,6 +168,7 @@ const AssetsPage = () => {
             <h1 className="text-2xl md:text-3xl font-bold">Assets</h1>
             <p className="text-muted-foreground mt-1">
               Manage and view all hardware assets
+              {allAssets ? ` (${allAssets.length} total)` : ''}
             </p>
           </div>
           
@@ -281,7 +279,9 @@ const AssetsPage = () => {
             </div>
             <h3 className="text-lg font-medium mb-2">No assets found</h3>
             <p className="text-muted-foreground mb-6">
-              There are no assets matching your current filters.
+              {allAssets.length > 0 
+                ? "There are no assets matching your current filters."
+                : "There are no assets in the system yet. Try adding some assets first."}
             </p>
             <button
               onClick={clearFilters}

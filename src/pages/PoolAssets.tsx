@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SearchFilter from "@/components/shared/SearchFilter";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AssetCard from "@/components/assets/AssetCard";
 import { Asset } from "@/lib/types";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { getAssets } from "@/data/assets";
 
 export default function PoolAssets() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -18,53 +18,35 @@ export default function PoolAssets() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Fetch assets from Supabase
-  const { data: poolAssets = [], isLoading, error } = useQuery({
-    queryKey: ["pool-assets"],
+  // Use the centralized getAssets function from data/assets.ts
+  const { data: allAssets = [], isLoading, error } = useQuery({
+    queryKey: ["all-assets"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('assets')
-        .select('*')
-        .eq('status', 'pool');
-      
-      if (error) {
+      console.log("Fetching all assets for pool filtering...");
+      try {
+        const assets = await getAssets();
+        console.log(`Successfully retrieved ${assets.length} total assets`);
+        return assets;
+      } catch (error) {
+        console.error("Error fetching assets:", error);
         toast({
           variant: "destructive",
           title: "Fehler beim Laden der Assets",
-          description: error.message
+          description: error instanceof Error ? error.message : "Ein unbekannter Fehler ist aufgetreten"
         });
         throw error;
       }
-      
-      // Map database fields to our Asset type
-      return data.map((item: any) => ({
-        id: item.id,
-        name: item.name,
-        type: item.type,
-        manufacturer: item.manufacturer,
-        model: item.model,
-        purchaseDate: item.purchase_date,
-        vendor: item.vendor,
-        price: item.price,
-        status: item.status,
-        employeeId: item.employee_id,
-        category: item.category,
-        serialNumber: item.serial_number,
-        inventoryNumber: item.inventory_number,
-        additionalWarranty: item.additional_warranty,
-        hasWarranty: item.has_warranty,
-        imei: item.imei,
-        phoneNumber: item.phone_number,
-        provider: item.provider,
-        contractEndDate: item.contract_end_date,
-        contractName: item.contract_name,
-        contractDuration: item.contract_duration,
-        connectedAssetId: item.connected_asset_id,
-        relatedAssetId: item.related_asset_id,
-        imageUrl: item.image_url
-      })) as Asset[];
     },
   });
+
+  // Filter only pool assets
+  const poolAssets = allAssets.filter(asset => asset.status === 'pool');
+
+  useEffect(() => {
+    if (poolAssets && poolAssets.length) {
+      console.log("Pool assets filtered:", poolAssets.length);
+    }
+  }, [poolAssets]);
 
   // Get unique categories from pool assets
   const assetCategories = Array.from(new Set(
@@ -90,13 +72,16 @@ export default function PoolAssets() {
     navigate('/asset/create');
   };
 
+  // Show more detailed error if one occurs
   if (error) {
     return (
       <PageTransition>
         <div className="p-3 md:p-4 xl:p-6 space-y-6 max-w-full">
           <h1 className="text-3xl font-bold tracking-tight">Pool Assets</h1>
-          <div className="p-4 text-center text-red-500">
-            Fehler beim Laden der Assets. Bitte versuchen Sie es später erneut.
+          <div className="p-4 rounded-lg bg-destructive/10 border border-destructive text-destructive">
+            <h3 className="font-semibold mb-2">Fehler beim Laden der Assets</h3>
+            <p>{error instanceof Error ? error.message : "Ein unbekannter Fehler ist aufgetreten"}</p>
+            <p className="mt-2 text-sm">Bitte stellen Sie sicher, dass Sie angemeldet sind und über die entsprechenden Berechtigungen verfügen.</p>
           </div>
         </div>
       </PageTransition>
@@ -111,6 +96,7 @@ export default function PoolAssets() {
             <h1 className="text-3xl font-bold tracking-tight">Pool Assets</h1>
             <p className="text-muted-foreground">
               Verwaltung von nicht zugewiesenen Geräten
+              {poolAssets ? ` (${poolAssets.length} total)` : ''}
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-2">
@@ -156,7 +142,11 @@ export default function PoolAssets() {
                 </div>
               ) : (
                 <div className="text-center py-12 bg-muted/40 rounded-lg">
-                  <p className="text-muted-foreground">Keine Pool-Assets gefunden</p>
+                  <p className="text-muted-foreground">
+                    {allAssets.length > 0 
+                      ? "Keine Pool-Assets gefunden" 
+                      : "Es sind keine Assets im System verfügbar"}
+                  </p>
                   <Button variant="outline" className="mt-4" onClick={handleAddAsset}>
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Asset zum Pool hinzufügen
