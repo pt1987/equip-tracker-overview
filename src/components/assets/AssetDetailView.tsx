@@ -110,86 +110,15 @@ export default function AssetDetailView({
   };
 
   return (
-    <div className="space-y-12">
-      {/* Top actions row */}
-      <div className="flex items-center justify-end gap-2">
-        <Dialog open={qrDialogOpen} onOpenChange={setQrDialogOpen}>
-          <DialogTrigger asChild>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button className="p-2 rounded-md hover:bg-muted/50 transition-colors">
-                    <QrCode size={18} className="text-muted-foreground hover:text-foreground" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>QR-Code anzeigen</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </DialogTrigger>
-          
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Asset QR-Code</DialogTitle>
-              <DialogDescription>
-                Scannen Sie diesen Code, um schnell auf die Asset-Details zuzugreifen
-              </DialogDescription>
-            </DialogHeader>
-            <div className="flex justify-center py-4">
-              <QRCode value={`${window.location.origin}/asset/${asset.id}`} size={160} title={`${asset.manufacturer} ${asset.model}`} />
-            </div>
-          </DialogContent>
-        </Dialog>
-        
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button onClick={onEdit} className="p-2 rounded-md hover:bg-muted/50 transition-colors">
-                <Pencil size={18} className="text-muted-foreground hover:text-foreground" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>Bearbeiten</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        
-        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-          <AlertDialogTrigger asChild>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button className="p-2 rounded-md hover:bg-muted/50 transition-colors">
-                    <Trash size={18} className="text-muted-foreground hover:text-destructive" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>Löschen</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </AlertDialogTrigger>
-          
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Sind Sie sicher?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Diese Aktion kann nicht rückgängig gemacht werden. Das Asset und alle zugehörigen Daten werden dauerhaft gelöscht.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDeleteConfirm}>
-                Löschen bestätigen
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
-
+    <div className="space-y-8">
       {/* Hero section with image and key info */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
         {/* Asset image - left column */}
         <div className="relative flex items-center justify-center">
           <motion.img 
             src={getAssetImage()} 
             alt={asset.name} 
-            className="max-h-[400px] w-auto object-contain" 
+            className="max-h-[360px] w-auto object-contain" 
             initial={{ opacity: 0, scale: 1.05 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
@@ -200,22 +129,95 @@ export default function AssetDetailView({
         </div>
 
         {/* Asset header info - right column */}
-        <div className="space-y-8">
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <Badge variant="secondary" className="font-medium">
-                {getAssetTypeLabel(asset.type)}
-              </Badge>
-              <StatusBadge status={asset.status} size="md" />
+        <div className="space-y-6">
+          <div className="relative">
+            {/* Action buttons aligned with badges */}
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="font-medium">
+                  {getAssetTypeLabel(asset.type)}
+                </Badge>
+                <StatusBadge status={asset.status} size="md" />
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Dialog open={qrDialogOpen} onOpenChange={setQrDialogOpen}>
+                  <DialogTrigger asChild>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button className="p-2 rounded-md hover:bg-muted/50 transition-colors">
+                            <QrCode size={18} className="text-muted-foreground hover:text-foreground" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>QR-Code anzeigen</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </DialogTrigger>
+                  
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Asset QR-Code</DialogTitle>
+                      <DialogDescription>
+                        Scannen Sie diesen Code, um schnell auf die Asset-Details zuzugreifen
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex justify-center py-4">
+                      <QRCode value={`${window.location.origin}/asset/${asset.id}`} size={160} title={`${asset.manufacturer} ${asset.model}`} />
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button onClick={onEdit} className="p-2 rounded-md hover:bg-muted/50 transition-colors">
+                        <Pencil size={18} className="text-muted-foreground hover:text-foreground" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>Bearbeiten</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                
+                <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                  <AlertDialogTrigger asChild>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button className="p-2 rounded-md hover:bg-muted/50 transition-colors">
+                            <Trash size={18} className="text-muted-foreground hover:text-destructive" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>Löschen</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </AlertDialogTrigger>
+                  
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Sind Sie sicher?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Diese Aktion kann nicht rückgängig gemacht werden. Das Asset und alle zugehörigen Daten werden dauerhaft gelöscht.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDeleteConfirm}>
+                        Löschen bestätigen
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
             </div>
 
-            <h1 className="text-3xl font-semibold mb-2">{asset.name}</h1>
-            <p className="text-muted-foreground mb-8">
+            <h1 className="text-3xl font-semibold mb-1">{asset.name}</h1>
+            <p className="text-muted-foreground mb-6">
               {asset.manufacturer} {asset.model}
             </p>
 
             {/* Key information indicators in a grid */}
-            <div className="grid grid-cols-2 gap-y-6 gap-x-12 mt-8">
+            <div className="grid grid-cols-2 gap-y-4 gap-x-8">
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Kaufdatum</p>
                 <p className="text-base font-medium">{formatDate(asset.purchaseDate)}</p>
@@ -241,10 +243,10 @@ export default function AssetDetailView({
       </div>
 
       {/* Technical details section */}
-      <section className="pt-8">
-        <h2 className="text-xl font-medium mb-6">Technische Details</h2>
+      <section>
+        <h2 className="text-xl font-medium mb-4">Technische Details</h2>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {asset.serialNumber && (
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Seriennummer</p>
@@ -278,9 +280,9 @@ export default function AssetDetailView({
         </div>
         
         {asset.type === "smartphone" && (
-          <div className="mt-8">
-            <h3 className="text-lg font-medium mb-4">Vertragsdaten</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="mt-6">
+            <h3 className="text-lg font-medium mb-3">Vertragsdaten</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {asset.phoneNumber && (
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Telefonnummer</p>
@@ -314,19 +316,19 @@ export default function AssetDetailView({
       </section>
 
       {/* Assigned Employee section */}
-      <section className="pt-4">
-        <h2 className="text-xl font-medium mb-6">Zugewiesener Mitarbeiter</h2>
+      <section>
+        <h2 className="text-xl font-medium mb-4">Zugewiesener Mitarbeiter</h2>
         
         <div>
           {asset.employeeId ? (
             <>
               {isLoadingEmployee ? (
-                <div className="flex justify-center py-8">
+                <div className="flex justify-center py-4">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                 </div>
               ) : employeeData ? (
-                <div className="flex items-center gap-6">
-                  <Avatar className="h-16 w-16">
+                <div className="flex items-center gap-5">
+                  <Avatar className="h-14 w-14">
                     <AvatarImage src={employeeData.imageUrl || `https://avatar.vercel.sh/${employeeData.id}`} alt={`${employeeData.firstName} ${employeeData.lastName}`} />
                     <AvatarFallback>
                       {employeeData.firstName?.[0]}{employeeData.lastName?.[0]}
@@ -353,7 +355,7 @@ export default function AssetDetailView({
               )}
             </>
           ) : (
-            <div className="py-4 flex items-center gap-3">
+            <div className="py-2 flex items-center gap-3">
               <User size={20} className="text-muted-foreground opacity-70" />
               <p className="text-muted-foreground">
                 Dieses Asset ist keinem Mitarbeiter zugewiesen.
@@ -362,8 +364,8 @@ export default function AssetDetailView({
           )}
           
           {asset.connectedAssetId && (
-            <div className="mt-6">
-              <h3 className="text-lg font-medium mb-3">Verbundenes Asset</h3>
+            <div className="mt-4">
+              <h3 className="text-lg font-medium mb-2">Verbundenes Asset</h3>
               <div className="text-sm">
                 <p className="text-muted-foreground">ID: {asset.connectedAssetId}</p>
                 <Button variant="link" size="sm" className="p-0 h-auto mt-1" asChild>
