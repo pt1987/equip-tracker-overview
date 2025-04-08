@@ -14,6 +14,8 @@ import {
 import { Employee } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
 import { getEmployeeAssetsSummary } from "@/data/employees";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface EmployeeCardProps {
   employee: Employee;
@@ -21,29 +23,37 @@ interface EmployeeCardProps {
 }
 
 const EmployeeCard: React.FC<EmployeeCardProps> = ({ employee }) => {
-  const [laptopCount, setLaptopCount] = useState(0);
-  const [phoneCount, setPhoneCount] = useState(0);
-  const [tabletCount, setTabletCount] = useState(0);
-  const [mouseCount, setMouseCount] = useState(0);
-  const [keyboardCount, setKeyboardCount] = useState(0);
-  const [accessoryCount, setAccessoryCount] = useState(0);
-
-  useEffect(() => {
-    const fetchAssetSummary = async () => {
-      if (employee.id) {
-        const summary = await getEmployeeAssetsSummary(employee.id);
-        // Now set the state with the summary data or use it directly
-        setLaptopCount(summary.assetsByType.laptop.length);
-        setPhoneCount(summary.assetsByType.smartphone.length);
-        setTabletCount(summary.assetsByType.tablet.length);
-        setMouseCount(summary.assetsByType.mouse.length);
-        setKeyboardCount(summary.assetsByType.keyboard.length);
-        setAccessoryCount(summary.assetsByType.accessory.length);
+  // Use React Query to get asset counts from Supabase
+  const { data: assetSummary, isLoading } = useQuery({
+    queryKey: ['employee-assets', employee.id],
+    queryFn: async () => {
+      if (!employee.id) return null;
+      
+      // Get all assets assigned to this employee
+      const { data, error } = await supabase
+        .from('assets')
+        .select('type')
+        .eq('employee_id', employee.id);
+      
+      if (error) {
+        console.error("Error fetching employee assets:", error);
+        return null;
       }
-    };
-    
-    fetchAssetSummary();
-  }, [employee.id]);
+
+      // Count assets by type
+      const summary = {
+        laptop: data.filter(asset => asset.type === 'laptop').length,
+        smartphone: data.filter(asset => asset.type === 'smartphone').length,
+        tablet: data.filter(asset => asset.type === 'tablet').length,
+        mouse: data.filter(asset => asset.type === 'mouse').length,
+        keyboard: data.filter(asset => asset.type === 'keyboard').length,
+        accessory: data.filter(asset => asset.type === 'accessory').length,
+      };
+      
+      return summary;
+    },
+    enabled: !!employee.id
+  });
 
   return (
     <Card className="glass-card">
@@ -104,30 +114,39 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ employee }) => {
               <span className="text-muted-foreground">Budget:</span>
               <p>{employee.budget}</p>
             </div>
-            <div>
-              <span className="text-muted-foreground">Laptops:</span>
-              <p>{laptopCount}</p>
-            </div>
-            <div>
-              <span className="text-muted-foreground">Smartphones:</span>
-              <p>{phoneCount}</p>
-            </div>
-            <div>
-              <span className="text-muted-foreground">Tablets:</span>
-              <p>{tabletCount}</p>
-            </div>
-            <div>
-              <span className="text-muted-foreground">Mice:</span>
-              <p>{mouseCount}</p>
-            </div>
-            <div>
-              <span className="text-muted-foreground">Keyboards:</span>
-              <p>{keyboardCount}</p>
-            </div>
-             <div>
-              <span className="text-muted-foreground">Accessories:</span>
-              <p>{accessoryCount}</p>
-            </div>
+            
+            {isLoading ? (
+              <div className="col-span-2 text-center text-sm text-muted-foreground">
+                Loading asset data...
+              </div>
+            ) : assetSummary ? (
+              <>
+                <div>
+                  <span className="text-muted-foreground">Laptops:</span>
+                  <p>{assetSummary.laptop}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Smartphones:</span>
+                  <p>{assetSummary.smartphone}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Tablets:</span>
+                  <p>{assetSummary.tablet}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Mice:</span>
+                  <p>{assetSummary.mouse}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Keyboards:</span>
+                  <p>{assetSummary.keyboard}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Accessories:</span>
+                  <p>{assetSummary.accessory}</p>
+                </div>
+              </>
+            ) : null}
           </div>
         </CardDescription>
       </CardContent>
