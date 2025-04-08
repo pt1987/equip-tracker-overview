@@ -349,7 +349,7 @@ export default function AssetDetailView({
           </div>
 
           {/* Assigned Employee */}
-          <div className="bg-background rounded-lg">
+          <div className="rounded-lg bg-transparent">
             <h3 className="text-lg font-medium p-4 pb-2">Zugewiesener Mitarbeiter</h3>
             <Separator className="mb-4" />
             
