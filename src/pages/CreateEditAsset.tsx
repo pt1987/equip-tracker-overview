@@ -35,7 +35,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
-import { getAssets, getEmployees, updateAsset } from "@/data/mockData";
+import { getAssets, getEmployees } from "@/data/mockData";
 import { supabase } from "@/integrations/supabase/client";
 import { AssetStatus, AssetType } from "@/lib/types";
 
@@ -136,12 +136,15 @@ export default function CreateEditAsset() {
     mutationFn: async (data: AssetFormValues) => {
       console.log("Submitting asset data:", data);
       
+      // Format the date correctly for PostgreSQL
+      const formattedPurchaseDate = data.purchaseDate ? data.purchaseDate : null;
+      
       const dbAsset = {
         name: `${data.manufacturer} ${data.model}`,
         type: data.category as AssetType,
         manufacturer: data.manufacturer,
         model: data.model,
-        purchase_date: data.purchaseDate,
+        purchase_date: formattedPurchaseDate,
         vendor: data.vendor || "",
         price: data.price,
         status: data.status as AssetStatus,
@@ -154,7 +157,7 @@ export default function CreateEditAsset() {
         imei: data.imei || "",
         phone_number: data.phoneNumber || "",
         provider: data.provider || "",
-        contract_end_date: data.contractDuration || "",
+        contract_end_date: data.contractDuration || null,
         contract_name: data.contractName || "",
         connected_asset_id: data.relatedAssetId && data.relatedAssetId !== "none" ? data.relatedAssetId : null,
         related_asset_id: data.relatedAssetId && data.relatedAssetId !== "none" ? data.relatedAssetId : null
