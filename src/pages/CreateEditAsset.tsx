@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import PageTransition from "@/components/layout/PageTransition";
@@ -51,6 +50,9 @@ const assetFormSchema = z.object({
   serialNumber: z.string().optional(),
   inventoryNumber: z.string().optional(),
   hasWarranty: z.boolean().optional(),
+  additionalWarranty: z.boolean().optional(),
+  warrantyExpiryDate: z.string().optional(),
+  warrantyInfo: z.string().optional(),
   imei: z.string().optional(),
   phoneNumber: z.string().optional(),
   provider: z.string().optional(),
@@ -93,7 +95,10 @@ export default function CreateEditAsset() {
       vendor: asset.vendor || "",
       serialNumber: asset.serialNumber || "",
       inventoryNumber: asset.inventoryNumber || "",
-      hasWarranty: asset.additionalWarranty || false,
+      hasWarranty: asset.hasWarranty || false,
+      additionalWarranty: asset.additionalWarranty || false,
+      warrantyExpiryDate: asset.warrantyExpiryDate ? new Date(asset.warrantyExpiryDate).toISOString().split('T')[0] : "",
+      warrantyInfo: asset.warrantyInfo || "",
       imei: asset.imei || "",
       phoneNumber: asset.phoneNumber || "",
       provider: asset.provider || "",
@@ -112,6 +117,9 @@ export default function CreateEditAsset() {
       serialNumber: "",
       inventoryNumber: "",
       hasWarranty: false,
+      additionalWarranty: false,
+      warrantyExpiryDate: "",
+      warrantyInfo: "",
       imei: "",
       phoneNumber: "",
       provider: "",
@@ -122,6 +130,8 @@ export default function CreateEditAsset() {
   });
 
   const watchCategory = form.watch("category");
+  const hasWarranty = form.watch("hasWarranty");
+
   useEffect(() => {
     if (["notebook", "smartphone", "tablet"].includes(watchCategory)) {
       setActiveTab("details");
@@ -138,6 +148,7 @@ export default function CreateEditAsset() {
       
       // Format the date correctly for PostgreSQL
       const formattedPurchaseDate = data.purchaseDate ? data.purchaseDate : null;
+      const formattedWarrantyDate = data.hasWarranty && data.warrantyExpiryDate ? data.warrantyExpiryDate : null;
       
       const dbAsset = {
         name: `${data.manufacturer} ${data.model}`,
@@ -152,8 +163,10 @@ export default function CreateEditAsset() {
         category: data.category,
         serial_number: data.serialNumber || "",
         inventory_number: data.inventoryNumber || "",
-        additional_warranty: data.hasWarranty || false,
         has_warranty: data.hasWarranty || false,
+        additional_warranty: data.additionalWarranty || false,
+        warranty_expiry_date: formattedWarrantyDate,
+        warranty_info: data.warrantyInfo || "",
         imei: data.imei || "",
         phone_number: data.phoneNumber || "",
         provider: data.provider || "",
@@ -238,6 +251,7 @@ export default function CreateEditAsset() {
                       <TabsTrigger value="basic">Grundinformationen</TabsTrigger>
                       <TabsTrigger value="details">Erweiterte Details</TabsTrigger>
                       <TabsTrigger value="relation">Zuordnung</TabsTrigger>
+                      <TabsTrigger value="warranty">Garantie</TabsTrigger>
                     </TabsList>
                     
                     <TabsContent value="basic" className="space-y-4 tabs-content">
@@ -589,6 +603,97 @@ export default function CreateEditAsset() {
                           </p>
                         </div>
                       )}
+                    </TabsContent>
+                    
+                    <TabsContent value="warranty" className="space-y-4 tabs-content">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="hasWarranty"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-base">Garantie</FormLabel>
+                                <FormDescription>
+                                  Hat dieses Gerät eine Garantie?
+                                </FormDescription>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        {hasWarranty && (
+                          <FormField
+                            control={form.control}
+                            name="additionalWarranty"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                                <div className="space-y-0.5">
+                                  <FormLabel className="text-base">Zusatzgarantie</FormLabel>
+                                  <FormDescription>
+                                    Hat dieses Gerät eine erweiterte Garantie?
+                                  </FormDescription>
+                                </div>
+                                <FormControl>
+                                  <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        )}
+                        
+                        {hasWarranty && (
+                          <FormField
+                            control={form.control}
+                            name="warrantyExpiryDate"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Garantieablaufdatum</FormLabel>
+                                <FormControl>
+                                  <Input type="date" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        )}
+                        
+                        {hasWarranty && (
+                          <FormField
+                            control={form.control}
+                            name="warrantyInfo"
+                            render={({ field }) => (
+                              <FormItem className="md:col-span-2">
+                                <FormLabel>Garantiedetails</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="Zusätzliche Informationen zur Garantie" {...field} />
+                                </FormControl>
+                                <FormDescription>
+                                  Hier können Sie weitere Informationen zur Garantie eingeben (z.B. Garantienummer, Kontaktdaten)
+                                </FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        )}
+                        
+                        {!hasWarranty && (
+                          <div className="col-span-1 md:col-span-2 flex items-center justify-center h-40">
+                            <p className="text-muted-foreground">
+                              Aktivieren Sie die Garantie, um weitere Garantieinformationen einzugeben.
+                            </p>
+                          </div>
+                        )}
+                      </div>
                     </TabsContent>
                   </Tabs>
                 </CardContent>

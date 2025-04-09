@@ -32,6 +32,8 @@ export interface Asset {
   inventoryNumber?: string;
   additionalWarranty?: boolean;
   hasWarranty?: boolean;
+  warrantyExpiryDate?: string;
+  warrantyInfo?: string;
   imei?: string;
   phoneNumber?: string;
   provider?: string;

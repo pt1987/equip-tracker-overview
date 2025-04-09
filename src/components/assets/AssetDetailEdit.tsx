@@ -37,7 +37,10 @@ export default function AssetDetailEdit({
       price: asset.price,
       serialNumber: asset.serialNumber || "",
       inventoryNumber: asset.inventoryNumber || "",
+      hasWarranty: asset.hasWarranty || false,
       additionalWarranty: asset.additionalWarranty || false,
+      warrantyExpiryDate: asset.warrantyExpiryDate ? new Date(asset.warrantyExpiryDate) : null,
+      warrantyInfo: asset.warrantyInfo || "",
       imageUrl: asset.imageUrl || "",
     },
   });

@@ -2,6 +2,7 @@
 import { Asset } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ShieldCheck, ShieldAlert } from "lucide-react";
 
 interface AssetTechnicalDetailsProps {
   asset: Asset;
@@ -36,13 +37,35 @@ export default function AssetTechnicalDetails({ asset }: AssetTechnicalDetailsPr
             </div>
           )}
           
-          {asset.hasWarranty !== undefined && (
+          <div className="space-y-1">
+            <p className="text-sm text-muted-foreground">Garantie</p>
+            <p className="font-medium flex items-center">
+              {asset.hasWarranty ? (
+                <>
+                  <ShieldCheck className="h-4 w-4 mr-1 text-green-500" />
+                  Ja
+                  {asset.additionalWarranty && ", erweitert"}
+                </>
+              ) : (
+                <>
+                  <ShieldAlert className="h-4 w-4 mr-1 text-gray-400" />
+                  Nein
+                </>
+              )}
+            </p>
+          </div>
+          
+          {asset.hasWarranty && asset.warrantyExpiryDate && (
             <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Garantie</p>
-              <p className="font-medium">
-                {asset.hasWarranty ? "Ja" : "Nein"}
-                {asset.additionalWarranty && ", erweitert"}
-              </p>
+              <p className="text-sm text-muted-foreground">Garantie gültig bis</p>
+              <p className="font-medium">{formatDate(asset.warrantyExpiryDate)}</p>
+            </div>
+          )}
+          
+          {asset.hasWarranty && asset.warrantyInfo && (
+            <div className="space-y-1 col-span-1 sm:col-span-2">
+              <p className="text-sm text-muted-foreground">Garantiedetails</p>
+              <p className="font-medium">{asset.warrantyInfo}</p>
             </div>
           )}
         </div>

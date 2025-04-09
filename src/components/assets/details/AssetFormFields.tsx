@@ -13,6 +13,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import {
   Select,
@@ -21,9 +22,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, ShieldCheck } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 
 // Schema for the form - moving here to keep it with the form fields
 export const assetFormSchema = z.object({
@@ -38,6 +40,9 @@ export const assetFormSchema = z.object({
   serialNumber: z.string().optional(),
   inventoryNumber: z.string().optional(),
   additionalWarranty: z.boolean().optional(),
+  hasWarranty: z.boolean().optional(),
+  warrantyExpiryDate: z.date().optional().nullable(),
+  warrantyInfo: z.string().optional(),
   imageUrl: z.string().optional(),
 });
 
@@ -45,6 +50,7 @@ export type AssetFormValues = z.infer<typeof assetFormSchema>;
 
 export default function AssetFormFields() {
   const form = useFormContext<AssetFormValues>();
+  const hasWarranty = form.watch("hasWarranty");
 
   return (
     <div className="flex-1">
@@ -244,6 +250,116 @@ export default function AssetFormFields() {
             </FormItem>
           )}
         />
+        
+        <div className="col-span-1 md:col-span-2 pt-2 border-t mt-4">
+          <h3 className="text-lg font-medium mb-4 flex items-center">
+            <ShieldCheck className="mr-2 h-5 w-5" />
+            Garantieinformationen
+          </h3>
+        </div>
+        
+        <FormField
+          control={form.control}
+          name="hasWarranty"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <FormLabel className="text-base">Garantie</FormLabel>
+                <FormDescription>
+                  Hat dieses Gerät eine Garantie?
+                </FormDescription>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        
+        {hasWarranty && (
+          <>
+            <FormField
+              control={form.control}
+              name="additionalWarranty"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">Zusatzgarantie</FormLabel>
+                    <FormDescription>
+                      Hat dieses Gerät eine erweiterte Garantie?
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="warrantyExpiryDate"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Garantieablaufdatum</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className="w-full pl-3 text-left font-normal flex justify-between"
+                        >
+                          {field.value ? (
+                            format(field.value, "dd.MM.yyyy")
+                          ) : (
+                            <span>Datum wählen</span>
+                          )}
+                          <CalendarIcon className="h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value || undefined}
+                        onSelect={field.onChange}
+                        disabled={(date) =>
+                          date < new Date()
+                        }
+                        initialFocus
+                        className="pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="warrantyInfo"
+              render={({ field }) => (
+                <FormItem className="col-span-1 md:col-span-2">
+                  <FormLabel>Garantiedetails</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Zusätzliche Informationen zur Garantie" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Hier können Sie weitere Informationen zur Garantie eingeben (z.B. Garantienummer, Kontaktdaten)
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
+        )}
       </div>
     </div>
   );

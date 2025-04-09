@@ -27,6 +27,7 @@ export function groupBy<T>(array: T[], key: (item: T) => string): Record<string,
 }
 
 export function formatDate(date: string | Date): string {
+  if (!date) return '';
   return new Date(date).toLocaleDateString('de-DE', {
     year: 'numeric',
     month: 'short',
@@ -35,6 +36,7 @@ export function formatDate(date: string | Date): string {
 }
 
 export function calculateAgeInMonths(date: string | Date): number {
+  if (!date) return 0;
   const purchaseDate = new Date(date);
   const now = new Date();
   
@@ -45,6 +47,7 @@ export function calculateAgeInMonths(date: string | Date): number {
 }
 
 export function calculateEmploymentDuration(startDate: string | Date): string {
+  if (!startDate) return '';
   const start = new Date(startDate);
   const now = new Date();
   
@@ -61,6 +64,27 @@ export function calculateEmploymentDuration(startDate: string | Date): string {
     return `${years} Jahr${years !== 1 ? 'e' : ''}`;
   } else {
     return `${months} Monat${months !== 1 ? 'e' : ''}`;
+  }
+}
+
+export function calculateWarrantyRemaining(expiryDate: string | Date): string {
+  if (!expiryDate) return '';
+  
+  const expiry = new Date(expiryDate);
+  const now = new Date();
+  
+  if (expiry < now) {
+    return "Abgelaufen";
+  }
+  
+  const diffTime = Math.abs(expiry.getTime() - now.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const diffMonths = Math.floor(diffDays / 30);
+  
+  if (diffMonths > 0) {
+    return `Noch ${diffMonths} Monat${diffMonths !== 1 ? 'e' : ''}`;
+  } else {
+    return `Noch ${diffDays} Tag${diffDays !== 1 ? 'e' : ''}`;
   }
 }
 
