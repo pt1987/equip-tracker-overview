@@ -50,6 +50,12 @@ export default function AssetDetailContent({
   const handleSave = async (formData: any) => {
     try {
       if (!asset) return;
+      
+      // Convert date objects to ISO strings for database storage
+      const warrantyExpiryDate = formData.hasWarranty && formData.warrantyExpiryDate 
+        ? formData.warrantyExpiryDate.toISOString().split('T')[0] 
+        : null;
+      
       const updatedAsset: Asset = {
         ...asset,
         name: formData.name,
@@ -62,7 +68,10 @@ export default function AssetDetailContent({
         price: formData.price,
         serialNumber: formData.serialNumber || null,
         inventoryNumber: formData.inventoryNumber || null,
+        hasWarranty: formData.hasWarranty || false,
         additionalWarranty: formData.additionalWarranty || false,
+        warrantyExpiryDate: warrantyExpiryDate,
+        warrantyInfo: formData.hasWarranty ? formData.warrantyInfo || null : null,
         imageUrl: formData.imageUrl || null
       };
       

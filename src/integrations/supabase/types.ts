@@ -82,6 +82,8 @@ export type Database = {
           type: string
           updated_at: string | null
           vendor: string
+          warranty_expiry_date: string | null
+          warranty_info: string | null
         }
         Insert: {
           additional_warranty?: boolean | null
@@ -110,6 +112,8 @@ export type Database = {
           type: string
           updated_at?: string | null
           vendor: string
+          warranty_expiry_date?: string | null
+          warranty_info?: string | null
         }
         Update: {
           additional_warranty?: boolean | null
@@ -138,6 +142,8 @@ export type Database = {
           type?: string
           updated_at?: string | null
           vendor?: string
+          warranty_expiry_date?: string | null
+          warranty_info?: string | null
         }
         Relationships: [
           {

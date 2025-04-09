@@ -9,6 +9,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import AssetImageUpload from "./details/AssetImageUpload";
 import AssetFormFields, { assetFormSchema, AssetFormValues } from "./details/AssetFormFields";
+import { Button } from "@/components/ui/button";
 
 interface AssetDetailEditProps {
   asset: Asset;
@@ -76,7 +77,24 @@ export default function AssetDetailEdit({
             onSave={form.handleSubmit(handleSubmit)}
             onCancel={onCancel}
           />
-          <AssetFormFields />
+          <div className="flex-1">
+            <AssetFormFields />
+            <div className="flex justify-end gap-3 mt-6">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={onCancel}
+              >
+                Abbrechen
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={isUploading}
+              >
+                Speichern
+              </Button>
+            </div>
+          </div>
         </div>
       </form>
     </Form>
