@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -7,12 +8,15 @@ import AssetDetailEdit from "@/components/assets/AssetDetailEdit";
 import { getAssetById, updateAsset, getAssetHistoryByAssetId } from "@/data/assets";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircle, ChevronLeft } from "lucide-react";
+import { AlertCircle, ChevronLeft, User } from "lucide-react";
 import { Asset } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import DocumentUpload, { Document } from "@/components/assets/DocumentUpload";
 import AssetHistoryTimeline from "@/components/assets/AssetHistoryTimeline";
 import { supabase } from "@/integrations/supabase/client";
+import { getEmployeeById } from "@/data/employees";
+import { Link } from "react-router-dom";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   Card,
   CardContent,
@@ -27,6 +31,8 @@ export default function AssetDetail() {
   const [isEditing, setIsEditing] = useState(false);
   const [documents, setDocuments] = useState<Document[]>([]);
   const { toast } = useToast();
+  const [employeeData, setEmployeeData] = useState<any | null>(null);
+  const [isLoadingEmployee, setIsLoadingEmployee] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -34,6 +40,7 @@ export default function AssetDetail() {
     }
   }, [id]);
 
+  // Asset data fetching
   const {
     data: asset,
     isLoading: isAssetLoading,
@@ -44,6 +51,7 @@ export default function AssetDetail() {
     enabled: !!id
   });
 
+  // Asset history fetching
   const {
     data: assetHistory = [],
     isLoading: isHistoryLoading
@@ -52,6 +60,27 @@ export default function AssetDetail() {
     queryFn: () => getAssetHistoryByAssetId(id),
     enabled: !!id
   });
+
+  // Fetch employee data when asset.employeeId changes
+  useEffect(() => {
+    const fetchEmployee = async () => {
+      if (asset?.employeeId) {
+        setIsLoadingEmployee(true);
+        try {
+          const employee = await getEmployeeById(asset.employeeId);
+          setEmployeeData(employee);
+        } catch (error) {
+          console.error("Error fetching employee data:", error);
+        } finally {
+          setIsLoadingEmployee(false);
+        }
+      }
+    };
+    
+    if (asset?.employeeId) {
+      fetchEmployee();
+    }
+  }, [asset?.employeeId]);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -214,12 +243,45 @@ export default function AssetDetail() {
                   </CardHeader>
                   <CardContent className="pt-0">
                     {asset.employeeId ? (
-                      <div className="employee-content">
-                        {/* Employee component from AssetDetailView will render here */}
-                      </div>
+                      <>
+                        {isLoadingEmployee ? (
+                          <div className="flex justify-center py-4 w-full">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                          </div>
+                        ) : employeeData ? (
+                          <div className="flex items-center gap-5">
+                            <Avatar className="h-14 w-14">
+                              <AvatarImage src={employeeData.imageUrl || `https://avatar.vercel.sh/${employeeData.id}`} alt={`${employeeData.firstName} ${employeeData.lastName}`} />
+                              <AvatarFallback>
+                                {employeeData.firstName?.[0]}{employeeData.lastName?.[0]}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <Link to={`/employee/${employeeData.id}`} className="text-lg font-medium hover:underline">
+                                {employeeData.firstName} {employeeData.lastName}
+                              </Link>
+                              <p className="text-sm text-muted-foreground">{employeeData.position}</p>
+                              <p className="text-sm text-muted-foreground">{employeeData.cluster}</p>
+                              <Button variant="link" size="sm" className="p-0 h-auto mt-1" asChild>
+                                <Link to={`/employee/${employeeData.id}`}>
+                                  Details anzeigen
+                                </Link>
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="py-4">
+                            <p>Mitarbeiterdaten konnten nicht geladen werden.</p>
+                            <p className="text-sm text-muted-foreground">ID: {asset.employeeId}</p>
+                          </div>
+                        )}
+                      </>
                     ) : (
-                      <div className="py-6 text-center text-muted-foreground">
-                        <p>Kein Mitarbeiter zugewiesen</p>
+                      <div className="py-2 flex items-center gap-3">
+                        <User size={20} className="text-muted-foreground opacity-70" />
+                        <p className="text-muted-foreground">
+                          Dieses Asset ist keinem Mitarbeiter zugewiesen.
+                        </p>
                       </div>
                     )}
                   </CardContent>
