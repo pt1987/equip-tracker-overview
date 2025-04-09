@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -27,6 +28,15 @@ export default function AssetDetail() {
   const [isEditing, setIsEditing] = useState(false);
   const [documents, setDocuments] = useState<Document[]>([]);
   const { toast } = useToast();
+
+  function handleAddDocument(document: Document) {
+    setDocuments([...documents, document]);
+    
+    toast({
+      title: "Dokument hinzugefügt",
+      description: `${document.name} wurde erfolgreich hinzugefügt.`
+    });
+  }
   
   const { fetchDocuments, uploadDocument, deleteDocument } = useDocumentStorage({
     assetId: id,
@@ -38,6 +48,13 @@ export default function AssetDetail() {
   useEffect(() => {
     if (id) {
       window.scrollTo(0, 0);
+    }
+  }, [id]);
+
+  // Only fetch documents once when component mounts or when id changes
+  useEffect(() => {
+    if (id) {
+      fetchDocuments();
     }
   }, [id]);
 
@@ -60,15 +77,6 @@ export default function AssetDetail() {
     enabled: !!id
   });
 
-  function handleAddDocument(document: Document) {
-    setDocuments([...documents, document]);
-    
-    toast({
-      title: "Dokument hinzugefügt",
-      description: `${document.name} wurde erfolgreich hinzugefügt.`
-    });
-  }
-
   const handleEdit = () => {
     setIsEditing(true);
   };
@@ -79,8 +87,11 @@ export default function AssetDetail() {
 
   const handleDelete = async () => {
     try {
+      // Fix: Make a proper delete request and handle the response
       const { error } = await supabase.from('assets').delete().eq('id', id);
+      
       if (error) {
+        console.error("Delete error:", error);
         toast({
           variant: "destructive",
           title: "Fehler beim Löschen",
@@ -88,6 +99,8 @@ export default function AssetDetail() {
         });
         return;
       }
+      
+      // If deletion was successful, invalidate queries and navigate
       queryClient.invalidateQueries({
         queryKey: ["assets"]
       });

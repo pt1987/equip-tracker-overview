@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Upload } from "lucide-react";
@@ -23,6 +23,7 @@ export default function DocumentUpload({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
+  const documentsLoadedRef = useRef(false);
   const { fetchDocuments, uploadDocument, deleteDocument } = useDocumentStorage({
     assetId,
     documents,
@@ -31,8 +32,10 @@ export default function DocumentUpload({
   });
 
   useEffect(() => {
-    if (assetId) {
+    // Only fetch documents once when the component mounts
+    if (assetId && !documentsLoadedRef.current) {
       fetchDocuments();
+      documentsLoadedRef.current = true;
     }
   }, [assetId]);
 
