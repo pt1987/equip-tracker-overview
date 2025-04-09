@@ -1,4 +1,3 @@
-
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import PageTransition from "@/components/layout/PageTransition";
@@ -12,7 +11,7 @@ import EmployeeDetailEdit from "@/components/employees/EmployeeDetailEdit";
 import AssetSection from "@/components/employees/details/AssetSection";
 import BudgetSection from "@/components/employees/details/BudgetSection";
 import QuickStatsSection from "@/components/employees/details/QuickStatsSection";
-import { EmployeeLoading, EmployeeNotFound } from "@/components/employees/details/EmployeeLoadingState";
+import { EmployeeDetailLoading, EmployeeNotFound } from "@/components/employees/details/EmployeeLoadingState";
 
 const EmployeeDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -80,14 +79,13 @@ const EmployeeDetail = () => {
   };
   
   if (loading) {
-    return <EmployeeLoading />;
+    return <EmployeeDetailLoading />;
   }
   
   if (!employee) {
     return <EmployeeNotFound />;
   }
   
-  // Group assets by type for quick stats
   const assetsByType: Record<string, Asset[]> = {};
   assets.forEach(asset => {
     if (!assetsByType[asset.type]) {

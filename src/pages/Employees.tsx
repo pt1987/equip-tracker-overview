@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import PageTransition from "@/components/layout/PageTransition";
 import { Employee } from "@/lib/types";
@@ -59,7 +58,7 @@ const EmployeesPage = () => {
               <p className="text-muted-foreground mt-1">Loading...</p>
             </div>
           </div>
-          <EmployeeLoadingState />
+          <EmployeeLoadingState variant="card" count={6} />
         </div>
       </PageTransition>
     );

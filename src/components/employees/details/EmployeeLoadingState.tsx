@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 
-export function EmployeeLoading() {
+export function EmployeeDetailLoading() {
   return (
     <div className="flex min-h-screen">
       <div className="flex-1 md:ml-64 p-8 flex items-center justify-center">
