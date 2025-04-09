@@ -18,6 +18,7 @@ import AssetFormBasicInfo from "@/components/assets/create-edit/AssetFormBasicIn
 import AssetFormDetails from "@/components/assets/create-edit/AssetFormDetails";
 import AssetFormWarranty from "@/components/assets/create-edit/AssetFormWarranty";
 import AssetFormRelation from "@/components/assets/create-edit/AssetFormRelation";
+import { AssetType, AssetStatus } from "@/lib/types";
 
 export default function CreateEditAsset() {
   const { id } = useParams();
@@ -95,13 +96,13 @@ export default function CreateEditAsset() {
       const assetData = {
         id: isEditing && id ? id : crypto.randomUUID(),
         name: `${data.manufacturer} ${data.model}`,
-        type: data.category,
+        type: data.category as AssetType,
         manufacturer: data.manufacturer,
         model: data.model,
         purchaseDate: formattedPurchaseDate,
         vendor: data.vendor || "",
         price: data.price,
-        status: data.status,
+        status: data.status as AssetStatus,
         employeeId: data.assignedTo && data.assignedTo !== "pool" ? data.assignedTo : null,
         category: data.category,
         serialNumber: data.serialNumber || "",

@@ -1,5 +1,6 @@
 
 import { z } from "zod";
+import { AssetType, AssetStatus } from "@/lib/types";
 
 export const assetFormSchema = z.object({
   category: z.string().min(1, "Bitte wählen Sie eine Kategorie"),
