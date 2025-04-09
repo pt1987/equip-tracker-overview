@@ -5,6 +5,7 @@ import { Upload } from "lucide-react";
 import { Document } from "./types";
 import { DocumentUploadDialog } from "./DocumentUploadDialog";
 import { useDocumentStorage } from "./hooks/useDocumentStorage";
+import { useToast } from "@/hooks/use-toast";
 
 interface DocumentUploadProps {
   assetId: string;
@@ -21,11 +22,12 @@ export default function DocumentUpload({
 }: DocumentUploadProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const { toast } = useToast();
   const { uploadDocument } = useDocumentStorage({
     assetId,
     documents,
     onAddDocument,
-    toast: () => {} // Wir benutzen den Toast aus dem übergeordneten Hook
+    toast
   });
 
   const handleUpload = async (selectedFiles: FileList, documentCategory: Document["category"]) => {
@@ -41,6 +43,11 @@ export default function DocumentUpload({
       }
     } catch (error: any) {
       console.error('Error uploading document:', error);
+      toast({
+        variant: "destructive",
+        title: "Upload fehlgeschlagen",
+        description: error.message || "Dokument konnte nicht hochgeladen werden."
+      });
     } finally {
       setIsUploading(false);
       setIsDialogOpen(false);
