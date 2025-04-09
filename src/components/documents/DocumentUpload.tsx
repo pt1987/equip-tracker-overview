@@ -180,9 +180,9 @@ export default function DocumentUpload({
     <div>
       <Button 
         variant="ghost" 
-        size="icon"
+        size="sm"
         onClick={() => setIsDialogOpen(true)}
-        className="h-8 w-8 p-0"
+        className="p-0 w-8 h-8 rounded-full"
       >
         <Upload size={16} />
         <span className="sr-only">Dokument hinzufügen</span>

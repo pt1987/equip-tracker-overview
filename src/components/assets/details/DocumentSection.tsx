@@ -18,7 +18,7 @@ export default function DocumentSection({
 }: DocumentSectionProps) {
   return (
     <Card className="shadow-sm">
-      <CardHeader className="flex flex-row items-center justify-between p-4 pb-0">
+      <CardHeader className="flex flex-row items-center justify-between py-4 px-6">
         <CardTitle className="text-lg font-medium">Dokumente</CardTitle>
         <DocumentUpload 
           assetId={assetId} 
@@ -27,7 +27,7 @@ export default function DocumentSection({
           onDeleteDocument={onDeleteDocument} 
         />
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-6 pt-0 pb-6">
         {/* DocumentList will be rendered inside DocumentUpload */}
       </CardContent>
     </Card>
