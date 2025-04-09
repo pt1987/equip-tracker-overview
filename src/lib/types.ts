@@ -1,3 +1,4 @@
+
 export type AssetStatus = 
   | 'ordered' 
   | 'delivered' 
@@ -51,7 +52,7 @@ export interface Employee {
   email: string;
   position: string;
   cluster: string;
-  imageUrl: string;
+  imageUrl?: string; // Make imageUrl optional
   startDate: string;
   entryDate?: string;
   budget: number;

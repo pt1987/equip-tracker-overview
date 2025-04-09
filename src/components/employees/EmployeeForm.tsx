@@ -153,16 +153,16 @@ export default function EmployeeFormFields() {
         name="profileImage"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Profilbild URL</FormLabel>
+            <FormLabel>Profilbild (optional)</FormLabel>
             <FormControl>
               <Input 
-                placeholder="https://example.com/image.jpg" 
+                placeholder="Bild hochladen (optional)" 
                 {...field}
                 value={field.value || ''}
               />
             </FormControl>
             <FormDescription>
-              Geben Sie die URL eines Profilbilds ein
+              Kann später hinzugefügt werden
             </FormDescription>
             <FormMessage />
           </FormItem>

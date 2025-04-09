@@ -14,7 +14,7 @@ interface EmployeeData {
   entryDate?: string;
   budget: number;
   usedBudget: number;
-  imageUrl: string;
+  imageUrl?: string;
   profileImage?: string;
   assets?: Asset[];
 }

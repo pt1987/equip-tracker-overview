@@ -139,6 +139,7 @@ export default function CreateEditEmployee() {
       start_date: new Date(data.entryDate).toISOString(),
       entry_date: new Date(data.entryDate).toISOString(),
       budget: data.budget,
+      // Make image fields optional
       image_url: data.profileImage || null,
       profile_image: data.profileImage || null
     };
@@ -184,7 +185,7 @@ export default function CreateEditEmployee() {
       
     if (profileError) throw new Error(`Fehler beim Erstellen des Profils: ${profileError.message}`);
     
-    // 3. Create employee entry
+    // 3. Create employee entry - with optional images
     const employeeData = {
       id: userId,
       first_name: data.firstName,
@@ -194,6 +195,7 @@ export default function CreateEditEmployee() {
       start_date: new Date(data.entryDate).toISOString(),
       entry_date: new Date(data.entryDate).toISOString(),
       budget: data.budget,
+      // Make image fields optional
       image_url: data.profileImage || null,
       profile_image: data.profileImage || null
     };
