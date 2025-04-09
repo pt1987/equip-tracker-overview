@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Asset } from "@/lib/types";
 import { formatDate, formatCurrency, calculateAgeInMonths } from "@/lib/utils";
@@ -17,13 +16,11 @@ import QRCode from "@/components/shared/QRCode";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
 interface AssetDetailViewProps {
   asset: Asset;
   onEdit: () => void;
   onDelete: () => void;
 }
-
 export default function AssetDetailView({
   asset,
   onEdit,
@@ -33,8 +30,9 @@ export default function AssetDetailView({
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
   const [employeeData, setEmployeeData] = useState<any | null>(null);
   const [isLoadingEmployee, setIsLoadingEmployee] = useState(false);
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   useEffect(() => {
     const fetchEmployee = async () => {
       if (asset.employeeId) {
@@ -51,7 +49,6 @@ export default function AssetDetailView({
     };
     fetchEmployee();
   }, [asset.employeeId]);
-
   const getAssetTypeLabel = (type: Asset["type"]) => {
     switch (type) {
       case "laptop":
@@ -70,7 +67,6 @@ export default function AssetDetailView({
         return "Other";
     }
   };
-
   const getAssetImage = () => {
     if (!asset.imageUrl || asset.imageUrl.trim() === '') {
       return `/placeholder.svg`;
@@ -82,29 +78,26 @@ export default function AssetDetailView({
       return `/placeholder.svg`;
     }
   };
-
   const handleDeleteConfirm = () => {
     onDelete();
     setIsDeleteDialogOpen(false);
   };
-
-  return (
-    <div className="space-y-8">
+  return <div className="space-y-8">
       {/* Hero section with image and key info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Asset image - left column */}
         <div className="relative flex items-center justify-center">
-          <motion.img 
-            src={getAssetImage()} 
-            alt={asset.name} 
-            className="max-h-[360px] w-auto object-contain" 
-            initial={{ opacity: 0, scale: 1.05 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-            onError={e => {
-              (e.target as HTMLImageElement).src = '/placeholder.svg';
-            }}
-          />
+          <motion.img src={getAssetImage()} alt={asset.name} className="max-h-[360px] w-auto object-contain" initial={{
+          opacity: 0,
+          scale: 1.05
+        }} animate={{
+          opacity: 1,
+          scale: 1
+        }} transition={{
+          duration: 0.5
+        }} onError={e => {
+          (e.target as HTMLImageElement).src = '/placeholder.svg';
+        }} />
         </div>
 
         {/* Asset header info - right column */}
@@ -228,128 +221,61 @@ export default function AssetDetailView({
         </CardHeader>
         <CardContent className="pt-0">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {asset.serialNumber && (
-              <div className="space-y-1">
+            {asset.serialNumber && <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Seriennummer</p>
                 <p className="font-medium tracking-wide">{asset.serialNumber}</p>
-              </div>
-            )}
+              </div>}
             
-            {asset.inventoryNumber && (
-              <div className="space-y-1">
+            {asset.inventoryNumber && <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Inventar-Nr.</p>
                 <p className="font-medium">{asset.inventoryNumber}</p>
-              </div>
-            )}
+              </div>}
             
-            {asset.imei && (
-              <div className="space-y-1">
+            {asset.imei && <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">IMEI</p>
                 <p className="font-medium">{asset.imei}</p>
-              </div>
-            )}
+              </div>}
             
-            {asset.hasWarranty !== undefined && (
-              <div className="space-y-1">
+            {asset.hasWarranty !== undefined && <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Garantie</p>
                 <p className="font-medium">
                   {asset.hasWarranty ? "Ja" : "Nein"}
                   {asset.additionalWarranty && ", erweitert"}
                 </p>
-              </div>
-            )}
+              </div>}
           </div>
           
-          {asset.type === "smartphone" && (
-            <div className="mt-6">
+          {asset.type === "smartphone" && <div className="mt-6">
               <h3 className="text-lg font-medium mb-3">Vertragsdaten</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {asset.phoneNumber && (
-                  <div className="space-y-1">
+                {asset.phoneNumber && <div className="space-y-1">
                     <p className="text-sm text-muted-foreground">Telefonnummer</p>
                     <p className="font-medium">{asset.phoneNumber}</p>
-                  </div>
-                )}
+                  </div>}
                 
-                {asset.provider && (
-                  <div className="space-y-1">
+                {asset.provider && <div className="space-y-1">
                     <p className="text-sm text-muted-foreground">Provider</p>
                     <p className="font-medium">{asset.provider}</p>
-                  </div>
-                )}
+                  </div>}
                 
-                {asset.contractName && (
-                  <div className="space-y-1">
+                {asset.contractName && <div className="space-y-1">
                     <p className="text-sm text-muted-foreground">Vertrag</p>
                     <p className="font-medium">{asset.contractName}</p>
-                  </div>
-                )}
+                  </div>}
                 
-                {asset.contractEndDate && (
-                  <div className="space-y-1">
+                {asset.contractEndDate && <div className="space-y-1">
                     <p className="text-sm text-muted-foreground">Vertragsende</p>
                     <p className="font-medium">{formatDate(asset.contractEndDate)}</p>
-                  </div>
-                )}
+                  </div>}
               </div>
-            </div>
-          )}
+            </div>}
         </CardContent>
       </Card>
 
       {/* Employee section */}
-      <Card className="shadow-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-xl">Mitarbeiter</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
-          {asset.employeeId ? (
-            <>
-              {isLoadingEmployee ? (
-                <div className="flex justify-center py-4 w-full">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                </div>
-              ) : employeeData ? (
-                <div className="flex items-center gap-5">
-                  <Avatar className="h-14 w-14">
-                    <AvatarImage src={employeeData.imageUrl || `https://avatar.vercel.sh/${employeeData.id}`} alt={`${employeeData.firstName} ${employeeData.lastName}`} />
-                    <AvatarFallback>
-                      {employeeData.firstName?.[0]}{employeeData.lastName?.[0]}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <Link to={`/employee/${employeeData.id}`} className="text-lg font-medium hover:underline">
-                      {employeeData.firstName} {employeeData.lastName}
-                    </Link>
-                    <p className="text-sm text-muted-foreground">{employeeData.position}</p>
-                    <p className="text-sm text-muted-foreground">{employeeData.cluster}</p>
-                    <Button variant="link" size="sm" className="p-0 h-auto mt-1" asChild>
-                      <Link to={`/employee/${employeeData.id}`}>
-                        Details anzeigen
-                      </Link>
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="py-4">
-                  <p>Mitarbeiterdaten konnten nicht geladen werden.</p>
-                  <p className="text-sm text-muted-foreground">ID: {asset.employeeId}</p>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="py-2 flex items-center gap-3">
-              <User size={20} className="text-muted-foreground opacity-70" />
-              <p className="text-muted-foreground">
-                Dieses Asset ist keinem Mitarbeiter zugewiesen.
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      
 
-      {asset.connectedAssetId && (
-        <Card className="shadow-sm">
+      {asset.connectedAssetId && <Card className="shadow-sm">
           <CardHeader className="pb-3">
             <CardTitle className="text-xl">Verbundenes Asset</CardTitle>
           </CardHeader>
@@ -363,8 +289,6 @@ export default function AssetDetailView({
               </Button>
             </div>
           </CardContent>
-        </Card>
-      )}
-    </div>
-  );
+        </Card>}
+    </div>;
 }
