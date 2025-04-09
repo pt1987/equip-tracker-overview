@@ -26,7 +26,7 @@ export default function StatusBadge({ status, size = "md" }: StatusBadgeProps) {
         return {
           bg: "bg-green-100",
           text: "text-green-800",
-          label: "In Gebrauch"
+          label: "Aktiv"
         };
       case "defective":
         return {

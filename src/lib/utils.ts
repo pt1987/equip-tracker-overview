@@ -1,3 +1,4 @@
+
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -67,7 +68,7 @@ export function localizeStatus(status: string): string {
   const statusMap: Record<string, string> = {
     ordered: "Bestellt",
     delivered: "Geliefert",
-    in_use: "In Gebrauch",
+    in_use: "Aktiv",
     defective: "Defekt",
     in_repair: "In Reparatur",
     pool: "Pool"
