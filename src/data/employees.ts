@@ -35,9 +35,7 @@ export const getEmployeeById = async (id: string): Promise<EmployeeType | null> 
         used_budget,
         image_url,
         profile_image,
-        profiles (
-          email
-        )
+        email
       `)
       .eq('id', id)
       .single();
@@ -50,14 +48,14 @@ export const getEmployeeById = async (id: string): Promise<EmployeeType | null> 
       id: data.id,
       firstName: data.first_name,
       lastName: data.last_name,
-      email: data.profiles?.email || '',
+      email: data.email || '',
       position: data.position,
       cluster: data.cluster,
       startDate: data.start_date || '',
       entryDate: data.entry_date,
       budget: data.budget || 0,
       usedBudget: data.used_budget || 0,
-      imageUrl: data.image_url || '',
+      imageUrl: data.image_url || undefined,
       profileImage: data.profile_image || undefined,
     };
   } catch (error) {
@@ -82,9 +80,7 @@ export const getEmployees = async (): Promise<EmployeeType[]> => {
         used_budget,
         image_url,
         profile_image,
-        profiles (
-          email
-        )
+        email
       `);
 
     if (error) throw error;
@@ -93,14 +89,14 @@ export const getEmployees = async (): Promise<EmployeeType[]> => {
       id: emp.id,
       firstName: emp.first_name,
       lastName: emp.last_name,
-      email: emp.profiles?.email || '',
+      email: emp.email || '',
       position: emp.position,
       cluster: emp.cluster,
       startDate: emp.start_date || '',
       entryDate: emp.entry_date,
       budget: emp.budget || 0,
       usedBudget: emp.used_budget || 0,
-      imageUrl: emp.image_url || '',
+      imageUrl: emp.image_url || undefined,
       profileImage: emp.profile_image || undefined,
     }));
   } catch (error) {
