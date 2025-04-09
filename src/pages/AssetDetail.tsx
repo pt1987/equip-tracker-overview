@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -14,7 +13,6 @@ import { Document } from "@/components/documents/types";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 
-// Import the new components
 import AssetLoading from "@/components/assets/details/AssetLoading";
 import AssetNotFound from "@/components/assets/details/AssetNotFound";
 import EmployeeSection from "@/components/assets/details/EmployeeSection";
@@ -35,7 +33,6 @@ export default function AssetDetail() {
     }
   }, [id]);
 
-  // Asset data fetching
   const {
     data: asset,
     isLoading: isAssetLoading,
@@ -46,7 +43,6 @@ export default function AssetDetail() {
     enabled: !!id
   });
 
-  // Asset history fetching
   const {
     data: assetHistory = [],
     isLoading: isHistoryLoading
@@ -147,13 +143,31 @@ export default function AssetDetail() {
     });
   };
 
-  const handleDeleteDocument = (documentId: string) => {
-    setDocuments(documents.filter(doc => doc.id !== documentId));
-    
-    toast({
-      title: "Dokument gelöscht",
-      description: "Das Dokument wurde erfolgreich gelöscht."
-    });
+  const handleDeleteDocument = async (documentId: string) => {
+    try {
+      const { deleteDocument } = useDocumentStorage({
+        assetId: id,
+        documents,
+        onAddDocument: handleAddDocument,
+        toast
+      });
+      
+      await deleteDocument(documentId);
+      
+      setDocuments(documents.filter(doc => doc.id !== documentId));
+      
+      toast({
+        title: "Dokument gelöscht",
+        description: "Das Dokument wurde erfolgreich gelöscht."
+      });
+    } catch (error: any) {
+      console.error('Error deleting document:', error);
+      toast({
+        variant: "destructive",
+        title: "Fehler beim Löschen",
+        description: error.message || "Ein Fehler ist aufgetreten beim Löschen des Dokuments."
+      });
+    }
   };
 
   if (isAssetLoading) {

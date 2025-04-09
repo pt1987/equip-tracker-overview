@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Document } from "../types";
 
@@ -90,7 +89,13 @@ export function useDocumentStorage({
     };
   };
 
-  const deleteDocument = async (document: Document) => {
+  const deleteDocument = async (documentId: string) => {
+    const document = documents.find(doc => doc.id === documentId);
+    
+    if (!document) {
+      throw new Error("Document not found");
+    }
+    
     const filePath = `${assetId}/${document.category}_${document.name}`;
     
     const {
