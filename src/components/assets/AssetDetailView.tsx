@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Asset } from "@/lib/types";
 import { getEmployeeById } from "@/data/employees";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 // Import new component parts
 import AssetImage from "./details/AssetImage";
@@ -13,7 +14,7 @@ import ConnectedAsset from "./details/ConnectedAsset";
 interface AssetDetailViewProps {
   asset: Asset;
   onEdit: () => void;
-  onDelete: () => void;
+  onDelete: () => Promise<void>;
 }
 
 export default function AssetDetailView({

@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { QueryClient } from "@tanstack/react-query";
 import { Asset, AssetHistoryEntry } from "@/lib/types";
 import { updateAsset } from "@/data/assets";
-import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 
 import AssetDetailView from "@/components/assets/AssetDetailView";
@@ -20,6 +19,7 @@ interface AssetDetailContentProps {
   isHistoryLoading: boolean;
   queryClient: QueryClient;
   toast: any;
+  onDelete: () => Promise<void>;
 }
 
 export default function AssetDetailContent({
@@ -27,7 +27,8 @@ export default function AssetDetailContent({
   assetHistory,
   isHistoryLoading,
   queryClient,
-  toast
+  toast,
+  onDelete
 }: AssetDetailContentProps) {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
@@ -44,40 +45,6 @@ export default function AssetDetailContent({
 
   const handleCancelEdit = () => {
     setIsEditing(false);
-  };
-
-  const handleDelete = async () => {
-    try {
-      const { error } = await supabase.from('assets').delete().eq('id', asset.id);
-      
-      if (error) {
-        console.error("Delete error:", error);
-        toast({
-          variant: "destructive",
-          title: "Fehler beim Löschen",
-          description: error.message
-        });
-        return;
-      }
-      
-      queryClient.invalidateQueries({
-        queryKey: ["assets"]
-      });
-      
-      toast({
-        title: "Asset gelöscht",
-        description: `Das Asset wurde erfolgreich gelöscht.`
-      });
-      
-      navigate("/assets");
-    } catch (err: any) {
-      console.error("Delete error:", err);
-      toast({
-        variant: "destructive",
-        title: "Fehler beim Löschen",
-        description: err.message || "Ein unbekannter Fehler ist aufgetreten."
-      });
-    }
   };
 
   const handleSave = async (formData: any) => {
@@ -139,7 +106,7 @@ export default function AssetDetailContent({
             <AssetDetailView 
               asset={asset} 
               onEdit={handleEdit} 
-              onDelete={handleDelete} 
+              onDelete={onDelete} 
             />
           </CardContent>
         )}

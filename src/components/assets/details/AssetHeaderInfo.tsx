@@ -14,12 +14,13 @@ import QRCode from "@/components/shared/QRCode";
 interface AssetHeaderInfoProps {
   asset: Asset;
   onEdit: () => void;
-  onDelete: () => void;
+  onDelete: () => Promise<void>;
 }
 
 export default function AssetHeaderInfo({ asset, onEdit, onDelete }: AssetHeaderInfoProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const getAssetTypeLabel = (type: Asset["type"]) => {
     switch (type) {
@@ -33,9 +34,14 @@ export default function AssetHeaderInfo({ asset, onEdit, onDelete }: AssetHeader
     }
   };
 
-  const handleDeleteConfirm = () => {
-    onDelete();
-    setIsDeleteDialogOpen(false);
+  const handleDeleteConfirm = async () => {
+    setIsDeleting(true);
+    try {
+      await onDelete();
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
+    }
   };
 
   return (
@@ -104,8 +110,12 @@ export default function AssetHeaderInfo({ asset, onEdit, onDelete }: AssetHeader
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDeleteConfirm}>
-                    Löschen bestätigen
+                  <AlertDialogAction 
+                    onClick={handleDeleteConfirm} 
+                    disabled={isDeleting}
+                    className={isDeleting ? "opacity-50 cursor-not-allowed" : ""}
+                  >
+                    {isDeleting ? "Löschen..." : "Löschen bestätigen"}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

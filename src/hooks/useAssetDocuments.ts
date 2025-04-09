@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Document } from "@/components/documents/types";
 import { useDocumentStorage } from "@/components/documents/hooks/useDocumentStorage";
@@ -6,15 +5,17 @@ import { useDocumentStorage } from "@/components/documents/hooks/useDocumentStor
 export function useAssetDocuments(assetId: string, toast: any) {
   const [documents, setDocuments] = useState<Document[]>([]);
   const documentsLoadedRef = useRef(false);
+  const initialRenderRef = useRef(true);
 
-  // Create a handler for adding new documents
   function addDocument(document: Document) {
     setDocuments(prevDocuments => [...prevDocuments, document]);
     
-    toast({
-      title: "Dokument hinzugefügt",
-      description: `${document.name} wurde erfolgreich hinzugefügt.`
-    });
+    if (!initialRenderRef.current) {
+      toast({
+        title: "Dokument hinzugefügt",
+        description: `${document.name} wurde erfolgreich hinzugefügt.`
+      });
+    }
   }
   
   const { fetchDocuments, uploadDocument, deleteDocument: deleteStorageDocument } = useDocumentStorage({
@@ -24,15 +25,16 @@ export function useAssetDocuments(assetId: string, toast: any) {
     toast
   });
 
-  // Fetch documents only once on component mount
   useEffect(() => {
     if (assetId && !documentsLoadedRef.current) {
       fetchDocuments();
       documentsLoadedRef.current = true;
+      setTimeout(() => {
+        initialRenderRef.current = false;
+      }, 500);
     }
   }, [assetId, fetchDocuments]);
 
-  // Handle document deletion
   const handleDeleteDocument = async (documentId: string) => {
     try {
       await deleteStorageDocument(documentId);
