@@ -14,6 +14,7 @@ import { Asset } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import DocumentUpload, { Document } from "@/components/assets/DocumentUpload";
 import AssetHistoryTimeline from "@/components/assets/AssetHistoryTimeline";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function AssetDetail() {
   const { id = "" } = useParams();
