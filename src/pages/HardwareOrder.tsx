@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { PackageIcon, ArrowLeft } from "lucide-react";
@@ -21,9 +20,7 @@ const hardwareOrderSchema = z.object({
   justification: z.string().optional(),
   estimatedPrice: z.number().min(0, "Der Preis muss positiv sein")
 });
-
 export type HardwareOrderFormValues = z.infer<typeof hardwareOrderSchema>;
-
 export default function HardwareOrder() {
   // Initialize form
   const form = useForm<HardwareOrderFormValues>({
@@ -38,20 +35,17 @@ export default function HardwareOrder() {
       estimatedPrice: 0
     }
   });
-
   const onSubmit = (data: HardwareOrderFormValues) => {
     console.log("Form submitted:", data);
     // Handle form submission logic here
   };
-
-  return (
-    <PageTransition>
+  return <PageTransition>
       <div className="p-3 md:p-4 xl:p-6 space-y-6 max-w-full">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-                <PackageIcon className="h-8 w-8 text-primary" />
+                
                 Hardware-Bestellung
               </h1>
               <p className="text-muted-foreground">
@@ -77,6 +71,5 @@ export default function HardwareOrder() {
           </Form>
         </div>
       </div>
-    </PageTransition>
-  );
+    </PageTransition>;
 }
