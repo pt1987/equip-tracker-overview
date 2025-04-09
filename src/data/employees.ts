@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Asset, Employee as EmployeeType } from "@/lib/types";
 
@@ -50,7 +51,7 @@ export const getEmployeeById = async (id: string): Promise<EmployeeType | null> 
 
     // Get email using our new secure function
     const { data: emailData, error: emailError } = await supabase
-      .rpc('get_safe_user_email', { user_id: id });
+      .rpc('get_safe_user_email', { user_id: id }) as { data: string | null, error: any };
     
     let email = '';
     
@@ -109,7 +110,7 @@ export const getEmployees = async (): Promise<EmployeeType[]> => {
     for (const emp of employeesData) {
       try {
         const { data: emailData } = await supabase
-          .rpc('get_safe_user_email', { user_id: emp.id });
+          .rpc('get_safe_user_email', { user_id: emp.id }) as { data: string | null, error: any };
           
         if (emailData) {
           emails.set(emp.id, emailData);
@@ -206,7 +207,7 @@ export const createEmployee = async (employeeData: {
         .rpc('update_user_email', {
           user_id: employeeId,
           new_email: employeeData.email
-        });
+        }) as { data: boolean | null, error: any };
         
       if (emailUpdateError) {
         console.error("Error updating email:", emailUpdateError);
@@ -264,7 +265,7 @@ export const updateEmployee = async (id: string, employeeData: {
         .rpc('update_user_email', {
           user_id: id,
           new_email: employeeData.email
-        });
+        }) as { data: boolean | null, error: any };
         
       if (emailUpdateError) {
         console.error("Error updating email with RPC function:", emailUpdateError);
