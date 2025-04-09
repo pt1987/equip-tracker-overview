@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export interface Document {
   id: string;
@@ -121,10 +122,16 @@ export default function DocumentUpload({
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-medium">Dokumente</h3>
           <DialogTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-2">
-              <FilePlus size={16} />
-              <span>Dokument hinzufügen</span>
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="rounded-full">
+                    <FilePlus size={16} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Dokument hinzufügen</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </DialogTrigger>
         </div>
 
@@ -133,18 +140,18 @@ export default function DocumentUpload({
             {documents.map((doc) => (
               <div 
                 key={doc.id} 
-                className="flex items-center justify-between p-3 bg-secondary/50 rounded-md"
+                className="flex items-center justify-between p-3 bg-background rounded-md border border-secondary/30"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-background rounded-md">
-                    <File size={20} />
+                  <div className="p-2 rounded-md">
+                    <File size={20} className="text-primary" />
                   </div>
                   <div>
                     <p className="font-medium text-sm">{doc.name}</p>
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
                       <span>{formatFileSize(doc.size)}</span>
                       <span>•</span>
-                      <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                      <span className="text-primary">
                         {getCategoryLabel(doc.category)}
                       </span>
                     </div>
@@ -156,6 +163,7 @@ export default function DocumentUpload({
                     size="icon" 
                     onClick={() => window.open(doc.url, '_blank')}
                     title="Herunterladen"
+                    className="rounded-full"
                   >
                     <DownloadCloud size={16} />
                   </Button>
@@ -163,7 +171,7 @@ export default function DocumentUpload({
                     variant="ghost" 
                     size="icon" 
                     onClick={() => onDeleteDocument(doc.id)}
-                    className="text-destructive hover:text-destructive/80"
+                    className="text-destructive hover:text-destructive/80 rounded-full"
                     title="Löschen"
                   >
                     <Trash2 size={16} />
@@ -173,13 +181,13 @@ export default function DocumentUpload({
             ))}
           </div>
         ) : (
-          <div className="text-center py-8 bg-secondary/20 rounded-lg border border-dashed border-secondary">
+          <div className="text-center py-8 rounded-lg border border-dashed border-secondary/50">
             <FileUp className="w-10 h-10 mx-auto text-muted-foreground mb-2" />
             <p className="text-muted-foreground">
               Keine Dokumente vorhanden
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Klicken Sie auf "Dokument hinzufügen", um ein Dokument hochzuladen
+              Klicken Sie auf "+", um ein Dokument hochzuladen
             </p>
           </div>
         )}

@@ -24,15 +24,15 @@ const AssetHistoryTimeline = ({ history }: AssetHistoryTimelineProps) => {
   const getActionIcon = (action: string) => {
     switch (action) {
       case "purchase":
-        return <ShoppingCart size={18} className="text-green-600" />;
+        return <ShoppingCart size={18} className="text-primary" />;
       case "assign":
-        return <UserCheck size={18} className="text-blue-600" />;
+        return <UserCheck size={18} className="text-primary" />;
       case "status_change":
-        return <RefreshCcw size={18} className="text-amber-600" />;
+        return <RefreshCcw size={18} className="text-primary" />;
       case "return":
-        return <RotateCcw size={18} className="text-purple-600" />;
+        return <RotateCcw size={18} className="text-primary" />;
       default:
-        return <Clock size={18} className="text-gray-600" />;
+        return <Clock size={18} className="text-primary" />;
     }
   };
 
@@ -51,49 +51,34 @@ const AssetHistoryTimeline = ({ history }: AssetHistoryTimelineProps) => {
     }
   };
 
-  const getActionColor = (action: string) => {
-    switch (action) {
-      case "purchase":
-        return "bg-green-100 border-green-200";
-      case "assign":
-        return "bg-blue-100 border-blue-200";
-      case "status_change":
-        return "bg-amber-100 border-amber-200";
-      case "return":
-        return "bg-purple-100 border-purple-200";
-      default:
-        return "bg-gray-100 border-gray-200";
-    }
-  };
-
   return (
     <div className="relative">
       {/* Timeline line */}
-      <div className="absolute left-3 top-3 bottom-3 w-0.5 bg-gradient-to-b from-primary/50 to-primary/10 rounded-full" />
+      <div className="absolute left-3 top-3 bottom-3 w-px bg-secondary rounded-full" />
 
       {/* Timeline entries */}
-      <div className="space-y-6">
+      <div className="space-y-4">
         {sortedHistory.map((entry, index) => (
           <motion.div
             key={entry.id}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1, duration: 0.4 }}
+            transition={{ delay: index * 0.1, duration: 0.3 }}
             className="relative pl-10"
           >
             {/* Timeline dot */}
-            <div className="absolute left-0 w-7 h-7 rounded-full bg-background border-2 border-primary flex items-center justify-center z-10">
+            <div className="absolute left-0 w-6 h-6 rounded-full bg-background flex items-center justify-center z-10 border border-secondary">
               {getActionIcon(entry.action)}
             </div>
 
             {/* Content */}
-            <div className={`rounded-lg border p-4 shadow-sm ${getActionColor(entry.action)}`}>
-              <div className="flex flex-wrap justify-between gap-2 mb-2">
+            <div className="rounded-lg p-3 bg-background">
+              <div className="flex flex-wrap justify-between gap-2 mb-1">
                 <div className="flex items-center">
                   <CalendarClock size={14} className="mr-1.5 text-muted-foreground" />
                   <span className="text-sm font-medium">{formatDate(entry.date)}</span>
                 </div>
-                <span className="inline-flex items-center px-2 py-1 rounded-full bg-white/80 text-xs font-medium">
+                <span className="inline-flex items-center text-xs font-medium text-primary">
                   {getActionLabel(entry.action)}
                 </span>
               </div>

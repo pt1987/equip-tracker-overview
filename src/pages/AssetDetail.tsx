@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -110,7 +109,7 @@ export default function AssetDetail() {
   if (isAssetLoading) {
     return (
       <PageTransition>
-        <div className="container mx-auto px-4 py-6">
+        <div className="container mx-auto px-4 py-4">
           <Skeleton className="h-8 w-48 mb-4" />
           <Skeleton className="h-[400px] w-full rounded-lg" />
         </div>
@@ -121,7 +120,7 @@ export default function AssetDetail() {
   if (assetError || !asset) {
     return (
       <PageTransition>
-        <div className="container mx-auto px-4 py-6">
+        <div className="container mx-auto px-4 py-4">
           <div className="flex flex-col items-center justify-center text-center py-10">
             <AlertCircle size={64} className="text-muted-foreground mb-4" />
             <h2 className="text-2xl font-bold mb-2">Asset nicht gefunden</h2>
@@ -140,9 +139,8 @@ export default function AssetDetail() {
 
   return (
     <PageTransition>
-      <div className="container mx-auto px-4 py-4 md:py-6">
-        <div className="flex flex-col gap-8">
-          {/* Navigation header */}
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex flex-col gap-6">
           <div>
             <Button variant="ghost" onClick={() => navigate(-1)} className="mb-1 -ml-3 h-9 px-2">
               <ChevronLeft size={16} className="mr-1" />
@@ -151,7 +149,6 @@ export default function AssetDetail() {
             <h1 className="text-3xl font-bold tracking-tight">Asset Details</h1>
           </div>
 
-          {/* Main content */}
           <div>
             {isEditing ? 
               <AssetDetailEdit 
@@ -167,15 +164,11 @@ export default function AssetDetail() {
             }
           </div>
 
-          {/* Document section */}
           <section>
-            <h2 className="text-xl font-medium mb-4 flex items-center">
+            <h2 className="text-xl font-medium mb-3 flex items-center">
               <FileText className="mr-2 h-5 w-5" />
               Dokumente
             </h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              Verwalten Sie alle mit diesem Asset verbundenen Dokumente
-            </p>
             <DocumentUpload 
               assetId={asset.id} 
               documents={documents} 
@@ -184,15 +177,11 @@ export default function AssetDetail() {
             />
           </section>
 
-          {/* History section */}
           <section>
-            <h2 className="text-xl font-medium mb-4 flex items-center">
+            <h2 className="text-xl font-medium mb-3 flex items-center">
               <FileText className="mr-2 h-5 w-5" />
               Asset Historie
             </h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              Chronologische Aufzeichnung aller Änderungen und Ereignisse
-            </p>
             
             {isHistoryLoading ? (
               <div className="space-y-2 py-4">
