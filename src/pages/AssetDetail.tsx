@@ -141,10 +141,7 @@ export default function AssetDetail() {
           </div>
 
           <section>
-            <h2 className="text-xl font-medium mb-3 flex items-center">
-              <FileText className="mr-2 h-5 w-5" />
-              Dokumente
-            </h2>
+            
             <DocumentUpload assetId={asset.id} documents={documents} onAddDocument={handleAddDocument} onDeleteDocument={handleDeleteDocument} />
           </section>
 
