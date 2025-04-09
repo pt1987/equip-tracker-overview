@@ -4,3 +4,4 @@ export * from './assets/fetch';
 export * from './assets/update';
 export * from './assets/stats';
 export * from './assets/storage';
+export * from './assets/mappers';

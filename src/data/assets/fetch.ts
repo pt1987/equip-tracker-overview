@@ -1,6 +1,6 @@
-
-import { Asset, AssetHistoryEntry, AssetType, AssetStatus } from "@/lib/types";
+import { Asset, AssetHistoryEntry } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
+import { mapDbAssetToAsset } from "./mappers";
 
 // Helper function to get an asset by ID
 export const getAssetById = async (id: string): Promise<Asset | null> => {
@@ -25,34 +25,7 @@ export const getAssetById = async (id: string): Promise<Asset | null> => {
     
     console.log(`Asset found:`, data);
     
-    return {
-      id: data.id,
-      name: data.name,
-      type: data.type,
-      manufacturer: data.manufacturer,
-      model: data.model,
-      purchaseDate: data.purchase_date,
-      vendor: data.vendor,
-      price: data.price,
-      status: data.status,
-      employeeId: data.employee_id,
-      category: data.category,
-      serialNumber: data.serial_number,
-      inventoryNumber: data.inventory_number,
-      additionalWarranty: data.additional_warranty,
-      hasWarranty: data.has_warranty,
-      warrantyExpiryDate: data.warranty_expiry_date,
-      warrantyInfo: data.warranty_info,
-      imei: data.imei,
-      phoneNumber: data.phone_number,
-      provider: data.provider,
-      contractEndDate: data.contract_end_date,
-      contractName: data.contract_name,
-      contractDuration: data.contract_duration,
-      connectedAssetId: data.connected_asset_id,
-      relatedAssetId: data.related_asset_id,
-      imageUrl: data.image_url
-    };
+    return mapDbAssetToAsset(data);
   } catch (error) {
     console.error(`Error in getAssetById for ${id}:`, error);
     throw error;
@@ -83,34 +56,7 @@ export const getAssets = async (): Promise<Asset[]> => {
     
     console.log(`Retrieved ${data.length} assets from database`);
     
-    return data.map(item => ({
-      id: item.id,
-      name: item.name,
-      type: item.type,
-      manufacturer: item.manufacturer,
-      model: item.model,
-      purchaseDate: item.purchase_date,
-      vendor: item.vendor,
-      price: item.price,
-      status: item.status,
-      employeeId: item.employee_id,
-      category: item.category,
-      serialNumber: item.serial_number,
-      inventoryNumber: item.inventory_number,
-      additionalWarranty: item.additional_warranty,
-      hasWarranty: item.has_warranty,
-      warrantyExpiryDate: item.warranty_expiry_date,
-      warrantyInfo: item.warranty_info,
-      imei: item.imei,
-      phoneNumber: item.phone_number,
-      provider: item.provider,
-      contractEndDate: item.contract_end_date,
-      contractName: item.contract_name,
-      contractDuration: item.contract_duration,
-      connectedAssetId: item.connected_asset_id,
-      relatedAssetId: item.related_asset_id,
-      imageUrl: item.image_url
-    }));
+    return data.map(mapDbAssetToAsset);
   } catch (error) {
     console.error("Error in getAssets:", error);
     throw error;
@@ -139,34 +85,7 @@ export const getAssetsByEmployeeId = async (employeeId: string): Promise<Asset[]
     
     console.log(`Found ${data.length} assets for employee: ${employeeId}`);
     
-    return data.map(item => ({
-      id: item.id,
-      name: item.name,
-      type: item.type,
-      manufacturer: item.manufacturer,
-      model: item.model,
-      purchaseDate: item.purchase_date,
-      vendor: item.vendor,
-      price: item.price,
-      status: item.status,
-      employeeId: item.employee_id,
-      category: item.category,
-      serialNumber: item.serial_number,
-      inventoryNumber: item.inventory_number,
-      additionalWarranty: item.additional_warranty,
-      hasWarranty: item.has_warranty,
-      warrantyExpiryDate: item.warranty_expiry_date,
-      warrantyInfo: item.warranty_info,
-      imei: item.imei,
-      phoneNumber: item.phone_number,
-      provider: item.provider,
-      contractEndDate: item.contract_end_date,
-      contractName: item.contract_name,
-      contractDuration: item.contract_duration,
-      connectedAssetId: item.connected_asset_id,
-      relatedAssetId: item.related_asset_id,
-      imageUrl: item.image_url
-    }));
+    return data.map(mapDbAssetToAsset);
   } catch (error) {
     console.error(`Error in getAssetsByEmployeeId for ${employeeId}:`, error);
     throw error;
