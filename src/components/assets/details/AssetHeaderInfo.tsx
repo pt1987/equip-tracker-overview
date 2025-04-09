@@ -89,16 +89,9 @@ export default function AssetHeaderInfo({ asset, onEdit, onDelete }: AssetHeader
             
             <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
               <AlertDialogTrigger asChild>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Trash size={18} className="text-muted-foreground hover:text-destructive" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Löschen</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Trash size={18} className="text-muted-foreground hover:text-destructive" />
+                </Button>
               </AlertDialogTrigger>
               
               <AlertDialogContent>

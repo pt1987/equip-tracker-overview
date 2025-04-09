@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Document } from "@/components/documents/types";
 import { useDocumentStorage } from "@/components/documents/hooks/useDocumentStorage";
@@ -6,11 +7,13 @@ export function useAssetDocuments(assetId: string, toast: any) {
   const [documents, setDocuments] = useState<Document[]>([]);
   const documentsLoadedRef = useRef(false);
   const initialRenderRef = useRef(true);
+  const hasShownInitialToastsRef = useRef(false);
 
   function addDocument(document: Document) {
     setDocuments(prevDocuments => [...prevDocuments, document]);
     
-    if (!initialRenderRef.current) {
+    // Only show toast notifications after initial render and not during the initial data loading
+    if (!initialRenderRef.current && hasShownInitialToastsRef.current) {
       toast({
         title: "Dokument hinzugefügt",
         description: `${document.name} wurde erfolgreich hinzugefügt.`
@@ -29,8 +32,15 @@ export function useAssetDocuments(assetId: string, toast: any) {
     if (assetId && !documentsLoadedRef.current) {
       fetchDocuments();
       documentsLoadedRef.current = true;
+      
+      // Set a timeout to mark initial render as complete
       setTimeout(() => {
         initialRenderRef.current = false;
+        // After 500ms, we consider all initial documents loaded
+        // From now on, we can show toast notifications for new documents
+        setTimeout(() => {
+          hasShownInitialToastsRef.current = true;
+        }, 100);
       }, 500);
     }
   }, [assetId, fetchDocuments]);
