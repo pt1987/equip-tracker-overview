@@ -1,3 +1,4 @@
+
 import { Asset, AssetHistoryEntry } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
 import { mapDbAssetToAsset } from "./mappers";
