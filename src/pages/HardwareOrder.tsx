@@ -109,8 +109,16 @@ export default function HardwareOrder() {
     try {
       console.log("Form submitted:", data);
       
-      // Send order email
-      await sendOrderEmail(data, selectedEmployee);
+      // Make sure all required properties are non-optional when passing to sendOrderEmail
+      await sendOrderEmail({
+        employeeId: data.employeeId,
+        articleName: data.articleName,
+        articleConfiguration: data.articleConfiguration,
+        articleCategory: data.articleCategory as HardwareCategory,
+        articleLink: data.articleLink,
+        justification: data.justification || "",
+        estimatedPrice: data.estimatedPrice
+      }, selectedEmployee);
       
       toast({
         title: "Bestellung eingereicht",
