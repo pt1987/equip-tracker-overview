@@ -34,8 +34,7 @@ export const getEmployeeById = async (id: string): Promise<EmployeeType | null> 
         budget,
         used_budget,
         image_url,
-        profile_image,
-        user_id
+        profile_image
       `)
       .eq('id', id)
       .single();
@@ -47,27 +46,15 @@ export const getEmployeeById = async (id: string): Promise<EmployeeType | null> 
     // Try to get email from profiles table if possible, but don't fail if we can't
     let email = '';
     try {
-      if (data.user_id) {
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('email')
-          .eq('id', data.user_id)
-          .maybeSingle();
-
-        if (profileData) {
-          email = profileData.email;
-        }
-      } else {
-        // Fallback to try getting profile by employee ID
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('email')
-          .eq('id', id)
-          .maybeSingle();
+      // Just try to get profile by employee ID
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('id', id)
+        .maybeSingle();
           
-        if (profileData) {
-          email = profileData.email;
-        }
+      if (profileData) {
+        email = profileData.email;
       }
     } catch (profileError) {
       console.error("Error fetching profile data:", profileError);
@@ -109,8 +96,7 @@ export const getEmployees = async (): Promise<EmployeeType[]> => {
         budget,
         used_budget,
         image_url,
-        profile_image,
-        user_id
+        profile_image
       `);
 
     if (employeesError) throw employeesError;
@@ -137,7 +123,7 @@ export const getEmployees = async (): Promise<EmployeeType[]> => {
       id: emp.id,
       firstName: emp.first_name,
       lastName: emp.last_name,
-      email: emp.user_id ? emailMap.get(emp.user_id) || '' : emailMap.get(emp.id) || '',
+      email: emailMap.get(emp.id) || '',
       position: emp.position,
       cluster: emp.cluster,
       startDate: emp.start_date || '',
@@ -207,7 +193,6 @@ export const createEmployee = async (employeeData: {
         used_budget: 0,
         image_url: employeeData.image_url,
         profile_image: employeeData.profile_image,
-        // Note: We're not setting user_id here, as we're not creating an auth user
       }]);
       
     if (employeeError) {
