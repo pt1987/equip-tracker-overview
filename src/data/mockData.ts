@@ -6,7 +6,9 @@ export {
   getAssetsByEmployeeId, 
   getAssetHistoryByAssetId,
   getAssetTypeDistribution,
-  getAssetStatusDistribution
+  getAssetStatusDistribution,
+  updateAsset,
+  uploadAssetImage
 } from './assets';
 
 export { 
