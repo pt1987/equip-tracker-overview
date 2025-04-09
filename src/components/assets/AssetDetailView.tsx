@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Asset } from "@/lib/types";
 import { formatDate, formatCurrency, calculateAgeInMonths } from "@/lib/utils";
@@ -33,6 +34,7 @@ export default function AssetDetailView({
   const {
     toast
   } = useToast();
+
   useEffect(() => {
     const fetchEmployee = async () => {
       if (asset.employeeId) {
@@ -49,6 +51,7 @@ export default function AssetDetailView({
     };
     fetchEmployee();
   }, [asset.employeeId]);
+
   const getAssetTypeLabel = (type: Asset["type"]) => {
     switch (type) {
       case "laptop":
@@ -67,6 +70,7 @@ export default function AssetDetailView({
         return "Other";
     }
   };
+
   const getAssetImage = () => {
     if (!asset.imageUrl || asset.imageUrl.trim() === '') {
       return `/placeholder.svg`;
@@ -78,10 +82,12 @@ export default function AssetDetailView({
       return `/placeholder.svg`;
     }
   };
+
   const handleDeleteConfirm = () => {
     onDelete();
     setIsDeleteDialogOpen(false);
   };
+  
   return <div className="space-y-8">
       {/* Hero section with image and key info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -271,9 +277,6 @@ export default function AssetDetailView({
             </div>}
         </CardContent>
       </Card>
-
-      {/* Employee section */}
-      
 
       {asset.connectedAssetId && <Card className="shadow-sm">
           <CardHeader className="pb-3">
