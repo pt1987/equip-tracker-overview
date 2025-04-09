@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { FilePlus } from "lucide-react";
+import { FilePlus, Upload } from "lucide-react";
 import { Document } from "./types";
 import { DocumentList } from "./DocumentList";
 import { DocumentUploadDialog } from "./DocumentUploadDialog";
@@ -152,13 +153,12 @@ export default function DocumentUpload({
   return (
     <div>
       <Button 
-        variant="outline" 
-        size="sm"
+        variant="ghost" 
+        size="icon"
         onClick={() => setIsDialogOpen(true)}
-        className="gap-1"
+        className="rounded-full"
       >
-        <FilePlus size={16} />
-        Dokument hinzufügen
+        <Upload size={18} className="text-primary" />
       </Button>
 
       <DocumentList documents={documents} onDeleteDocument={handleDeleteDocument} />
