@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -14,7 +13,12 @@ import { useToast } from "@/hooks/use-toast";
 import DocumentUpload, { Document } from "@/components/assets/DocumentUpload";
 import AssetHistoryTimeline from "@/components/assets/AssetHistoryTimeline";
 import { supabase } from "@/integrations/supabase/client";
-import { Separator } from "@/components/ui/separator";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/card";
 
 export default function AssetDetail() {
   const { id = "" } = useParams();
@@ -188,69 +192,27 @@ export default function AssetDetail() {
             <h1 className="text-3xl font-bold tracking-tight">Asset Details</h1>
           </div>
 
-          <div className="bg-card rounded-xl border shadow-sm overflow-hidden">
+          <Card className="shadow-sm">
             {isEditing ? (
-              <div className="p-6">
+              <CardContent className="p-6">
                 <AssetDetailEdit asset={asset} onSave={handleSave} onCancel={handleCancelEdit} />
-              </div>
+              </CardContent>
             ) : (
-              <div className="p-6">
+              <CardContent className="p-6">
                 <AssetDetailView asset={asset} onEdit={handleEdit} onDelete={handleDelete} />
-              </div>
+              </CardContent>
             )}
-          </div>
+          </Card>
 
           {!isEditing && (
             <>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Technical Details Section */}
-                <section className="bg-card rounded-xl border shadow-sm p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <h2 className="text-xl font-medium">Technische Details</h2>
-                    <Separator className="flex-grow" />
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {asset.serialNumber && (
-                      <div className="space-y-1">
-                        <p className="text-sm text-muted-foreground">Seriennummer</p>
-                        <p className="font-medium tracking-wide border-b pb-1 border-border/30">{asset.serialNumber}</p>
-                      </div>
-                    )}
-                    
-                    {asset.inventoryNumber && (
-                      <div className="space-y-1">
-                        <p className="text-sm text-muted-foreground">Inventar-Nr.</p>
-                        <p className="font-medium border-b pb-1 border-border/30">{asset.inventoryNumber}</p>
-                      </div>
-                    )}
-                    
-                    {asset.imei && (
-                      <div className="space-y-1">
-                        <p className="text-sm text-muted-foreground">IMEI</p>
-                        <p className="font-medium border-b pb-1 border-border/30">{asset.imei}</p>
-                      </div>
-                    )}
-                    
-                    {asset.hasWarranty !== undefined && (
-                      <div className="space-y-1">
-                        <p className="text-sm text-muted-foreground">Garantie</p>
-                        <p className="font-medium border-b pb-1 border-border/30">
-                          {asset.hasWarranty ? "Ja" : "Nein"}
-                          {asset.additionalWarranty && ", erweitert"}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </section>
-
-                <div className="grid grid-cols-1 gap-6">
-                  {/* Employee Section */}
-                  <section className="bg-card rounded-xl border shadow-sm p-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <h2 className="text-xl font-medium">Zugewiesener Mitarbeiter</h2>
-                      <Separator className="flex-grow" />
-                    </div>
+                {/* Employee Section */}
+                <Card className="shadow-sm">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-xl">Zugewiesener Mitarbeiter</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
                     {asset.employeeId ? (
                       <div className="employee-content">
                         {/* Employee component from AssetDetailView will render here */}
@@ -260,40 +222,42 @@ export default function AssetDetail() {
                         <p>Kein Mitarbeiter zugewiesen</p>
                       </div>
                     )}
-                  </section>
+                  </CardContent>
+                </Card>
 
-                  {/* Document Section */}
-                  <section className="bg-card rounded-xl border shadow-sm p-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <h2 className="text-xl font-medium">Dokumente</h2>
-                      <Separator className="flex-grow" />
-                    </div>
+                {/* Document Section */}
+                <Card className="shadow-sm">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-xl">Dokumente</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
                     <DocumentUpload 
                       assetId={asset.id} 
                       documents={documents} 
                       onAddDocument={handleAddDocument} 
                       onDeleteDocument={handleDeleteDocument} 
                     />
-                  </section>
-                </div>
+                  </CardContent>
+                </Card>
               </div>
 
               {/* Asset History Section */}
-              <section className="bg-card rounded-xl border shadow-sm p-6 mt-2">
-                <div className="flex items-center gap-2 mb-4">
-                  <h2 className="text-xl font-medium">Asset Historie</h2>
-                  <Separator className="flex-grow" />
-                </div>
-                {!isHistoryLoading ? (
-                  <AssetHistoryTimeline history={assetHistory} />
-                ) : (
-                  <div className="space-y-2 py-4">
-                    <Skeleton className="h-12 w-full" />
-                    <Skeleton className="h-12 w-full" />
-                    <Skeleton className="h-12 w-full" />
-                  </div>
-                )}
-              </section>
+              <Card className="shadow-sm mt-2">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-xl">Asset Historie</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  {!isHistoryLoading ? (
+                    <AssetHistoryTimeline history={assetHistory} />
+                  ) : (
+                    <div className="space-y-2 py-4">
+                      <Skeleton className="h-12 w-full" />
+                      <Skeleton className="h-12 w-full" />
+                      <Skeleton className="h-12 w-full" />
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </>
           )}
         </div>
