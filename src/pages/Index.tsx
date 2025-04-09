@@ -1,6 +1,7 @@
+
 import { useEffect, useState } from "react";
 import PageTransition from "@/components/layout/PageTransition";
-import { DashboardStats, AssetTypeDistribution, AssetStatusDistribution, Asset } from "@/lib/types";
+import { DashboardStats, AssetTypeDistribution, AssetStatusDistribution, Asset, AssetType, AssetStatus } from "@/lib/types";
 import { getDashboardStats } from "@/data/helpers";
 import { getAssets } from "@/data/assets";
 import { getEmployees } from "@/data/employees";
