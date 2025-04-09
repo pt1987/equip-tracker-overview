@@ -3,10 +3,16 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { FilePlus } from "lucide-react";
+import { FilePlus, Upload } from "lucide-react";
 import { Document } from "./types";
 import { DocumentList } from "./DocumentList";
 import { DocumentUploadDialog } from "./DocumentUploadDialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from "@/components/ui/tooltip";
 
 interface DocumentUploadProps {
   assetId: string;
@@ -193,14 +199,21 @@ export default function DocumentUpload({
   return (
     <div>
       <div className="flex justify-end mb-4">
-        <Button 
-          size="sm" 
-          className="gap-1" 
-          onClick={() => setIsDialogOpen(true)}
-        >
-          <FilePlus size={16} />
-          Dokument hinzufügen
-        </Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setIsDialogOpen(true)}
+                className="rounded-full"
+              >
+                <Upload size={16} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Dokument hinzufügen</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
       <DocumentList 

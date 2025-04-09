@@ -18,16 +18,16 @@ export default function DocumentSection({
 }: DocumentSectionProps) {
   return (
     <Card className="shadow-sm">
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-3 flex flex-row items-center justify-between">
         <CardTitle className="text-xl">Dokumente</CardTitle>
-      </CardHeader>
-      <CardContent className="pt-0">
         <DocumentUpload 
           assetId={assetId} 
           documents={documents} 
           onAddDocument={onAddDocument} 
           onDeleteDocument={onDeleteDocument} 
         />
+      </CardHeader>
+      <CardContent className="pt-0">
       </CardContent>
     </Card>
   );
