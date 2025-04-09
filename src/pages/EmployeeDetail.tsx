@@ -1,3 +1,4 @@
+
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import PageTransition from "@/components/layout/PageTransition";
@@ -25,11 +26,13 @@ const EmployeeDetail = () => {
     if (id) {
       const fetchData = async () => {
         const employeeData = await getEmployeeById(id);
-        setEmployee(employeeData);
         
         if (employeeData) {
+          setEmployee(employeeData);
           const employeeAssets = await getAssetsByEmployeeId(employeeData.id);
           setAssets(employeeAssets);
+        } else {
+          setEmployee(null);
         }
         
         setLoading(false);
@@ -54,7 +57,7 @@ const EmployeeDetail = () => {
       const updatedEmployee = {
         ...employee,
         ...data,
-        startDate: data.startDate.toISOString(),
+        startDate: typeof data.startDate === 'object' ? data.startDate.toISOString() : data.startDate,
       };
       setEmployee(updatedEmployee);
     }

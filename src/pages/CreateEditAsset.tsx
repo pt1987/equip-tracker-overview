@@ -10,7 +10,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
-import { getAssets, getEmployees } from "@/data/mockData";
+import { getAssets } from "@/data/mockData";
+import { getEmployees } from "@/data/employees";
 import { createAsset, updateAsset } from "@/data/assets";
 import { assetFormSchema } from "@/components/assets/create-edit/AssetFormSchema";
 import type { AssetFormValues } from "@/components/assets/create-edit/AssetFormSchema";
@@ -18,7 +19,7 @@ import AssetFormBasicInfo from "@/components/assets/create-edit/AssetFormBasicIn
 import AssetFormDetails from "@/components/assets/create-edit/AssetFormDetails";
 import AssetFormWarranty from "@/components/assets/create-edit/AssetFormWarranty";
 import AssetFormRelation from "@/components/assets/create-edit/AssetFormRelation";
-import { AssetType, AssetStatus } from "@/lib/types";
+import { AssetType, AssetStatus, Employee } from "@/lib/types";
 
 export default function CreateEditAsset() {
   const { id } = useParams();

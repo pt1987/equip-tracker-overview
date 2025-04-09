@@ -66,12 +66,14 @@ export function HardwareOrderForm() {
       if (employeeId) {
         try {
           const employee = await getEmployeeById(employeeId);
-          setSelectedEmployee(employee);
-          if (employee && (employee.entryDate || employee.startDate)) {
-            const budgetCalc = calculateAvailableBudget(employee.entryDate || employee.startDate, employee.usedBudget);
-            setBudgetInfo(budgetCalc);
-          } else {
-            setBudgetInfo(null);
+          if (employee) {
+            setSelectedEmployee(employee);
+            if (employee.entryDate || employee.startDate) {
+              const budgetCalc = calculateAvailableBudget(employee.entryDate || employee.startDate, employee.usedBudget);
+              setBudgetInfo(budgetCalc);
+            } else {
+              setBudgetInfo(null);
+            }
           }
         } catch (error) {
           console.error("Error fetching employee data:", error);

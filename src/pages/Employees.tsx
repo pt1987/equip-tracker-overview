@@ -17,17 +17,11 @@ const EmployeesPage = () => {
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
   const [view, setView] = useState<"grid" | "list">("grid");
   
-  const { data: employeesData = [], isLoading } = useQuery({
+  const { data: employees = [], isLoading } = useQuery({
     queryKey: ['employees'],
     queryFn: getEmployees
   });
-
-  // Convert to Employee type from lib/types.ts
-  const employees: Employee[] = employeesData.map(emp => ({
-    ...emp,
-    imageUrl: emp.imageUrl || ''
-  }));
-
+  
   const clusters = [...new Set(employees.map(emp => emp.cluster))];
   
   useEffect(() => {

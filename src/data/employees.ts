@@ -1,23 +1,25 @@
-import { supabase } from "@/integrations/supabase/client";
-import { Asset } from "@/lib/types";
 
-export interface Employee {
+import { supabase } from "@/integrations/supabase/client";
+import { Asset, Employee as EmployeeType } from "@/lib/types";
+
+// This interface is for internal use in this file only
+interface EmployeeData {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
   position: string;
   cluster: string;
-  startDate?: Date;
+  startDate?: string | Date;
   entryDate?: string;
   budget: number;
-  usedBudget?: number;
-  imageUrl?: string;
+  usedBudget: number;
+  imageUrl: string;
   profileImage?: string;
   assets?: Asset[];
 }
 
-export const getEmployeeById = async (id: string): Promise<Employee | null> => {
+export const getEmployeeById = async (id: string): Promise<EmployeeType | null> => {
   try {
     const { data, error } = await supabase
       .from('employees')
@@ -51,11 +53,11 @@ export const getEmployeeById = async (id: string): Promise<Employee | null> => {
       email: data.profiles?.email || '',
       position: data.position,
       cluster: data.cluster,
-      startDate: data.start_date ? new Date(data.start_date) : undefined,
+      startDate: data.start_date || '',
       entryDate: data.entry_date,
       budget: data.budget || 0,
       usedBudget: data.used_budget || 0,
-      imageUrl: data.image_url || undefined,
+      imageUrl: data.image_url || '',
       profileImage: data.profile_image || undefined,
     };
   } catch (error) {
@@ -64,7 +66,7 @@ export const getEmployeeById = async (id: string): Promise<Employee | null> => {
   }
 };
 
-export const getEmployees = async (): Promise<Employee[]> => {
+export const getEmployees = async (): Promise<EmployeeType[]> => {
   try {
     const { data, error } = await supabase
       .from('employees')
@@ -94,11 +96,11 @@ export const getEmployees = async (): Promise<Employee[]> => {
       email: emp.profiles?.email || '',
       position: emp.position,
       cluster: emp.cluster,
-      startDate: emp.start_date ? new Date(emp.start_date) : undefined,
+      startDate: emp.start_date || '',
       entryDate: emp.entry_date,
       budget: emp.budget || 0,
       usedBudget: emp.used_budget || 0,
-      imageUrl: emp.image_url || undefined,
+      imageUrl: emp.image_url || '',
       profileImage: emp.profile_image || undefined,
     }));
   } catch (error) {
