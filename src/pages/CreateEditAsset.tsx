@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import PageTransition from "@/components/layout/PageTransition";
 import { Button } from "@/components/ui/button";
@@ -33,10 +33,11 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { toast } from "@/hooks/use-toast";
-import { getAssets, getEmployees } from "@/data/mockData";
+import { useToast } from "@/hooks/use-toast";
+import { getAssets, getEmployees, updateAsset } from "@/data/mockData";
+import { supabase } from "@/integrations/supabase/client";
+import { AssetStatus, AssetType } from "@/lib/types";
 
-// Schema for the form
 const assetFormSchema = z.object({
   category: z.string().min(1, "Bitte wählen Sie eine Kategorie"),
   manufacturer: z.string().min(1, "Bitte geben Sie einen Hersteller an"),
@@ -46,7 +47,6 @@ const assetFormSchema = z.object({
   purchaseDate: z.string().min(1, "Bitte geben Sie ein Kaufdatum an"),
   price: z.coerce.number().min(0, "Der Preis darf nicht negativ sein"),
   vendor: z.string().optional(),
-  // Extended fields for different categories
   serialNumber: z.string().optional(),
   inventoryNumber: z.string().optional(),
   hasWarranty: z.boolean().optional(),
@@ -65,6 +65,7 @@ export default function CreateEditAsset() {
   const navigate = useNavigate();
   const isEditing = !!id;
   const [activeTab, setActiveTab] = useState("basic");
+  const { toast } = useToast();
 
   const { data: assets = [] } = useQuery({
     queryKey: ["assets"],
@@ -119,7 +120,6 @@ export default function CreateEditAsset() {
     }
   });
 
-  // When the category changes, we set the active tab
   const watchCategory = form.watch("category");
   useEffect(() => {
     if (["notebook", "smartphone", "tablet"].includes(watchCategory)) {
@@ -131,18 +131,75 @@ export default function CreateEditAsset() {
     }
   }, [watchCategory]);
 
+  const mutation = useMutation({
+    mutationFn: async (data: AssetFormValues) => {
+      console.log("Submitting asset data:", data);
+      
+      const dbAsset = {
+        name: `${data.manufacturer} ${data.model}`,
+        type: data.category as AssetType,
+        manufacturer: data.manufacturer,
+        model: data.model,
+        purchase_date: data.purchaseDate,
+        vendor: data.vendor || "",
+        price: data.price,
+        status: data.status as AssetStatus,
+        employee_id: data.assignedTo !== "pool" ? data.assignedTo : null,
+        category: data.category,
+        serial_number: data.serialNumber,
+        inventory_number: data.inventoryNumber,
+        additional_warranty: data.hasWarranty,
+        has_warranty: data.hasWarranty,
+        imei: data.imei,
+        phone_number: data.phoneNumber,
+        provider: data.provider,
+        contract_end_date: data.contractDuration,
+        contract_name: data.contractName,
+        connected_asset_id: data.relatedAssetId !== "none" ? data.relatedAssetId : null,
+        related_asset_id: data.relatedAssetId !== "none" ? data.relatedAssetId : null
+      };
+
+      if (isEditing && id) {
+        const { data: updatedAsset, error } = await supabase
+          .from('assets')
+          .update(dbAsset)
+          .eq('id', id)
+          .select()
+          .single();
+        
+        if (error) throw error;
+        return updatedAsset;
+      } else {
+        const { data: newAsset, error } = await supabase
+          .from('assets')
+          .insert(dbAsset)
+          .select()
+          .single();
+        
+        if (error) throw error;
+        return newAsset;
+      }
+    },
+    onSuccess: () => {
+      toast({
+        title: isEditing ? "Asset aktualisiert" : "Asset erstellt",
+        description: `${form.getValues("manufacturer")} ${form.getValues("model")} wurde erfolgreich ${isEditing ? 'aktualisiert' : 'erstellt'}.`,
+      });
+      navigate("/assets");
+    },
+    onError: (error) => {
+      console.error("Error saving asset:", error);
+      toast({
+        variant: "destructive",
+        title: isEditing ? "Fehler beim Aktualisieren" : "Fehler beim Erstellen",
+        description: `Das Asset konnte nicht gespeichert werden: ${error.message}`,
+      });
+    }
+  });
+
   const onSubmit = (data: AssetFormValues) => {
-    // In a real application, we would send the data to the API
-    console.log(data);
-    
-    // Show toast message
-    toast({
-      title: isEditing ? "Asset aktualisiert" : "Asset erstellt",
-      description: `${data.manufacturer} ${data.model} wurde erfolgreich ${isEditing ? 'aktualisiert' : 'erstellt'}.`,
-    });
-    
-    // Navigate back to the asset overview
-    navigate("/assets");
+    console.log("Form submitted with data:", data);
+    mutation.mutate(data);
   };
 
   return (
@@ -228,9 +285,9 @@ export default function CreateEditAsset() {
                                 <SelectContent>
                                   <SelectItem value="ordered">Bestellt</SelectItem>
                                   <SelectItem value="delivered">Geliefert</SelectItem>
-                                  <SelectItem value="in_use">In Gebrauch</SelectItem>
+                                  <SelectItem value="in_use">Aktiv</SelectItem>
                                   <SelectItem value="defective">Defekt</SelectItem>
-                                  <SelectItem value="in_repair">In Reparatur</SelectItem>
+                                  <SelectItem value="repair">In Reparatur</SelectItem>
                                   <SelectItem value="pool">Pool</SelectItem>
                                 </SelectContent>
                               </Select>
@@ -539,8 +596,11 @@ export default function CreateEditAsset() {
                   >
                     Abbrechen
                   </Button>
-                  <Button type="submit">
-                    {isEditing ? "Speichern" : "Erstellen"}
+                  <Button 
+                    type="submit"
+                    disabled={mutation.isPending}
+                  >
+                    {mutation.isPending ? 'Wird gespeichert...' : (isEditing ? "Speichern" : "Erstellen")}
                   </Button>
                 </CardFooter>
               </Card>
