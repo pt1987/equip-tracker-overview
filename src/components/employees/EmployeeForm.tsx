@@ -62,7 +62,6 @@ export default function EmployeeFormFields() {
                 type="email" 
                 placeholder="max.mustermann@unternehmen.de" 
                 {...field} 
-                value={field.value || ''}
               />
             </FormControl>
             <FormMessage />
@@ -143,27 +142,6 @@ export default function EmployeeFormFields() {
             </FormControl>
             <FormDescription>
               Verfügbares Budget für Hardware-Anschaffungen
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      
-      <FormField
-        control={form.control}
-        name="profileImage"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Profilbild (optional)</FormLabel>
-            <FormControl>
-              <Input 
-                placeholder="Bild hochladen (optional)" 
-                {...field}
-                value={field.value || ''}
-              />
-            </FormControl>
-            <FormDescription>
-              Kann später hinzugefügt werden
             </FormDescription>
             <FormMessage />
           </FormItem>

@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Asset, Employee as EmployeeType } from "@/lib/types";
 
@@ -37,7 +36,8 @@ export const getEmployeeById = async (id: string): Promise<EmployeeType | null> 
         budget,
         used_budget,
         image_url,
-        profile_image
+        profile_image,
+        email
       `)
       .eq('id', id)
       .single();
@@ -49,24 +49,11 @@ export const getEmployeeById = async (id: string): Promise<EmployeeType | null> 
 
     if (!employeeData) return null;
 
-    // Get email using our secure function
-    const { data: emailData, error: emailError } = await supabase
-      .rpc('get_safe_user_email', { user_id: id }) as { data: string | null, error: any };
-    
-    let email = '';
-    
-    if (emailError) {
-      console.error("Error fetching email using RPC:", emailError);
-    } else {
-      email = emailData || '';
-      console.log("Found email using secure function:", email);
-    }
-
     return {
       id: employeeData.id,
       firstName: employeeData.first_name,
       lastName: employeeData.last_name,
-      email: email,
+      email: employeeData.email || '', // Use email directly from employees table
       position: employeeData.position,
       cluster: employeeData.cluster,
       startDate: employeeData.start_date || '',
@@ -98,33 +85,17 @@ export const getEmployees = async (): Promise<EmployeeType[]> => {
         budget,
         used_budget,
         image_url,
-        profile_image
+        profile_image,
+        email
       `);
 
     if (employeesError) throw employeesError;
-
-    // Use a map to store emails for each employee
-    const emails = new Map<string, string>();
-    
-    // For each employee, try to get their email using our secure function
-    for (const emp of employeesData) {
-      try {
-        const { data: emailData } = await supabase
-          .rpc('get_safe_user_email', { user_id: emp.id }) as { data: string | null, error: any };
-          
-        if (emailData) {
-          emails.set(emp.id, emailData);
-        }
-      } catch (err) {
-        console.error(`Error fetching email for employee ${emp.id}:`, err);
-      }
-    }
 
     return employeesData.map(emp => ({
       id: emp.id,
       firstName: emp.first_name,
       lastName: emp.last_name,
-      email: emails.get(emp.id) || '',
+      email: emp.email || '', // Use email directly from employees table
       position: emp.position,
       cluster: emp.cluster,
       startDate: emp.start_date || '',
@@ -179,7 +150,7 @@ export const createEmployee = async (employeeData: {
     // Generate a UUID for the employee
     const employeeId = crypto.randomUUID();
     
-    // Create the employee record without trying to reference profiles table
+    // Create the employee record with email directly in employees table
     const { error: employeeError } = await supabase
       .from('employees')
       .insert([{
@@ -194,27 +165,12 @@ export const createEmployee = async (employeeData: {
         used_budget: 0,
         image_url: employeeData.image_url,
         profile_image: employeeData.profile_image,
+        email: employeeData.email, // Store email directly in employees table
       }]);
       
     if (employeeError) {
       console.error("Failed to create employee:", employeeError);
       throw new Error(`Failed to create employee: ${employeeError.message}`);
-    }
-    
-    // Update email separately using our secure function
-    if (employeeData.email) {
-      const { data: emailUpdateResult, error: emailUpdateError } = await supabase
-        .rpc('update_user_email', {
-          user_id: employeeId,
-          new_email: employeeData.email
-        }) as { data: boolean | null, error: any };
-        
-      if (emailUpdateError) {
-        console.error("Error updating email:", emailUpdateError);
-        // Continue anyway, we at least created the employee
-      } else {
-        console.log("Email updated successfully:", employeeData.email);
-      }
     }
     
     return employeeId;
@@ -238,7 +194,7 @@ export const updateEmployee = async (id: string, employeeData: {
   try {
     console.log(`Updating employee ${id} with data:`, employeeData);
     
-    // Update the employee record first
+    // Update the employee record with email directly in employees table
     const { error: employeeError } = await supabase
       .from('employees')
       .update({
@@ -250,33 +206,14 @@ export const updateEmployee = async (id: string, employeeData: {
         entry_date: employeeData.start_date,
         budget: employeeData.budget,
         image_url: employeeData.image_url,
-        profile_image: employeeData.profile_image
+        profile_image: employeeData.profile_image,
+        email: employeeData.email, // Store email directly in employees table
       })
       .eq('id', id);
       
     if (employeeError) {
       console.error("Error updating employee record:", employeeError);
       throw employeeError;
-    }
-    
-    // Update email separately using our secure function
-    if (employeeData.email) {
-      console.log(`Updating email for user ${id} to ${employeeData.email} using RPC function`);
-      
-      const { data: emailUpdateResult, error: emailUpdateError } = await supabase
-        .rpc('update_user_email', {
-          user_id: id,
-          new_email: employeeData.email
-        }) as { data: boolean | null, error: any };
-        
-      if (emailUpdateError) {
-        console.error("Error updating email with RPC function:", emailUpdateError);
-        // Continue execution - we at least updated the employee
-      } else {
-        console.log("Email update result:", emailUpdateResult);
-      }
-    } else {
-      console.log("No email provided for update, skipping email update");
     }
     
     console.log("Employee update completed successfully");

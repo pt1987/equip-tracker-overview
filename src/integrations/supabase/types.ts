@@ -174,6 +174,7 @@ export type Database = {
           budget: number
           cluster: string
           created_at: string | null
+          email: string | null
           entry_date: string | null
           first_name: string
           id: string
@@ -190,6 +191,7 @@ export type Database = {
           budget?: number
           cluster: string
           created_at?: string | null
+          email?: string | null
           entry_date?: string | null
           first_name: string
           id: string
@@ -206,6 +208,7 @@ export type Database = {
           budget?: number
           cluster?: string
           created_at?: string | null
+          email?: string | null
           entry_date?: string | null
           first_name?: string
           id?: string
