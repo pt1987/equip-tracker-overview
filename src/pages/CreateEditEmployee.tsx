@@ -63,7 +63,32 @@ export default function CreateEditEmployee() {
       // Generate UUID for new employee
       const employeeId = isEditing ? id : crypto.randomUUID();
       
-      // Prepare data in the format expected by Supabase
+      // First, we need to create or update a profile entry
+      // This is necessary because employees table has a foreign key constraint to profiles
+      const profileData = {
+        id: employeeId,
+        name: `${data.firstName} ${data.lastName}`,
+        email: `${data.firstName.toLowerCase()}.${data.lastName.toLowerCase()}@example.com`, // Using a placeholder email
+        role: 'user'
+      };
+
+      // Create or update the profile first
+      if (isEditing) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update(profileData)
+          .eq('id', employeeId);
+          
+        if (profileError) throw profileError;
+      } else {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert([profileData]);
+          
+        if (profileError) throw profileError;
+      }
+      
+      // Now prepare the employee data
       const employeeData = {
         id: employeeId,
         first_name: data.firstName,
@@ -77,7 +102,7 @@ export default function CreateEditEmployee() {
         profile_image: data.profileImage || null
       };
       
-      // Insert or update data in Supabase
+      // Insert or update the employee data
       if (isEditing) {
         const { error } = await supabase
           .from('employees')
