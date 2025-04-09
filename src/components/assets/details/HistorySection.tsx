@@ -20,7 +20,13 @@ export default function HistorySection({
       </CardHeader>
       <CardContent className="pt-0">
         {!isHistoryLoading ? (
-          <AssetHistoryTimeline history={assetHistory} />
+          assetHistory && assetHistory.length > 0 ? (
+            <AssetHistoryTimeline history={assetHistory} />
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              Keine Historieneinträge für dieses Asset vorhanden.
+            </div>
+          )
         ) : (
           <div className="space-y-2 py-4">
             <Skeleton className="h-12 w-full" />

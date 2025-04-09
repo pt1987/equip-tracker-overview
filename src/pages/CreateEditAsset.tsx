@@ -35,7 +35,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { getAssets, getEmployees } from "@/data/mockData";
-import { supabase } from "@/integrations/supabase/client";
+import { createAsset, updateAsset } from "@/data/assets";
 import { AssetStatus, AssetType } from "@/lib/types";
 
 const assetFormSchema = z.object({
@@ -146,55 +146,40 @@ export default function CreateEditAsset() {
     mutationFn: async (data: AssetFormValues) => {
       console.log("Submitting asset data:", data);
       
-      // Format the date correctly for PostgreSQL
       const formattedPurchaseDate = data.purchaseDate ? data.purchaseDate : null;
       const formattedWarrantyDate = data.hasWarranty && data.warrantyExpiryDate ? data.warrantyExpiryDate : null;
       
-      const dbAsset = {
+      const assetData = {
+        id: isEditing && id ? id : crypto.randomUUID(),
         name: `${data.manufacturer} ${data.model}`,
         type: data.category as AssetType,
         manufacturer: data.manufacturer,
         model: data.model,
-        purchase_date: formattedPurchaseDate,
+        purchaseDate: formattedPurchaseDate,
         vendor: data.vendor || "",
         price: data.price,
         status: data.status as AssetStatus,
-        employee_id: data.assignedTo && data.assignedTo !== "pool" ? data.assignedTo : null,
+        employeeId: data.assignedTo && data.assignedTo !== "pool" ? data.assignedTo : null,
         category: data.category,
-        serial_number: data.serialNumber || "",
-        inventory_number: data.inventoryNumber || "",
-        has_warranty: data.hasWarranty || false,
-        additional_warranty: data.additionalWarranty || false,
-        warranty_expiry_date: formattedWarrantyDate,
-        warranty_info: data.warrantyInfo || "",
+        serialNumber: data.serialNumber || "",
+        inventoryNumber: data.inventoryNumber || "",
+        hasWarranty: data.hasWarranty || false,
+        additionalWarranty: data.additionalWarranty || false,
+        warrantyExpiryDate: formattedWarrantyDate,
+        warrantyInfo: data.warrantyInfo || "",
         imei: data.imei || "",
-        phone_number: data.phoneNumber || "",
+        phoneNumber: data.phoneNumber || "",
         provider: data.provider || "",
-        contract_end_date: data.contractDuration || null,
-        contract_name: data.contractName || "",
-        connected_asset_id: data.relatedAssetId && data.relatedAssetId !== "none" ? data.relatedAssetId : null,
-        related_asset_id: data.relatedAssetId && data.relatedAssetId !== "none" ? data.relatedAssetId : null
+        contractEndDate: data.contractDuration || null,
+        contractName: data.contractName || "",
+        connectedAssetId: data.relatedAssetId && data.relatedAssetId !== "none" ? data.relatedAssetId : null,
+        relatedAssetId: data.relatedAssetId && data.relatedAssetId !== "none" ? data.relatedAssetId : null
       };
 
       if (isEditing && id) {
-        const { data: updatedAsset, error } = await supabase
-          .from('assets')
-          .update(dbAsset)
-          .eq('id', id)
-          .select()
-          .single();
-        
-        if (error) throw error;
-        return updatedAsset;
+        return await updateAsset(assetData);
       } else {
-        const { data: newAsset, error } = await supabase
-          .from('assets')
-          .insert(dbAsset)
-          .select()
-          .single();
-        
-        if (error) throw error;
-        return newAsset;
+        return await createAsset(assetData);
       }
     },
     onSuccess: () => {
