@@ -69,7 +69,7 @@ export default function CreateEditEmployee() {
         // Update existing employee
         await updateExistingEmployee(employeeId as string, data);
       } else {
-        // Create new employee without auth account
+        // Create new employee record
         await createNewEmployee(employeeId, data);
       }
       
@@ -94,9 +94,8 @@ export default function CreateEditEmployee() {
   };
 
   const updateExistingEmployee = async (employeeId: string, data: EmployeeFormValues) => {
-    // Update employee data directly, without updating auth
+    // Update employee data in employees table
     const employeeData = {
-      id: employeeId,
       first_name: data.firstName,
       last_name: data.lastName,
       position: data.position,
@@ -108,21 +107,41 @@ export default function CreateEditEmployee() {
       profile_image: data.profileImage || null
     };
 
-    const { error } = await supabase
+    const { error: employeeError } = await supabase
       .from('employees')
       .update(employeeData)
       .eq('id', employeeId);
       
-    if (error) throw error;
+    if (employeeError) throw employeeError;
+    
+    // Update email in profiles table
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({ email: data.email })
+      .eq('id', employeeId);
+      
+    if (profileError) throw profileError;
   };
 
   const createNewEmployee = async (employeeId: string, data: EmployeeFormValues) => {
-    // Just create employee record without auth, use the generated UUID
+    // Create profiles record with email
+    const profileData = {
+      id: employeeId,
+      email: data.email,
+      name: `${data.firstName} ${data.lastName}`
+    };
+    
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .insert([profileData]);
+      
+    if (profileError) throw profileError;
+    
+    // Create employee record
     const employeeData = {
       id: employeeId,
       first_name: data.firstName,
       last_name: data.lastName,
-      email: data.email,
       position: data.position,
       cluster: data.cluster,
       start_date: new Date(data.entryDate).toISOString(),
@@ -137,7 +156,7 @@ export default function CreateEditEmployee() {
       .from('employees')
       .insert([employeeData]);
       
-    if (employeeError) throw new Error(`Fehler beim Erstellen des Mitarbeiters: ${employeeError.message}`);
+    if (employeeError) throw employeeError;
   };
 
   return (

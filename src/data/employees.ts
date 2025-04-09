@@ -34,8 +34,7 @@ export const getEmployeeById = async (id: string): Promise<EmployeeType | null> 
         budget,
         used_budget,
         image_url,
-        profile_image,
-        email
+        profile_image
       `)
       .eq('id', id)
       .single();
@@ -44,11 +43,22 @@ export const getEmployeeById = async (id: string): Promise<EmployeeType | null> 
 
     if (!data) return null;
 
+    // Join with profiles table to get the email
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('email')
+      .eq('id', id)
+      .single();
+
+    if (profileError) {
+      console.error("Error fetching profile data:", profileError);
+    }
+
     return {
       id: data.id,
       firstName: data.first_name,
       lastName: data.last_name,
-      email: data.email || '',
+      email: profileData?.email || '',
       position: data.position,
       cluster: data.cluster,
       startDate: data.start_date || '',
@@ -66,7 +76,8 @@ export const getEmployeeById = async (id: string): Promise<EmployeeType | null> 
 
 export const getEmployees = async (): Promise<EmployeeType[]> => {
   try {
-    const { data, error } = await supabase
+    // Get all employees from employees table
+    const { data: employeesData, error: employeesError } = await supabase
       .from('employees')
       .select(`
         id,
@@ -79,17 +90,33 @@ export const getEmployees = async (): Promise<EmployeeType[]> => {
         budget,
         used_budget,
         image_url,
-        profile_image,
-        email
+        profile_image
       `);
 
-    if (error) throw error;
+    if (employeesError) throw employeesError;
 
-    return data.map(emp => ({
+    // Get all emails from profiles table
+    const { data: profilesData, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id, email');
+
+    if (profilesError) {
+      console.error("Error fetching profiles:", profilesError);
+    }
+
+    // Create a map of profile IDs to emails
+    const emailMap = new Map();
+    if (profilesData) {
+      profilesData.forEach(profile => {
+        emailMap.set(profile.id, profile.email);
+      });
+    }
+
+    return employeesData.map(emp => ({
       id: emp.id,
       firstName: emp.first_name,
       lastName: emp.last_name,
-      email: emp.email || '',
+      email: emailMap.get(emp.id) || '',
       position: emp.position,
       cluster: emp.cluster,
       startDate: emp.start_date || '',
