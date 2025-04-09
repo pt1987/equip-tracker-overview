@@ -18,6 +18,12 @@ export default function DocumentSection({
   onAddDocument,
   onDeleteDocument
 }: DocumentSectionProps) {
+  // Create a wrapper function that adapts the onDeleteDocument to match the expected signature
+  const handleDeleteDocument = async (documentId: string, docName: string): Promise<void> => {
+    onDeleteDocument(documentId);
+    return Promise.resolve();
+  };
+
   return <Card className="shadow-sm">
       <div className="border-b">
         <CardHeader className="flex flex-row items-center justify-between py-4 px-6">
@@ -34,7 +40,7 @@ export default function DocumentSection({
         </CardHeader>
       </div>
       <CardContent className="p-6">
-        <DocumentList documents={documents} onDeleteDocument={onDeleteDocument} />
+        <DocumentList documents={documents} onDeleteDocument={handleDeleteDocument} />
       </CardContent>
     </Card>;
 }
