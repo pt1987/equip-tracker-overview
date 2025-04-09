@@ -26,6 +26,7 @@ export default function EmployeeDetailEdit({
     defaultValues: {
       firstName: employee.firstName,
       lastName: employee.lastName,
+      email: employee.email || "",
       position: employee.position,
       cluster: employee.cluster,
       entryDate: new Date(employee.startDate).toISOString().split('T')[0],

@@ -2,7 +2,7 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import PageTransition from "@/components/layout/PageTransition";
-import { getEmployeeById } from "@/data/employees";
+import { getEmployeeById, updateEmployee } from "@/data/employees";
 import { getAssetsByEmployeeId } from "@/data/assets";
 import { Asset, Employee } from "@/lib/types";
 import { ChevronLeft } from "lucide-react";
@@ -24,23 +24,26 @@ const EmployeeDetail = () => {
   
   useEffect(() => {
     if (id) {
-      const fetchData = async () => {
-        const employeeData = await getEmployeeById(id);
-        
-        if (employeeData) {
-          setEmployee(employeeData);
-          const employeeAssets = await getAssetsByEmployeeId(employeeData.id);
-          setAssets(employeeAssets);
-        } else {
-          setEmployee(null);
-        }
-        
-        setLoading(false);
-      };
-      
-      fetchData();
+      fetchEmployeeData();
     }
   }, [id]);
+  
+  const fetchEmployeeData = async () => {
+    if (!id) return;
+    
+    setLoading(true);
+    const employeeData = await getEmployeeById(id);
+    
+    if (employeeData) {
+      setEmployee(employeeData);
+      const employeeAssets = await getAssetsByEmployeeId(employeeData.id);
+      setAssets(employeeAssets);
+    } else {
+      setEmployee(null);
+    }
+    
+    setLoading(false);
+  };
   
   const handleEdit = () => {
     setIsEditing(true);
@@ -50,24 +53,56 @@ const EmployeeDetail = () => {
     setIsEditing(false);
   };
   
-  const handleSave = (data: any) => {
+  const handleSave = async (data: any) => {
     console.log("Updated employee data:", data);
     
-    if (employee) {
-      const updatedEmployee = {
-        ...employee,
-        ...data,
-        startDate: typeof data.startDate === 'object' ? data.startDate.toISOString() : data.startDate,
-      };
-      setEmployee(updatedEmployee);
+    if (employee && id) {
+      try {
+        // Save to database
+        const success = await updateEmployee(id, {
+          first_name: data.firstName,
+          last_name: data.lastName,
+          email: data.email,
+          position: data.position,
+          cluster: data.cluster,
+          start_date: data.entryDate || data.startDate,
+          budget: data.budget,
+          image_url: data.imageUrl || data.profileImage,
+          profile_image: data.imageUrl || data.profileImage
+        });
+        
+        if (!success) {
+          throw new Error("Failed to update employee");
+        }
+        
+        // Update the employee state with the new data
+        const updatedEmployee = {
+          ...employee,
+          ...data,
+          startDate: typeof data.startDate === 'object' ? data.startDate.toISOString() : data.startDate,
+          imageUrl: data.imageUrl || data.profileImage,
+        };
+        
+        setEmployee(updatedEmployee);
+        
+        toast({
+          title: "Mitarbeiter aktualisiert",
+          description: "Die Änderungen wurden erfolgreich gespeichert."
+        });
+        
+        // Reload employee data to ensure we have the latest
+        fetchEmployeeData();
+      } catch (error) {
+        console.error("Error updating employee:", error);
+        toast({
+          variant: "destructive",
+          title: "Fehler beim Speichern",
+          description: "Die Änderungen konnten nicht gespeichert werden."
+        });
+      }
     }
     
     setIsEditing(false);
-    
-    toast({
-      title: "Mitarbeiter aktualisiert",
-      description: "Die Änderungen wurden erfolgreich gespeichert."
-    });
   };
   
   const handleDelete = () => {

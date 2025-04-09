@@ -12,14 +12,14 @@ import {
   CardTitle 
 } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
-import { getEmployees, createEmployee, updateEmployee } from "@/data/employees";
+import { getEmployees, createEmployee, updateEmployee, getEmployeeById } from "@/data/employees";
 import { uploadEmployeeImage } from "@/data/employees/storage";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@/hooks/use-toast";
 import EmployeeFormFields from "@/components/employees/EmployeeForm";
 import { employeeFormSchema, EmployeeFormValues } from "@/components/employees/EmployeeFormTypes";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function CreateEditEmployee() {
   const { id } = useParams();
@@ -29,26 +29,39 @@ export default function CreateEditEmployee() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [employee, setEmployee] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(isEditing);
 
-  const { data: employeeData = [] } = useQuery({
-    queryKey: ["employees"],
-    queryFn: getEmployees,
-  });
+  // Load employee data if editing
+  useEffect(() => {
+    const loadEmployee = async () => {
+      if (isEditing && id) {
+        setIsLoading(true);
+        try {
+          const employeeData = await getEmployeeById(id);
+          if (employeeData) {
+            setEmployee(employeeData);
+            setImagePreview(employeeData.imageUrl || null);
+          }
+        } catch (error) {
+          console.error("Error loading employee:", error);
+          toast({
+            variant: "destructive",
+            title: "Fehler beim Laden",
+            description: "Mitarbeiterdaten konnten nicht geladen werden."
+          });
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
 
-  const employee = isEditing ? employeeData.find(e => e.id === id) : null;
+    loadEmployee();
+  }, [isEditing, id]);
 
   const form = useForm<EmployeeFormValues>({
     resolver: zodResolver(employeeFormSchema),
-    defaultValues: isEditing && employee ? {
-      firstName: employee.firstName || "",
-      lastName: employee.lastName || "",
-      email: employee.email || "",
-      position: employee.position || "",
-      cluster: employee.cluster || "",
-      entryDate: employee.entryDate || employee.startDate ? new Date(employee.startDate).toISOString().split('T')[0] : "",
-      budget: employee.budget || 0,
-      profileImage: employee.profileImage || employee.imageUrl || "",
-    } : {
+    defaultValues: {
       firstName: "",
       lastName: "",
       email: "",
@@ -57,8 +70,24 @@ export default function CreateEditEmployee() {
       entryDate: new Date().toISOString().split('T')[0],
       budget: 5000,
       profileImage: "",
-    }
+    },
   });
+
+  // Update form when employee data is loaded
+  useEffect(() => {
+    if (employee) {
+      form.reset({
+        firstName: employee.firstName || "",
+        lastName: employee.lastName || "",
+        email: employee.email || "",
+        position: employee.position || "",
+        cluster: employee.cluster || "",
+        entryDate: employee.startDate ? new Date(employee.startDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        budget: employee.budget || 5000,
+        profileImage: employee.imageUrl || "",
+      });
+    }
+  }, [employee, form]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -169,59 +198,65 @@ export default function CreateEditEmployee() {
             </div>
           </div>
 
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Mitarbeiter Details</CardTitle>
-                  <CardDescription>
-                    Geben Sie die Informationen für diesen Mitarbeiter ein
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="card-content">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                    <div className="col-span-1">
-                      <div className="aspect-square bg-muted rounded-full overflow-hidden relative group">
-                        <img
-                          src={imagePreview || form.watch("profileImage") || "/placeholder.svg"}
-                          alt="Profile"
-                          className="w-full h-full object-cover object-center"
-                        />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <label className="cursor-pointer px-3 py-2 bg-background rounded-md text-sm font-medium">
-                            Bild auswählen
-                            <input
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={handleImageChange}
-                            />
-                          </label>
+          {isLoading ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+            </div>
+          ) : (
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Mitarbeiter Details</CardTitle>
+                    <CardDescription>
+                      Geben Sie die Informationen für diesen Mitarbeiter ein
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="card-content">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                      <div className="col-span-1">
+                        <div className="aspect-square bg-muted rounded-full overflow-hidden relative group">
+                          <img
+                            src={imagePreview || form.watch("profileImage") || "/placeholder.svg"}
+                            alt="Profile"
+                            className="w-full h-full object-cover object-center"
+                          />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <label className="cursor-pointer px-3 py-2 bg-background rounded-md text-sm font-medium">
+                              Bild auswählen
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleImageChange}
+                              />
+                            </label>
+                          </div>
                         </div>
                       </div>
+                      <div className="col-span-2">
+                        <EmployeeFormFields />
+                      </div>
                     </div>
-                    <div className="col-span-2">
-                      <EmployeeFormFields />
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter className="flex justify-between">
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={() => navigate(-1)}
-                  >
-                    Abbrechen
-                  </Button>
-                  <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting 
-                      ? isEditing ? "Wird gespeichert..." : "Wird erstellt..." 
-                      : isEditing ? "Speichern" : "Erstellen"}
-                  </Button>
-                </CardFooter>
-              </Card>
-            </form>
-          </Form>
+                  </CardContent>
+                  <CardFooter className="flex justify-between">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => navigate(-1)}
+                    >
+                      Abbrechen
+                    </Button>
+                    <Button type="submit" disabled={isSubmitting}>
+                      {isSubmitting 
+                        ? isEditing ? "Wird gespeichert..." : "Wird erstellt..." 
+                        : isEditing ? "Speichern" : "Erstellen"}
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </form>
+            </Form>
+          )}
         </div>
       </div>
     </PageTransition>

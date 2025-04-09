@@ -31,6 +31,8 @@ export const uploadEmployeeImage = async (file: File, employeeId: string): Promi
       .from('employee-images')
       .getPublicUrl(filePath);
     
+    console.log("Successfully uploaded image, public URL:", publicUrlData.publicUrl);
+    
     return publicUrlData.publicUrl;
   } catch (error) {
     console.error("Error in uploadEmployeeImage:", error);
