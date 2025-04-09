@@ -1,15 +1,19 @@
+
 import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useFormContext, useWatch } from "react-hook-form";
-import { getEmployees } from "@/data/employees";
+import { getEmployeeById, getEmployees } from "@/data/employees";
 import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
-import { hardwareCategoryInfo } from "@/lib/hardware-order-types";
+import { hardwareCategoryInfo, calculateAvailableBudget } from "@/lib/hardware-order-types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CircleDollarSign, HelpCircle, InfoIcon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Employee } from "@/lib/types";
+import { formatCurrency } from "@/lib/utils";
+
 export function HardwareOrderForm() {
   const {
     control
@@ -18,6 +22,13 @@ export function HardwareOrderForm() {
     label: string;
     value: string;
   }[]>([]);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [budgetInfo, setBudgetInfo] = useState<{
+    totalBudget: number;
+    availableBudget: number;
+    budgetExceeded: boolean;
+  } | null>(null);
+  
   const selectedCategory = useWatch({
     control,
     name: "articleCategory"
@@ -26,6 +37,12 @@ export function HardwareOrderForm() {
     control,
     name: "estimatedPrice"
   });
+  const employeeId = useWatch({
+    control,
+    name: "employeeId"
+  });
+  
+  // Fetch employee options for dropdown
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
@@ -42,9 +59,34 @@ export function HardwareOrderForm() {
     };
     fetchEmployees();
   }, []);
-  return <CardContent className="grid gap-6">
-      
+  
+  // Fetch selected employee data and calculate budget
+  useEffect(() => {
+    const fetchEmployeeData = async () => {
+      if (employeeId) {
+        try {
+          const employee = await getEmployeeById(employeeId);
+          setSelectedEmployee(employee);
+          if (employee && (employee.entryDate || employee.startDate)) {
+            const budgetCalc = calculateAvailableBudget(employee.entryDate || employee.startDate, employee.usedBudget);
+            setBudgetInfo(budgetCalc);
+          } else {
+            setBudgetInfo(null);
+          }
+        } catch (error) {
+          console.error("Error fetching employee data:", error);
+          setSelectedEmployee(null);
+          setBudgetInfo(null);
+        }
+      } else {
+        setSelectedEmployee(null);
+        setBudgetInfo(null);
+      }
+    };
+    fetchEmployeeData();
+  }, [employeeId]);
 
+  return <CardContent className="grid gap-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField control={control} name="articleName" render={({
         field
@@ -158,6 +200,32 @@ export function HardwareOrderForm() {
               <FormMessage />
             </FormItem>} />
       </div>
+
+      {/* Budget information for selected employee */}
+      {selectedEmployee && budgetInfo && (
+        <div className="mt-2">
+          <Alert className="bg-blue-50 border-blue-200">
+            <InfoIcon className="h-4 w-4 text-blue-600" />
+            <AlertTitle className="text-blue-800">Budget-Information für {selectedEmployee.firstName} {selectedEmployee.lastName}</AlertTitle>
+            <AlertDescription className="text-blue-700">
+              <div className="grid grid-cols-2 gap-1 mt-2">
+                <span>Gesamtbudget:</span>
+                <span className="font-medium">{formatCurrency(budgetInfo.totalBudget)}</span>
+                <span>Bereits verwendet:</span>
+                <span className="font-medium">{formatCurrency(selectedEmployee.usedBudget)}</span>
+                <span>Verfügbar:</span>
+                <span className={`font-medium ${budgetInfo.budgetExceeded ? "text-red-600" : "text-green-600"}`}>
+                  {formatCurrency(budgetInfo.availableBudget)}
+                </span>
+                <span>Nach Bestellung:</span>
+                <span className={`font-medium ${budgetInfo.availableBudget - (estimatedPrice || 0) < 0 ? "text-red-600" : "text-green-600"}`}>
+                  {formatCurrency(budgetInfo.availableBudget - (estimatedPrice || 0))}
+                </span>
+              </div>
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
 
       {selectedCategory === 'smartphone' && estimatedPrice > 1000 && <Alert className="bg-amber-50 border-amber-200">
           <InfoIcon className="h-4 w-4 text-amber-600" />
