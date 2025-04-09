@@ -16,6 +16,7 @@ import { calculateAvailableBudget } from "@/lib/hardware-order-types";
 import { Employee } from "@/lib/types";
 import { toast } from "@/hooks/use-toast";
 import { sendOrderEmail } from "@/lib/hardware-order-service";
+import BudgetInfoCard from "@/components/hardware-order/BudgetInfoCard";
 
 // Create a schema for the hardware order form
 const hardwareOrderSchema = z.object({
@@ -55,6 +56,7 @@ export default function HardwareOrder() {
   
   const watchEmployeeId = form.watch('employeeId');
   const watchEstimatedPrice = form.watch('estimatedPrice');
+  const watchArticleCategory = form.watch('articleCategory');
   
   // Fetch employee data when employee ID changes
   useEffect(() => {
@@ -86,6 +88,16 @@ export default function HardwareOrder() {
     
     fetchEmployeeData();
   }, [watchEmployeeId]);
+
+  // Check if justification is required
+  useEffect(() => {
+    const category = watchArticleCategory as HardwareCategory;
+    const isExpensiveSmartphone = category === 'smartphone' && watchEstimatedPrice > 1000;
+    
+    if (category === 'special' || isExpensiveSmartphone) {
+      form.setValue('justification', form.getValues('justification') || '');
+    }
+  }, [watchArticleCategory, watchEstimatedPrice, form]);
 
   const onSubmit = async (data: HardwareOrderFormValues) => {
     if (!selectedEmployee) {
@@ -166,19 +178,21 @@ export default function HardwareOrder() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2">
+                <div className="lg:col-span-2 space-y-6">
                   <HardwareOrderForm />
                 </div>
                 
-                {selectedEmployee && budgetInfo && (
-                  <div className="lg:col-span-1">
+                <div className="lg:col-span-1 space-y-6">
+                  <BudgetInfoCard />
+                  
+                  {selectedEmployee && budgetInfo && (
                     <BudgetDisplay 
                       employee={selectedEmployee} 
                       budgetInfo={budgetInfo} 
                       estimatedPrice={watchEstimatedPrice || 0} 
                     />
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
               
               <div className="flex justify-end">
