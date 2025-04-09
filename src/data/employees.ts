@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Asset, Employee as EmployeeType } from "@/lib/types";
 
@@ -49,7 +48,7 @@ export const getEmployeeById = async (id: string): Promise<EmployeeType | null> 
 
     if (!employeeData) return null;
 
-    // Get email using our new secure function
+    // Get email using our secure function
     const { data: emailData, error: emailError } = await supabase
       .rpc('get_safe_user_email', { user_id: id }) as { data: string | null, error: any };
     

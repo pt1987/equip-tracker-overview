@@ -40,6 +40,7 @@ export default function CreateEditEmployee() {
         try {
           const employeeData = await getEmployeeById(id);
           if (employeeData) {
+            console.log("Loaded employee data:", employeeData);
             setEmployee(employeeData);
             setImagePreview(employeeData.imageUrl || null);
           }
@@ -76,6 +77,7 @@ export default function CreateEditEmployee() {
   // Update form when employee data is loaded
   useEffect(() => {
     if (employee) {
+      console.log("Setting form values from employee:", employee);
       form.reset({
         firstName: employee.firstName || "",
         lastName: employee.lastName || "",
@@ -120,7 +122,7 @@ export default function CreateEditEmployee() {
         const success = await updateEmployee(id, {
           first_name: data.firstName,
           last_name: data.lastName,
-          email: data.email,
+          email: data.email, // Always include email
           position: data.position,
           cluster: data.cluster,
           start_date: data.entryDate,
@@ -137,7 +139,7 @@ export default function CreateEditEmployee() {
         const employeeId = await createEmployee({
           first_name: data.firstName,
           last_name: data.lastName,
-          email: data.email,
+          email: data.email, // Always include email
           position: data.position,
           cluster: data.cluster,
           start_date: data.entryDate,

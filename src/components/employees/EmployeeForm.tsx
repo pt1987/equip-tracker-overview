@@ -62,6 +62,7 @@ export default function EmployeeFormFields() {
                 type="email" 
                 placeholder="max.mustermann@unternehmen.de" 
                 {...field} 
+                value={field.value || ''}
               />
             </FormControl>
             <FormMessage />
