@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Asset, Employee as EmployeeType } from "@/lib/types";
 
@@ -220,7 +221,7 @@ export const updateEmployee = async (id: string, employeeData: {
   profile_image?: string | null;
 }): Promise<boolean> => {
   try {
-    // Update the employee record
+    // Update the employee record first
     const { error: employeeError } = await supabase
       .from('employees')
       .update({
@@ -237,6 +238,38 @@ export const updateEmployee = async (id: string, employeeData: {
       .eq('id', id);
       
     if (employeeError) throw employeeError;
+    
+    // If email is provided, try to update email in profiles table
+    if (employeeData.email) {
+      try {
+        // Check if profile exists first
+        const { data: profileExists } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', id)
+          .maybeSingle();
+          
+        if (profileExists) {
+          // Update existing profile
+          await supabase
+            .from('profiles')
+            .update({ email: employeeData.email })
+            .eq('id', id);
+        } else {
+          // Create new profile
+          await supabase
+            .from('profiles')
+            .insert({ 
+              id: id, 
+              email: employeeData.email, 
+              name: `${employeeData.first_name} ${employeeData.last_name}`
+            });
+        }
+      } catch (profileError) {
+        console.error("Error updating profile email:", profileError);
+        // But don't fail the entire operation
+      }
+    }
     
     return true;
   } catch (error) {

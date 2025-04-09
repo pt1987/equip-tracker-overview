@@ -21,12 +21,13 @@ export default function EmployeeDetailEdit({
 }: EmployeeDetailEditProps) {
   const [imagePreview, setImagePreview] = useState(employee.imageUrl || "");
   
+  // Make sure we properly set the email in the default values
   const form = useForm<EmployeeFormValues>({
     resolver: zodResolver(employeeFormSchema),
     defaultValues: {
       firstName: employee.firstName,
       lastName: employee.lastName,
-      email: employee.email || "",
+      email: employee.email || "", // Ensure email is properly initialized
       position: employee.position,
       cluster: employee.cluster,
       entryDate: new Date(employee.startDate).toISOString().split('T')[0],
@@ -41,10 +42,12 @@ export default function EmployeeDetailEdit({
   };
   
   const handleSubmit = (data: EmployeeFormValues) => {
+    // Make sure the email is included in the submission
     onSave({
       ...data, 
       startDate: new Date(data.entryDate),
-      imageUrl: data.profileImage
+      imageUrl: data.profileImage,
+      email: data.email // Explicitly include email in the save data
     });
   };
   
