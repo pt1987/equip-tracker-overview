@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Asset, Employee as EmployeeType } from "@/lib/types";
 
@@ -23,6 +22,7 @@ export * from './employees/storage';
 
 export const getEmployeeById = async (id: string): Promise<EmployeeType | null> => {
   try {
+    // Get the employee data from employees table
     const { data, error } = await supabase
       .from('employees')
       .select(`
@@ -45,28 +45,21 @@ export const getEmployeeById = async (id: string): Promise<EmployeeType | null> 
 
     if (!data) return null;
 
-    // Try to get email from profiles table if possible, but don't fail if we can't
-    let email = '';
-    try {
-      // Just try to get profile by employee ID
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('email')
-        .eq('id', id)
-        .maybeSingle();
-          
-      if (profileData) {
-        email = profileData.email;
-      }
-    } catch (profileError) {
-      console.error("Error fetching profile data:", profileError);
-    }
+    // Get email from profiles table using same ID
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('email')
+      .eq('id', id)
+      .single();
+
+    // If profile exists, get the email, otherwise use empty string
+    const email = profileData?.email || '';
 
     return {
       id: data.id,
       firstName: data.first_name,
       lastName: data.last_name,
-      email: email,
+      email: email, // Use email from profile
       position: data.position,
       cluster: data.cluster,
       startDate: data.start_date || '',
@@ -239,35 +232,33 @@ export const updateEmployee = async (id: string, employeeData: {
       
     if (employeeError) throw employeeError;
     
-    // If email is provided, try to update email in profiles table
+    // ALWAYS handle email update separately in profiles table when email is provided
     if (employeeData.email) {
-      try {
-        // Check if profile exists first
-        const { data: profileExists } = await supabase
+      // First check if profile exists
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', id)
+        .single();
+        
+      if (existingProfile) {
+        // Update existing profile
+        await supabase
           .from('profiles')
-          .select('id')
-          .eq('id', id)
-          .maybeSingle();
-          
-        if (profileExists) {
-          // Update existing profile
-          await supabase
-            .from('profiles')
-            .update({ email: employeeData.email })
-            .eq('id', id);
-        } else {
-          // Create new profile
-          await supabase
-            .from('profiles')
-            .insert({ 
-              id: id, 
-              email: employeeData.email, 
-              name: `${employeeData.first_name} ${employeeData.last_name}`
-            });
-        }
-      } catch (profileError) {
-        console.error("Error updating profile email:", profileError);
-        // But don't fail the entire operation
+          .update({ 
+            email: employeeData.email,
+            name: `${employeeData.first_name} ${employeeData.last_name}`
+          })
+          .eq('id', id);
+      } else {
+        // Create new profile if it doesn't exist
+        await supabase
+          .from('profiles')
+          .insert({ 
+            id: id, 
+            email: employeeData.email, 
+            name: `${employeeData.first_name} ${employeeData.last_name}`
+          });
       }
     }
     

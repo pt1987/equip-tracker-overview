@@ -58,11 +58,11 @@ const EmployeeDetail = () => {
     
     if (employee && id) {
       try {
-        // Save to database - make sure to include the email
+        // Save to database - ensure email is included
         const success = await updateEmployee(id, {
           first_name: data.firstName,
           last_name: data.lastName,
-          email: data.email, // Ensure email is passed to updateEmployee
+          email: data.email, // Explicitly include email
           position: data.position,
           cluster: data.cluster,
           start_date: data.entryDate || data.startDate,
@@ -75,11 +75,11 @@ const EmployeeDetail = () => {
           throw new Error("Failed to update employee");
         }
         
-        // Update the employee state with the new data, including email
+        // Update the employee state with the new data
         const updatedEmployee = {
           ...employee,
           ...data,
-          email: data.email, // Explicitly include email in the updated employee state
+          email: data.email, // Ensure email is in the updated state
           startDate: typeof data.startDate === 'object' ? data.startDate.toISOString() : data.startDate,
           imageUrl: data.imageUrl || data.profileImage,
         };
@@ -91,7 +91,7 @@ const EmployeeDetail = () => {
           description: "Die Änderungen wurden erfolgreich gespeichert."
         });
         
-        // Reload employee data to ensure we have the latest
+        // Reload employee data to ensure we have the latest including the email
         fetchEmployeeData();
       } catch (error) {
         console.error("Error updating employee:", error);

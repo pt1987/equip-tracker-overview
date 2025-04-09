@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Employee } from "@/lib/types";
 import { Form } from "@/components/ui/form";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { employeeFormSchema, EmployeeFormValues } from "./EmployeeFormTypes";
 import EmployeeFormFields from "./EmployeeForm";
 import EmployeeImageUpload from "./EmployeeImageUpload";
@@ -21,13 +21,15 @@ export default function EmployeeDetailEdit({
 }: EmployeeDetailEditProps) {
   const [imagePreview, setImagePreview] = useState(employee.imageUrl || "");
   
-  // Make sure we properly set the email in the default values
+  // Debug: Log the employee object to see if email exists
+  console.log("Employee data in EmployeeDetailEdit:", employee);
+  
   const form = useForm<EmployeeFormValues>({
     resolver: zodResolver(employeeFormSchema),
     defaultValues: {
       firstName: employee.firstName,
       lastName: employee.lastName,
-      email: employee.email || "", // Ensure email is properly initialized
+      email: employee.email,
       position: employee.position,
       cluster: employee.cluster,
       entryDate: new Date(employee.startDate).toISOString().split('T')[0],
@@ -36,13 +38,18 @@ export default function EmployeeDetailEdit({
     },
   });
   
+  // Update form if employee data changes (including email)
+  useEffect(() => {
+    form.setValue("email", employee.email || "");
+  }, [employee.email, form]);
+  
   const handleImageChange = (imageUrl: string) => {
     setImagePreview(imageUrl);
     form.setValue("profileImage", imageUrl);
   };
   
   const handleSubmit = (data: EmployeeFormValues) => {
-    // Make sure the email is included in the submission
+    console.log("Submitting form with data:", data);
     onSave({
       ...data, 
       startDate: new Date(data.entryDate),
