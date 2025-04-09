@@ -15,6 +15,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
 
 export interface Document {
   id: string;
@@ -42,7 +44,66 @@ export default function DocumentUpload({
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [documentCategory, setDocumentCategory] = useState<Document["category"]>("other");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
+  
+  useEffect(() => {
+    // Load existing documents from storage on component mount
+    const fetchDocuments = async () => {
+      try {
+        const { data, error } = await supabase
+          .storage
+          .from('asset-documents')
+          .list(`${assetId}/`);
+        
+        if (error) {
+          console.error('Error fetching documents:', error);
+          return;
+        }
+
+        if (!data || data.length === 0) return;
+        
+        // Process existing files from storage
+        for (const file of data) {
+          // Skip folder entries
+          if (file.id === null) continue;
+          
+          // Extract category from file path or name
+          const nameParts = file.name.split('_');
+          const category = nameParts.length > 1 ? 
+            (nameParts[0] as Document["category"]) || "other" : 
+            "other";
+          
+          // Get public URL for the file
+          const { data: urlData } = supabase
+            .storage
+            .from('asset-documents')
+            .getPublicUrl(`${assetId}/${file.name}`);
+            
+          const docExists = documents.some(doc => doc.name === file.name);
+          if (!docExists) {
+            const newDoc: Document = {
+              id: file.id,
+              name: file.name.replace(`${category}_`, ''),
+              type: file.metadata?.mimetype || 'application/octet-stream',
+              size: file.metadata?.size || 0,
+              url: urlData.publicUrl,
+              uploadDate: file.created_at || new Date().toISOString(),
+              category: category as Document["category"],
+            };
+            
+            onAddDocument(newDoc);
+          }
+        }
+      } catch (error) {
+        console.error('Error processing storage documents:', error);
+      }
+    };
+    
+    if (assetId) {
+      fetchDocuments();
+    }
+  }, [assetId]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -54,7 +115,7 @@ export default function DocumentUpload({
     setDocumentCategory(e.target.value as Document["category"]);
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!selectedFiles || selectedFiles.length === 0) {
       toast({
         title: "Kein Dokument ausgewählt",
@@ -64,24 +125,100 @@ export default function DocumentUpload({
       return;
     }
 
-    // In a real app, we would upload the file to a server or storage service
-    Array.from(selectedFiles).forEach(file => {
-      const newDocument: Document = {
-        id: Math.random().toString(36).substring(2, 11),
-        name: file.name,
-        type: file.type,
-        size: file.size,
-        url: URL.createObjectURL(file), // This is temporary and would be a server URL in a real app
-        uploadDate: new Date().toISOString(),
-        category: documentCategory,
-      };
-
-      onAddDocument(newDocument);
-    });
-
-    setSelectedFiles(null);
-    setDocumentCategory("other");
-    setIsDialogOpen(false);
+    setIsUploading(true);
+    
+    try {
+      for (const file of Array.from(selectedFiles)) {
+        // Prepend category to filename to help with organization and filtering
+        const fileName = `${documentCategory}_${file.name}`;
+        const filePath = `${assetId}/${fileName}`;
+        
+        // Upload the file to Supabase storage
+        const { data: uploadData, error: uploadError } = await supabase
+          .storage
+          .from('asset-documents')
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: true
+          });
+        
+        if (uploadError) {
+          throw uploadError;
+        }
+        
+        // Get the public URL for the file
+        const { data: urlData } = supabase
+          .storage
+          .from('asset-documents')
+          .getPublicUrl(filePath);
+        
+        // Create document object
+        const newDocument: Document = {
+          id: uploadData.id || Math.random().toString(36).substring(2, 11),
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          url: urlData.publicUrl,
+          uploadDate: new Date().toISOString(),
+          category: documentCategory,
+        };
+        
+        onAddDocument(newDocument);
+        
+        toast({
+          title: "Dokument hochgeladen",
+          description: `${file.name} wurde erfolgreich hochgeladen.`,
+        });
+      }
+    } catch (error: any) {
+      console.error('Error uploading document:', error);
+      toast({
+        title: "Fehler beim Hochladen",
+        description: error.message || "Ein Fehler ist aufgetreten beim Hochladen des Dokuments.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+      setSelectedFiles(null);
+      setDocumentCategory("other");
+      setIsDialogOpen(false);
+    }
+  };
+  
+  const handleDeleteDocument = async (documentId: string, docName: string) => {
+    try {
+      // Find the document to get its category prefix
+      const doc = documents.find(d => d.id === documentId);
+      if (!doc) return;
+      
+      // Extract file path including category prefix
+      const filePath = `${assetId}/${documentCategory}_${doc.name}`;
+      
+      // Delete file from storage
+      const { error } = await supabase
+        .storage
+        .from('asset-documents')
+        .remove([filePath]);
+      
+      if (error) {
+        throw error;
+      }
+      
+      // Remove from local state
+      onDeleteDocument(documentId);
+      
+      toast({
+        title: "Dokument gelöscht",
+        description: `${docName} wurde erfolgreich gelöscht.`,
+      });
+    } catch (error: any) {
+      console.error('Error deleting document:', error);
+      toast({
+        title: "Fehler beim Löschen",
+        description: error.message || "Ein Fehler ist aufgetreten beim Löschen des Dokuments.",
+        variant: "destructive",
+      });
+    }
   };
 
   const formatFileSize = (bytes: number): string => {
@@ -158,7 +295,7 @@ export default function DocumentUpload({
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          onClick={() => onDeleteDocument(doc.id)}
+                          onClick={() => handleDeleteDocument(doc.id, doc.name)}
                           className="text-destructive hover:text-destructive/80 rounded-full"
                         >
                           <Trash2 size={16} />
@@ -228,8 +365,11 @@ export default function DocumentUpload({
             <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
               Abbrechen
             </Button>
-            <Button onClick={handleUpload} disabled={!selectedFiles || selectedFiles.length === 0}>
-              Hochladen
+            <Button 
+              onClick={handleUpload} 
+              disabled={!selectedFiles || selectedFiles.length === 0 || isUploading}
+            >
+              {isUploading ? "Wird hochgeladen..." : "Hochladen"}
             </Button>
           </DialogFooter>
         </DialogContent>
