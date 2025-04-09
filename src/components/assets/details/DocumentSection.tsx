@@ -18,18 +18,22 @@ export default function DocumentSection({
 }: DocumentSectionProps) {
   return (
     <Card className="shadow-sm">
-      <CardHeader className="flex flex-row items-center justify-between py-4 px-6">
-        <CardTitle className="text-lg font-medium">Dokumente</CardTitle>
-        <DocumentUpload 
-          assetId={assetId} 
-          documents={documents} 
-          onAddDocument={onAddDocument} 
-          onDeleteDocument={onDeleteDocument} 
-        />
-      </CardHeader>
-      <CardContent className="px-6 pt-0 pb-6">
-        {/* DocumentList will be rendered inside DocumentUpload */}
-      </CardContent>
+      <div className="border-b">
+        <CardHeader className="flex flex-row items-center justify-between py-4 px-6">
+          <CardTitle className="text-lg font-medium">Dokumente</CardTitle>
+          <DocumentUpload 
+            assetId={assetId} 
+            documents={documents} 
+            onAddDocument={onAddDocument} 
+            onDeleteDocument={onDeleteDocument} 
+          />
+        </CardHeader>
+      </div>
+      <div>
+        <CardContent className="p-6">
+          {/* DocumentList will be rendered inside DocumentUpload */}
+        </CardContent>
+      </div>
     </Card>
   );
 }

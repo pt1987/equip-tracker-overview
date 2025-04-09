@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -179,10 +180,10 @@ export default function DocumentUpload({
   return (
     <div>
       <Button 
-        variant="ghost" 
-        size="sm"
+        variant="outline" 
+        size="icon"
         onClick={() => setIsDialogOpen(true)}
-        className="p-0 w-8 h-8 rounded-full"
+        className="h-8 w-8 rounded-full"
       >
         <Upload size={16} />
         <span className="sr-only">Dokument hinzufügen</span>
