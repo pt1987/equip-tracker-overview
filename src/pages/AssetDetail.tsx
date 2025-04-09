@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Document } from "@/components/documents/types";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
+import { useDocumentStorage } from "@/components/documents/hooks/useDocumentStorage";
 
 import AssetLoading from "@/components/assets/details/AssetLoading";
 import AssetNotFound from "@/components/assets/details/AssetNotFound";
@@ -26,6 +27,13 @@ export default function AssetDetail() {
   const [isEditing, setIsEditing] = useState(false);
   const [documents, setDocuments] = useState<Document[]>([]);
   const { toast } = useToast();
+  
+  const { fetchDocuments, uploadDocument, deleteDocument } = useDocumentStorage({
+    assetId: id,
+    documents,
+    onAddDocument: handleAddDocument,
+    toast
+  });
 
   useEffect(() => {
     if (id) {
@@ -51,6 +59,15 @@ export default function AssetDetail() {
     queryFn: () => getAssetHistoryByAssetId(id),
     enabled: !!id
   });
+
+  function handleAddDocument(document: Document) {
+    setDocuments([...documents, document]);
+    
+    toast({
+      title: "Dokument hinzugefügt",
+      description: `${document.name} wurde erfolgreich hinzugefügt.`
+    });
+  }
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -134,24 +151,8 @@ export default function AssetDetail() {
     }
   };
 
-  const handleAddDocument = (document: Document) => {
-    setDocuments([...documents, document]);
-    
-    toast({
-      title: "Dokument hinzugefügt",
-      description: `${document.name} wurde erfolgreich hinzugefügt.`
-    });
-  };
-
   const handleDeleteDocument = async (documentId: string) => {
     try {
-      const { deleteDocument } = useDocumentStorage({
-        assetId: id,
-        documents,
-        onAddDocument: handleAddDocument,
-        toast
-      });
-      
       await deleteDocument(documentId);
       
       setDocuments(documents.filter(doc => doc.id !== documentId));
