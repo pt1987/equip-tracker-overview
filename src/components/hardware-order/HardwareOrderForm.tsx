@@ -2,14 +2,9 @@
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -28,16 +23,25 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { forwardRef, useState, useEffect } from "react";
-import { DayPicker } from "react-day-picker";
-import { Controller, useFormContext } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 import { getEmployees } from "@/data/employees";
+import { 
+  FormField, 
+  FormItem, 
+  FormLabel, 
+  FormControl, 
+  FormDescription,
+  FormMessage 
+} from "@/components/ui/form";
+import { hardwareCategoryInfo } from "@/lib/hardware-order-types";
+import { Button } from "@/components/ui/button";
 
 interface HardwareOrderFormProps {}
 
-const HardwareOrderForm = forwardRef<HTMLFormElement, HardwareOrderFormProps>(
+const HardwareOrderForm = forwardRef<HTMLDivElement, HardwareOrderFormProps>(
   ({}, ref) => {
     const { control } = useFormContext();
-    const [date, setDate] = useState<Date>();
+    const [date, setDate] = useState<Date | undefined>(new Date());
     const [employeeOptions, setEmployeeOptions] = useState<{label: string, value: string}[]>([]);
 
     useEffect(() => {
@@ -61,104 +65,144 @@ const HardwareOrderForm = forwardRef<HTMLFormElement, HardwareOrderFormProps>(
     return (
       <CardContent className="grid gap-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="model">Model</Label>
-            <Input id="model" placeholder="z.B. MacBook Pro 16&quot;" />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="serialNumber">Serial Number</Label>
-            <Input id="serialNumber" placeholder="z.B. C02XG123ABCD" />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="category">Category</Label>
-            <Select>
-              <SelectTrigger>
-                <SelectValue placeholder="Kategorie auswählen" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="laptop">Laptop</SelectItem>
-                <SelectItem value="smartphone">Smartphone</SelectItem>
-                <SelectItem value="tablet">Tablet</SelectItem>
-                <SelectItem value="mouse">Mouse</SelectItem>
-                <SelectItem value="keyboard">Keyboard</SelectItem>
-                <SelectItem value="accessory">Accessory</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="supplier">Supplier</Label>
-            <Input id="supplier" placeholder="z.B. Apple" />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="price">Price</Label>
-            <Input id="price" placeholder="z.B. 2500" type="number" />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="orderDate">Order Date</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className={cn(
-                    "w-[240px] justify-start text-left font-normal",
-                    !date && "text-muted-foreground"
-                  )}
-                >
-                  {date ? format(date, "PPP") : <span>Pick a date</span>}
-                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <DayPicker
-                  mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  disabled={(date) =>
-                    date < new Date(2022, 0, 20)
-                  }
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="assignee">Assignee</Label>
-          <Controller
+          <FormField
             control={control}
-            name="assignee"
+            name="articleName"
             render={({ field }) => (
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Mitarbeiter auswählen" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Kein Mitarbeiter</SelectItem>
-                  {employeeOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormItem>
+                <FormLabel>Artikelname</FormLabel>
+                <FormControl>
+                  <Input placeholder="z.B. MacBook Pro 16&quot;" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={control}
+            name="articleConfiguration"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Konfiguration</FormLabel>
+                <FormControl>
+                  <Input placeholder="z.B. M2 Max, 32GB RAM, 1TB SSD" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="notes">Notes</Label>
-          <Textarea id="notes" placeholder="Weitere Infos..." />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={control}
+            name="articleCategory"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Kategorie</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Kategorie auswählen" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {Object.entries(hardwareCategoryInfo).map(([key, info]) => (
+                      <SelectItem key={key} value={key}>
+                        {info.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  {field.value && hardwareCategoryInfo[field.value as keyof typeof hardwareCategoryInfo]?.description}
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={control}
+            name="estimatedPrice"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Geschätzter Preis (€)</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="z.B. 2500" 
+                    type="number" 
+                    {...field} 
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
+
+        <div className="grid grid-cols-1 gap-4">
+          <FormField
+            control={control}
+            name="articleLink"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Link zum Artikel</FormLabel>
+                <FormControl>
+                  <Input placeholder="https://..." {...field} />
+                </FormControl>
+                <FormDescription>Link zur Produktseite des Artikels</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-4">
+          <FormField
+            control={control}
+            name="employeeId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Mitarbeiter</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Mitarbeiter auswählen" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {employeeOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <FormField
+          control={control}
+          name="justification"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Begründung</FormLabel>
+              <FormControl>
+                <Textarea placeholder="Begründung für die Bestellung..." {...field} />
+              </FormControl>
+              <FormDescription>
+                Bitte geben Sie eine Begründung an, wenn es sich um eine Sonderbestellung handelt.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </CardContent>
     );
   }
