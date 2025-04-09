@@ -43,14 +43,19 @@ export const getEmployeeById = async (id: string): Promise<EmployeeType | null> 
 
     if (!data) return null;
 
-    // Join with profiles table to get the email
-    const { data: profileData, error: profileError } = await supabase
-      .from('profiles')
-      .select('email')
-      .eq('id', id)
-      .single();
+    // Try to get email from profiles table if possible, but don't fail if we can't
+    let email = '';
+    try {
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('id', id)
+        .maybeSingle();
 
-    if (profileError) {
+      if (profileData) {
+        email = profileData.email;
+      }
+    } catch (profileError) {
       console.error("Error fetching profile data:", profileError);
     }
 
@@ -58,7 +63,7 @@ export const getEmployeeById = async (id: string): Promise<EmployeeType | null> 
       id: data.id,
       firstName: data.first_name,
       lastName: data.last_name,
-      email: profileData?.email || '',
+      email: email,
       position: data.position,
       cluster: data.cluster,
       startDate: data.start_date || '',
@@ -95,21 +100,22 @@ export const getEmployees = async (): Promise<EmployeeType[]> => {
 
     if (employeesError) throw employeesError;
 
-    // Get all emails from profiles table
-    const { data: profilesData, error: profilesError } = await supabase
-      .from('profiles')
-      .select('id, email');
+    // Try to get emails from profiles table if possible
+    let emailMap = new Map<string, string>();
+    try {
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, email');
 
-    if (profilesError) {
-      console.error("Error fetching profiles:", profilesError);
-    }
-
-    // Create a map of profile IDs to emails
-    const emailMap = new Map();
-    if (profilesData) {
-      profilesData.forEach(profile => {
-        emailMap.set(profile.id, profile.email);
-      });
+      if (profilesData) {
+        profilesData.forEach(profile => {
+          if (profile.id && profile.email) {
+            emailMap.set(profile.id, profile.email);
+          }
+        });
+      }
+    } catch (profileError) {
+      console.error("Error fetching profiles:", profileError);
     }
 
     return employeesData.map(emp => ({
