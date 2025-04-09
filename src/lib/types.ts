@@ -1,4 +1,3 @@
-
 export type AssetStatus = 
   | 'ordered' 
   | 'delivered' 
@@ -49,11 +48,12 @@ export interface Employee {
   id: string;
   firstName: string;
   lastName: string;
+  email: string;
+  position: string;
+  cluster: string;
   imageUrl: string;
   startDate: string;
   entryDate?: string;
-  cluster: string;
-  position: string;
   budget: number;
   usedBudget: number;
   profileImage?: string;

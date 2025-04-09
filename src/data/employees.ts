@@ -1,11 +1,11 @@
 import { supabase } from "@/integrations/supabase/client";
-import { Asset } from "./assets";
+import { Asset } from "@/lib/types";
 
 export interface Employee {
   id: string;
   firstName: string;
   lastName: string;
-  email: string; // Added email field
+  email: string;
   position: string;
   cluster: string;
   startDate?: Date;
@@ -17,7 +17,7 @@ export interface Employee {
   assets?: Asset[];
 }
 
-export const getEmployee = async (id: string): Promise<Employee | null> => {
+export const getEmployeeById = async (id: string): Promise<Employee | null> => {
   try {
     const { data, error } = await supabase
       .from('employees')
@@ -121,4 +121,12 @@ export const deleteEmployee = async (id: string): Promise<boolean> => {
     console.error("Error deleting employee:", error);
     return false;
   }
+};
+
+export const getEmployeeAssetsSummary = async (employeeId: string) => {
+  return {
+    totalAssets: 0,
+    totalValue: 0,
+    assetsByType: {}
+  };
 };

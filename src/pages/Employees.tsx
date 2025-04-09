@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import PageTransition from "@/components/layout/PageTransition";
 import { Employee } from "@/lib/types";
@@ -16,10 +17,16 @@ const EmployeesPage = () => {
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
   const [view, setView] = useState<"grid" | "list">("grid");
   
-  const { data: employees = [], isLoading } = useQuery({
+  const { data: employeesData = [], isLoading } = useQuery({
     queryKey: ['employees'],
     queryFn: getEmployees
   });
+
+  // Convert to Employee type from lib/types.ts
+  const employees: Employee[] = employeesData.map(emp => ({
+    ...emp,
+    imageUrl: emp.imageUrl || ''
+  }));
 
   const clusters = [...new Set(employees.map(emp => emp.cluster))];
   
