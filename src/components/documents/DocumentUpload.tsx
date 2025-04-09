@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -198,7 +197,7 @@ export default function DocumentUpload({
 
   return (
     <div>
-      <div className="flex justify-end mb-4">
+      <div>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
