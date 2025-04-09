@@ -35,6 +35,7 @@ const EmployeeDetail = () => {
     const employeeData = await getEmployeeById(id);
     
     if (employeeData) {
+      console.log("Fetched employee data:", employeeData);
       setEmployee(employeeData);
       const employeeAssets = await getAssetsByEmployeeId(employeeData.id);
       setAssets(employeeAssets);
@@ -58,6 +59,8 @@ const EmployeeDetail = () => {
     
     if (employee && id) {
       try {
+        console.log("Saving employee with email:", data.email);
+        
         // Save to database - ensure email is included
         const success = await updateEmployee(id, {
           first_name: data.firstName,
@@ -78,12 +81,17 @@ const EmployeeDetail = () => {
         // Update the employee state with the new data
         const updatedEmployee = {
           ...employee,
-          ...data,
+          firstName: data.firstName,
+          lastName: data.lastName,
           email: data.email, // Ensure email is in the updated state
+          position: data.position,
+          cluster: data.cluster, 
           startDate: typeof data.startDate === 'object' ? data.startDate.toISOString() : data.startDate,
           imageUrl: data.imageUrl || data.profileImage,
+          budget: data.budget,
         };
         
+        console.log("Setting updated employee state:", updatedEmployee);
         setEmployee(updatedEmployee);
         
         toast({

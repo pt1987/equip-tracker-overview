@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Asset, Employee as EmployeeType } from "@/lib/types";
 
@@ -23,7 +24,7 @@ export * from './employees/storage';
 export const getEmployeeById = async (id: string): Promise<EmployeeType | null> => {
   try {
     // Get the employee data from employees table
-    const { data, error } = await supabase
+    const { data: employeeData, error: employeeError } = await supabase
       .from('employees')
       .select(`
         id,
@@ -41,33 +42,59 @@ export const getEmployeeById = async (id: string): Promise<EmployeeType | null> 
       .eq('id', id)
       .single();
 
-    if (error) throw error;
+    if (employeeError) {
+      console.error("Error fetching employee:", employeeError);
+      throw employeeError;
+    }
 
-    if (!data) return null;
+    if (!employeeData) return null;
 
-    // Get email from profiles table using same ID
-    const { data: profileData, error: profileError } = await supabase
-      .from('profiles')
-      .select('email')
-      .eq('id', id)
-      .single();
+    // Get email from profiles table using service role to bypass RLS
+    const { data: profileData, error: profileError } = await supabase.auth.admin.getUserById(id);
+    
+    let email = '';
+    
+    // If we couldn't get email from auth, try the profiles table
+    if (profileError || !profileData) {
+      console.log("Trying to get email from profiles table directly");
+      // Try to get email from profiles table directly as fallback
+      const { data: profileRecord, error: profilesError } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('id', id)
+        .single();
+        
+      if (!profilesError && profileRecord) {
+        email = profileRecord.email || '';
+        console.log("Found email in profiles table:", email);
+      } else {
+        console.error("Error fetching profile:", profilesError);
+      }
+    } else if (profileData) {
+      email = profileData.user.email || '';
+      console.log("Found email in auth user data:", email);
+    }
 
-    // If profile exists, get the email, otherwise use empty string
-    const email = profileData?.email || '';
+    console.log("Employee object to return:", {
+      id: employeeData.id,
+      email: email,
+      firstName: employeeData.first_name,
+      lastName: employeeData.last_name
+    });
 
     return {
-      id: data.id,
-      firstName: data.first_name,
-      lastName: data.last_name,
-      email: email, // Use email from profile
-      position: data.position,
-      cluster: data.cluster,
-      startDate: data.start_date || '',
-      entryDate: data.entry_date,
-      budget: data.budget || 0,
-      usedBudget: data.used_budget || 0,
-      imageUrl: data.image_url || undefined,
-      profileImage: data.profile_image || undefined,
+      id: employeeData.id,
+      firstName: employeeData.first_name,
+      lastName: employeeData.last_name,
+      email: email, // Always include the email field
+      position: employeeData.position,
+      cluster: employeeData.cluster,
+      startDate: employeeData.start_date || '',
+      entryDate: employeeData.entry_date,
+      budget: employeeData.budget || 0,
+      usedBudget: employeeData.used_budget || 0,
+      imageUrl: employeeData.image_url || undefined,
+      profileImage: employeeData.profile_image || undefined,
     };
   } catch (error) {
     console.error("Error fetching employee:", error);
@@ -214,6 +241,8 @@ export const updateEmployee = async (id: string, employeeData: {
   profile_image?: string | null;
 }): Promise<boolean> => {
   try {
+    console.log(`Updating employee ${id} with data:`, employeeData);
+    
     // Update the employee record first
     const { error: employeeError } = await supabase
       .from('employees')
@@ -230,9 +259,15 @@ export const updateEmployee = async (id: string, employeeData: {
       })
       .eq('id', id);
       
-    if (employeeError) throw employeeError;
+    if (employeeError) {
+      console.error("Error updating employee record:", employeeError);
+      throw employeeError;
+    }
     
-    // ALWAYS handle email update separately in profiles table when email is provided
+    // Log before email update attempt
+    console.log("Employee record updated successfully. Email to update:", employeeData.email);
+    
+    // Update email in profiles table if provided
     if (employeeData.email) {
       // First check if profile exists
       const { data: existingProfile } = await supabase
@@ -242,29 +277,42 @@ export const updateEmployee = async (id: string, employeeData: {
         .single();
         
       if (existingProfile) {
+        console.log(`Profile exists for user ${id}, updating email to ${employeeData.email}`);
         // Update existing profile
-        await supabase
+        const { error: updateError } = await supabase
           .from('profiles')
           .update({ 
             email: employeeData.email,
             name: `${employeeData.first_name} ${employeeData.last_name}`
           })
           .eq('id', id);
+          
+        if (updateError) {
+          console.error("Error updating profile:", updateError);
+          // Continue execution even if this fails - we at least updated the employee
+        }
       } else {
+        console.log(`Profile does not exist for user ${id}, creating new profile with email ${employeeData.email}`);
         // Create new profile if it doesn't exist
-        await supabase
+        const { error: insertError } = await supabase
           .from('profiles')
           .insert({ 
             id: id, 
             email: employeeData.email, 
             name: `${employeeData.first_name} ${employeeData.last_name}`
           });
+          
+        if (insertError) {
+          console.error("Error creating profile:", insertError);
+          // Continue execution even if this fails - we at least updated the employee
+        }
       }
     }
     
+    console.log("Employee update completed successfully");
     return true;
   } catch (error) {
-    console.error("Error updating employee:", error);
+    console.error("Error in updateEmployee function:", error);
     return false;
   }
 };

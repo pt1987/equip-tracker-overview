@@ -21,7 +21,7 @@ export default function EmployeeDetailEdit({
 }: EmployeeDetailEditProps) {
   const [imagePreview, setImagePreview] = useState(employee.imageUrl || "");
   
-  // Debug: Log the employee object to see if email exists
+  // Debug: Log the employee object to verify email exists
   console.log("Employee data in EmployeeDetailEdit:", employee);
   
   const form = useForm<EmployeeFormValues>({
@@ -29,7 +29,7 @@ export default function EmployeeDetailEdit({
     defaultValues: {
       firstName: employee.firstName,
       lastName: employee.lastName,
-      email: employee.email,
+      email: employee.email || "", // Ensure email is initialized, even if empty
       position: employee.position,
       cluster: employee.cluster,
       entryDate: new Date(employee.startDate).toISOString().split('T')[0],
@@ -38,10 +38,19 @@ export default function EmployeeDetailEdit({
     },
   });
   
-  // Update form if employee data changes (including email)
+  // Update form when employee data changes, especially when email is loaded
   useEffect(() => {
+    console.log("Setting email in form to:", employee.email);
+    // Update all form fields to ensure nothing is lost
+    form.setValue("firstName", employee.firstName);
+    form.setValue("lastName", employee.lastName);
     form.setValue("email", employee.email || "");
-  }, [employee.email, form]);
+    form.setValue("position", employee.position);
+    form.setValue("cluster", employee.cluster);
+    form.setValue("entryDate", new Date(employee.startDate).toISOString().split('T')[0]);
+    form.setValue("budget", employee.budget);
+    form.setValue("profileImage", employee.imageUrl || "");
+  }, [employee, form]);
   
   const handleImageChange = (imageUrl: string) => {
     setImagePreview(imageUrl);
