@@ -3,10 +3,11 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { FilePlus, Upload } from "lucide-react";
+import { Upload } from "lucide-react";
 import { Document } from "./types";
 import { DocumentList } from "./DocumentList";
 import { DocumentUploadDialog } from "./DocumentUploadDialog";
+import { useDocumentStorage } from "./hooks/useDocumentStorage";
 
 interface DocumentUploadProps {
   assetId: string;
@@ -24,44 +25,14 @@ export default function DocumentUpload({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
+  const { fetchDocuments, uploadDocument, deleteDocument } = useDocumentStorage({
+    assetId,
+    documents,
+    onAddDocument,
+    toast
+  });
 
   useEffect(() => {
-    const fetchDocuments = async () => {
-      try {
-        const {
-          data,
-          error
-        } = await supabase.storage.from('asset-documents').list(`${assetId}/`);
-        if (error) {
-          console.error('Error fetching documents:', error);
-          return;
-        }
-        if (!data || data.length === 0) return;
-        for (const file of data) {
-          if (file.id === null) continue;
-          const nameParts = file.name.split('_');
-          const category = nameParts.length > 1 ? nameParts[0] as Document["category"] || "other" : "other";
-          const {
-            data: urlData
-          } = supabase.storage.from('asset-documents').getPublicUrl(`${assetId}/${file.name}`);
-          const docExists = documents.some(doc => doc.name === file.name);
-          if (!docExists) {
-            const newDoc: Document = {
-              id: file.id,
-              name: file.name.replace(`${category}_`, ''),
-              type: file.metadata?.mimetype || 'application/octet-stream',
-              size: file.metadata?.size || 0,
-              url: urlData.publicUrl,
-              uploadDate: file.created_at || new Date().toISOString(),
-              category: category as Document["category"]
-            };
-            onAddDocument(newDoc);
-          }
-        }
-      } catch (error) {
-        console.error('Error processing storage documents:', error);
-      }
-    };
     if (assetId) {
       fetchDocuments();
     }
@@ -76,34 +47,13 @@ export default function DocumentUpload({
       });
       return;
     }
+    
     setIsUploading(true);
     try {
       for (const file of Array.from(selectedFiles)) {
-        const fileName = `${documentCategory}_${file.name}`;
-        const filePath = `${assetId}/${fileName}`;
-        const {
-          data: uploadData,
-          error: uploadError
-        } = await supabase.storage.from('asset-documents').upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: true
-        });
-        if (uploadError) {
-          throw uploadError;
-        }
-        const {
-          data: urlData
-        } = supabase.storage.from('asset-documents').getPublicUrl(filePath);
-        const newDocument: Document = {
-          id: uploadData.id || Math.random().toString(36).substring(2, 11),
-          name: file.name,
-          type: file.type,
-          size: file.size,
-          url: urlData.publicUrl,
-          uploadDate: new Date().toISOString(),
-          category: documentCategory
-        };
+        const newDocument = await uploadDocument(file, documentCategory);
         onAddDocument(newDocument);
+        
         toast({
           title: "Dokument hochgeladen",
           description: `${file.name} wurde erfolgreich hochgeladen.`
@@ -125,19 +75,16 @@ export default function DocumentUpload({
   const handleDeleteDocument = async (documentId: string, docName: string) => {
     try {
       const doc = documents.find(d => d.id === documentId);
-      if (!doc) return;
-      const filePath = `${assetId}/${doc.category}_${doc.name}`;
-      const {
-        error
-      } = await supabase.storage.from('asset-documents').remove([filePath]);
-      if (error) {
-        throw error;
-      }
+      if (!doc) return Promise.reject(new Error("Document not found"));
+      
+      await deleteDocument(doc);
       onDeleteDocument(documentId);
+      
       toast({
         title: "Dokument gelöscht",
         description: `${docName} wurde erfolgreich gelöscht.`
       });
+      
       return Promise.resolve();
     } catch (error: any) {
       console.error('Error deleting document:', error);
