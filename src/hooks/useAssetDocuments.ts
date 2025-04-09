@@ -10,7 +10,12 @@ export function useAssetDocuments(assetId: string, toast: any) {
   const hasShownInitialToastsRef = useRef(false);
 
   function addDocument(document: Document) {
-    setDocuments(prevDocuments => [...prevDocuments, document]);
+    // Prüfe, ob das Dokument bereits existiert, um Duplikate zu vermeiden
+    setDocuments(prevDocuments => {
+      const documentExists = prevDocuments.some(doc => doc.id === document.id);
+      if (documentExists) return prevDocuments;
+      return [...prevDocuments, document];
+    });
     
     // Only show toast notifications after initial render and not during the initial data loading
     if (!initialRenderRef.current && hasShownInitialToastsRef.current) {

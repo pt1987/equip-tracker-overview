@@ -24,6 +24,15 @@ export default function DocumentSection({
     return Promise.resolve();
   };
 
+  // Entferne Duplikate für die DocumentList
+  const uniqueDocuments = documents.reduce((acc: Document[], current) => {
+    const existingDocIndex = acc.findIndex(doc => doc.id === current.id);
+    if (existingDocIndex === -1) {
+      acc.push(current);
+    }
+    return acc;
+  }, []);
+
   return <Card className="shadow-sm">
       <div className="border-b">
         <CardHeader className="flex flex-row items-center justify-between py-4 px-6">
@@ -33,14 +42,14 @@ export default function DocumentSection({
           </div>
           <DocumentUpload 
             assetId={assetId} 
-            documents={documents} 
+            documents={uniqueDocuments} 
             onAddDocument={onAddDocument} 
             onDeleteDocument={onDeleteDocument} 
           />
         </CardHeader>
       </div>
       <CardContent className="p-6">
-        <DocumentList documents={documents} onDeleteDocument={handleDeleteDocument} />
+        <DocumentList documents={uniqueDocuments} onDeleteDocument={handleDeleteDocument} />
       </CardContent>
     </Card>;
 }

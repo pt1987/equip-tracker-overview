@@ -11,7 +11,16 @@ export function DocumentList({
   documents,
   onDeleteDocument
 }: DocumentListProps) {
-  if (documents.length === 0) {
+  // Entferne Duplikate basierend auf document ID
+  const uniqueDocuments = documents.reduce((acc: Document[], current) => {
+    const existingDocIndex = acc.findIndex(doc => doc.id === current.id);
+    if (existingDocIndex === -1) {
+      acc.push(current);
+    }
+    return acc;
+  }, []);
+  
+  if (uniqueDocuments.length === 0) {
     return (
       <div className="text-center text-muted-foreground py-4">
         Keine Dokumente vorhanden
@@ -21,7 +30,7 @@ export function DocumentList({
 
   return (
     <div className="space-y-2">
-      {documents.map(doc => (
+      {uniqueDocuments.map(doc => (
         <DocumentItem 
           key={doc.id} 
           document={doc} 
