@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Asset, Employee as EmployeeType } from "@/lib/types";
 
@@ -18,6 +17,8 @@ interface EmployeeData {
   profileImage?: string;
   assets?: Asset[];
 }
+
+export * from './employees/storage';
 
 export const getEmployeeById = async (id: string): Promise<EmployeeType | null> => {
   try {

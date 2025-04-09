@@ -1,5 +1,5 @@
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import PageTransition from "@/components/layout/PageTransition";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import { getEmployees, createEmployee, updateEmployee } from "@/data/employees";
+import { uploadEmployeeImage } from "@/data/employees/storage";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@/hooks/use-toast";
@@ -23,8 +24,11 @@ import { useState } from "react";
 export default function CreateEditEmployee() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const isEditing = !!id;
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const { data: employeeData = [] } = useQuery({
     queryKey: ["employees"],
@@ -56,12 +60,33 @@ export default function CreateEditEmployee() {
     }
   });
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const onSubmit = async (data: EmployeeFormValues) => {
     setIsSubmitting(true);
     try {
       console.log("Form submitted with data:", data);
       
+      let imageUrl = data.profileImage;
+      
       if (isEditing && id) {
+        // If there's a new image, upload it first
+        if (selectedImage) {
+          imageUrl = await uploadEmployeeImage(selectedImage, id);
+        }
+        
         // Update existing employee
         const success = await updateEmployee(id, {
           first_name: data.firstName,
@@ -71,8 +96,8 @@ export default function CreateEditEmployee() {
           cluster: data.cluster,
           start_date: data.entryDate,
           budget: data.budget,
-          image_url: data.profileImage || null,
-          profile_image: data.profileImage || null
+          image_url: imageUrl || null,
+          profile_image: imageUrl || null
         });
         
         if (!success) {
@@ -80,7 +105,7 @@ export default function CreateEditEmployee() {
         }
       } else {
         // Create new employee
-        await createEmployee({
+        const employeeId = await createEmployee({
           first_name: data.firstName,
           last_name: data.lastName,
           email: data.email,
@@ -88,10 +113,24 @@ export default function CreateEditEmployee() {
           cluster: data.cluster,
           start_date: data.entryDate,
           budget: data.budget,
-          image_url: data.profileImage || null,
-          profile_image: data.profileImage || null
+          image_url: null,  // Will update after creation if needed
+          profile_image: null  // Will update after creation if needed
         });
+        
+        // If we have a selected image and got a valid employee ID, upload it
+        if (selectedImage && employeeId) {
+          imageUrl = await uploadEmployeeImage(selectedImage, employeeId);
+          
+          // Update the employee with the image URL
+          await updateEmployee(employeeId, {
+            image_url: imageUrl,
+            profile_image: imageUrl
+          });
+        }
       }
+      
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["employees"] });
       
       // Show success message
       toast({
@@ -140,7 +179,31 @@ export default function CreateEditEmployee() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="card-content">
-                  <EmployeeFormFields />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div className="col-span-1">
+                      <div className="aspect-square bg-muted rounded-full overflow-hidden relative group">
+                        <img
+                          src={imagePreview || form.watch("profileImage") || "/placeholder.svg"}
+                          alt="Profile"
+                          className="w-full h-full object-cover object-center"
+                        />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <label className="cursor-pointer px-3 py-2 bg-background rounded-md text-sm font-medium">
+                            Bild auswählen
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={handleImageChange}
+                            />
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-span-2">
+                      <EmployeeFormFields />
+                    </div>
+                  </div>
                 </CardContent>
                 <CardFooter className="flex justify-between">
                   <Button 

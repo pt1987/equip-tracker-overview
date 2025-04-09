@@ -53,6 +53,7 @@ export default function EmployeeDetailEdit({
         <div className="flex flex-col md:flex-row gap-6">
           <EmployeeImageUpload
             initialImageUrl={employee.imageUrl}
+            employeeId={employee.id}
             onImageChange={handleImageChange}
             onSave={form.handleSubmit(handleSubmit)}
             onCancel={onCancel}
