@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import PageTransition from "@/components/layout/PageTransition";
@@ -144,19 +145,19 @@ export default function CreateEditAsset() {
         vendor: data.vendor || "",
         price: data.price,
         status: data.status as AssetStatus,
-        employee_id: data.assignedTo !== "pool" ? data.assignedTo : null,
+        employee_id: data.assignedTo && data.assignedTo !== "pool" ? data.assignedTo : null,
         category: data.category,
-        serial_number: data.serialNumber,
-        inventory_number: data.inventoryNumber,
-        additional_warranty: data.hasWarranty,
-        has_warranty: data.hasWarranty,
-        imei: data.imei,
-        phone_number: data.phoneNumber,
-        provider: data.provider,
-        contract_end_date: data.contractDuration,
-        contract_name: data.contractName,
-        connected_asset_id: data.relatedAssetId !== "none" ? data.relatedAssetId : null,
-        related_asset_id: data.relatedAssetId !== "none" ? data.relatedAssetId : null
+        serial_number: data.serialNumber || "",
+        inventory_number: data.inventoryNumber || "",
+        additional_warranty: data.hasWarranty || false,
+        has_warranty: data.hasWarranty || false,
+        imei: data.imei || "",
+        phone_number: data.phoneNumber || "",
+        provider: data.provider || "",
+        contract_end_date: data.contractDuration || "",
+        contract_name: data.contractName || "",
+        connected_asset_id: data.relatedAssetId && data.relatedAssetId !== "none" ? data.relatedAssetId : null,
+        related_asset_id: data.relatedAssetId && data.relatedAssetId !== "none" ? data.relatedAssetId : null
       };
 
       if (isEditing && id) {

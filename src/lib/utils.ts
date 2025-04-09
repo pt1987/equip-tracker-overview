@@ -70,7 +70,7 @@ export function localizeStatus(status: string): string {
     delivered: "Geliefert",
     in_use: "Aktiv",
     defective: "Defekt",
-    in_repair: "In Reparatur",
+    repair: "In Reparatur",
     pool: "Pool"
   };
   
