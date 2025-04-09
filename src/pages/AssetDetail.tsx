@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -15,15 +14,17 @@ import { Asset } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import DocumentUpload, { Document } from "@/components/assets/DocumentUpload";
 import AssetHistoryTimeline from "@/components/assets/AssetHistoryTimeline";
-
 export default function AssetDetail() {
-  const { id = "" } = useParams();
+  const {
+    id = ""
+  } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
   const [documents, setDocuments] = useState<Document[]>([]);
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   const {
     data: asset,
     isLoading: isAssetLoading,
@@ -33,7 +34,6 @@ export default function AssetDetail() {
     queryFn: () => getAssetById(id),
     enabled: !!id
   });
-
   const {
     data: assetHistory = [],
     isLoading: isHistoryLoading
@@ -42,22 +42,18 @@ export default function AssetDetail() {
     queryFn: () => getAssetHistoryByAssetId(id),
     enabled: !!id
   });
-
   const handleEdit = () => {
     setIsEditing(true);
   };
-
   const handleCancelEdit = () => {
     setIsEditing(false);
   };
-
   const handleDelete = async () => {
     queryClient.invalidateQueries({
       queryKey: ["assets"]
     });
     navigate("/assets");
   };
-
   const handleSave = async (formData: any) => {
     try {
       if (!asset) return;
@@ -98,29 +94,22 @@ export default function AssetDetail() {
       });
     }
   };
-
   const handleAddDocument = (document: Document) => {
     setDocuments([...documents, document]);
   };
-
   const handleDeleteDocument = (documentId: string) => {
     setDocuments(documents.filter(doc => doc.id !== documentId));
   };
-
   if (isAssetLoading) {
-    return (
-      <PageTransition>
+    return <PageTransition>
         <div className="container mx-auto px-6 py-4 max-w-7xl">
           <Skeleton className="h-8 w-48 mb-4" />
           <Skeleton className="h-[400px] w-full rounded-lg" />
         </div>
-      </PageTransition>
-    );
+      </PageTransition>;
   }
-
   if (assetError || !asset) {
-    return (
-      <PageTransition>
+    return <PageTransition>
         <div className="container mx-auto px-6 py-4 max-w-7xl">
           <div className="flex flex-col items-center justify-center text-center py-10">
             <AlertCircle size={64} className="text-muted-foreground mb-4" />
@@ -134,13 +123,10 @@ export default function AssetDetail() {
             </Button>
           </div>
         </div>
-      </PageTransition>
-    );
+      </PageTransition>;
   }
-
-  return (
-    <PageTransition>
-      <div className="container mx-auto px-6 py-4 max-w-7xl">
+  return <PageTransition>
+      <div className="container mx-auto py-4 max-w-7xl px-[38px]">
         <div className="flex flex-col gap-6">
           <div>
             <Button variant="ghost" onClick={() => navigate(-1)} className="mb-1 -ml-3 h-9 px-2">
@@ -151,18 +137,7 @@ export default function AssetDetail() {
           </div>
 
           <div>
-            {isEditing ? 
-              <AssetDetailEdit 
-                asset={asset} 
-                onSave={handleSave} 
-                onCancel={handleCancelEdit} 
-              /> : 
-              <AssetDetailView 
-                asset={asset} 
-                onEdit={handleEdit} 
-                onDelete={handleDelete} 
-              />
-            }
+            {isEditing ? <AssetDetailEdit asset={asset} onSave={handleSave} onCancel={handleCancelEdit} /> : <AssetDetailView asset={asset} onEdit={handleEdit} onDelete={handleDelete} />}
           </div>
 
           <section>
@@ -170,12 +145,7 @@ export default function AssetDetail() {
               <FileText className="mr-2 h-5 w-5" />
               Dokumente
             </h2>
-            <DocumentUpload 
-              assetId={asset.id} 
-              documents={documents} 
-              onAddDocument={handleAddDocument} 
-              onDeleteDocument={handleDeleteDocument} 
-            />
+            <DocumentUpload assetId={asset.id} documents={documents} onAddDocument={handleAddDocument} onDeleteDocument={handleDeleteDocument} />
           </section>
 
           <section>
@@ -184,22 +154,15 @@ export default function AssetDetail() {
               Asset Historie
             </h2>
             
-            {isHistoryLoading ? (
-              <div className="space-y-2 py-4">
+            {isHistoryLoading ? <div className="space-y-2 py-4">
                 <Skeleton className="h-12 w-full" />
                 <Skeleton className="h-12 w-full" />
                 <Skeleton className="h-12 w-full" />
-              </div>
-            ) : assetHistory.length === 0 ? (
-              <div className="py-6 text-center">
+              </div> : assetHistory.length === 0 ? <div className="py-6 text-center">
                 <p className="text-muted-foreground">Keine Historieneinträge vorhanden.</p>
-              </div>
-            ) : (
-              <AssetHistoryTimeline history={assetHistory} />
-            )}
+              </div> : <AssetHistoryTimeline history={assetHistory} />}
           </section>
         </div>
       </div>
-    </PageTransition>
-  );
+    </PageTransition>;
 }
