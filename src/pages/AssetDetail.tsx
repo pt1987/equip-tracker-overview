@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -14,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import DocumentUpload, { Document } from "@/components/assets/DocumentUpload";
 import AssetHistoryTimeline from "@/components/assets/AssetHistoryTimeline";
 import { supabase } from "@/integrations/supabase/client";
+import { Separator } from "@/components/ui/separator";
 
 export default function AssetDetail() {
   const { id = "" } = useParams();
@@ -25,7 +25,6 @@ export default function AssetDetail() {
 
   useEffect(() => {
     if (id) {
-      // Scroll to top when component mounts or ID changes
       window.scrollTo(0, 0);
     }
   }, [id]);
@@ -199,7 +198,6 @@ export default function AssetDetail() {
           {!isEditing && (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Employee section - Left */}
                 <section className="employee-section">
                   <div className="flex items-center gap-2 mb-4">
                     <h2 className="text-xl font-medium">Zugewiesener Mitarbeiter</h2>
@@ -212,7 +210,6 @@ export default function AssetDetail() {
                   )}
                 </section>
 
-                {/* Document upload section - Right */}
                 <section className="document-section">
                   <div className="flex items-center gap-2 mb-4">
                     <h2 className="text-xl font-medium">Dokumente</h2>
@@ -229,7 +226,6 @@ export default function AssetDetail() {
                 </section>
               </div>
 
-              {/* Asset Timeline section - Bottom */}
               <section className="timeline-section mt-2">
                 <div className="flex items-center gap-2 mb-4">
                   <h2 className="text-xl font-medium">Asset Historie</h2>
