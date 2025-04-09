@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -7,12 +6,6 @@ import { Upload } from "lucide-react";
 import { Document } from "./types";
 import { DocumentList } from "./DocumentList";
 import { DocumentUploadDialog } from "./DocumentUploadDialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger
-} from "@/components/ui/tooltip";
 
 interface DocumentUploadProps {
   assetId: string;
@@ -185,22 +178,15 @@ export default function DocumentUpload({
 
   return (
     <div>
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => setIsDialogOpen(true)}
-              className="h-8 w-8 p-0"
-            >
-              <Upload size={16} />
-              <span className="sr-only">Dokument hinzufügen</span>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Dokument hinzufügen</TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <Button 
+        variant="ghost" 
+        size="icon"
+        onClick={() => setIsDialogOpen(true)}
+        className="h-8 w-8 p-0"
+      >
+        <Upload size={16} />
+        <span className="sr-only">Dokument hinzufügen</span>
+      </Button>
 
       <DocumentList 
         documents={documents} 
