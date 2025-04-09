@@ -2,16 +2,18 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload } from "lucide-react";
+import { FilePlus } from "lucide-react";
 import { Document } from "./types";
 import { DocumentList } from "./DocumentList";
 import { DocumentUploadDialog } from "./DocumentUploadDialog";
+
 interface DocumentUploadProps {
   assetId: string;
   documents: Document[];
   onAddDocument: (document: Document) => void;
   onDeleteDocument: (documentId: string) => void;
 }
+
 export default function DocumentUpload({
   assetId,
   documents,
@@ -20,9 +22,8 @@ export default function DocumentUpload({
 }: DocumentUploadProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
@@ -64,6 +65,7 @@ export default function DocumentUpload({
       fetchDocuments();
     }
   }, [assetId]);
+
   const handleUpload = async (selectedFiles: FileList, documentCategory: Document["category"]) => {
     if (!selectedFiles || selectedFiles.length === 0) {
       toast({
@@ -118,6 +120,7 @@ export default function DocumentUpload({
       setIsDialogOpen(false);
     }
   };
+
   const handleDeleteDocument = async (documentId: string, docName: string) => {
     try {
       const doc = documents.find(d => d.id === documentId);
@@ -145,11 +148,27 @@ export default function DocumentUpload({
       return Promise.reject(error);
     }
   };
-  return <div>
-      
+
+  return (
+    <div>
+      <Button 
+        variant="outline" 
+        size="sm"
+        onClick={() => setIsDialogOpen(true)}
+        className="gap-1"
+      >
+        <FilePlus size={16} />
+        Dokument hinzufügen
+      </Button>
 
       <DocumentList documents={documents} onDeleteDocument={handleDeleteDocument} />
 
-      <DocumentUploadDialog isOpen={isDialogOpen} onClose={() => setIsDialogOpen(false)} onUpload={handleUpload} isUploading={isUploading} />
-    </div>;
+      <DocumentUploadDialog 
+        isOpen={isDialogOpen} 
+        onClose={() => setIsDialogOpen(false)} 
+        onUpload={handleUpload} 
+        isUploading={isUploading} 
+      />
+    </div>
+  );
 }
