@@ -74,6 +74,7 @@ export default function EmployeeFormFields() {
             <Select 
               onValueChange={field.onChange} 
               defaultValue={field.value}
+              value={field.value}
             >
               <FormControl>
                 <SelectTrigger>
@@ -117,7 +118,8 @@ export default function EmployeeFormFields() {
               <Input 
                 type="number" 
                 placeholder="5000" 
-                {...field} 
+                {...field}
+                onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
               />
             </FormControl>
             <FormDescription>
@@ -137,7 +139,8 @@ export default function EmployeeFormFields() {
             <FormControl>
               <Input 
                 placeholder="https://example.com/image.jpg" 
-                {...field} 
+                {...field}
+                value={field.value || ''}
               />
             </FormControl>
             <FormDescription>

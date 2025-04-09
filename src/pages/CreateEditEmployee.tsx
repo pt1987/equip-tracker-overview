@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import PageTransition from "@/components/layout/PageTransition";
@@ -17,11 +18,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@/hooks/use-toast";
 import EmployeeFormFields from "@/components/employees/EmployeeForm";
 import { employeeFormSchema, EmployeeFormValues } from "@/components/employees/EmployeeFormTypes";
+import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
 
 export default function CreateEditEmployee() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditing = !!id;
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: employeeData = [] } = useQuery({
     queryKey: ["employees"],
@@ -51,18 +55,62 @@ export default function CreateEditEmployee() {
     }
   });
 
-  const onSubmit = (data: EmployeeFormValues) => {
-    // In a real application, we would send the data to the API
-    console.log(data);
-    
-    // Show toast message
-    toast({
-      title: isEditing ? "Mitarbeiter aktualisiert" : "Mitarbeiter erstellt",
-      description: `${data.firstName} ${data.lastName} wurde erfolgreich ${isEditing ? 'aktualisiert' : 'erstellt'}.`,
-    });
-    
-    // Navigate back to the employee overview
-    navigate("/employees");
+  const onSubmit = async (data: EmployeeFormValues) => {
+    setIsSubmitting(true);
+    try {
+      console.log("Form submitted with data:", data);
+      
+      // Generate UUID for new employee
+      const employeeId = isEditing ? id : crypto.randomUUID();
+      
+      // Prepare data in the format expected by Supabase
+      const employeeData = {
+        id: employeeId,
+        first_name: data.firstName,
+        last_name: data.lastName,
+        position: data.position,
+        cluster: data.cluster,
+        start_date: new Date(data.entryDate).toISOString(),
+        entry_date: new Date(data.entryDate).toISOString(),
+        budget: data.budget,
+        image_url: data.profileImage || null,
+        profile_image: data.profileImage || null
+      };
+      
+      // Insert or update data in Supabase
+      if (isEditing) {
+        const { error } = await supabase
+          .from('employees')
+          .update(employeeData)
+          .eq('id', id);
+          
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('employees')
+          .insert([employeeData]);
+          
+        if (error) throw error;
+      }
+      
+      // Show success message
+      toast({
+        title: isEditing ? "Mitarbeiter aktualisiert" : "Mitarbeiter erstellt",
+        description: `${data.firstName} ${data.lastName} wurde erfolgreich ${isEditing ? 'aktualisiert' : 'erstellt'}.`,
+      });
+      
+      // Navigate back to the employee overview
+      navigate("/employees");
+    } catch (error) {
+      console.error("Error saving employee:", error);
+      toast({
+        title: "Fehler",
+        description: `Ein Fehler ist aufgetreten: ${(error as Error).message}`,
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -102,8 +150,10 @@ export default function CreateEditEmployee() {
                   >
                     Abbrechen
                   </Button>
-                  <Button type="submit">
-                    {isEditing ? "Speichern" : "Erstellen"}
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting 
+                      ? isEditing ? "Wird gespeichert..." : "Wird erstellt..." 
+                      : isEditing ? "Speichern" : "Erstellen"}
                   </Button>
                 </CardFooter>
               </Card>
