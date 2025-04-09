@@ -29,6 +29,7 @@ export function EmployeeFormContainer({
       cluster: "",
       entryDate: new Date().toISOString().split('T')[0],
       budget: 5000,
+      profileImage: "",
     },
   });
 
@@ -44,6 +45,7 @@ export function EmployeeFormContainer({
         cluster: employee.cluster || "",
         entryDate: employee.startDate ? new Date(employee.startDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
         budget: employee.budget || 5000,
+        profileImage: employee.imageUrl || "",
       });
     }
   }, [employee, form]);

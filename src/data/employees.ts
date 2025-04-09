@@ -91,6 +91,8 @@ export const getEmployees = async (): Promise<EmployeeType[]> => {
 
     if (employeesError) throw employeesError;
 
+    if (!employeesData) return [];
+
     return employeesData.map(emp => ({
       id: emp.id,
       firstName: emp.first_name,
