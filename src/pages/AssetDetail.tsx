@@ -1,60 +1,27 @@
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import PageTransition from "@/components/layout/PageTransition";
-import AssetDetailView from "@/components/assets/AssetDetailView";
-import AssetDetailEdit from "@/components/assets/AssetDetailEdit";
-import { getAssetById, updateAsset, getAssetHistoryByAssetId } from "@/data/assets";
+import { getAssetById, getAssetHistoryByAssetId } from "@/data/assets";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
-import { Asset } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
-import { Document } from "@/components/documents/types";
-import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent } from "@/components/ui/card";
-import { useDocumentStorage } from "@/components/documents/hooks/useDocumentStorage";
 
+import AssetDetailContent from "@/components/assets/details/AssetDetailContent";
 import AssetLoading from "@/components/assets/details/AssetLoading";
 import AssetNotFound from "@/components/assets/details/AssetNotFound";
-import EmployeeSection from "@/components/assets/details/EmployeeSection";
-import DocumentSection from "@/components/assets/details/DocumentSection";
-import HistorySection from "@/components/assets/details/HistorySection";
 
 export default function AssetDetail() {
   const { id = "" } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [isEditing, setIsEditing] = useState(false);
-  const [documents, setDocuments] = useState<Document[]>([]);
   const { toast } = useToast();
 
-  function handleAddDocument(document: Document) {
-    setDocuments([...documents, document]);
-    
-    toast({
-      title: "Dokument hinzugefügt",
-      description: `${document.name} wurde erfolgreich hinzugefügt.`
-    });
-  }
-  
-  const { fetchDocuments, uploadDocument, deleteDocument } = useDocumentStorage({
-    assetId: id,
-    documents,
-    onAddDocument: handleAddDocument,
-    toast
-  });
-
+  // Scroll to top when navigating to this page
   useEffect(() => {
     if (id) {
       window.scrollTo(0, 0);
-    }
-  }, [id]);
-
-  // Only fetch documents once when component mounts or when id changes
-  useEffect(() => {
-    if (id) {
-      fetchDocuments();
     }
   }, [id]);
 
@@ -76,113 +43,6 @@ export default function AssetDetail() {
     queryFn: () => getAssetHistoryByAssetId(id),
     enabled: !!id
   });
-
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
-
-  const handleCancelEdit = () => {
-    setIsEditing(false);
-  };
-
-  const handleDelete = async () => {
-    try {
-      // Fix: Make a proper delete request and handle the response
-      const { error } = await supabase.from('assets').delete().eq('id', id);
-      
-      if (error) {
-        console.error("Delete error:", error);
-        toast({
-          variant: "destructive",
-          title: "Fehler beim Löschen",
-          description: error.message
-        });
-        return;
-      }
-      
-      // If deletion was successful, invalidate queries and navigate
-      queryClient.invalidateQueries({
-        queryKey: ["assets"]
-      });
-      
-      toast({
-        title: "Asset gelöscht",
-        description: `Das Asset wurde erfolgreich gelöscht.`
-      });
-      
-      navigate("/assets");
-    } catch (err: any) {
-      console.error("Delete error:", err);
-      toast({
-        variant: "destructive",
-        title: "Fehler beim Löschen",
-        description: err.message || "Ein unbekannter Fehler ist aufgetreten."
-      });
-    }
-  };
-
-  const handleSave = async (formData: any) => {
-    try {
-      if (!asset) return;
-      const updatedAsset: Asset = {
-        ...asset,
-        name: formData.name,
-        manufacturer: formData.manufacturer,
-        model: formData.model,
-        type: formData.type,
-        vendor: formData.vendor,
-        status: formData.status,
-        purchaseDate: formData.purchaseDate.toISOString().split('T')[0],
-        price: formData.price,
-        serialNumber: formData.serialNumber || null,
-        inventoryNumber: formData.inventoryNumber || null,
-        additionalWarranty: formData.additionalWarranty || false,
-        imageUrl: formData.imageUrl || null
-      };
-      
-      await updateAsset(updatedAsset);
-      
-      queryClient.invalidateQueries({
-        queryKey: ["asset", id]
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["assets"]
-      });
-      
-      setIsEditing(false);
-      toast({
-        title: "Asset aktualisiert",
-        description: "Die Änderungen wurden erfolgreich gespeichert."
-      });
-    } catch (error) {
-      console.error("Error saving asset:", error);
-      toast({
-        variant: "destructive",
-        title: "Fehler beim Speichern",
-        description: "Die Änderungen konnten nicht gespeichert werden."
-      });
-    }
-  };
-
-  const handleDeleteDocument = async (documentId: string) => {
-    try {
-      await deleteDocument(documentId);
-      
-      setDocuments(documents.filter(doc => doc.id !== documentId));
-      
-      toast({
-        title: "Dokument gelöscht",
-        description: "Das Dokument wurde erfolgreich gelöscht."
-      });
-    } catch (error: any) {
-      console.error('Error deleting document:', error);
-      toast({
-        variant: "destructive",
-        title: "Fehler beim Löschen",
-        description: error.message || "Ein Fehler ist aufgetreten beim Löschen des Dokuments."
-      });
-    }
-  };
 
   if (isAssetLoading) {
     return (
@@ -212,36 +72,13 @@ export default function AssetDetail() {
             <h1 className="text-3xl font-bold tracking-tight">Asset Details</h1>
           </div>
 
-          <Card className="shadow-sm">
-            {isEditing ? (
-              <CardContent className="p-6">
-                <AssetDetailEdit asset={asset} onSave={handleSave} onCancel={handleCancelEdit} />
-              </CardContent>
-            ) : (
-              <CardContent className="p-6">
-                <AssetDetailView asset={asset} onEdit={handleEdit} onDelete={handleDelete} />
-              </CardContent>
-            )}
-          </Card>
-
-          {!isEditing && (
-            <>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <EmployeeSection employeeId={asset.employeeId} />
-                <DocumentSection 
-                  assetId={asset.id}
-                  documents={documents}
-                  onAddDocument={handleAddDocument}
-                  onDeleteDocument={handleDeleteDocument}
-                />
-              </div>
-
-              <HistorySection 
-                assetHistory={assetHistory}
-                isHistoryLoading={isHistoryLoading}
-              />
-            </>
-          )}
+          <AssetDetailContent 
+            asset={asset}
+            assetHistory={assetHistory}
+            isHistoryLoading={isHistoryLoading}
+            queryClient={queryClient}
+            toast={toast}
+          />
         </div>
       </div>
     </PageTransition>
