@@ -53,6 +53,24 @@ export default function EmployeeFormFields() {
       
       <FormField
         control={form.control}
+        name="email"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>E-Mail</FormLabel>
+            <FormControl>
+              <Input 
+                type="email" 
+                placeholder="max.mustermann@unternehmen.de" 
+                {...field} 
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      <FormField
+        control={form.control}
         name="position"
         render={({ field }) => (
           <FormItem>

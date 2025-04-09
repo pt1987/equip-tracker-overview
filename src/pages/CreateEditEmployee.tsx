@@ -21,6 +21,28 @@ import { employeeFormSchema, EmployeeFormValues } from "@/components/employees/E
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 
+// Function to generate a secure random password
+const generateSecurePassword = () => {
+  const length = 12;
+  const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+";
+  let password = "";
+  
+  // Ensure password has at least one of each: uppercase, lowercase, number, special char
+  password += "Aa1!";
+  
+  // Fill the rest with random characters
+  for (let i = 0; i < length - 4; i++) {
+    const randomIndex = Math.floor(Math.random() * charset.length);
+    password += charset[randomIndex];
+  }
+  
+  // Shuffle the password characters
+  return password
+    .split('')
+    .sort(() => 0.5 - Math.random())
+    .join('');
+};
+
 export default function CreateEditEmployee() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -39,6 +61,7 @@ export default function CreateEditEmployee() {
     defaultValues: isEditing && employee ? {
       firstName: employee.firstName || "",
       lastName: employee.lastName || "",
+      email: employee.email || "",
       position: employee.position || "",
       cluster: employee.cluster || "",
       entryDate: employee.entryDate || employee.startDate ? new Date(employee.startDate).toISOString().split('T')[0] : "",
@@ -47,6 +70,7 @@ export default function CreateEditEmployee() {
     } : {
       firstName: "",
       lastName: "",
+      email: "",
       position: "",
       cluster: "",
       entryDate: new Date().toISOString().split('T')[0],
@@ -62,60 +86,13 @@ export default function CreateEditEmployee() {
       
       // Generate UUID for new employee
       const employeeId = isEditing ? id : crypto.randomUUID();
-      
-      // First, we need to create or update a profile entry
-      // This is necessary because employees table has a foreign key constraint to profiles
-      const profileData = {
-        id: employeeId,
-        name: `${data.firstName} ${data.lastName}`,
-        email: `${data.firstName.toLowerCase()}.${data.lastName.toLowerCase()}@example.com`, // Using a placeholder email
-        role: 'user'
-      };
 
-      // Create or update the profile first
       if (isEditing) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update(profileData)
-          .eq('id', employeeId);
-          
-        if (profileError) throw profileError;
+        // Update existing employee
+        await updateExistingEmployee(employeeId as string, data);
       } else {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([profileData]);
-          
-        if (profileError) throw profileError;
-      }
-      
-      // Now prepare the employee data
-      const employeeData = {
-        id: employeeId,
-        first_name: data.firstName,
-        last_name: data.lastName,
-        position: data.position,
-        cluster: data.cluster,
-        start_date: new Date(data.entryDate).toISOString(),
-        entry_date: new Date(data.entryDate).toISOString(),
-        budget: data.budget,
-        image_url: data.profileImage || null,
-        profile_image: data.profileImage || null
-      };
-      
-      // Insert or update the employee data
-      if (isEditing) {
-        const { error } = await supabase
-          .from('employees')
-          .update(employeeData)
-          .eq('id', id);
-          
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('employees')
-          .insert([employeeData]);
-          
-        if (error) throw error;
+        // Create new employee with auth account
+        await createNewEmployeeWithAuth(employeeId, data);
       }
       
       // Show success message
@@ -136,6 +113,118 @@ export default function CreateEditEmployee() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const updateExistingEmployee = async (employeeId: string, data: EmployeeFormValues) => {
+    // Update profile data
+    const profileData = {
+      name: `${data.firstName} ${data.lastName}`,
+      email: data.email,
+    };
+
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update(profileData)
+      .eq('id', employeeId);
+      
+    if (profileError) throw profileError;
+    
+    // Update employee data
+    const employeeData = {
+      id: employeeId,
+      first_name: data.firstName,
+      last_name: data.lastName,
+      position: data.position,
+      cluster: data.cluster,
+      start_date: new Date(data.entryDate).toISOString(),
+      entry_date: new Date(data.entryDate).toISOString(),
+      budget: data.budget,
+      image_url: data.profileImage || null,
+      profile_image: data.profileImage || null
+    };
+
+    const { error } = await supabase
+      .from('employees')
+      .update(employeeData)
+      .eq('id', employeeId);
+      
+    if (error) throw error;
+  };
+
+  const createNewEmployeeWithAuth = async (employeeId: string, data: EmployeeFormValues) => {
+    const temporaryPassword = generateSecurePassword();
+    
+    // 1. Create auth user
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      email: data.email,
+      password: temporaryPassword,
+      email_confirm: true,
+      user_metadata: {
+        first_name: data.firstName,
+        last_name: data.lastName,
+      },
+      role: "authenticated"
+    });
+    
+    if (authError) throw new Error(`Fehler beim Erstellen des Benutzerkontos: ${authError.message}`);
+    
+    const userId = authData.user.id;
+    
+    // 2. Create profile entry
+    const profileData = {
+      id: userId,
+      name: `${data.firstName} ${data.lastName}`,
+      email: data.email,
+      role: 'user'
+    };
+    
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .insert([profileData]);
+      
+    if (profileError) throw new Error(`Fehler beim Erstellen des Profils: ${profileError.message}`);
+    
+    // 3. Create employee entry
+    const employeeData = {
+      id: userId,
+      first_name: data.firstName,
+      last_name: data.lastName,
+      position: data.position,
+      cluster: data.cluster,
+      start_date: new Date(data.entryDate).toISOString(),
+      entry_date: new Date(data.entryDate).toISOString(),
+      budget: data.budget,
+      image_url: data.profileImage || null,
+      profile_image: data.profileImage || null
+    };
+    
+    const { error: employeeError } = await supabase
+      .from('employees')
+      .insert([employeeData]);
+      
+    if (employeeError) throw new Error(`Fehler beim Erstellen des Mitarbeiters: ${employeeError.message}`);
+    
+    // 4. Send invitation email with password reset link
+    const { error: passwordResetError } = await supabase.auth.resetPasswordForEmail(
+      data.email,
+      {
+        redirectTo: `${window.location.origin}/reset-password`
+      }
+    );
+    
+    if (passwordResetError) {
+      console.error("Fehler beim Senden der Einladungs-E-Mail:", passwordResetError);
+      throw new Error(`Mitarbeiter wurde erstellt, aber die Einladungs-E-Mail konnte nicht gesendet werden: ${passwordResetError.message}`);
+    }
+    
+    // Log temporary password - in a real app you would send this via a secure channel
+    console.log(`Temporäres Passwort für ${data.email}: ${temporaryPassword}`);
+    
+    // Show additional success message with temp password
+    toast({
+      title: "Temporäres Passwort",
+      description: `Temporäres Passwort für ${data.email}: ${temporaryPassword}`,
+    });
   };
 
   return (

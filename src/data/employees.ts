@@ -1,90 +1,124 @@
-
-import { Employee } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
+import { Asset } from "./assets";
 
-// Helper functions to retrieve employee data from Supabase
-export const getEmployeeById = async (id: string): Promise<Employee | null> => {
-  const { data, error } = await supabase
-    .from('employees')
-    .select('*')
-    .eq('id', id)
-    .single();
-  
-  if (error || !data) return null;
-  
-  return {
-    id: data.id,
-    firstName: data.first_name,
-    lastName: data.last_name,
-    imageUrl: data.image_url,
-    startDate: data.start_date,
-    entryDate: data.entry_date,
-    cluster: data.cluster,
-    position: data.position,
-    budget: data.budget,
-    usedBudget: data.used_budget,
-    profileImage: data.profile_image
-  };
-};
+export interface Employee {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string; // Added email field
+  position: string;
+  cluster: string;
+  startDate?: Date;
+  entryDate?: string;
+  budget: number;
+  usedBudget?: number;
+  imageUrl?: string;
+  profileImage?: string;
+  assets?: Asset[];
+}
 
-// Get all employees from Supabase
-export const getEmployees = async (): Promise<Employee[]> => {
-  const { data, error } = await supabase
-    .from('employees')
-    .select('*');
-  
-  if (error || !data) return [];
-  
-  return data.map(employee => ({
-    id: employee.id,
-    firstName: employee.first_name,
-    lastName: employee.last_name,
-    imageUrl: employee.image_url,
-    startDate: employee.start_date,
-    entryDate: employee.entry_date,
-    cluster: employee.cluster,
-    position: employee.position,
-    budget: employee.budget,
-    usedBudget: employee.used_budget,
-    profileImage: employee.profile_image
-  }));
-};
+export const getEmployee = async (id: string): Promise<Employee | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('employees')
+      .select(`
+        id,
+        first_name,
+        last_name,
+        position,
+        cluster,
+        start_date,
+        entry_date,
+        budget,
+        used_budget,
+        image_url,
+        profile_image,
+        profiles (
+          email
+        )
+      `)
+      .eq('id', id)
+      .single();
 
-// Get employee assets summary
-export const getEmployeeAssetsSummary = async (employeeId: string) => {
-  const { data: employeeAssets, error } = await supabase
-    .from('assets')
-    .select('*')
-    .eq('employee_id', employeeId);
-  
-  if (error || !employeeAssets) {
+    if (error) throw error;
+
+    if (!data) return null;
+
     return {
-      totalAssets: 0,
-      totalValue: 0,
-      assetsByType: {
-        laptop: [],
-        smartphone: [],
-        tablet: [],
-        mouse: [],
-        keyboard: [],
-        accessory: []
-      }
+      id: data.id,
+      firstName: data.first_name,
+      lastName: data.last_name,
+      email: data.profiles?.email || '',
+      position: data.position,
+      cluster: data.cluster,
+      startDate: data.start_date ? new Date(data.start_date) : undefined,
+      entryDate: data.entry_date,
+      budget: data.budget || 0,
+      usedBudget: data.used_budget || 0,
+      imageUrl: data.image_url || undefined,
+      profileImage: data.profile_image || undefined,
     };
+  } catch (error) {
+    console.error("Error fetching employee:", error);
+    return null;
   }
-  
-  const totalValue = employeeAssets.reduce((sum, asset) => sum + asset.price, 0);
-  const assetsByType = {
-    laptop: employeeAssets.filter(asset => asset.type === 'laptop'),
-    smartphone: employeeAssets.filter(asset => asset.type === 'smartphone'),
-    tablet: employeeAssets.filter(asset => asset.type === 'tablet'),
-    mouse: employeeAssets.filter(asset => asset.type === 'mouse'),
-    keyboard: employeeAssets.filter(asset => asset.type === 'keyboard'),
-    accessory: employeeAssets.filter(asset => asset.type === 'accessory')
-  };
-  
-  return {
-    totalAssets: employeeAssets.length,
-    totalValue,
-    assetsByType
-  };
+};
+
+export const getEmployees = async (): Promise<Employee[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('employees')
+      .select(`
+        id,
+        first_name,
+        last_name,
+        position,
+        cluster,
+        start_date,
+        entry_date,
+        budget,
+        used_budget,
+        image_url,
+        profile_image,
+        profiles (
+          email
+        )
+      `);
+
+    if (error) throw error;
+
+    return data.map(emp => ({
+      id: emp.id,
+      firstName: emp.first_name,
+      lastName: emp.last_name,
+      email: emp.profiles?.email || '',
+      position: emp.position,
+      cluster: emp.cluster,
+      startDate: emp.start_date ? new Date(emp.start_date) : undefined,
+      entryDate: emp.entry_date,
+      budget: emp.budget || 0,
+      usedBudget: emp.used_budget || 0,
+      imageUrl: emp.image_url || undefined,
+      profileImage: emp.profile_image || undefined,
+    }));
+  } catch (error) {
+    console.error("Error fetching employees:", error);
+    return [];
+  }
+};
+
+export const deleteEmployee = async (id: string): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('employees')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+
+    return true;
+  } catch (error) {
+    console.error("Error deleting employee:", error);
+    return false;
+  }
 };
