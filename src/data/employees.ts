@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Asset, Employee as EmployeeType } from "@/lib/types";
 
@@ -211,6 +212,8 @@ export const createEmployee = async (employeeData: {
       if (emailUpdateError) {
         console.error("Error updating email:", emailUpdateError);
         // Continue anyway, we at least created the employee
+      } else {
+        console.log("Email updated successfully:", employeeData.email);
       }
     }
     
@@ -272,6 +275,8 @@ export const updateEmployee = async (id: string, employeeData: {
       } else {
         console.log("Email update result:", emailUpdateResult);
       }
+    } else {
+      console.log("No email provided for update, skipping email update");
     }
     
     console.log("Employee update completed successfully");
