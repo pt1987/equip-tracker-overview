@@ -1,3 +1,4 @@
+
 import { Asset, AssetHistoryEntry, AssetStatus, AssetType } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
 
