@@ -161,3 +161,120 @@ export const getEmployeeAssetsSummary = async (employeeId: string) => {
     assetsByType: {}
   };
 };
+
+export const createEmployee = async (employeeData: {
+  first_name: string;
+  last_name: string;
+  email: string;
+  position: string;
+  cluster: string;
+  start_date: string;
+  budget: number;
+  image_url?: string | null;
+  profile_image?: string | null;
+}): Promise<string> => {
+  try {
+    // Generate a UUID for the employee
+    const employeeId = crypto.randomUUID();
+    
+    // First, attempt to create profile record (this might fail due to RLS)
+    try {
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert([{ 
+          id: employeeId, 
+          email: employeeData.email,
+          name: `${employeeData.first_name} ${employeeData.last_name}`
+        }]);
+      
+      if (profileError) {
+        console.warn("Could not insert into profiles table:", profileError);
+        // Continue anyway since this might be due to RLS permissions
+      }
+    } catch (err) {
+      console.warn("Exception trying to create profile:", err);
+      // Continue despite profile creation error
+    }
+    
+    // Now create the employee record
+    const { error: employeeError } = await supabase
+      .from('employees')
+      .insert([{
+        id: employeeId,
+        first_name: employeeData.first_name,
+        last_name: employeeData.last_name,
+        position: employeeData.position,
+        cluster: employeeData.cluster,
+        start_date: employeeData.start_date,
+        entry_date: employeeData.start_date,
+        budget: employeeData.budget,
+        used_budget: 0,
+        image_url: employeeData.image_url,
+        profile_image: employeeData.profile_image
+      }]);
+      
+    if (employeeError) {
+      console.error("Failed to create employee:", employeeError);
+      throw new Error(`Failed to create employee: ${employeeError.message}`);
+    }
+    
+    return employeeId;
+  } catch (error) {
+    const errorMessage = (error as Error).message || "Failed to create employee";
+    throw new Error(errorMessage);
+  }
+};
+
+export const updateEmployee = async (id: string, employeeData: {
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  position?: string;
+  cluster?: string;
+  start_date?: string;
+  budget?: number;
+  image_url?: string | null;
+  profile_image?: string | null;
+}): Promise<boolean> => {
+  try {
+    // Update the employee record
+    const { error: employeeError } = await supabase
+      .from('employees')
+      .update({
+        first_name: employeeData.first_name,
+        last_name: employeeData.last_name,
+        position: employeeData.position,
+        cluster: employeeData.cluster,
+        start_date: employeeData.start_date,
+        entry_date: employeeData.start_date,
+        budget: employeeData.budget,
+        image_url: employeeData.image_url,
+        profile_image: employeeData.profile_image
+      })
+      .eq('id', id);
+      
+    if (employeeError) throw employeeError;
+    
+    // Try to update the email in profiles, but don't fail if it doesn't work
+    if (employeeData.email) {
+      try {
+        await supabase
+          .from('profiles')
+          .update({ 
+            email: employeeData.email,
+            name: employeeData.first_name && employeeData.last_name ? 
+              `${employeeData.first_name} ${employeeData.last_name}` : undefined
+          })
+          .eq('id', id);
+      } catch (profileError) {
+        console.warn("Could not update profile email:", profileError);
+        // Continue despite profile update error
+      }
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error updating employee:", error);
+    return false;
+  }
+};

@@ -12,13 +12,12 @@ import {
   CardTitle 
 } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
-import { getEmployees } from "@/data/employees";
+import { getEmployees, createEmployee, updateEmployee } from "@/data/employees";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@/hooks/use-toast";
 import EmployeeFormFields from "@/components/employees/EmployeeForm";
 import { employeeFormSchema, EmployeeFormValues } from "@/components/employees/EmployeeFormTypes";
-import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 
 export default function CreateEditEmployee() {
@@ -62,15 +61,36 @@ export default function CreateEditEmployee() {
     try {
       console.log("Form submitted with data:", data);
       
-      // Generate UUID for new employee
-      const employeeId = isEditing ? id : crypto.randomUUID();
-
-      if (isEditing) {
+      if (isEditing && id) {
         // Update existing employee
-        await updateExistingEmployee(employeeId as string, data);
+        const success = await updateEmployee(id, {
+          first_name: data.firstName,
+          last_name: data.lastName,
+          email: data.email,
+          position: data.position,
+          cluster: data.cluster,
+          start_date: data.entryDate,
+          budget: data.budget,
+          image_url: data.profileImage || null,
+          profile_image: data.profileImage || null
+        });
+        
+        if (!success) {
+          throw new Error("Failed to update employee record");
+        }
       } else {
-        // Create new employee record
-        await createNewEmployee(employeeId, data);
+        // Create new employee
+        await createEmployee({
+          first_name: data.firstName,
+          last_name: data.lastName,
+          email: data.email,
+          position: data.position,
+          cluster: data.cluster,
+          start_date: data.entryDate,
+          budget: data.budget,
+          image_url: data.profileImage || null,
+          profile_image: data.profileImage || null
+        });
       }
       
       // Show success message
@@ -91,58 +111,6 @@ export default function CreateEditEmployee() {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const updateExistingEmployee = async (employeeId: string, data: EmployeeFormValues) => {
-    // Update employee data in employees table
-    const employeeData = {
-      first_name: data.firstName,
-      last_name: data.lastName,
-      position: data.position,
-      cluster: data.cluster,
-      start_date: new Date(data.entryDate).toISOString(),
-      entry_date: new Date(data.entryDate).toISOString(),
-      budget: data.budget,
-      image_url: data.profileImage || null,
-      profile_image: data.profileImage || null
-    };
-
-    const { error: employeeError } = await supabase
-      .from('employees')
-      .update(employeeData)
-      .eq('id', employeeId);
-      
-    if (employeeError) throw employeeError;
-    
-    // Skip updating profiles table as it might have RLS restrictions
-    // This works because employees data is the primary source
-  };
-
-  const createNewEmployee = async (employeeId: string, data: EmployeeFormValues) => {
-    // First create employee record since it may have less restrictive RLS
-    const employeeData = {
-      id: employeeId,
-      first_name: data.firstName,
-      last_name: data.lastName,
-      position: data.position,
-      cluster: data.cluster,
-      start_date: new Date(data.entryDate).toISOString(),
-      entry_date: new Date(data.entryDate).toISOString(),
-      budget: data.budget,
-      used_budget: 0,
-      image_url: data.profileImage || null,
-      profile_image: data.profileImage || null
-    };
-    
-    const { error: employeeError } = await supabase
-      .from('employees')
-      .insert([employeeData]);
-      
-    if (employeeError) throw employeeError;
-    
-    // We'll store the email in our own application state instead of trying
-    // to update the profiles table which has RLS restrictions
-    // This data will be accessible through the employees.ts functions
   };
 
   return (
