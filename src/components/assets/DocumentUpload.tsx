@@ -14,7 +14,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export interface Document {
@@ -102,30 +101,15 @@ export default function DocumentUpload({
     }
   };
 
-  const getFileIcon = (mimeType: string) => {
-    if (mimeType.includes('pdf')) return "pdf";
-    if (mimeType.includes('image')) return "image";
-    if (mimeType.includes('word')) return "word";
-    if (mimeType.includes('excel')) return "excel";
-    return "generic";
-  };
-
   return (
     <div>
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-medium">Dokumente</h3>
+        <div className="flex justify-end mb-4">
           <DialogTrigger asChild>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button className="p-2 rounded-full bg-secondary/20 hover:bg-secondary/40 transition-colors">
-                    <FilePlus size={16} className="text-primary" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>Dokument hinzufügen</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <Button size="sm" className="gap-1">
+              <FilePlus size={16} />
+              Dokument hinzufügen
+            </Button>
           </DialogTrigger>
         </div>
 
@@ -152,36 +136,49 @@ export default function DocumentUpload({
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => window.open(doc.url, '_blank')}
-                    title="Herunterladen"
-                    className="rounded-full"
-                  >
-                    <DownloadCloud size={16} />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => onDeleteDocument(doc.id)}
-                    className="text-destructive hover:text-destructive/80 rounded-full"
-                    title="Löschen"
-                  >
-                    <Trash2 size={16} />
-                  </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => window.open(doc.url, '_blank')}
+                          className="rounded-full"
+                        >
+                          <DownloadCloud size={16} />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Herunterladen</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => onDeleteDocument(doc.id)}
+                          className="text-destructive hover:text-destructive/80 rounded-full"
+                        >
+                          <Trash2 size={16} />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Löschen</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="text-center py-8 rounded-lg border border-dashed border-secondary/50">
+          <div className="text-center py-6 rounded-lg border border-dashed border-secondary/50">
             <FileUp className="w-10 h-10 mx-auto text-muted-foreground mb-2" />
             <p className="text-muted-foreground">
               Keine Dokumente vorhanden
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Klicken Sie auf das Plus-Symbol, um ein Dokument hochzuladen
+              Klicken Sie auf "Dokument hinzufügen", um ein Dokument hochzuladen
             </p>
           </div>
         )}

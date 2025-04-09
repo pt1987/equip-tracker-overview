@@ -52,13 +52,21 @@ const AssetHistoryTimeline = ({ history }: AssetHistoryTimelineProps) => {
     }
   };
 
+  if (sortedHistory.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-muted-foreground">Keine Historieneinträge vorhanden.</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="relative">
+    <div className="relative pb-4">
       {/* Timeline line */}
       <div className="absolute left-3 top-3 bottom-3 w-px bg-secondary/40 rounded-full" />
 
       {/* Timeline entries */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         {sortedHistory.map((entry, index) => (
           <motion.div
             key={entry.id}

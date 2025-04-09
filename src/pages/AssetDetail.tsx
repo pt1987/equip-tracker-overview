@@ -8,9 +8,7 @@ import AssetDetailEdit from "@/components/assets/AssetDetailEdit";
 import { getAssetById, updateAsset, getAssetHistoryByAssetId } from "@/data/assets";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChevronLeft, Download, FileText, AlertCircle, Share } from "lucide-react";
-import { formatDate } from "@/lib/utils";
+import { AlertCircle, ChevronLeft } from "lucide-react";
 import { Asset } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import DocumentUpload, { Document } from "@/components/assets/DocumentUpload";
@@ -26,7 +24,10 @@ export default function AssetDetail() {
   const { toast } = useToast();
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    if (id) {
+      // Scroll to top when component mounts or ID changes
+      window.scrollTo(0, 0);
+    }
   }, [id]);
 
   const {
@@ -106,7 +107,6 @@ export default function AssetDetail() {
         imageUrl: formData.imageUrl || null
       };
       
-      console.log("Saving updated asset:", updatedAsset);
       await updateAsset(updatedAsset);
       
       queryClient.invalidateQueries({
@@ -151,34 +151,35 @@ export default function AssetDetail() {
 
   if (isAssetLoading) {
     return <PageTransition>
-        <div className="container mx-auto px-6 py-4 max-w-7xl">
-          <Skeleton className="h-8 w-48 mb-4" />
-          <Skeleton className="h-[400px] w-full rounded-lg" />
-        </div>
-      </PageTransition>;
+      <div className="container mx-auto px-6 py-4 max-w-7xl">
+        <Skeleton className="h-8 w-48 mb-4" />
+        <Skeleton className="h-[400px] w-full rounded-lg" />
+      </div>
+    </PageTransition>;
   }
 
   if (assetError || !asset) {
     return <PageTransition>
-        <div className="container mx-auto px-6 py-4 max-w-7xl">
-          <div className="flex flex-col items-center justify-center text-center py-10">
-            <AlertCircle size={64} className="text-muted-foreground mb-4" />
-            <h2 className="text-2xl font-bold mb-2">Asset nicht gefunden</h2>
-            <p className="text-muted-foreground mb-6">
-              Das angeforderte Asset konnte nicht gefunden werden.
-            </p>
-            <Button onClick={() => navigate("/assets")}>
-              <ChevronLeft size={16} className="mr-2" />
-              Zurück zur Übersicht
-            </Button>
-          </div>
+      <div className="container mx-auto px-6 py-4 max-w-7xl">
+        <div className="flex flex-col items-center justify-center text-center py-10">
+          <AlertCircle size={64} className="text-muted-foreground mb-4" />
+          <h2 className="text-2xl font-bold mb-2">Asset nicht gefunden</h2>
+          <p className="text-muted-foreground mb-6">
+            Das angeforderte Asset konnte nicht gefunden werden.
+          </p>
+          <Button onClick={() => navigate("/assets")}>
+            <ChevronLeft size={16} className="mr-2" />
+            Zurück zur Übersicht
+          </Button>
         </div>
-      </PageTransition>;
+      </div>
+    </PageTransition>;
   }
 
-  return <PageTransition>
-      <div className="container mx-auto py-4 max-w-7xl px-[68px]">
-        <div className="flex flex-col gap-6">
+  return (
+    <PageTransition>
+      <div className="container mx-auto py-8 max-w-7xl px-6">
+        <div className="flex flex-col gap-8">
           <div>
             <Button variant="ghost" onClick={() => navigate(-1)} className="mb-1 -ml-3 h-9 px-2">
               <ChevronLeft size={16} className="mr-1" />
@@ -197,26 +198,45 @@ export default function AssetDetail() {
 
           {!isEditing && (
             <>
-              <div className="document-section">
-                {asset && !isEditing && (
-                  <DocumentUpload 
-                    assetId={asset.id} 
-                    documents={documents} 
-                    onAddDocument={handleAddDocument} 
-                    onDeleteDocument={handleDeleteDocument} 
-                  />
-                )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Employee section - Left */}
+                <section className="employee-section">
+                  <div className="flex items-center gap-2 mb-4">
+                    <h2 className="text-xl font-medium">Zugewiesener Mitarbeiter</h2>
+                    <Separator className="flex-grow" />
+                  </div>
+                  {asset && !isEditing && asset.employeeId && (
+                    <div className="employee-content">
+                      {/* Employee component from AssetDetailView will render here */}
+                    </div>
+                  )}
+                </section>
+
+                {/* Document upload section - Right */}
+                <section className="document-section">
+                  <div className="flex items-center gap-2 mb-4">
+                    <h2 className="text-xl font-medium">Dokumente</h2>
+                    <Separator className="flex-grow" />
+                  </div>
+                  {asset && !isEditing && (
+                    <DocumentUpload 
+                      assetId={asset.id} 
+                      documents={documents} 
+                      onAddDocument={handleAddDocument} 
+                      onDeleteDocument={handleDeleteDocument} 
+                    />
+                  )}
+                </section>
               </div>
 
-              <div className="timeline-section">
+              {/* Asset Timeline section - Bottom */}
+              <section className="timeline-section mt-2">
+                <div className="flex items-center gap-2 mb-4">
+                  <h2 className="text-xl font-medium">Asset Historie</h2>
+                  <Separator className="flex-grow" />
+                </div>
                 {!isHistoryLoading ? (
-                  assetHistory.length > 0 ? (
-                    <AssetHistoryTimeline history={assetHistory} />
-                  ) : (
-                    <div className="py-6 text-center">
-                      <p className="text-muted-foreground">Keine Historieneinträge vorhanden.</p>
-                    </div>
-                  )
+                  <AssetHistoryTimeline history={assetHistory} />
                 ) : (
                   <div className="space-y-2 py-4">
                     <Skeleton className="h-12 w-full" />
@@ -224,10 +244,11 @@ export default function AssetDetail() {
                     <Skeleton className="h-12 w-full" />
                   </div>
                 )}
-              </div>
+              </section>
             </>
           )}
         </div>
       </div>
-    </PageTransition>;
+    </PageTransition>
+  );
 }

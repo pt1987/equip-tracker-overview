@@ -91,7 +91,7 @@ export default function AssetDetailView({
   return (
     <div className="space-y-8">
       {/* Hero section with image and key info */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Asset image - left column */}
         <div className="relative flex items-center justify-center">
           <motion.img 
@@ -125,9 +125,9 @@ export default function AssetDetailView({
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <button className="p-2 rounded-md hover:bg-muted/50 transition-colors">
-                            <QrCode size={18} className="text-muted-foreground hover:text-foreground" />
-                          </button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <QrCode size={18} className="text-muted-foreground" />
+                          </Button>
                         </TooltipTrigger>
                         <TooltipContent>QR-Code anzeigen</TooltipContent>
                       </Tooltip>
@@ -142,7 +142,7 @@ export default function AssetDetailView({
                       </DialogDescription>
                     </DialogHeader>
                     <div className="flex justify-center py-4">
-                      <QRCode value={`${window.location.origin}/asset/${asset.id}`} size={160} title={`${asset.manufacturer} ${asset.model}`} />
+                      <QRCode value={`${window.location.origin}/asset/${asset.id}`} size={200} title={`${asset.manufacturer} ${asset.model}`} />
                     </div>
                   </DialogContent>
                 </Dialog>
@@ -150,9 +150,9 @@ export default function AssetDetailView({
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <button onClick={onEdit} className="p-2 rounded-md hover:bg-muted/50 transition-colors">
-                        <Pencil size={18} className="text-muted-foreground hover:text-foreground" />
-                      </button>
+                      <Button variant="ghost" size="icon" onClick={onEdit} className="h-8 w-8">
+                        <Pencil size={18} className="text-muted-foreground" />
+                      </Button>
                     </TooltipTrigger>
                     <TooltipContent>Bearbeiten</TooltipContent>
                   </Tooltip>
@@ -163,9 +163,9 @@ export default function AssetDetailView({
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <button className="p-2 rounded-md hover:bg-muted/50 transition-colors">
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
                             <Trash size={18} className="text-muted-foreground hover:text-destructive" />
-                          </button>
+                          </Button>
                         </TooltipTrigger>
                         <TooltipContent>Löschen</TooltipContent>
                       </Tooltip>
@@ -232,7 +232,7 @@ export default function AssetDetailView({
           {asset.serialNumber && (
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Seriennummer</p>
-              <p className="font-medium text-sm font-mono">{asset.serialNumber}</p>
+              <p className="font-medium tracking-wide">{asset.serialNumber}</p>
             </div>
           )}
           
@@ -246,7 +246,7 @@ export default function AssetDetailView({
           {asset.imei && (
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">IMEI</p>
-              <p className="font-medium font-mono text-sm">{asset.imei}</p>
+              <p className="font-medium">{asset.imei}</p>
             </div>
           )}
           
@@ -297,93 +297,65 @@ export default function AssetDetailView({
         )}
       </section>
 
-      {/* Employee and Document section side by side */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Assigned Employee section */}
-        <section>
-          <div className="flex items-center gap-2 mb-4">
-            <h2 className="text-xl font-medium">Zugewiesener Mitarbeiter</h2>
-            <Separator className="flex-grow" />
-          </div>
-          
-          <div>
-            {asset.employeeId ? (
-              <>
-                {isLoadingEmployee ? (
-                  <div className="flex justify-center py-4">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  </div>
-                ) : employeeData ? (
-                  <div className="flex items-center gap-5">
-                    <Avatar className="h-14 w-14">
-                      <AvatarImage src={employeeData.imageUrl || `https://avatar.vercel.sh/${employeeData.id}`} alt={`${employeeData.firstName} ${employeeData.lastName}`} />
-                      <AvatarFallback>
-                        {employeeData.firstName?.[0]}{employeeData.lastName?.[0]}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <Link to={`/employee/${employeeData.id}`} className="text-lg font-medium hover:underline">
-                        {employeeData.firstName} {employeeData.lastName}
-                      </Link>
-                      <p className="text-sm text-muted-foreground">{employeeData.position}</p>
-                      <p className="text-sm text-muted-foreground">{employeeData.cluster}</p>
-                      <Button variant="link" size="sm" className="p-0 h-auto mt-1" asChild>
-                        <Link to={`/employee/${employeeData.id}`}>
-                          Details anzeigen
-                        </Link>
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="py-4">
-                    <p>Mitarbeiterdaten konnten nicht geladen werden.</p>
-                    <p className="text-sm text-muted-foreground">ID: {asset.employeeId}</p>
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="py-2 flex items-center gap-3">
-                <User size={20} className="text-muted-foreground opacity-70" />
-                <p className="text-muted-foreground">
-                  Dieses Asset ist keinem Mitarbeiter zugewiesen.
-                </p>
+      {/* Employee section */}
+      <div className="flex items-center">
+        {asset.employeeId ? (
+          <>
+            {isLoadingEmployee ? (
+              <div className="flex justify-center py-4 w-full">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               </div>
-            )}
-            
-            {asset.connectedAssetId && (
-              <div className="mt-4">
-                <h3 className="text-lg font-medium mb-2">Verbundenes Asset</h3>
-                <div className="text-sm">
-                  <p className="text-muted-foreground">ID: {asset.connectedAssetId}</p>
+            ) : employeeData ? (
+              <div className="flex items-center gap-5">
+                <Avatar className="h-14 w-14">
+                  <AvatarImage src={employeeData.imageUrl || `https://avatar.vercel.sh/${employeeData.id}`} alt={`${employeeData.firstName} ${employeeData.lastName}`} />
+                  <AvatarFallback>
+                    {employeeData.firstName?.[0]}{employeeData.lastName?.[0]}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <Link to={`/employee/${employeeData.id}`} className="text-lg font-medium hover:underline">
+                    {employeeData.firstName} {employeeData.lastName}
+                  </Link>
+                  <p className="text-sm text-muted-foreground">{employeeData.position}</p>
+                  <p className="text-sm text-muted-foreground">{employeeData.cluster}</p>
                   <Button variant="link" size="sm" className="p-0 h-auto mt-1" asChild>
-                    <Link to={`/asset/${asset.connectedAssetId}`}>
-                      Verbundenes Asset anzeigen
+                    <Link to={`/employee/${employeeData.id}`}>
+                      Details anzeigen
                     </Link>
                   </Button>
                 </div>
               </div>
+            ) : (
+              <div className="py-4">
+                <p>Mitarbeiterdaten konnten nicht geladen werden.</p>
+                <p className="text-sm text-muted-foreground">ID: {asset.employeeId}</p>
+              </div>
             )}
+          </>
+        ) : (
+          <div className="py-2 flex items-center gap-3">
+            <User size={20} className="text-muted-foreground opacity-70" />
+            <p className="text-muted-foreground">
+              Dieses Asset ist keinem Mitarbeiter zugewiesen.
+            </p>
           </div>
-        </section>
-
-        {/* Documents section */}
-        <section className="document-section">
-          <div className="flex items-center gap-2 mb-4">
-            <h2 className="text-xl font-medium">Dokumente</h2>
-            <Separator className="flex-grow" />
+        )}
+        
+        {asset.connectedAssetId && (
+          <div className="mt-4">
+            <h3 className="text-lg font-medium mb-2">Verbundenes Asset</h3>
+            <div className="text-sm">
+              <p className="text-muted-foreground">ID: {asset.connectedAssetId}</p>
+              <Button variant="link" size="sm" className="p-0 h-auto mt-1" asChild>
+                <Link to={`/asset/${asset.connectedAssetId}`}>
+                  Verbundenes Asset anzeigen
+                </Link>
+              </Button>
+            </div>
           </div>
-          {/* The DocumentUpload component will be rendered here from the parent component */}
-        </section>
+        )}
       </div>
-
-      {/* Asset Timeline section - at the bottom */}
-      <section>
-        <div className="flex items-center gap-2 mb-4">
-          <h2 className="text-xl font-medium">Asset Historie</h2>
-          <Separator className="flex-grow" />
-        </div>
-        {/* The AssetHistoryTimeline component will be rendered here from the parent component */}
-      </section>
     </div>
   );
 }
