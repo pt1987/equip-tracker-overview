@@ -1,6 +1,7 @@
 
 import { Document } from "@/components/documents/types";
 import DocumentUpload from "@/components/documents/DocumentUpload";
+import { DocumentList } from "@/components/documents/DocumentList";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { FileText } from "lucide-react";
 
@@ -24,11 +25,16 @@ export default function DocumentSection({
             <FileText size={18} className="text-primary" />
             <CardTitle className="text-lg">Dokumente</CardTitle>
           </div>
-          <DocumentUpload assetId={assetId} documents={documents} onAddDocument={onAddDocument} onDeleteDocument={onDeleteDocument} />
+          <DocumentUpload 
+            assetId={assetId} 
+            documents={documents} 
+            onAddDocument={onAddDocument} 
+            onDeleteDocument={onDeleteDocument} 
+          />
         </CardHeader>
       </div>
       <CardContent className="p-6">
-        {/* DocumentList will be rendered inside DocumentUpload */}
+        <DocumentList documents={documents} onDeleteDocument={onDeleteDocument} />
       </CardContent>
     </Card>;
 }

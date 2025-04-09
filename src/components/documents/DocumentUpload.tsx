@@ -2,10 +2,8 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { Upload } from "lucide-react";
 import { Document } from "./types";
-import { DocumentList } from "./DocumentList";
 import { DocumentUploadDialog } from "./DocumentUploadDialog";
 import { useDocumentStorage } from "./hooks/useDocumentStorage";
 
@@ -72,31 +70,6 @@ export default function DocumentUpload({
     }
   };
 
-  const handleDeleteDocument = async (documentId: string, docName: string) => {
-    try {
-      const doc = documents.find(d => d.id === documentId);
-      if (!doc) return Promise.reject(new Error("Document not found"));
-      
-      await deleteDocument(doc);
-      onDeleteDocument(documentId);
-      
-      toast({
-        title: "Dokument gelöscht",
-        description: `${docName} wurde erfolgreich gelöscht.`
-      });
-      
-      return Promise.resolve();
-    } catch (error: any) {
-      console.error('Error deleting document:', error);
-      toast({
-        title: "Fehler beim Löschen",
-        description: error.message || "Ein Fehler ist aufgetreten beim Löschen des Dokuments.",
-        variant: "destructive"
-      });
-      return Promise.reject(error);
-    }
-  };
-
   return (
     <div>
       <Button 
@@ -107,8 +80,6 @@ export default function DocumentUpload({
       >
         <Upload size={18} className="text-primary" />
       </Button>
-
-      <DocumentList documents={documents} onDeleteDocument={handleDeleteDocument} />
 
       <DocumentUploadDialog 
         isOpen={isDialogOpen} 
