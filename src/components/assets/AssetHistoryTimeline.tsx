@@ -10,6 +10,7 @@ import {
   RotateCcw,
   Clock
 } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 interface AssetHistoryTimelineProps {
   history: AssetHistoryEntry[];

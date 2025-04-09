@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Asset } from "@/lib/types";
 import { formatDate, formatCurrency, calculateAgeInMonths } from "@/lib/utils";
@@ -222,13 +223,16 @@ export default function AssetDetailView({
 
       {/* Technical details section */}
       <section>
-        <h2 className="text-xl font-medium mb-4">Technische Details</h2>
+        <div className="flex items-center gap-2 mb-4">
+          <h2 className="text-xl font-medium">Technische Details</h2>
+          <Separator className="flex-grow" />
+        </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {asset.serialNumber && (
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Seriennummer</p>
-              <p className="font-medium text-sm">{asset.serialNumber}</p>
+              <p className="font-medium text-sm font-mono">{asset.serialNumber}</p>
             </div>
           )}
           
@@ -293,68 +297,92 @@ export default function AssetDetailView({
         )}
       </section>
 
-      {/* Assigned Employee section */}
-      <section>
-        <h2 className="text-xl font-medium mb-4">Zugewiesener Mitarbeiter</h2>
-        
-        <div>
-          {asset.employeeId ? (
-            <>
-              {isLoadingEmployee ? (
-                <div className="flex justify-center py-4">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                </div>
-              ) : employeeData ? (
-                <div className="flex items-center gap-5">
-                  <Avatar className="h-14 w-14">
-                    <AvatarImage src={employeeData.imageUrl || `https://avatar.vercel.sh/${employeeData.id}`} alt={`${employeeData.firstName} ${employeeData.lastName}`} />
-                    <AvatarFallback>
-                      {employeeData.firstName?.[0]}{employeeData.lastName?.[0]}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <Link to={`/employee/${employeeData.id}`} className="text-lg font-medium hover:underline">
-                      {employeeData.firstName} {employeeData.lastName}
-                    </Link>
-                    <p className="text-sm text-muted-foreground">{employeeData.position}</p>
-                    <p className="text-sm text-muted-foreground">{employeeData.cluster}</p>
-                    <Button variant="link" size="sm" className="p-0 h-auto mt-1" asChild>
-                      <Link to={`/employee/${employeeData.id}`}>
-                        Details anzeigen
-                      </Link>
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="py-4">
-                  <p>Mitarbeiterdaten konnten nicht geladen werden.</p>
-                  <p className="text-sm text-muted-foreground">ID: {asset.employeeId}</p>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="py-2 flex items-center gap-3">
-              <User size={20} className="text-muted-foreground opacity-70" />
-              <p className="text-muted-foreground">
-                Dieses Asset ist keinem Mitarbeiter zugewiesen.
-              </p>
-            </div>
-          )}
+      {/* Employee and Document section side by side */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Assigned Employee section */}
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+            <h2 className="text-xl font-medium">Zugewiesener Mitarbeiter</h2>
+            <Separator className="flex-grow" />
+          </div>
           
-          {asset.connectedAssetId && (
-            <div className="mt-4">
-              <h3 className="text-lg font-medium mb-2">Verbundenes Asset</h3>
-              <div className="text-sm">
-                <p className="text-muted-foreground">ID: {asset.connectedAssetId}</p>
-                <Button variant="link" size="sm" className="p-0 h-auto mt-1" asChild>
-                  <Link to={`/asset/${asset.connectedAssetId}`}>
-                    Verbundenes Asset anzeigen
-                  </Link>
-                </Button>
+          <div>
+            {asset.employeeId ? (
+              <>
+                {isLoadingEmployee ? (
+                  <div className="flex justify-center py-4">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  </div>
+                ) : employeeData ? (
+                  <div className="flex items-center gap-5">
+                    <Avatar className="h-14 w-14">
+                      <AvatarImage src={employeeData.imageUrl || `https://avatar.vercel.sh/${employeeData.id}`} alt={`${employeeData.firstName} ${employeeData.lastName}`} />
+                      <AvatarFallback>
+                        {employeeData.firstName?.[0]}{employeeData.lastName?.[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <Link to={`/employee/${employeeData.id}`} className="text-lg font-medium hover:underline">
+                        {employeeData.firstName} {employeeData.lastName}
+                      </Link>
+                      <p className="text-sm text-muted-foreground">{employeeData.position}</p>
+                      <p className="text-sm text-muted-foreground">{employeeData.cluster}</p>
+                      <Button variant="link" size="sm" className="p-0 h-auto mt-1" asChild>
+                        <Link to={`/employee/${employeeData.id}`}>
+                          Details anzeigen
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="py-4">
+                    <p>Mitarbeiterdaten konnten nicht geladen werden.</p>
+                    <p className="text-sm text-muted-foreground">ID: {asset.employeeId}</p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="py-2 flex items-center gap-3">
+                <User size={20} className="text-muted-foreground opacity-70" />
+                <p className="text-muted-foreground">
+                  Dieses Asset ist keinem Mitarbeiter zugewiesen.
+                </p>
               </div>
-            </div>
-          )}
+            )}
+            
+            {asset.connectedAssetId && (
+              <div className="mt-4">
+                <h3 className="text-lg font-medium mb-2">Verbundenes Asset</h3>
+                <div className="text-sm">
+                  <p className="text-muted-foreground">ID: {asset.connectedAssetId}</p>
+                  <Button variant="link" size="sm" className="p-0 h-auto mt-1" asChild>
+                    <Link to={`/asset/${asset.connectedAssetId}`}>
+                      Verbundenes Asset anzeigen
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Documents section */}
+        <section className="document-section">
+          <div className="flex items-center gap-2 mb-4">
+            <h2 className="text-xl font-medium">Dokumente</h2>
+            <Separator className="flex-grow" />
+          </div>
+          {/* The DocumentUpload component will be rendered here from the parent component */}
+        </section>
+      </div>
+
+      {/* Asset Timeline section - at the bottom */}
+      <section>
+        <div className="flex items-center gap-2 mb-4">
+          <h2 className="text-xl font-medium">Asset Historie</h2>
+          <Separator className="flex-grow" />
         </div>
+        {/* The AssetHistoryTimeline component will be rendered here from the parent component */}
       </section>
     </div>
   );

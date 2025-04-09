@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -187,27 +188,45 @@ export default function AssetDetail() {
           </div>
 
           <div>
-            {isEditing ? <AssetDetailEdit asset={asset} onSave={handleSave} onCancel={handleCancelEdit} /> : <AssetDetailView asset={asset} onEdit={handleEdit} onDelete={handleDelete} />}
+            {isEditing ? (
+              <AssetDetailEdit asset={asset} onSave={handleSave} onCancel={handleCancelEdit} />
+            ) : (
+              <AssetDetailView asset={asset} onEdit={handleEdit} onDelete={handleDelete} />
+            )}
           </div>
 
-          <section>
-            <DocumentUpload assetId={asset.id} documents={documents} onAddDocument={handleAddDocument} onDeleteDocument={handleDeleteDocument} />
-          </section>
+          {!isEditing && (
+            <>
+              <div className="document-section">
+                {asset && !isEditing && (
+                  <DocumentUpload 
+                    assetId={asset.id} 
+                    documents={documents} 
+                    onAddDocument={handleAddDocument} 
+                    onDeleteDocument={handleDeleteDocument} 
+                  />
+                )}
+              </div>
 
-          <section>
-            <h2 className="text-xl font-medium mb-3 flex items-center">
-              <FileText className="mr-2 h-5 w-5" />
-              Asset Historie
-            </h2>
-            
-            {isHistoryLoading ? <div className="space-y-2 py-4">
-                <Skeleton className="h-12 w-full" />
-                <Skeleton className="h-12 w-full" />
-                <Skeleton className="h-12 w-full" />
-              </div> : assetHistory.length === 0 ? <div className="py-6 text-center">
-                <p className="text-muted-foreground">Keine Historieneinträge vorhanden.</p>
-              </div> : <AssetHistoryTimeline history={assetHistory} />}
-          </section>
+              <div className="timeline-section">
+                {!isHistoryLoading ? (
+                  assetHistory.length > 0 ? (
+                    <AssetHistoryTimeline history={assetHistory} />
+                  ) : (
+                    <div className="py-6 text-center">
+                      <p className="text-muted-foreground">Keine Historieneinträge vorhanden.</p>
+                    </div>
+                  )
+                ) : (
+                  <div className="space-y-2 py-4">
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </PageTransition>;
