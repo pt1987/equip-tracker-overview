@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Asset } from "@/lib/types";
 import { formatDate, formatCurrency, calculateAgeInMonths } from "@/lib/utils";
@@ -17,11 +16,13 @@ import QRCode from "@/components/shared/QRCode";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 interface AssetDetailViewProps {
   asset: Asset;
   onEdit: () => void;
   onDelete: () => void;
 }
+
 export default function AssetDetailView({
   asset,
   onEdit,
@@ -31,9 +32,7 @@ export default function AssetDetailView({
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
   const [employeeData, setEmployeeData] = useState<any | null>(null);
   const [isLoadingEmployee, setIsLoadingEmployee] = useState(false);
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchEmployee = async () => {
@@ -89,9 +88,7 @@ export default function AssetDetailView({
   };
   
   return <div className="space-y-8">
-      {/* Hero section with image and key info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Asset image - left column */}
         <div className="relative flex items-center justify-center">
           <motion.img src={getAssetImage()} alt={asset.name} className="max-h-[360px] w-auto object-contain" initial={{
           opacity: 0,
@@ -106,10 +103,8 @@ export default function AssetDetailView({
         }} />
         </div>
 
-        {/* Asset header info - right column */}
         <div className="space-y-6">
           <div className="relative">
-            {/* Action buttons aligned with badges */}
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center gap-2">
                 <Badge variant="secondary" className="font-medium">
@@ -121,16 +116,9 @@ export default function AssetDetailView({
               <div className="flex items-center gap-2">
                 <Dialog open={qrDialogOpen} onOpenChange={setQrDialogOpen}>
                   <DialogTrigger asChild>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <QrCode size={18} className="text-muted-foreground" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>QR-Code anzeigen</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <QrCode size={18} className="text-muted-foreground" />
+                    </Button>
                   </DialogTrigger>
                   
                   <DialogContent className="sm:max-w-md">
@@ -194,7 +182,6 @@ export default function AssetDetailView({
               {asset.manufacturer} {asset.model}
             </p>
 
-            {/* Key information indicators in a grid */}
             <div className="grid grid-cols-2 gap-y-4 gap-x-8">
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Kaufdatum</p>
@@ -220,7 +207,6 @@ export default function AssetDetailView({
         </div>
       </div>
 
-      {/* Technical details section */}
       <Card className="shadow-sm">
         <CardHeader className="pb-3">
           <CardTitle className="text-xl">Technische Details</CardTitle>
