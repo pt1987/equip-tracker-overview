@@ -18,7 +18,7 @@ export default function DocumentSection({
 }: DocumentSectionProps) {
   return (
     <Card className="shadow-sm">
-      <CardHeader className="pb-3 flex flex-row items-center justify-between">
+      <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
         <CardTitle className="text-xl">Dokumente</CardTitle>
         <DocumentUpload 
           assetId={assetId} 

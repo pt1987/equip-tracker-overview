@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { FilePlus, Upload } from "lucide-react";
+import { Upload } from "lucide-react";
 import { Document } from "./types";
 import { DocumentList } from "./DocumentList";
 import { DocumentUploadDialog } from "./DocumentUploadDialog";
@@ -189,11 +190,12 @@ export default function DocumentUpload({
           <TooltipTrigger asChild>
             <Button 
               variant="ghost" 
-              size="icon" 
+              size="sm"
               onClick={() => setIsDialogOpen(true)}
-              className="h-8 w-8 rounded-full p-0"
+              className="h-8 w-8 p-0"
             >
               <Upload size={16} />
+              <span className="sr-only">Dokument hinzufügen</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent>Dokument hinzufügen</TooltipContent>
