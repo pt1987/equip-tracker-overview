@@ -179,7 +179,7 @@ export default function AssetDetail() {
   return (
     <PageTransition>
       <div className="container mx-auto py-8 max-w-7xl px-6">
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-6">
           <div>
             <Button variant="ghost" onClick={() => navigate(-1)} className="mb-1 -ml-3 h-9 px-2">
               <ChevronLeft size={16} className="mr-1" />
@@ -188,46 +188,98 @@ export default function AssetDetail() {
             <h1 className="text-3xl font-bold tracking-tight">Asset Details</h1>
           </div>
 
-          <div>
+          <div className="bg-card rounded-xl border shadow-sm overflow-hidden">
             {isEditing ? (
-              <AssetDetailEdit asset={asset} onSave={handleSave} onCancel={handleCancelEdit} />
+              <div className="p-6">
+                <AssetDetailEdit asset={asset} onSave={handleSave} onCancel={handleCancelEdit} />
+              </div>
             ) : (
-              <AssetDetailView asset={asset} onEdit={handleEdit} onDelete={handleDelete} />
+              <div className="p-6">
+                <AssetDetailView asset={asset} onEdit={handleEdit} onDelete={handleDelete} />
+              </div>
             )}
           </div>
 
           {!isEditing && (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <section className="employee-section">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Technical Details Section */}
+                <section className="bg-card rounded-xl border shadow-sm p-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <h2 className="text-xl font-medium">Zugewiesener Mitarbeiter</h2>
+                    <h2 className="text-xl font-medium">Technische Details</h2>
                     <Separator className="flex-grow" />
                   </div>
-                  {asset && !isEditing && asset.employeeId && (
-                    <div className="employee-content">
-                      {/* Employee component from AssetDetailView will render here */}
-                    </div>
-                  )}
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {asset.serialNumber && (
+                      <div className="space-y-1">
+                        <p className="text-sm text-muted-foreground">Seriennummer</p>
+                        <p className="font-medium tracking-wide border-b pb-1 border-border/30">{asset.serialNumber}</p>
+                      </div>
+                    )}
+                    
+                    {asset.inventoryNumber && (
+                      <div className="space-y-1">
+                        <p className="text-sm text-muted-foreground">Inventar-Nr.</p>
+                        <p className="font-medium border-b pb-1 border-border/30">{asset.inventoryNumber}</p>
+                      </div>
+                    )}
+                    
+                    {asset.imei && (
+                      <div className="space-y-1">
+                        <p className="text-sm text-muted-foreground">IMEI</p>
+                        <p className="font-medium border-b pb-1 border-border/30">{asset.imei}</p>
+                      </div>
+                    )}
+                    
+                    {asset.hasWarranty !== undefined && (
+                      <div className="space-y-1">
+                        <p className="text-sm text-muted-foreground">Garantie</p>
+                        <p className="font-medium border-b pb-1 border-border/30">
+                          {asset.hasWarranty ? "Ja" : "Nein"}
+                          {asset.additionalWarranty && ", erweitert"}
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </section>
 
-                <section className="document-section">
-                  <div className="flex items-center gap-2 mb-4">
-                    <h2 className="text-xl font-medium">Dokumente</h2>
-                    <Separator className="flex-grow" />
-                  </div>
-                  {asset && !isEditing && (
+                <div className="grid grid-cols-1 gap-6">
+                  {/* Employee Section */}
+                  <section className="bg-card rounded-xl border shadow-sm p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <h2 className="text-xl font-medium">Zugewiesener Mitarbeiter</h2>
+                      <Separator className="flex-grow" />
+                    </div>
+                    {asset.employeeId ? (
+                      <div className="employee-content">
+                        {/* Employee component from AssetDetailView will render here */}
+                      </div>
+                    ) : (
+                      <div className="py-6 text-center text-muted-foreground">
+                        <p>Kein Mitarbeiter zugewiesen</p>
+                      </div>
+                    )}
+                  </section>
+
+                  {/* Document Section */}
+                  <section className="bg-card rounded-xl border shadow-sm p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <h2 className="text-xl font-medium">Dokumente</h2>
+                      <Separator className="flex-grow" />
+                    </div>
                     <DocumentUpload 
                       assetId={asset.id} 
                       documents={documents} 
                       onAddDocument={handleAddDocument} 
                       onDeleteDocument={handleDeleteDocument} 
                     />
-                  )}
-                </section>
+                  </section>
+                </div>
               </div>
 
-              <section className="timeline-section mt-2">
+              {/* Asset History Section */}
+              <section className="bg-card rounded-xl border shadow-sm p-6 mt-2">
                 <div className="flex items-center gap-2 mb-4">
                   <h2 className="text-xl font-medium">Asset Historie</h2>
                   <Separator className="flex-grow" />
