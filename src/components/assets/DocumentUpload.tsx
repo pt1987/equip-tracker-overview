@@ -66,7 +66,6 @@ export default function DocumentUpload({
     }
 
     // In a real app, we would upload the file to a server or storage service
-    // For this demo, we'll simulate the upload
     Array.from(selectedFiles).forEach(file => {
       const newDocument: Document = {
         id: Math.random().toString(36).substring(2, 11),
@@ -84,11 +83,6 @@ export default function DocumentUpload({
     setSelectedFiles(null);
     setDocumentCategory("other");
     setIsDialogOpen(false);
-
-    toast({
-      title: "Dokument hochgeladen",
-      description: "Das Dokument wurde erfolgreich hochgeladen.",
-    });
   };
 
   const formatFileSize = (bytes: number): string => {
@@ -125,9 +119,9 @@ export default function DocumentUpload({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full">
-                    <FilePlus size={16} />
-                  </Button>
+                  <button className="p-2 rounded-full bg-secondary/20 hover:bg-secondary/40 transition-colors">
+                    <FilePlus size={16} className="text-primary" />
+                  </button>
                 </TooltipTrigger>
                 <TooltipContent>Dokument hinzufügen</TooltipContent>
               </Tooltip>
@@ -187,7 +181,7 @@ export default function DocumentUpload({
               Keine Dokumente vorhanden
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Klicken Sie auf "+", um ein Dokument hochzuladen
+              Klicken Sie auf das Plus-Symbol, um ein Dokument hochzuladen
             </p>
           </div>
         )}

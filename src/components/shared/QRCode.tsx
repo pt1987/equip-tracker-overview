@@ -19,6 +19,11 @@ export default function QRCode({
   level = "M",
   title,
 }: QRCodeProps) {
+  if (!value) {
+    console.error("QRCode requires a value prop");
+    return null;
+  }
+  
   return (
     <motion.div 
       className="inline-flex flex-col items-center justify-center p-4 rounded-xl bg-white shadow-subtle"

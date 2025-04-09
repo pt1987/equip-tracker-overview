@@ -54,10 +54,10 @@ const AssetHistoryTimeline = ({ history }: AssetHistoryTimelineProps) => {
   return (
     <div className="relative">
       {/* Timeline line */}
-      <div className="absolute left-3 top-3 bottom-3 w-px bg-secondary/70 rounded-full" />
+      <div className="absolute left-3 top-3 bottom-3 w-px bg-secondary/40 rounded-full" />
 
       {/* Timeline entries */}
-      <div className="space-y-3">
+      <div className="space-y-2">
         {sortedHistory.map((entry, index) => (
           <motion.div
             key={entry.id}
@@ -67,12 +67,12 @@ const AssetHistoryTimeline = ({ history }: AssetHistoryTimelineProps) => {
             className="relative pl-10"
           >
             {/* Timeline dot */}
-            <div className="absolute left-0 w-6 h-6 rounded-full bg-background flex items-center justify-center z-10 border border-secondary/50">
+            <div className="absolute left-0 w-6 h-6 rounded-full bg-background flex items-center justify-center z-10 border border-secondary/30">
               {getActionIcon(entry.action)}
             </div>
 
             {/* Content */}
-            <div className="rounded-lg p-3 bg-secondary/5 backdrop-blur-sm">
+            <div className="rounded-lg p-3 bg-secondary/5 backdrop-blur-sm border border-secondary/10">
               <div className="flex flex-wrap justify-between gap-2 mb-1">
                 <div className="flex items-center">
                   <CalendarClock size={14} className="mr-1.5 text-muted-foreground" />

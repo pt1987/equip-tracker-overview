@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import PageTransition from "@/components/layout/PageTransition";
@@ -14,17 +14,19 @@ import { Asset } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import DocumentUpload, { Document } from "@/components/assets/DocumentUpload";
 import AssetHistoryTimeline from "@/components/assets/AssetHistoryTimeline";
+
 export default function AssetDetail() {
-  const {
-    id = ""
-  } = useParams();
+  const { id = "" } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
   const [documents, setDocuments] = useState<Document[]>([]);
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [id]);
+
   const {
     data: asset,
     isLoading: isAssetLoading,
@@ -34,6 +36,7 @@ export default function AssetDetail() {
     queryFn: () => getAssetById(id),
     enabled: !!id
   });
+
   const {
     data: assetHistory = [],
     isLoading: isHistoryLoading
@@ -42,18 +45,46 @@ export default function AssetDetail() {
     queryFn: () => getAssetHistoryByAssetId(id),
     enabled: !!id
   });
+
   const handleEdit = () => {
     setIsEditing(true);
   };
+
   const handleCancelEdit = () => {
     setIsEditing(false);
   };
+
   const handleDelete = async () => {
-    queryClient.invalidateQueries({
-      queryKey: ["assets"]
-    });
-    navigate("/assets");
+    try {
+      const { error } = await supabase.from('assets').delete().eq('id', id);
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Fehler beim Löschen",
+          description: error.message
+        });
+        return;
+      }
+      queryClient.invalidateQueries({
+        queryKey: ["assets"]
+      });
+      
+      toast({
+        title: "Asset gelöscht",
+        description: `Das Asset wurde erfolgreich gelöscht.`
+      });
+      
+      navigate("/assets");
+    } catch (err: any) {
+      console.error("Delete error:", err);
+      toast({
+        variant: "destructive",
+        title: "Fehler beim Löschen",
+        description: err.message || "Ein unbekannter Fehler ist aufgetreten."
+      });
+    }
   };
+
   const handleSave = async (formData: any) => {
     try {
       if (!asset) return;
@@ -72,14 +103,17 @@ export default function AssetDetail() {
         additionalWarranty: formData.additionalWarranty || false,
         imageUrl: formData.imageUrl || null
       };
+      
       console.log("Saving updated asset:", updatedAsset);
       await updateAsset(updatedAsset);
+      
       queryClient.invalidateQueries({
         queryKey: ["asset", id]
       });
       queryClient.invalidateQueries({
         queryKey: ["assets"]
       });
+      
       setIsEditing(false);
       toast({
         title: "Asset aktualisiert",
@@ -94,12 +128,25 @@ export default function AssetDetail() {
       });
     }
   };
+
   const handleAddDocument = (document: Document) => {
     setDocuments([...documents, document]);
+    
+    toast({
+      title: "Dokument hinzugefügt",
+      description: `${document.name} wurde erfolgreich hinzugefügt.`
+    });
   };
+
   const handleDeleteDocument = (documentId: string) => {
     setDocuments(documents.filter(doc => doc.id !== documentId));
+    
+    toast({
+      title: "Dokument gelöscht",
+      description: "Das Dokument wurde erfolgreich gelöscht."
+    });
   };
+
   if (isAssetLoading) {
     return <PageTransition>
         <div className="container mx-auto px-6 py-4 max-w-7xl">
@@ -108,6 +155,7 @@ export default function AssetDetail() {
         </div>
       </PageTransition>;
   }
+
   if (assetError || !asset) {
     return <PageTransition>
         <div className="container mx-auto px-6 py-4 max-w-7xl">
@@ -125,8 +173,9 @@ export default function AssetDetail() {
         </div>
       </PageTransition>;
   }
+
   return <PageTransition>
-      <div className="container mx-auto py-4 max-w-7xl px-[38px]">
+      <div className="container mx-auto py-4 max-w-7xl px-[68px]">
         <div className="flex flex-col gap-6">
           <div>
             <Button variant="ghost" onClick={() => navigate(-1)} className="mb-1 -ml-3 h-9 px-2">
@@ -141,7 +190,6 @@ export default function AssetDetail() {
           </div>
 
           <section>
-            
             <DocumentUpload assetId={asset.id} documents={documents} onAddDocument={handleAddDocument} onDeleteDocument={handleDeleteDocument} />
           </section>
 

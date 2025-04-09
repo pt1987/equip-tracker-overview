@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Asset } from "@/lib/types";
 import { formatDate, formatCurrency, calculateAgeInMonths } from "@/lib/utils";
@@ -83,30 +82,9 @@ export default function AssetDetailView({
     }
   };
 
-  const handleDeleteConfirm = async () => {
-    try {
-      const { error } = await supabase.from('assets').delete().eq('id', asset.id);
-      if (error) {
-        toast({
-          variant: "destructive",
-          title: "Fehler beim Löschen",
-          description: error.message
-        });
-        return;
-      }
-      onDelete();
-      toast({
-        title: "Asset gelöscht",
-        description: `${asset.name} wurde erfolgreich gelöscht.`
-      });
-    } catch (err: any) {
-      console.error("Delete error:", err);
-      toast({
-        variant: "destructive",
-        title: "Fehler beim Löschen",
-        description: err.message || "Ein unbekannter Fehler ist aufgetreten."
-      });
-    }
+  const handleDeleteConfirm = () => {
+    onDelete();
+    setIsDeleteDialogOpen(false);
   };
 
   return (
@@ -250,7 +228,7 @@ export default function AssetDetailView({
           {asset.serialNumber && (
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Seriennummer</p>
-              <p className="font-medium font-mono text-sm">{asset.serialNumber}</p>
+              <p className="font-medium text-sm">{asset.serialNumber}</p>
             </div>
           )}
           
