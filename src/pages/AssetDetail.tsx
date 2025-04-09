@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -109,7 +110,7 @@ export default function AssetDetail() {
   if (isAssetLoading) {
     return (
       <PageTransition>
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-6 py-4 max-w-7xl">
           <Skeleton className="h-8 w-48 mb-4" />
           <Skeleton className="h-[400px] w-full rounded-lg" />
         </div>
@@ -120,7 +121,7 @@ export default function AssetDetail() {
   if (assetError || !asset) {
     return (
       <PageTransition>
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-6 py-4 max-w-7xl">
           <div className="flex flex-col items-center justify-center text-center py-10">
             <AlertCircle size={64} className="text-muted-foreground mb-4" />
             <h2 className="text-2xl font-bold mb-2">Asset nicht gefunden</h2>
@@ -139,7 +140,7 @@ export default function AssetDetail() {
 
   return (
     <PageTransition>
-      <div className="container mx-auto px-4 py-4">
+      <div className="container mx-auto px-6 py-4 max-w-7xl">
         <div className="flex flex-col gap-6">
           <div>
             <Button variant="ghost" onClick={() => navigate(-1)} className="mb-1 -ml-3 h-9 px-2">
