@@ -31,7 +31,6 @@ export default function DocumentUpload({
   const { toast } = useToast();
   
   useEffect(() => {
-    // Load existing documents from storage on component mount
     const fetchDocuments = async () => {
       try {
         const { data, error } = await supabase
@@ -46,18 +45,14 @@ export default function DocumentUpload({
 
         if (!data || data.length === 0) return;
         
-        // Process existing files from storage
         for (const file of data) {
-          // Skip folder entries
           if (file.id === null) continue;
           
-          // Extract category from file path or name
           const nameParts = file.name.split('_');
           const category = nameParts.length > 1 ? 
             (nameParts[0] as Document["category"]) || "other" : 
             "other";
           
-          // Get public URL for the file
           const { data: urlData } = supabase
             .storage
             .from('asset-documents')
@@ -102,11 +97,9 @@ export default function DocumentUpload({
     
     try {
       for (const file of Array.from(selectedFiles)) {
-        // Prepend category to filename to help with organization and filtering
         const fileName = `${documentCategory}_${file.name}`;
         const filePath = `${assetId}/${fileName}`;
         
-        // Upload the file to Supabase storage
         const { data: uploadData, error: uploadError } = await supabase
           .storage
           .from('asset-documents')
@@ -119,13 +112,11 @@ export default function DocumentUpload({
           throw uploadError;
         }
         
-        // Get the public URL for the file
         const { data: urlData } = supabase
           .storage
           .from('asset-documents')
           .getPublicUrl(filePath);
         
-        // Create document object
         const newDocument: Document = {
           id: uploadData.id || Math.random().toString(36).substring(2, 11),
           name: file.name,
@@ -158,14 +149,11 @@ export default function DocumentUpload({
   
   const handleDeleteDocument = async (documentId: string, docName: string) => {
     try {
-      // Find the document to get its category prefix
       const doc = documents.find(d => d.id === documentId);
       if (!doc) return;
       
-      // Extract file path including category prefix
       const filePath = `${assetId}/${doc.category}_${doc.name}`;
       
-      // Delete file from storage
       const { error } = await supabase
         .storage
         .from('asset-documents')
@@ -175,7 +163,6 @@ export default function DocumentUpload({
         throw error;
       }
       
-      // Remove from local state
       onDeleteDocument(documentId);
       
       toast({
@@ -197,23 +184,21 @@ export default function DocumentUpload({
 
   return (
     <div>
-      <div>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => setIsDialogOpen(true)}
-                className="rounded-full"
-              >
-                <Upload size={16} />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Dokument hinzufügen</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setIsDialogOpen(true)}
+              className="h-8 w-8 rounded-full p-0"
+            >
+              <Upload size={16} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Dokument hinzufügen</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
 
       <DocumentList 
         documents={documents} 
