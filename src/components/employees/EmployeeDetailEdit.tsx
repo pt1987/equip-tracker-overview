@@ -38,10 +38,8 @@ export default function EmployeeDetailEdit({
     },
   });
   
-  // Update form when employee data changes, especially when email is loaded
   useEffect(() => {
     console.log("Setting email in form to:", employee.email);
-    // Update all form fields to ensure nothing is lost
     form.setValue("firstName", employee.firstName);
     form.setValue("lastName", employee.lastName);
     form.setValue("email", employee.email || "");
@@ -81,6 +79,22 @@ export default function EmployeeDetailEdit({
           
           <div className="flex-1">
             <EmployeeFormFields />
+            
+            <div className="mt-6 flex justify-end space-x-2">
+              <button 
+                type="button"
+                onClick={onCancel}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700"
+              >
+                Save Changes
+              </button>
+            </div>
           </div>
         </div>
       </form>

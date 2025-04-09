@@ -99,7 +99,7 @@ const EmployeeDetail = () => {
           description: "Die Änderungen wurden erfolgreich gespeichert."
         });
         
-        // Reload employee data to ensure we have the latest including the email
+        // Reload employee data to ensure we have the latest
         fetchEmployeeData();
       } catch (error) {
         console.error("Error updating employee:", error);

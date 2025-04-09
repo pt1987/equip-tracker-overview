@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Asset, Employee as EmployeeType } from "@/lib/types";
 
@@ -49,44 +48,24 @@ export const getEmployeeById = async (id: string): Promise<EmployeeType | null> 
 
     if (!employeeData) return null;
 
-    // Get email from profiles table using service role to bypass RLS
-    const { data: profileData, error: profileError } = await supabase.auth.admin.getUserById(id);
+    // Get email using our new secure function
+    const { data: emailData, error: emailError } = await supabase
+      .rpc('get_safe_user_email', { user_id: id });
     
     let email = '';
     
-    // If we couldn't get email from auth, try the profiles table
-    if (profileError || !profileData) {
-      console.log("Trying to get email from profiles table directly");
-      // Try to get email from profiles table directly as fallback
-      const { data: profileRecord, error: profilesError } = await supabase
-        .from('profiles')
-        .select('email')
-        .eq('id', id)
-        .single();
-        
-      if (!profilesError && profileRecord) {
-        email = profileRecord.email || '';
-        console.log("Found email in profiles table:", email);
-      } else {
-        console.error("Error fetching profile:", profilesError);
-      }
-    } else if (profileData) {
-      email = profileData.user.email || '';
-      console.log("Found email in auth user data:", email);
+    if (emailError) {
+      console.error("Error fetching email using RPC:", emailError);
+    } else {
+      email = emailData || '';
+      console.log("Found email using secure function:", email);
     }
-
-    console.log("Employee object to return:", {
-      id: employeeData.id,
-      email: email,
-      firstName: employeeData.first_name,
-      lastName: employeeData.last_name
-    });
 
     return {
       id: employeeData.id,
       firstName: employeeData.first_name,
       lastName: employeeData.last_name,
-      email: email, // Always include the email field
+      email: email,
       position: employeeData.position,
       cluster: employeeData.cluster,
       startDate: employeeData.start_date || '',
@@ -123,29 +102,28 @@ export const getEmployees = async (): Promise<EmployeeType[]> => {
 
     if (employeesError) throw employeesError;
 
-    // Try to get emails from profiles table if possible
-    let emailMap = new Map<string, string>();
-    try {
-      const { data: profilesData } = await supabase
-        .from('profiles')
-        .select('id, email');
-
-      if (profilesData) {
-        profilesData.forEach(profile => {
-          if (profile.id && profile.email) {
-            emailMap.set(profile.id, profile.email);
-          }
-        });
+    // Use a map to store emails for each employee
+    const emails = new Map<string, string>();
+    
+    // For each employee, try to get their email using our secure function
+    for (const emp of employeesData) {
+      try {
+        const { data: emailData } = await supabase
+          .rpc('get_safe_user_email', { user_id: emp.id });
+          
+        if (emailData) {
+          emails.set(emp.id, emailData);
+        }
+      } catch (err) {
+        console.error(`Error fetching email for employee ${emp.id}:`, err);
       }
-    } catch (profileError) {
-      console.error("Error fetching profiles:", profileError);
     }
 
     return employeesData.map(emp => ({
       id: emp.id,
       firstName: emp.first_name,
       lastName: emp.last_name,
-      email: emailMap.get(emp.id) || '',
+      email: emails.get(emp.id) || '',
       position: emp.position,
       cluster: emp.cluster,
       startDate: emp.start_date || '',
@@ -222,6 +200,20 @@ export const createEmployee = async (employeeData: {
       throw new Error(`Failed to create employee: ${employeeError.message}`);
     }
     
+    // Update email separately using our secure function
+    if (employeeData.email) {
+      const { data: emailUpdateResult, error: emailUpdateError } = await supabase
+        .rpc('update_user_email', {
+          user_id: employeeId,
+          new_email: employeeData.email
+        });
+        
+      if (emailUpdateError) {
+        console.error("Error updating email:", emailUpdateError);
+        // Continue anyway, we at least created the employee
+      }
+    }
+    
     return employeeId;
   } catch (error) {
     const errorMessage = (error as Error).message || "Failed to create employee";
@@ -264,48 +256,21 @@ export const updateEmployee = async (id: string, employeeData: {
       throw employeeError;
     }
     
-    // Log before email update attempt
-    console.log("Employee record updated successfully. Email to update:", employeeData.email);
-    
-    // Update email in profiles table if provided
+    // Update email separately using our secure function
     if (employeeData.email) {
-      // First check if profile exists
-      const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', id)
-        .single();
+      console.log(`Updating email for user ${id} to ${employeeData.email} using RPC function`);
+      
+      const { data: emailUpdateResult, error: emailUpdateError } = await supabase
+        .rpc('update_user_email', {
+          user_id: id,
+          new_email: employeeData.email
+        });
         
-      if (existingProfile) {
-        console.log(`Profile exists for user ${id}, updating email to ${employeeData.email}`);
-        // Update existing profile
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .update({ 
-            email: employeeData.email,
-            name: `${employeeData.first_name} ${employeeData.last_name}`
-          })
-          .eq('id', id);
-          
-        if (updateError) {
-          console.error("Error updating profile:", updateError);
-          // Continue execution even if this fails - we at least updated the employee
-        }
+      if (emailUpdateError) {
+        console.error("Error updating email with RPC function:", emailUpdateError);
+        // Continue execution - we at least updated the employee
       } else {
-        console.log(`Profile does not exist for user ${id}, creating new profile with email ${employeeData.email}`);
-        // Create new profile if it doesn't exist
-        const { error: insertError } = await supabase
-          .from('profiles')
-          .insert({ 
-            id: id, 
-            email: employeeData.email, 
-            name: `${employeeData.first_name} ${employeeData.last_name}`
-          });
-          
-        if (insertError) {
-          console.error("Error creating profile:", insertError);
-          // Continue execution even if this fails - we at least updated the employee
-        }
+        console.log("Email update result:", emailUpdateResult);
       }
     }
     
