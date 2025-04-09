@@ -184,6 +184,7 @@ export type Database = {
           start_date: string
           updated_at: string | null
           used_budget: number
+          user_id: string | null
         }
         Insert: {
           budget?: number
@@ -199,6 +200,7 @@ export type Database = {
           start_date: string
           updated_at?: string | null
           used_budget?: number
+          user_id?: string | null
         }
         Update: {
           budget?: number
@@ -214,16 +216,9 @@ export type Database = {
           start_date?: string
           updated_at?: string | null
           used_budget?: number
+          user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "employees_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       profiles: {
         Row: {

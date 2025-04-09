@@ -34,7 +34,8 @@ export const getEmployeeById = async (id: string): Promise<EmployeeType | null> 
         budget,
         used_budget,
         image_url,
-        profile_image
+        profile_image,
+        user_id
       `)
       .eq('id', id)
       .single();
@@ -46,14 +47,27 @@ export const getEmployeeById = async (id: string): Promise<EmployeeType | null> 
     // Try to get email from profiles table if possible, but don't fail if we can't
     let email = '';
     try {
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('email')
-        .eq('id', id)
-        .maybeSingle();
+      if (data.user_id) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('email')
+          .eq('id', data.user_id)
+          .maybeSingle();
 
-      if (profileData) {
-        email = profileData.email;
+        if (profileData) {
+          email = profileData.email;
+        }
+      } else {
+        // Fallback to try getting profile by employee ID
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('email')
+          .eq('id', id)
+          .maybeSingle();
+          
+        if (profileData) {
+          email = profileData.email;
+        }
       }
     } catch (profileError) {
       console.error("Error fetching profile data:", profileError);
@@ -95,7 +109,8 @@ export const getEmployees = async (): Promise<EmployeeType[]> => {
         budget,
         used_budget,
         image_url,
-        profile_image
+        profile_image,
+        user_id
       `);
 
     if (employeesError) throw employeesError;
@@ -122,7 +137,7 @@ export const getEmployees = async (): Promise<EmployeeType[]> => {
       id: emp.id,
       firstName: emp.first_name,
       lastName: emp.last_name,
-      email: emailMap.get(emp.id) || '',
+      email: emp.user_id ? emailMap.get(emp.user_id) || '' : emailMap.get(emp.id) || '',
       position: emp.position,
       cluster: emp.cluster,
       startDate: emp.start_date || '',
@@ -177,26 +192,7 @@ export const createEmployee = async (employeeData: {
     // Generate a UUID for the employee
     const employeeId = crypto.randomUUID();
     
-    // First, attempt to create profile record (this might fail due to RLS)
-    try {
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert([{ 
-          id: employeeId, 
-          email: employeeData.email,
-          name: `${employeeData.first_name} ${employeeData.last_name}`
-        }]);
-      
-      if (profileError) {
-        console.warn("Could not insert into profiles table:", profileError);
-        // Continue anyway since this might be due to RLS permissions
-      }
-    } catch (err) {
-      console.warn("Exception trying to create profile:", err);
-      // Continue despite profile creation error
-    }
-    
-    // Now create the employee record
+    // Create the employee record without trying to reference profiles table
     const { error: employeeError } = await supabase
       .from('employees')
       .insert([{
@@ -210,7 +206,8 @@ export const createEmployee = async (employeeData: {
         budget: employeeData.budget,
         used_budget: 0,
         image_url: employeeData.image_url,
-        profile_image: employeeData.profile_image
+        profile_image: employeeData.profile_image,
+        // Note: We're not setting user_id here, as we're not creating an auth user
       }]);
       
     if (employeeError) {
@@ -254,23 +251,6 @@ export const updateEmployee = async (id: string, employeeData: {
       .eq('id', id);
       
     if (employeeError) throw employeeError;
-    
-    // Try to update the email in profiles, but don't fail if it doesn't work
-    if (employeeData.email) {
-      try {
-        await supabase
-          .from('profiles')
-          .update({ 
-            email: employeeData.email,
-            name: employeeData.first_name && employeeData.last_name ? 
-              `${employeeData.first_name} ${employeeData.last_name}` : undefined
-          })
-          .eq('id', id);
-      } catch (profileError) {
-        console.warn("Could not update profile email:", profileError);
-        // Continue despite profile update error
-      }
-    }
     
     return true;
   } catch (error) {
