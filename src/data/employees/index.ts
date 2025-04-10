@@ -1,5 +1,7 @@
 
-// This file is just a re-export of all functionality from the employees directory
-
-export * from '../employees';
+// Export all employee-related functions
+export * from './fetch';
+export * from './create';
+export * from './update';
+export * from './exists';
 export * from './storage';

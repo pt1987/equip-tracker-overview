@@ -22,13 +22,30 @@ export const addAssetHistoryEntry = async (
   console.log(`Adding history entry for asset ${assetId}, action: ${action}`);
   
   try {
+    // Create entry without employee_id if it's null to avoid foreign key issues
     const newEntry = {
       asset_id: assetId,
       action,
-      employee_id: employeeId,
       notes,
       date: new Date().toISOString()
     };
+
+    // Only add employee_id if it's not null to avoid foreign key constraint violation
+    if (employeeId) {
+      // Check if employee exists in the employees table first
+      const { data: employeeExists } = await supabase
+        .from('employees')
+        .select('id')
+        .eq('id', employeeId)
+        .single();
+
+      if (employeeExists) {
+        // Employee exists, include the employee_id
+        Object.assign(newEntry, { employee_id: employeeId });
+      } else {
+        console.log(`Employee with ID ${employeeId} not found. Inserting history without employee reference.`);
+      }
+    }
     
     const { data, error } = await supabase
       .from('asset_history')

@@ -1,7 +1,7 @@
 
 // Export all functions from the asset modules with proper naming to avoid conflicts
 
-// Export from fetch.ts except createAsset
+// Export from fetch.ts
 export {
   getAssetById,
   getAssets,
@@ -11,10 +11,8 @@ export {
 
 // Export from other modules
 export { updateAsset } from './update';
+export { createAsset } from './create';
 export * from './stats';
 export * from './storage';
 export * from './history';
-
-// Export createAsset from create.ts only
-export { createAsset } from './create';
 export * from './mappers';

@@ -49,49 +49,65 @@ export const updateAsset = async (asset: Asset): Promise<Asset> => {
       throw new Error(`No asset returned after update for ID: ${asset.id}`);
     }
     
-    // Check if status has changed and add history entry if it has
-    if (currentAsset && currentAsset.status !== dbAsset.status) {
-      const actionType = getActionTypeForStatusChange(
-        currentAsset.status as AssetStatus, 
-        dbAsset.status as AssetStatus
-      );
-      
-      const notes = generateStatusChangeNote(
-        currentAsset.status as AssetStatus, 
-        dbAsset.status as AssetStatus
-      );
-      
-      await addAssetHistoryEntry(
-        asset.id,
-        actionType,
-        asset.employeeId,
-        notes
-      );
-      
-      console.log(`Added ${actionType} to asset history`);
-    }
-    
-    // Check if employee assignment has changed
-    if (currentAsset && currentAsset.employee_id !== dbAsset.employee_id) {
-      if (dbAsset.employee_id) {
-        // Asset was assigned to someone
+    try {
+      // Check if status has changed and add history entry if it has
+      if (currentAsset && currentAsset.status !== dbAsset.status) {
+        const actionType = getActionTypeForStatusChange(
+          currentAsset.status as AssetStatus, 
+          dbAsset.status as AssetStatus
+        );
+        
+        const notes = generateStatusChangeNote(
+          currentAsset.status as AssetStatus, 
+          dbAsset.status as AssetStatus
+        );
+        
         await addAssetHistoryEntry(
           asset.id,
-          "assign",
-          dbAsset.employee_id,
-          `Asset einem Mitarbeiter zugewiesen`
+          actionType,
+          null, // Status changes don't need employee association
+          notes
         );
-        console.log("Added assignment change to asset history");
-      } else if (currentAsset.employee_id) {
-        // Asset was returned to pool
-        await addAssetHistoryEntry(
-          asset.id,
-          "return",
-          currentAsset.employee_id,
-          `Asset in den Pool zurückgegeben`
-        );
-        console.log("Added return to pool to asset history");
+        
+        console.log(`Added ${actionType} to asset history`);
       }
+      
+      // Check if employee assignment has changed
+      if (currentAsset && currentAsset.employee_id !== dbAsset.employee_id) {
+        if (dbAsset.employee_id) {
+          // Verify employee exists before adding history entry
+          const { data: employeeExists } = await supabase
+            .from('employees')
+            .select('id')
+            .eq('id', dbAsset.employee_id)
+            .single();
+
+          if (employeeExists) {
+            // Asset was assigned to someone
+            await addAssetHistoryEntry(
+              asset.id,
+              "assign",
+              dbAsset.employee_id,
+              `Asset einem Mitarbeiter zugewiesen`
+            );
+            console.log("Added assignment change to asset history");
+          } else {
+            console.log(`Employee with ID ${dbAsset.employee_id} not found. Skipping history entry.`);
+          }
+        } else if (currentAsset.employee_id) {
+          // Asset was returned to pool
+          await addAssetHistoryEntry(
+            asset.id,
+            "return",
+            null, // Return to pool doesn't need employee association
+            `Asset in den Pool zurückgegeben`
+          );
+          console.log("Added return to pool to asset history");
+        }
+      }
+    } catch (historyError) {
+      console.error("Error updating asset history entries:", historyError);
+      // Continue with asset update even if history entries fail
     }
     
     console.log("Asset updated successfully:", data);
