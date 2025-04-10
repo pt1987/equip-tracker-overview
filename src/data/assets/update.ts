@@ -1,5 +1,5 @@
 
-import { Asset } from "@/lib/types";
+import { Asset, AssetStatus } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
 import { mapAssetToDbAsset, mapDbAssetToAsset } from "./mappers";
 import { 
@@ -51,8 +51,15 @@ export const updateAsset = async (asset: Asset): Promise<Asset> => {
     
     // Check if status has changed and add history entry if it has
     if (currentAsset && currentAsset.status !== dbAsset.status) {
-      const actionType = getActionTypeForStatusChange(currentAsset.status, dbAsset.status);
-      const notes = generateStatusChangeNote(currentAsset.status, dbAsset.status);
+      const actionType = getActionTypeForStatusChange(
+        currentAsset.status as AssetStatus, 
+        dbAsset.status as AssetStatus
+      );
+      
+      const notes = generateStatusChangeNote(
+        currentAsset.status as AssetStatus, 
+        dbAsset.status as AssetStatus
+      );
       
       await addAssetHistoryEntry(
         asset.id,
@@ -60,6 +67,7 @@ export const updateAsset = async (asset: Asset): Promise<Asset> => {
         asset.employeeId,
         notes
       );
+      
       console.log(`Added ${actionType} to asset history`);
     }
     
