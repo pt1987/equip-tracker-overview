@@ -72,7 +72,8 @@ export default function AssetDetailContent({
         additionalWarranty: formData.additionalWarranty || false,
         warrantyExpiryDate: warrantyExpiryDate,
         warrantyInfo: formData.hasWarranty ? formData.warrantyInfo || null : null,
-        imageUrl: formData.imageUrl || null
+        imageUrl: formData.imageUrl || null,
+        employeeId: formData.employeeId || null
       };
       
       await updateAsset(updatedAsset);
@@ -82,6 +83,9 @@ export default function AssetDetailContent({
       });
       queryClient.invalidateQueries({
         queryKey: ["assets"]
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["assetHistory", asset.id]
       });
       
       setIsEditing(false);

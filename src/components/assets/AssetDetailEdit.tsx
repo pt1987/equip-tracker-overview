@@ -43,6 +43,7 @@ export default function AssetDetailEdit({
       warrantyExpiryDate: asset.warrantyExpiryDate ? new Date(asset.warrantyExpiryDate) : null,
       warrantyInfo: asset.warrantyInfo || "",
       imageUrl: asset.imageUrl || "",
+      employeeId: asset.employeeId || "",
     },
   });
   

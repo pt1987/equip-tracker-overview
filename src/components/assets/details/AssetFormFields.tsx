@@ -1,59 +1,57 @@
-import { useFormContext } from "react-hook-form";
-import { z } from "zod";
-import { Input } from "@/components/ui/input";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  FormDescription,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { CalendarIcon, ShieldCheck } from "lucide-react";
-import { format } from "date-fns";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 
-// Schema for the form - moving here to keep it with the form fields
+import { useFormContext } from "react-hook-form";
+import { useState, useEffect } from "react";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { z } from "zod";
+import { getEmployees } from "@/data/employees";
+import { Employee } from "@/lib/types";
+
 export const assetFormSchema = z.object({
-  name: z.string().min(1, "Name wird benötigt"),
-  manufacturer: z.string().min(1, "Hersteller wird benötigt"),
-  model: z.string().min(1, "Modell wird benötigt"),
-  type: z.string().min(1, "Typ wird benötigt"),
-  vendor: z.string().min(1, "Lieferant wird benötigt"),
-  status: z.string().min(1, "Status wird benötigt"),
+  name: z.string().min(1, "Name is required"),
+  manufacturer: z.string().min(1, "Manufacturer is required"),
+  model: z.string().min(1, "Model is required"),
+  type: z.string().min(1, "Asset type is required"),
+  vendor: z.string().min(1, "Vendor is required"),
+  status: z.string().min(1, "Status is required"),
   purchaseDate: z.date(),
-  price: z.coerce.number().min(0, "Preis kann nicht negativ sein"),
+  price: z.number().nonnegative("Price cannot be negative"),
   serialNumber: z.string().optional(),
   inventoryNumber: z.string().optional(),
-  additionalWarranty: z.boolean().optional(),
-  hasWarranty: z.boolean().optional(),
-  warrantyExpiryDate: z.date().optional().nullable(),
+  hasWarranty: z.boolean().default(false),
+  additionalWarranty: z.boolean().default(false),
+  warrantyExpiryDate: z.date().nullable(),
   warrantyInfo: z.string().optional(),
   imageUrl: z.string().optional(),
+  employeeId: z.string().nullable().optional(),
 });
 
 export type AssetFormValues = z.infer<typeof assetFormSchema>;
 
 export default function AssetFormFields() {
   const form = useFormContext<AssetFormValues>();
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const hasWarranty = form.watch("hasWarranty");
 
+  // Laden der Mitarbeiterliste beim Komponenten-Mount
+  useEffect(() => {
+    const loadEmployees = async () => {
+      try {
+        const employeeData = await getEmployees();
+        setEmployees(employeeData);
+      } catch (error) {
+        console.error("Error loading employees:", error);
+      }
+    };
+    
+    loadEmployees();
+  }, []);
+
   return (
-    <div className="flex-1">
+    <div className="space-y-6">
+      <h3 className="text-lg font-medium">Asset-Informationen</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
           control={form.control}
@@ -62,23 +60,20 @@ export default function AssetFormFields() {
             <FormItem>
               <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input placeholder="Asset Name" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        
+
         <FormField
           control={form.control}
           name="type"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Typ</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-              >
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Typ auswählen" />
@@ -97,7 +92,7 @@ export default function AssetFormFields() {
             </FormItem>
           )}
         />
-        
+
         <FormField
           control={form.control}
           name="manufacturer"
@@ -105,13 +100,13 @@ export default function AssetFormFields() {
             <FormItem>
               <FormLabel>Hersteller</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input placeholder="z.B. Apple, Dell" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        
+
         <FormField
           control={form.control}
           name="model"
@@ -119,91 +114,34 @@ export default function AssetFormFields() {
             <FormItem>
               <FormLabel>Modell</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input placeholder="z.B. MacBook Pro" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        
-        <FormField
-          control={form.control}
-          name="purchaseDate"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Kaufdatum</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className="w-full pl-3 text-left font-normal flex justify-between"
-                    >
-                      {field.value ? (
-                        format(field.value, "dd.MM.yyyy")
-                      ) : (
-                        <span>Datum wählen</span>
-                      )}
-                      <CalendarIcon className="h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    disabled={(date) =>
-                      date > new Date()
-                    }
-                    initialFocus
-                    className="pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="price"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Preis (€)</FormLabel>
-              <FormControl>
-                <Input type="number" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
+
         <FormField
           control={form.control}
           name="vendor"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Lieferant</FormLabel>
+              <FormLabel>Verkäufer</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input placeholder="z.B. Amazon" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        
+
         <FormField
           control={form.control}
           name="status"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Status</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-              >
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Status auswählen" />
@@ -212,7 +150,7 @@ export default function AssetFormFields() {
                 <SelectContent>
                   <SelectItem value="ordered">Bestellt</SelectItem>
                   <SelectItem value="delivered">Geliefert</SelectItem>
-                  <SelectItem value="in_use">In Gebrauch</SelectItem>
+                  <SelectItem value="in_use">In Benutzung</SelectItem>
                   <SelectItem value="defective">Defekt</SelectItem>
                   <SelectItem value="repair">In Reparatur</SelectItem>
                   <SelectItem value="pool">Pool</SelectItem>
@@ -222,7 +160,74 @@ export default function AssetFormFields() {
             </FormItem>
           )}
         />
-        
+
+        <FormField
+          control={form.control}
+          name="purchaseDate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Kaufdatum</FormLabel>
+              <FormControl>
+                <Input 
+                  type="date" 
+                  value={field.value instanceof Date ? field.value.toISOString().split('T')[0] : ''} 
+                  onChange={(e) => field.onChange(new Date(e.target.value))} 
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="price"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Preis (€)</FormLabel>
+              <FormControl>
+                <Input 
+                  type="number" 
+                  placeholder="0.00" 
+                  {...field}
+                  onChange={(e) => field.onChange(parseFloat(e.target.value))} 
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Mitarbeiterzuweisung */}
+        <FormField
+          control={form.control}
+          name="employeeId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Zugewiesen an</FormLabel>
+              <Select 
+                onValueChange={field.onChange} 
+                defaultValue={field.value || ''}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Mitarbeiter auswählen" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="">Nicht zugewiesen</SelectItem>
+                  {employees.map((employee) => (
+                    <SelectItem key={employee.id} value={employee.id}>
+                      {employee.firstName} {employee.lastName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <FormField
           control={form.control}
           name="serialNumber"
@@ -230,13 +235,13 @@ export default function AssetFormFields() {
             <FormItem>
               <FormLabel>Seriennummer</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input placeholder="Seriennummer" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        
+
         <FormField
           control={form.control}
           name="inventoryNumber"
@@ -244,122 +249,90 @@ export default function AssetFormFields() {
             <FormItem>
               <FormLabel>Inventarnummer</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input placeholder="Inventarnummer" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        
-        <div className="col-span-1 md:col-span-2 pt-2 border-t mt-4">
-          <h3 className="text-lg font-medium mb-4 flex items-center">
-            <ShieldCheck className="mr-2 h-5 w-5" />
-            Garantieinformationen
-          </h3>
-        </div>
-        
-        <FormField
-          control={form.control}
-          name="hasWarranty"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <FormLabel className="text-base">Garantie</FormLabel>
-                <FormDescription>
-                  Hat dieses Gerät eine Garantie?
-                </FormDescription>
-              </div>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        
-        {hasWarranty && (
-          <>
+
+        {/* Garantie-Bereich */}
+        <div className="col-span-1 md:col-span-2 mt-4">
+          <h3 className="text-lg font-medium mb-4">Garantie-Informationen</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
-              name="additionalWarranty"
+              name="hasWarranty"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">Zusatzgarantie</FormLabel>
-                    <FormDescription>
-                      Hat dieses Gerät eine erweiterte Garantie?
-                    </FormDescription>
-                  </div>
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                   <FormControl>
-                    <Switch
+                    <Checkbox
                       checked={field.value}
                       onCheckedChange={field.onChange}
                     />
                   </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Garantie vorhanden</FormLabel>
+                  </div>
                 </FormItem>
               )}
             />
-            
-            <FormField
-              control={form.control}
-              name="warrantyExpiryDate"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Garantieablaufdatum</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
+
+            {hasWarranty && (
+              <>
+                <FormField
+                  control={form.control}
+                  name="additionalWarranty"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                       <FormControl>
-                        <Button
-                          variant={"outline"}
-                          className="w-full pl-3 text-left font-normal flex justify-between"
-                        >
-                          {field.value ? (
-                            format(field.value, "dd.MM.yyyy")
-                          ) : (
-                            <span>Datum wählen</span>
-                          )}
-                          <CalendarIcon className="h-4 w-4 opacity-50" />
-                        </Button>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
                       </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value || undefined}
-                        onSelect={field.onChange}
-                        disabled={(date) =>
-                          date < new Date()
-                        }
-                        initialFocus
-                        className="pointer-events-auto"
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="warrantyInfo"
-              render={({ field }) => (
-                <FormItem className="col-span-1 md:col-span-2">
-                  <FormLabel>Garantiedetails</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Zusätzliche Informationen zur Garantie" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Hier können Sie weitere Informationen zur Garantie eingeben (z.B. Garantienummer, Kontaktdaten)
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </>
-        )}
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Zusätzliche Garantie</FormLabel>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="warrantyExpiryDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Garantie gültig bis</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="date" 
+                          value={field.value instanceof Date ? field.value.toISOString().split('T')[0] : ''} 
+                          onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : null)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="warrantyInfo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Garantie-Informationen</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Garantie-Informationen" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
