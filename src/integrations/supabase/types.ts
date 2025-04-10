@@ -157,7 +157,7 @@ export type Database = {
             foreignKeyName: "assets_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
           {
