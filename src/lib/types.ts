@@ -60,11 +60,20 @@ export interface Employee {
   profileImage?: string;
 }
 
+export type AssetHistoryAction = 
+  | 'purchase' 
+  | 'delivery'
+  | 'assign' 
+  | 'status_change' 
+  | 'repair'
+  | 'return'
+  | 'dispose';
+
 export interface AssetHistoryEntry {
   id: string;
   assetId: string;
   date: string;
-  action: 'purchase' | 'assign' | 'status_change' | 'return';
+  action: AssetHistoryAction;
   employeeId: string | null;
   notes: string;
 }

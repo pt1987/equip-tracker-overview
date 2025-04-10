@@ -2,7 +2,11 @@
 import { Asset } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
 import { mapAssetToDbAsset, mapDbAssetToAsset } from "./mappers";
-import { addAssetHistoryEntry } from "./history";
+import { 
+  addAssetHistoryEntry, 
+  generateStatusChangeNote, 
+  getActionTypeForStatusChange 
+} from "./history";
 
 // Function to update an asset in the database
 export const updateAsset = async (asset: Asset): Promise<Asset> => {
@@ -47,13 +51,16 @@ export const updateAsset = async (asset: Asset): Promise<Asset> => {
     
     // Check if status has changed and add history entry if it has
     if (currentAsset && currentAsset.status !== dbAsset.status) {
+      const actionType = getActionTypeForStatusChange(currentAsset.status, dbAsset.status);
+      const notes = generateStatusChangeNote(currentAsset.status, dbAsset.status);
+      
       await addAssetHistoryEntry(
         asset.id,
-        "status_change",
+        actionType,
         asset.employeeId,
-        `Status changed from ${currentAsset.status} to ${dbAsset.status}`
+        notes
       );
-      console.log("Added status change to asset history");
+      console.log(`Added ${actionType} to asset history`);
     }
     
     // Check if employee assignment has changed
@@ -64,7 +71,7 @@ export const updateAsset = async (asset: Asset): Promise<Asset> => {
           asset.id,
           "assign",
           dbAsset.employee_id,
-          `Asset assigned to employee`
+          `Asset einem Mitarbeiter zugewiesen`
         );
         console.log("Added assignment change to asset history");
       } else if (currentAsset.employee_id) {
@@ -73,7 +80,7 @@ export const updateAsset = async (asset: Asset): Promise<Asset> => {
           asset.id,
           "return",
           currentAsset.employee_id,
-          `Asset returned to pool`
+          `Asset in den Pool zurückgegeben`
         );
         console.log("Added return to pool to asset history");
       }

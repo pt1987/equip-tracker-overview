@@ -6,3 +6,4 @@ export * from './assets/stats';
 export * from './assets/storage';
 export * from './assets/mappers';
 export * from './assets/history';
+export * from './assets/create';

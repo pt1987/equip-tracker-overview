@@ -1,6 +1,6 @@
 
 import { motion } from "framer-motion";
-import { AssetHistoryEntry } from "@/lib/types";
+import { AssetHistoryEntry, AssetHistoryAction } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
 import { 
   CalendarClock,
@@ -8,7 +8,10 @@ import {
   UserCheck, 
   RefreshCcw, 
   RotateCcw,
-  Clock
+  Clock,
+  Truck,
+  Wrench,
+  Trash2
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
@@ -22,31 +25,43 @@ const AssetHistoryTimeline = ({ history }: AssetHistoryTimelineProps) => {
     new Date(b.date).getTime() - new Date(a.date).getTime()
   );
 
-  const getActionIcon = (action: string) => {
+  const getActionIcon = (action: AssetHistoryAction) => {
     switch (action) {
       case "purchase":
         return <ShoppingCart size={18} className="text-primary" />;
+      case "delivery":
+        return <Truck size={18} className="text-primary" />;
       case "assign":
         return <UserCheck size={18} className="text-primary" />;
       case "status_change":
         return <RefreshCcw size={18} className="text-primary" />;
+      case "repair":
+        return <Wrench size={18} className="text-primary" />;
       case "return":
         return <RotateCcw size={18} className="text-primary" />;
+      case "dispose":
+        return <Trash2 size={18} className="text-primary" />;
       default:
         return <Clock size={18} className="text-primary" />;
     }
   };
 
-  const getActionLabel = (action: string) => {
+  const getActionLabel = (action: AssetHistoryAction) => {
     switch (action) {
       case "purchase":
         return "Kauf";
+      case "delivery":
+        return "Lieferung";
       case "assign":
         return "Zugewiesen";
       case "status_change":
         return "Status geändert";
+      case "repair":
+        return "Zur Reparatur";
       case "return":
         return "Zurückgegeben";
+      case "dispose":
+        return "Entsorgt";
       default:
         return action;
     }
