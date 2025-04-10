@@ -43,7 +43,7 @@ export default function AssetDetailEdit({
       warrantyExpiryDate: asset.warrantyExpiryDate ? new Date(asset.warrantyExpiryDate) : null,
       warrantyInfo: asset.warrantyInfo || "",
       imageUrl: asset.imageUrl || "",
-      employeeId: asset.employeeId || "",
+      employeeId: asset.employeeId || "not_assigned", // Changed from empty string to "not_assigned"
     },
   });
   
@@ -53,6 +53,11 @@ export default function AssetDetailEdit({
   
   const handleSubmit = async (data: AssetFormValues) => {
     try {
+      // If employeeId is "not_assigned", set it to null
+      if (data.employeeId === "not_assigned") {
+        data.employeeId = null;
+      }
+      
       // Pass the form data to the parent component's onSave function
       onSave(data);
     } catch (error) {

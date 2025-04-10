@@ -207,7 +207,7 @@ export default function AssetFormFields() {
               <FormLabel>Zugewiesen an</FormLabel>
               <Select 
                 onValueChange={field.onChange} 
-                defaultValue={field.value || ''}
+                defaultValue={field.value || 'not_assigned'}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -215,7 +215,8 @@ export default function AssetFormFields() {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="">Nicht zugewiesen</SelectItem>
+                  {/* Changed empty string to 'not_assigned' */}
+                  <SelectItem value="not_assigned">Nicht zugewiesen</SelectItem>
                   {employees.map((employee) => (
                     <SelectItem key={employee.id} value={employee.id}>
                       {employee.firstName} {employee.lastName}
