@@ -9,6 +9,7 @@ import { Asset, AssetBooking, Employee } from "@/lib/types";
 import { getCurrentOrUpcomingBooking, getBookingsByAssetId } from "@/data/bookings";
 import { getEmployeeById } from "@/data/employees";
 import BookingDialog from "@/components/bookings/BookingDialog";
+import AssetStatusIndicator from "@/components/bookings/AssetStatusIndicator";
 
 interface AssetBookingSectionProps {
   asset: Asset;
@@ -67,19 +68,34 @@ export default function AssetBookingSection({ asset, employees, refetchAsset }: 
     refetchAsset();
   };
   
-  // Check if asset is a pool device
-  const isPoolDevice = asset?.isPoolDevice === true;
+  // Bestimme den Verfügbarkeitsstatus
+  const getAvailabilityStatus = () => {
+    if (currentBooking && currentBooking.status === 'active') {
+      return "booked";
+    } else if (bookings.length > 0 && bookings.some(b => b.status === 'reserved')) {
+      return "available-partial";
+    } else {
+      return "available";
+    }
+  };
   
-  if (!isPoolDevice) {
-    return null;
-  }
+  // Zähle zukünftige Buchungen
+  const countUpcomingBookings = () => {
+    return bookings.filter(b => b.status === 'reserved').length;
+  };
 
   return (
     <Card className="shadow-sm">
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start">
           <div>
-            <CardTitle>Buchungsstatus</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              Buchungsstatus
+              <AssetStatusIndicator 
+                status={getAvailabilityStatus()} 
+                bookingCount={countUpcomingBookings()}
+              />
+            </CardTitle>
             <CardDescription>
               Status des Poolgeräts und aktuelle Buchungen
             </CardDescription>
@@ -95,7 +111,7 @@ export default function AssetBookingSection({ asset, employees, refetchAsset }: 
               <RefreshCw className="h-4 w-4 mr-1" />
               Aktualisieren
             </Button>
-            {asset.status === 'pool' && (
+            {(asset.status === 'pool' || asset.isPoolDevice) && !currentBooking?.status === 'active' && (
               <Button
                 size="sm"
                 onClick={handleBook}

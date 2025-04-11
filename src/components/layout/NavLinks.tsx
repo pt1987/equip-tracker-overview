@@ -75,7 +75,6 @@ export const NavLinks = () => {
         href="/history"
         icon={<History size={16} />}
         label="Historie"
-        hasDividerAbove={false}
       />
       <NavLink
         href="/reporting"

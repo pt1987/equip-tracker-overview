@@ -142,8 +142,8 @@ export default function AssetDetailContent({
 
       {!isEditing && (
         <>
-          {/* Show booking section for pool devices */}
-          {asset.isPoolDevice && (
+          {/* Immer die Buchungssektion für Pool-Geräte anzeigen oder wenn asset.status === 'pool' */}
+          {(asset.isPoolDevice || asset.status === 'pool') && (
             <AssetBookingSection 
               asset={asset}
               employees={employees}
@@ -151,7 +151,6 @@ export default function AssetDetailContent({
             />
           )}
 
-          {/* Add DepreciationSection */}
           <DepreciationSection asset={asset} />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
