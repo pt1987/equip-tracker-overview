@@ -3,7 +3,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import {
   Calendar,
-  Calendar as CalendarIcon,
   CircleDollarSign,
   Clock,
   FileBarChart,
@@ -18,7 +17,8 @@ import {
   User,
   Users,
   Grid,
-  FileLineChart
+  FileLineChart,
+  BookOpen
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -75,7 +75,7 @@ export const NavLinks = () => {
         href="/history"
         icon={<History size={16} />}
         label="Historie"
-        hasDividerAbove
+        hasDividerAbove={false}
       />
       <NavLink
         href="/reporting"
