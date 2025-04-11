@@ -33,8 +33,8 @@ export default function BudgetSection({ budget, usedBudget }: BudgetSectionProps
       </div>
       
       <div className="flex justify-between text-sm text-muted-foreground mt-2">
-        <span>{formatCurrency(usedBudget)} used</span>
-        <span>{formatCurrency(budget)} total</span>
+        <span>{formatCurrency(usedBudget)}</span>
+        <span>{formatCurrency(budget)}</span>
       </div>
       
       <div className="mt-6 p-4 rounded-lg bg-secondary/50">
