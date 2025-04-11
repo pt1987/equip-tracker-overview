@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,82 +12,71 @@ import AssetUsageDurationReport from "@/components/reports/AssetUsageDurationRep
 import WarrantyDefectsReport from "@/components/reports/WarrantyDefectsReport";
 import FixedAssetsReport from "@/components/reports/FixedAssetsReport";
 import { DownloadIcon, FileBarChart, ChevronDown } from "lucide-react";
-import { 
-  exportOrderTimeline, 
-  exportYearlyBudget, 
-  exportYearlyPurchases, 
-  exportUsageDuration, 
-  exportWarrantyDefects,
-  exportFixedAssetsReport
-} from "@/utils/export";
-import { 
-  getOrderTimelineByEmployee, 
-  getYearlyBudgetReport, 
-  getYearlyAssetPurchasesReport, 
-  getAssetUsageDurationReport, 
-  getWarrantyDefectReport,
-  getFixedAssetsReport
-} from "@/data/reports";
-
+import { exportOrderTimeline, exportYearlyBudget, exportYearlyPurchases, exportUsageDuration, exportWarrantyDefects, exportFixedAssetsReport } from "@/utils/export";
+import { getOrderTimelineByEmployee, getYearlyBudgetReport, getYearlyAssetPurchasesReport, getAssetUsageDurationReport, getWarrantyDefectReport, getFixedAssetsReport } from "@/data/reports";
 export default function Reporting() {
   const [activeReport, setActiveReport] = useState<ReportType>("orderTimeline");
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   const exportReport = async (format: 'excel' | 'pdf') => {
     try {
       switch (activeReport) {
-        case 'orderTimeline': {
-          const data = await getOrderTimelineByEmployee();
-          exportOrderTimeline(data, format);
-          break;
-        }
-        case 'yearlyBudget': {
-          const data = await getYearlyBudgetReport();
-          exportYearlyBudget(data, format);
-          break;
-        }
-        case 'yearlyPurchases': {
-          const data = await getYearlyAssetPurchasesReport();
-          exportYearlyPurchases(data, format);
-          break;
-        }
-        case 'usageDuration': {
-          const data = await getAssetUsageDurationReport();
-          exportUsageDuration(data, format);
-          break;
-        }
-        case 'warrantyDefects': {
-          const data = await getWarrantyDefectReport();
-          exportWarrantyDefects(data, format);
-          break;
-        }
-        case 'fixedAssets': {
-          const data = await getFixedAssetsReport();
-          exportFixedAssetsReport(data, format);
-          break;
-        }
+        case 'orderTimeline':
+          {
+            const data = await getOrderTimelineByEmployee();
+            exportOrderTimeline(data, format);
+            break;
+          }
+        case 'yearlyBudget':
+          {
+            const data = await getYearlyBudgetReport();
+            exportYearlyBudget(data, format);
+            break;
+          }
+        case 'yearlyPurchases':
+          {
+            const data = await getYearlyAssetPurchasesReport();
+            exportYearlyPurchases(data, format);
+            break;
+          }
+        case 'usageDuration':
+          {
+            const data = await getAssetUsageDurationReport();
+            exportUsageDuration(data, format);
+            break;
+          }
+        case 'warrantyDefects':
+          {
+            const data = await getWarrantyDefectReport();
+            exportWarrantyDefects(data, format);
+            break;
+          }
+        case 'fixedAssets':
+          {
+            const data = await getFixedAssetsReport();
+            exportFixedAssetsReport(data, format);
+            break;
+          }
       }
-      
       toast({
         title: "Report exported",
-        description: `The report has been exported as ${format.toUpperCase()}.`,
+        description: `The report has been exported as ${format.toUpperCase()}.`
       });
     } catch (error) {
       toast({
         title: "Export failed",
         description: "There was an error exporting the report.",
-        variant: "destructive",
+        variant: "destructive"
       });
       console.error("Export error:", error);
     }
   };
-
-  return (
-    <div className="container mx-auto p-4 md:p-6 space-y-6 max-w-7xl">
+  return <div className="container mx-auto p-4 md:p-6 space-y-6 max-w-7xl">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
-            <FileBarChart className="h-7 w-7 text-primary" />
+            
             Reporting
           </h1>
           <p className="text-muted-foreground">
@@ -97,12 +85,7 @@ export default function Reporting() {
         </div>
       </div>
 
-      <Tabs
-        defaultValue="orderTimeline"
-        value={activeReport}
-        onValueChange={(value) => setActiveReport(value as ReportType)}
-        className="w-full"
-      >
+      <Tabs defaultValue="orderTimeline" value={activeReport} onValueChange={value => setActiveReport(value as ReportType)} className="w-full">
         <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
           <TabsList className="flex flex-wrap gap-2 h-auto">
             <TabsTrigger value="orderTimeline">Order Timeline</TabsTrigger>
@@ -178,6 +161,5 @@ export default function Reporting() {
           </CardContent>
         </Card>
       </Tabs>
-    </div>
-  );
+    </div>;
 }
