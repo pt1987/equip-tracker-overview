@@ -5,11 +5,17 @@ import { getEmployeeById } from "./employees";
 import { getAssetById } from "./assets";
 import { format } from "date-fns";
 
+// Helper function to safely access the asset_bookings table
+// This is a temporary fix until the Supabase types are updated
+const bookingsTable = () => {
+  // @ts-ignore - Ignore TypeScript errors as we know this table exists
+  return supabase.from('asset_bookings');
+};
+
 // Get all bookings
 export const getAllBookings = async (): Promise<AssetBooking[]> => {
   try {
-    const { data, error } = await supabase
-      .from('asset_bookings')
+    const { data, error } = await bookingsTable()
       .select('*')
       .order('start_date', { ascending: true });
 
@@ -28,8 +34,7 @@ export const getAllBookings = async (): Promise<AssetBooking[]> => {
 // Get bookings by asset ID
 export const getBookingsByAssetId = async (assetId: string): Promise<AssetBooking[]> => {
   try {
-    const { data, error } = await supabase
-      .from('asset_bookings')
+    const { data, error } = await bookingsTable()
       .select('*')
       .eq('asset_id', assetId)
       .order('start_date', { ascending: true });
@@ -49,8 +54,7 @@ export const getBookingsByAssetId = async (assetId: string): Promise<AssetBookin
 // Get bookings by employee ID
 export const getBookingsByEmployeeId = async (employeeId: string): Promise<AssetBooking[]> => {
   try {
-    const { data, error } = await supabase
-      .from('asset_bookings')
+    const { data, error } = await bookingsTable()
       .select('*')
       .eq('employee_id', employeeId)
       .order('start_date', { ascending: true });
@@ -70,8 +74,7 @@ export const getBookingsByEmployeeId = async (employeeId: string): Promise<Asset
 // Get a booking by ID
 export const getBookingById = async (bookingId: string): Promise<AssetBooking | null> => {
   try {
-    const { data, error } = await supabase
-      .from('asset_bookings')
+    const { data, error } = await bookingsTable()
       .select('*')
       .eq('id', bookingId)
       .single();
@@ -97,8 +100,7 @@ export const isAssetAvailableForBooking = async (
 ): Promise<boolean> => {
   try {
     // Query to find any overlapping bookings
-    let query = supabase
-      .from('asset_bookings')
+    let query = bookingsTable()
       .select('id')
       .eq('asset_id', assetId)
       .not('status', 'eq', 'canceled')
@@ -151,8 +153,8 @@ export const createBooking = async (
       status = 'completed';
     }
 
-    const { data, error } = await supabase
-      .from('asset_bookings')
+    // Create the booking record using the correct table name
+    const { data, error } = await bookingsTable()
       .insert({
         asset_id: assetId,
         employee_id: employeeId,
@@ -194,8 +196,7 @@ export const updateBookingStatus = async (
   status: BookingStatus
 ): Promise<AssetBooking | null> => {
   try {
-    const { data, error } = await supabase
-      .from('asset_bookings')
+    const { data, error } = await bookingsTable()
       .update({ status: status })
       .eq('id', bookingId)
       .select()
@@ -246,8 +247,7 @@ export const recordAssetReturn = async (
       checked_at: checkedById ? new Date().toISOString() : null
     };
 
-    const { data, error } = await supabase
-      .from('asset_bookings')
+    const { data, error } = await bookingsTable()
       .update({
         return_info: returnInfo,
         status: 'completed'
@@ -311,8 +311,7 @@ export const updateBookingDates = async (
       throw new Error("Asset is not available for the requested period");
     }
 
-    const { data, error } = await supabase
-      .from('asset_bookings')
+    const { data, error } = await bookingsTable()
       .update({
         start_date: startDate,
         end_date: endDate
@@ -339,16 +338,14 @@ export const updateBookingStatuses = async (): Promise<void> => {
     const now = new Date().toISOString();
     
     // Update reserved -> active
-    await supabase
-      .from('asset_bookings')
+    await bookingsTable()
       .update({ status: 'active' })
       .eq('status', 'reserved')
       .lte('start_date', now)
       .gt('end_date', now);
     
     // Update active -> completed
-    await supabase
-      .from('asset_bookings')
+    await bookingsTable()
       .update({ status: 'completed' })
       .eq('status', 'active')
       .lte('end_date', now);
@@ -364,34 +361,32 @@ export const getCurrentOrUpcomingBooking = async (assetId: string): Promise<Asse
     const now = new Date().toISOString();
     
     // First check for active booking
-    const { data: activeBooking, error: activeError } = await supabase
-      .from('asset_bookings')
+    let query = bookingsTable()
       .select('*')
       .eq('asset_id', assetId)
       .eq('status', 'active')
       .lte('start_date', now)
       .gt('end_date', now)
       .order('start_date', { ascending: true })
-      .limit(1)
-      .single();
+      .limit(1);
     
-    if (activeBooking && !activeError) {
-      return mapDbBookingToBooking(activeBooking);
+    const { data: activeBookings, error: activeError } = await query;
+    
+    if (activeBookings && activeBookings.length > 0 && !activeError) {
+      return mapDbBookingToBooking(activeBookings[0]);
     }
     
     // If no active booking, check for upcoming booking
-    const { data: upcomingBooking, error: upcomingError } = await supabase
-      .from('asset_bookings')
+    const { data: upcomingBookings, error: upcomingError } = await bookingsTable()
       .select('*')
       .eq('asset_id', assetId)
       .eq('status', 'reserved')
       .gt('start_date', now)
       .order('start_date', { ascending: true })
-      .limit(1)
-      .single();
+      .limit(1);
     
-    if (upcomingBooking && !upcomingError) {
-      return mapDbBookingToBooking(upcomingBooking);
+    if (upcomingBookings && upcomingBookings.length > 0 && !upcomingError) {
+      return mapDbBookingToBooking(upcomingBookings[0]);
     }
     
     return null;

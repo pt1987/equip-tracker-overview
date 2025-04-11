@@ -170,7 +170,7 @@ export default function AssetBookingSection({ asset, employees, refetchAsset }: 
                             {format(parseISO(booking.endDate), "dd.MM.yyyy")}
                           </div>
                           {booking.returnInfo?.returned && (
-                            <Badge variant="outline" size="sm" className="mt-1">
+                            <Badge variant="outline" className="mt-1">
                               Zurückgegeben am {format(parseISO(booking.returnInfo.returnedAt!), "dd.MM.yyyy")}
                             </Badge>
                           )}
