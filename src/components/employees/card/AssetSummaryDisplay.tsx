@@ -1,5 +1,6 @@
 
 import { Badge } from "@/components/ui/badge";
+import { formatCurrency } from "@/lib/utils";
 
 export type AssetSummary = {
   laptop: number;
@@ -39,7 +40,7 @@ const AssetSummaryDisplay = ({ assetSummary, isLoading }: AssetSummaryDisplayPro
       <div className="flex justify-between items-center mb-2">
         <span className="text-sm font-medium">Assets ({assetSummary.totalCount})</span>
         <Badge variant="outline" className="text-xs">
-          Value: ${assetSummary.totalValue.toLocaleString()}
+          Value: {formatCurrency(assetSummary.totalValue)}
         </Badge>
       </div>
       <div className="grid grid-cols-3 gap-2">
