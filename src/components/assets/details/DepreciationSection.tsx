@@ -1,40 +1,31 @@
-
 import { motion } from "framer-motion";
 import { Asset } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
-import { 
-  calculateAssetBookValue, 
-  isFixedAsset, 
-  isGWG, 
-  getRecommendedDepreciationDuration 
-} from "@/lib/depreciation-utils";
+import { calculateAssetBookValue, isFixedAsset, isGWG, getRecommendedDepreciationDuration } from "@/lib/depreciation-utils";
 import { Badge } from "@/components/ui/badge";
 import { CalculatorIcon, Calendar, EuroIcon, InfoIcon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-
 interface DepreciationSectionProps {
   asset: Asset;
 }
-
-export default function DepreciationSection({ asset }: DepreciationSectionProps) {
+export default function DepreciationSection({
+  asset
+}: DepreciationSectionProps) {
   // Only show for assets that can be depreciated
   if (!asset.purchaseDate) return null;
-  
   const bookValue = calculateAssetBookValue(asset);
   const fixedAsset = isFixedAsset(asset);
   const gwg = isGWG(asset);
   const depreciationDurationYears = bookValue.totalMonths / 12;
-  
+
   // If it's not a fixed asset or GWG, don't show this section
   if (!fixedAsset && !gwg) return null;
-  
-  return (
-    <Card className="shadow-sm">
+  return <Card className="shadow-sm">
       <CardHeader className="pb-3">
         <div className="flex justify-between items-center">
           <CardTitle className="text-xl flex items-center gap-2">
-            <CalculatorIcon className="h-5 w-5" />
+            
             Abschreibung
           </CardTitle>
           <AssetClassificationBadge asset={asset} />
@@ -59,12 +50,13 @@ export default function DepreciationSection({ asset }: DepreciationSectionProps)
             <span>{Math.round(bookValue.depreciationPercentage)}%</span>
           </div>
           <div className="h-2 bg-muted rounded-full overflow-hidden">
-            <motion.div 
-              className="h-full bg-primary rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${bookValue.depreciationPercentage}%` }}
-              transition={{ duration: 1 }}
-            />
+            <motion.div className="h-full bg-primary rounded-full" initial={{
+            width: 0
+          }} animate={{
+            width: `${bookValue.depreciationPercentage}%`
+          }} transition={{
+            duration: 1
+          }} />
           </div>
         </div>
         
@@ -76,8 +68,7 @@ export default function DepreciationSection({ asset }: DepreciationSectionProps)
             </div>
             <div className="font-medium">
               {depreciationDurationYears} Jahre
-              {gwg && (
-                <TooltipProvider>
+              {gwg && <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <InfoIcon className="inline h-4 w-4 ml-1 text-muted-foreground cursor-help" />
@@ -86,8 +77,7 @@ export default function DepreciationSection({ asset }: DepreciationSectionProps)
                       <p>GWG wird im Anschaffungsjahr sofort abgeschrieben.</p>
                     </TooltipContent>
                   </Tooltip>
-                </TooltipProvider>
-              )}
+                </TooltipProvider>}
             </div>
           </div>
           
@@ -108,36 +98,32 @@ export default function DepreciationSection({ asset }: DepreciationSectionProps)
           </div>
         </div>
         
-        {bookValue.isFullyDepreciated ? (
-          <div className="mt-6 p-4 bg-amber-100 dark:bg-amber-950/30 text-amber-800 dark:text-amber-300 rounded-md">
+        {bookValue.isFullyDepreciated ? <div className="mt-6 p-4 bg-amber-100 dark:bg-amber-950/30 text-amber-800 dark:text-amber-300 rounded-md">
             <p className="text-sm font-medium">
               Dieses Asset ist vollständig abgeschrieben.
             </p>
-          </div>
-        ) : (
-          <div className="mt-6 p-4 bg-muted rounded-md">
+          </div> : <div className="mt-6 p-4 bg-muted rounded-md">
             <p className="text-sm">
               Verbleibende Abschreibungsdauer: <span className="font-medium">{bookValue.remainingMonths} Monate</span>
             </p>
-          </div>
-        )}
+          </div>}
       </CardContent>
-    </Card>
-  );
+    </Card>;
 }
 
 // Badge component to show the asset classification
-function AssetClassificationBadge({ asset }: { asset: Asset }) {
+function AssetClassificationBadge({
+  asset
+}: {
+  asset: Asset;
+}) {
   const fixedAsset = isFixedAsset(asset);
   const gwg = isGWG(asset);
-  
   if (fixedAsset) {
     return <Badge variant="outline" className="bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800">Anlagevermögen</Badge>;
   }
-  
   if (gwg) {
     return <Badge variant="outline" className="bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800">GWG</Badge>;
   }
-  
   return null;
 }
