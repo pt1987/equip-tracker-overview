@@ -155,7 +155,28 @@ export type ReportType =
   | 'yearlyBudget'
   | 'yearlyPurchases'
   | 'usageDuration'
-  | 'warrantyDefects';
+  | 'warrantyDefects'
+  | 'fixedAssets';
+
+export interface FixedAssetsReport {
+  fixedAssets: Asset[];
+  gwgAssets: Asset[];
+  fixedAssetValue: number;
+  gwgValue: number;
+  currentBookValue: number;
+  depreciationAmount: number;
+  assetCount: {
+    fixed: number;
+    gwg: number;
+    other: number;
+    total: number;
+  };
+  categoryDistribution: Array<{
+    category: string;
+    count: number;
+    value: number;
+  }>;
+}
 
 export type EmployeeFormType = 'onboarding' | 'offboarding';
 export type EmployeeFormStatus = 'draft' | 'completed' | 'cancelled';

@@ -1,4 +1,3 @@
-
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
@@ -7,7 +6,8 @@ import {
   YearlyBudgetReport, 
   YearlyAssetPurchaseReport, 
   AssetUsageDurationReport, 
-  WarrantyDefectReport 
+  WarrantyDefectReport,
+  FixedAssetsReport
 } from "@/lib/types";
 import { formatCurrency, formatDate, localizeCategory } from "@/lib/utils";
 
@@ -57,7 +57,6 @@ export function exportToPDF(
 
 // Specific export functions for each report type
 export function exportOrderTimeline(data: OrderTimeline[], format: 'excel' | 'pdf' = 'excel') {
-  // Transform data for export
   const exportData = data.flatMap(employee => 
     employee.orders.map(order => ({
       Employee: employee.employeeName,
@@ -195,5 +194,145 @@ export function exportWarrantyDefects(data: WarrantyDefectReport, format: 'excel
       ],
       'WarrantyDefects'
     );
+  }
+}
+
+export function exportFixedAssetsReport(data: FixedAssetsReport, format: 'excel' | 'pdf' = 'excel') {
+  const fixedAssetsExportData = data.fixedAssets.map(asset => {
+    const netPrice = asset.netPurchasePrice || asset.price / 1.19;
+    return {
+      Name: asset.name,
+      Type: asset.type,
+      Category: asset.category,
+      Manufacturer: asset.manufacturer,
+      Model: asset.model,
+      SerialNumber: asset.serialNumber || '',
+      PurchaseDate: formatDate(asset.purchaseDate),
+      OriginalValue: netPrice,
+      CurrentBookValue: data.currentBookValue
+    };
+  });
+
+  const gwgAssetsExportData = data.gwgAssets.map(asset => {
+    const netPrice = asset.netPurchasePrice || asset.price / 1.19;
+    return {
+      Name: asset.name,
+      Type: asset.type,
+      Category: asset.category,
+      Manufacturer: asset.manufacturer,
+      Model: asset.model,
+      SerialNumber: asset.serialNumber || '',
+      PurchaseDate: formatDate(asset.purchaseDate),
+      Value: netPrice
+    };
+  });
+
+  const summaryData = [
+    {
+      Category: 'Anlagevermögen',
+      Count: data.assetCount.fixed,
+      TotalValue: data.fixedAssetValue,
+      CurrentBookValue: data.currentBookValue,
+      DepreciationAmount: data.depreciationAmount
+    },
+    {
+      Category: 'GWG',
+      Count: data.assetCount.gwg,
+      TotalValue: data.gwgValue,
+      CurrentBookValue: 0,
+      DepreciationAmount: data.gwgValue
+    },
+    {
+      Category: 'Gesamt',
+      Count: data.assetCount.fixed + data.assetCount.gwg,
+      TotalValue: data.fixedAssetValue + data.gwgValue,
+      CurrentBookValue: data.currentBookValue,
+      DepreciationAmount: data.depreciationAmount + data.gwgValue
+    }
+  ];
+
+  if (format === 'excel') {
+    const workbook = XLSX.utils.book_new();
+    
+    const summarySheet = XLSX.utils.json_to_sheet(summaryData);
+    XLSX.utils.book_append_sheet(workbook, summarySheet, 'Übersicht');
+    
+    const fixedAssetsSheet = XLSX.utils.json_to_sheet(fixedAssetsExportData);
+    XLSX.utils.book_append_sheet(workbook, fixedAssetsSheet, 'Anlagevermögen');
+    
+    const gwgSheet = XLSX.utils.json_to_sheet(gwgAssetsExportData);
+    XLSX.utils.book_append_sheet(workbook, gwgSheet, 'GWG');
+    
+    XLSX.writeFile(workbook, 'FixedAssetsReport.xlsx');
+  } else {
+    const doc = new jsPDF();
+    
+    doc.setFontSize(16);
+    doc.text('Anlagevermögen & GWG Bericht', 14, 20);
+    doc.setFontSize(10);
+    doc.text(`Erstellt am: ${formatDate(new Date().toISOString())}`, 14, 30);
+    
+    autoTable(doc, {
+      head: [['Kategorie', 'Anzahl', 'Gesamtwert', 'Buchwert', 'AfA Betrag']],
+      body: summaryData.map(item => [
+        item.Category,
+        item.Count.toString(),
+        formatCurrency(item.TotalValue),
+        formatCurrency(item.CurrentBookValue),
+        formatCurrency(item.DepreciationAmount)
+      ]),
+      startY: 40,
+      headStyles: { fillColor: [41, 128, 185] }
+    });
+    
+    doc.addPage();
+    doc.setFontSize(14);
+    doc.text('Anlagevermögen', 14, 20);
+    
+    autoTable(doc, {
+      head: [['Name', 'Kategorie', 'Kaufdatum', 'Anschaffungswert', 'Buchwert']],
+      body: data.fixedAssets.map(asset => {
+        const netPrice = asset.netPurchasePrice || asset.price / 1.19;
+        const bookValue = data.currentBookValue;
+        return [
+          asset.name,
+          asset.category,
+          formatDate(asset.purchaseDate),
+          formatCurrency(netPrice),
+          formatCurrency(bookValue)
+        ];
+      }),
+      startY: 30,
+      headStyles: { fillColor: [41, 128, 185] },
+      didDrawPage: (data) => {
+        doc.setFontSize(14);
+        doc.text('Anlagevermögen', 14, 20);
+      }
+    });
+    
+    doc.addPage();
+    doc.setFontSize(14);
+    doc.text('Geringwertige Wirtschaftsgüter (GWG)', 14, 20);
+    
+    autoTable(doc, {
+      head: [['Name', 'Kategorie', 'Kaufdatum', 'Wert']],
+      body: data.gwgAssets.map(asset => {
+        const netPrice = asset.netPurchasePrice || asset.price / 1.19;
+        return [
+          asset.name,
+          asset.category,
+          formatDate(asset.purchaseDate),
+          formatCurrency(netPrice)
+        ];
+      }),
+      startY: 30,
+      headStyles: { fillColor: [41, 128, 185] },
+      didDrawPage: (data) => {
+        doc.setFontSize(14);
+        doc.text('Geringwertige Wirtschaftsgüter (GWG)', 14, 20);
+      }
+    });
+    
+    doc.save('FixedAssetsReport.pdf');
   }
 }

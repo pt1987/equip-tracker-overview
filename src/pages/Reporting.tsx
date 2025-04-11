@@ -11,20 +11,23 @@ import BudgetYearlyReport from "@/components/reports/BudgetYearlyReport";
 import AssetPurchasesReport from "@/components/reports/AssetPurchasesReport";
 import AssetUsageDurationReport from "@/components/reports/AssetUsageDurationReport";
 import WarrantyDefectsReport from "@/components/reports/WarrantyDefectsReport";
+import FixedAssetsReport from "@/components/reports/FixedAssetsReport";
 import { DownloadIcon, FileBarChart, ChevronDown } from "lucide-react";
 import { 
   exportOrderTimeline, 
   exportYearlyBudget, 
   exportYearlyPurchases, 
   exportUsageDuration, 
-  exportWarrantyDefects 
+  exportWarrantyDefects,
+  exportFixedAssetsReport
 } from "@/utils/export";
 import { 
   getOrderTimelineByEmployee, 
   getYearlyBudgetReport, 
   getYearlyAssetPurchasesReport, 
   getAssetUsageDurationReport, 
-  getWarrantyDefectReport 
+  getWarrantyDefectReport,
+  getFixedAssetsReport
 } from "@/data/reports";
 
 export default function Reporting() {
@@ -57,6 +60,11 @@ export default function Reporting() {
         case 'warrantyDefects': {
           const data = await getWarrantyDefectReport();
           exportWarrantyDefects(data, format);
+          break;
+        }
+        case 'fixedAssets': {
+          const data = await getFixedAssetsReport();
+          exportFixedAssetsReport(data, format);
           break;
         }
       }
@@ -102,6 +110,7 @@ export default function Reporting() {
             <TabsTrigger value="yearlyPurchases">Yearly Purchases</TabsTrigger>
             <TabsTrigger value="usageDuration">Usage Duration</TabsTrigger>
             <TabsTrigger value="warrantyDefects">Warranty Defects</TabsTrigger>
+            <TabsTrigger value="fixedAssets">Anlagevermögen & GWG</TabsTrigger>
           </TabsList>
           
           <DropdownMenu>
@@ -131,6 +140,7 @@ export default function Reporting() {
               {activeReport === "yearlyPurchases" && "Yearly Asset Purchases"}
               {activeReport === "usageDuration" && "Average Asset Usage Duration"}
               {activeReport === "warrantyDefects" && "Defective Hardware Warranty Analysis"}
+              {activeReport === "fixedAssets" && "Anlagevermögen & GWG Übersicht"}
             </CardTitle>
             <CardDescription>
               {activeReport === "orderTimeline" && "Timeline of asset purchases per employee"}
@@ -138,6 +148,7 @@ export default function Reporting() {
               {activeReport === "yearlyPurchases" && "Number of assets purchased per year by type"}
               {activeReport === "usageDuration" && "Average usage duration by asset category"}
               {activeReport === "warrantyDefects" && "Analysis of defective hardware with and without warranty"}
+              {activeReport === "fixedAssets" && "Übersicht über Anlagevermögen und geringwertige Wirtschaftsgüter"}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -159,6 +170,10 @@ export default function Reporting() {
             
             <TabsContent value="warrantyDefects" className="mt-0">
               <WarrantyDefectsReport />
+            </TabsContent>
+            
+            <TabsContent value="fixedAssets" className="mt-0">
+              <FixedAssetsReport />
             </TabsContent>
           </CardContent>
         </Card>

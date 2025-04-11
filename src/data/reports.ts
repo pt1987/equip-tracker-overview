@@ -1,10 +1,10 @@
-
 import { 
   OrderTimeline, 
   YearlyBudgetReport, 
   YearlyAssetPurchaseReport, 
   AssetUsageDurationReport, 
   WarrantyDefectReport,
+  FixedAssetsReport,
   AssetType,
   Asset,
   Employee
@@ -12,6 +12,7 @@ import {
 import { getAssets, getAssetHistoryByAssetId } from "./assets";
 import { getEmployees } from "./employees";
 import { calculateAgeInMonths, groupBy } from "@/lib/utils";
+import { isFixedAsset, isGWG, calculateAssetBookValue } from "@/lib/depreciation-utils";
 
 // Helper function to get employee name
 const getEmployeeName = async (id: string): Promise<string> => {
@@ -225,6 +226,103 @@ export const getWarrantyDefectReport = async (): Promise<WarrantyDefectReport> =
     return {
       withWarranty: { count: 0, percentage: 0 },
       withoutWarranty: { count: 0, percentage: 0 }
+    };
+  }
+};
+
+// Fixed assets and GWG report
+export const getFixedAssetsReport = async (): Promise<FixedAssetsReport> => {
+  try {
+    const assets = await getAssets();
+    
+    if (!Array.isArray(assets)) {
+      console.error("getFixedAssetsReport: assets is not an array");
+      return {
+        fixedAssets: [],
+        gwgAssets: [],
+        fixedAssetValue: 0,
+        gwgValue: 0,
+        currentBookValue: 0,
+        depreciationAmount: 0,
+        assetCount: {
+          fixed: 0,
+          gwg: 0,
+          other: 0,
+          total: 0
+        },
+        categoryDistribution: []
+      };
+    }
+    
+    // Filter assets
+    const fixedAssets = assets.filter(asset => isFixedAsset(asset));
+    const gwgAssets = assets.filter(asset => isGWG(asset));
+    
+    // Calculate values
+    const fixedAssetValue = fixedAssets.reduce(
+      (sum, asset) => sum + (asset.netPurchasePrice || asset.price / 1.19), 
+      0
+    );
+    
+    const gwgValue = gwgAssets.reduce(
+      (sum, asset) => sum + (asset.netPurchasePrice || asset.price / 1.19), 
+      0
+    );
+    
+    // Calculate current book values
+    const currentBookValue = fixedAssets.reduce((sum, asset) => {
+      const bookValue = calculateAssetBookValue(asset);
+      return sum + bookValue.currentBookValue;
+    }, 0);
+    
+    // Calculate depreciation amount
+    const depreciationAmount = fixedAssetValue - currentBookValue;
+    
+    // Calculate category distribution
+    const categoryDistribution = Array.from(
+      fixedAssets.reduce((map, asset) => {
+        const category = asset.category;
+        if (!map.has(category)) {
+          map.set(category, { category, count: 0, value: 0 });
+        }
+        const item = map.get(category)!;
+        item.count++;
+        item.value += (asset.netPurchasePrice || asset.price / 1.19);
+        return map;
+      }, new Map<string, { category: string; count: number; value: number }>())
+    ).map(([_, value]) => value);
+    
+    return {
+      fixedAssets,
+      gwgAssets,
+      fixedAssetValue,
+      gwgValue,
+      currentBookValue,
+      depreciationAmount,
+      assetCount: {
+        fixed: fixedAssets.length,
+        gwg: gwgAssets.length,
+        other: assets.length - fixedAssets.length - gwgAssets.length,
+        total: assets.length
+      },
+      categoryDistribution
+    };
+  } catch (error) {
+    console.error("Error in getFixedAssetsReport:", error);
+    return {
+      fixedAssets: [],
+      gwgAssets: [],
+      fixedAssetValue: 0,
+      gwgValue: 0,
+      currentBookValue: 0,
+      depreciationAmount: 0,
+      assetCount: {
+        fixed: 0,
+        gwg: 0,
+        other: 0,
+        total: 0
+      },
+      categoryDistribution: []
     };
   }
 };
