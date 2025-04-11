@@ -16,7 +16,9 @@ import {
   MouseIcon,
   KeyboardIcon,
   PackageIcon,
-  ArrowRight
+  ArrowRight,
+  UserRound,
+  Factory
 } from "lucide-react";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { Link } from "react-router-dom";
@@ -25,6 +27,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getAssets } from "@/data/assets";
+import { getEmployees } from "@/data/employees";
 
 const AssetTypeIcon = ({ type }: { type: AssetType }) => {
   switch (type) {
@@ -72,6 +75,8 @@ const AssetsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTypes, setSelectedTypes] = useState<AssetType[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<AssetStatus[]>([]);
+  const [selectedManufacturers, setSelectedManufacturers] = useState<string[]>([]);
+  const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [view, setView] = useState<"grid" | "list">("grid");
   const { toast } = useToast();
@@ -97,13 +102,32 @@ const AssetsPage = () => {
     },
   });
 
+  // Fetch employees for the employee filter
+  const { data: employees = [] } = useQuery({
+    queryKey: ["employees"],
+    queryFn: async () => {
+      try {
+        const employees = await getEmployees();
+        return employees;
+      } catch (error) {
+        console.error("Error fetching employees:", error);
+        return [];
+      }
+    }
+  });
+  
+  // Extract unique manufacturers from assets for filter
+  const manufacturers = Array.from(
+    new Set(allAssets.map(asset => asset.manufacturer))
+  ).filter(Boolean).sort();
+
   useEffect(() => {
     if (allAssets && allAssets.length) {
       console.log("Assets loaded in component:", allAssets.length);
     }
   }, [allAssets]);
 
-  // Filter assets based on search term, types, and statuses
+  // Filter assets based on search term, types, statuses, manufacturers, and employees
   const filteredAssets = allAssets.filter((asset) => {
     // Check if asset matches search term
     const matchesSearch = searchTerm === "" || 
@@ -119,7 +143,15 @@ const AssetsPage = () => {
     const matchesStatus = selectedStatuses.length === 0 || 
       selectedStatuses.includes(asset.status);
     
-    return matchesSearch && matchesType && matchesStatus;
+    // Check if asset matches selected manufacturers
+    const matchesManufacturer = selectedManufacturers.length === 0 ||
+      selectedManufacturers.includes(asset.manufacturer);
+
+    // Check if asset matches selected employees
+    const matchesEmployee = selectedEmployees.length === 0 ||
+      (asset.employeeId && selectedEmployees.includes(asset.employeeId));
+
+    return matchesSearch && matchesType && matchesStatus && matchesManufacturer && matchesEmployee;
   });
   
   const toggleTypeFilter = (type: AssetType) => {
@@ -138,9 +170,27 @@ const AssetsPage = () => {
     }
   };
   
+  const toggleManufacturerFilter = (manufacturer: string) => {
+    if (selectedManufacturers.includes(manufacturer)) {
+      setSelectedManufacturers(selectedManufacturers.filter(m => m !== manufacturer));
+    } else {
+      setSelectedManufacturers([...selectedManufacturers, manufacturer]);
+    }
+  };
+
+  const toggleEmployeeFilter = (employeeId: string) => {
+    if (selectedEmployees.includes(employeeId)) {
+      setSelectedEmployees(selectedEmployees.filter(e => e !== employeeId));
+    } else {
+      setSelectedEmployees([...selectedEmployees, employeeId]);
+    }
+  };
+  
   const clearFilters = () => {
     setSelectedTypes([]);
     setSelectedStatuses([]);
+    setSelectedManufacturers([]);
+    setSelectedEmployees([]);
     setSearchTerm("");
   };
 
@@ -190,9 +240,9 @@ const AssetsPage = () => {
           >
             <SlidersHorizontal size={18} />
             <span>Filters</span>
-            {(selectedTypes.length > 0 || selectedStatuses.length > 0) && (
+            {(selectedTypes.length > 0 || selectedStatuses.length > 0 || selectedManufacturers.length > 0 || selectedEmployees.length > 0) && (
               <span className="ml-1 px-2 py-0.5 rounded-full text-xs bg-primary text-primary-foreground">
-                {selectedTypes.length + selectedStatuses.length}
+                {selectedTypes.length + selectedStatuses.length + selectedManufacturers.length + selectedEmployees.length}
               </span>
             )}
           </button>
@@ -256,6 +306,54 @@ const AssetsPage = () => {
                     >
                       {status.label}
                       {selectedStatuses.includes(status.value as AssetStatus) && (
+                        <Check size={14} />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Manufacturer Filter */}
+              <div>
+                <h4 className="text-sm font-medium mb-2">Hersteller</h4>
+                <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto pr-2">
+                  {manufacturers.map(manufacturer => (
+                    <button
+                      key={manufacturer}
+                      onClick={() => toggleManufacturerFilter(manufacturer)}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                        selectedManufacturers.includes(manufacturer)
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-secondary text-foreground hover:bg-secondary/80"
+                      }`}
+                    >
+                      <Factory size={14} />
+                      {manufacturer}
+                      {selectedManufacturers.includes(manufacturer) && (
+                        <Check size={14} />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Employee Filter */}
+              <div>
+                <h4 className="text-sm font-medium mb-2">Zugewiesener Mitarbeiter</h4>
+                <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto pr-2">
+                  {employees.map(employee => (
+                    <button
+                      key={employee.id}
+                      onClick={() => toggleEmployeeFilter(employee.id)}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                        selectedEmployees.includes(employee.id)
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-secondary text-foreground hover:bg-secondary/80"
+                      }`}
+                    >
+                      <UserRound size={14} />
+                      {employee.firstName} {employee.lastName}
+                      {selectedEmployees.includes(employee.id) && (
                         <Check size={14} />
                       )}
                     </button>
