@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { AssetBooking, BookingReturnCondition, BookingStatus } from "@/lib/types";
 import { getEmployeeById } from "./employees";
@@ -27,8 +26,26 @@ type RawBooking = {
 
 // Helper function to safely access the database tables
 // This is a temporary workaround until the Supabase types are updated
-const safeTable = <T = any>(tableName: string) => {
-  return supabase.from(tableName) as any;
+const safeTable = (tableName: string) => {
+  // Force type cast to any to completely bypass TypeScript checks
+  return supabase.from(tableName) as unknown as {
+    select: (columns: string) => any;
+    insert: (values: any) => any;
+    update: (values: any) => any;
+    delete: () => any;
+    eq: (column: string, value: any) => any;
+    neq: (column: string, value: any) => any;
+    gt: (column: string, value: any) => any;
+    lt: (column: string, value: any) => any;
+    gte: (column: string, value: any) => any;
+    lte: (column: string, value: any) => any;
+    order: (column: string, options?: { ascending: boolean }) => any;
+    limit: (count: number) => any;
+    single: () => any;
+    or: (query: string) => any;
+    not: (column: string, operator: string, value: any) => any;
+    in: (column: string, values: any[]) => any;
+  };
 };
 
 // Get all bookings

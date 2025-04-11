@@ -9,6 +9,57 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      asset_bookings: {
+        Row: {
+          asset_id: string
+          created_at: string
+          employee_id: string | null
+          end_date: string
+          id: string
+          purpose: string | null
+          return_info: Json | null
+          start_date: string
+          status: string
+        }
+        Insert: {
+          asset_id: string
+          created_at?: string
+          employee_id?: string | null
+          end_date: string
+          id?: string
+          purpose?: string | null
+          return_info?: Json | null
+          start_date: string
+          status: string
+        }
+        Update: {
+          asset_id?: string
+          created_at?: string
+          employee_id?: string | null
+          end_date?: string
+          id?: string
+          purpose?: string | null
+          return_info?: Json | null
+          start_date?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_bookings_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_bookings_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       asset_history: {
         Row: {
           action: string
@@ -69,6 +120,7 @@ export type Database = {
           image_url: string | null
           imei: string | null
           inventory_number: string | null
+          is_pool_device: boolean | null
           manufacturer: string
           model: string
           name: string
@@ -99,6 +151,7 @@ export type Database = {
           image_url?: string | null
           imei?: string | null
           inventory_number?: string | null
+          is_pool_device?: boolean | null
           manufacturer: string
           model: string
           name: string
@@ -129,6 +182,7 @@ export type Database = {
           image_url?: string | null
           imei?: string | null
           inventory_number?: string | null
+          is_pool_device?: boolean | null
           manufacturer?: string
           model?: string
           name?: string
