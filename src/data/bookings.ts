@@ -1,28 +1,21 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { AssetBooking, BookingReturnCondition, BookingStatus } from "@/lib/types";
 import { getEmployeeById } from "./employees";
 import { getAssetById } from "./assets";
 import { format } from "date-fns";
+import { Json } from "@/integrations/supabase/types";
 
 // Define the raw booking type from the database
 type RawBooking = {
   id: string;
   asset_id: string;
-  employee_id: string;
+  employee_id: string | null;
   start_date: string;
   end_date: string;
   purpose: string | null;
   status: string;
   created_at: string;
-  return_info: {
-    returned?: boolean;
-    returned_at?: string;
-    condition?: string;
-    comments?: string;
-    checked_by_id?: string;
-    checked_at?: string;
-  } | null;
+  return_info: Json | null;
 };
 
 // Get all bookings
@@ -458,20 +451,22 @@ export const getCurrentOrUpcomingBooking = async (assetId: string): Promise<Asse
 const mapDbBookingToBooking = (dbBooking: RawBooking): AssetBooking => {
   let returnInfo = null;
   if (dbBooking.return_info) {
+    // Safely cast the Json type to our expected structure
+    const returnInfoData = dbBooking.return_info as any;
     returnInfo = {
-      returned: dbBooking.return_info.returned || false,
-      returnedAt: dbBooking.return_info.returned_at,
-      condition: dbBooking.return_info.condition as BookingReturnCondition,
-      comments: dbBooking.return_info.comments,
-      checkedById: dbBooking.return_info.checked_by_id,
-      checkedAt: dbBooking.return_info.checked_at
+      returned: returnInfoData.returned || false,
+      returnedAt: returnInfoData.returned_at,
+      condition: returnInfoData.condition as BookingReturnCondition,
+      comments: returnInfoData.comments,
+      checkedById: returnInfoData.checked_by_id,
+      checkedAt: returnInfoData.checked_at
     };
   }
 
   return {
     id: dbBooking.id,
     assetId: dbBooking.asset_id,
-    employeeId: dbBooking.employee_id,
+    employeeId: dbBooking.employee_id || "",
     startDate: dbBooking.start_date,
     endDate: dbBooking.end_date,
     purpose: dbBooking.purpose || undefined,
