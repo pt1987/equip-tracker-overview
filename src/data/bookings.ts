@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { AssetBooking, BookingReturnCondition, BookingStatus } from "@/lib/types";
 import { getEmployeeById } from "./employees";
@@ -27,8 +28,9 @@ type RawBooking = {
 // Helper function to safely access the database tables
 // This is a temporary workaround until the Supabase types are updated
 const safeTable = (tableName: string) => {
-  // Force type cast to any to completely bypass TypeScript checks
-  return supabase.from(tableName) as unknown as {
+  // We need to cast to unknown first, and then to the specific interface
+  // This completely bypasses TypeScript's type checking for table names
+  return supabase.from(tableName as any) as unknown as {
     select: (columns: string) => any;
     insert: (values: any) => any;
     update: (values: any) => any;
