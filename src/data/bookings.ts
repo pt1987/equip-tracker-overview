@@ -5,11 +5,31 @@ import { getEmployeeById } from "./employees";
 import { getAssetById } from "./assets";
 import { format } from "date-fns";
 
+// Define the raw booking type from the database
+type RawBooking = {
+  id: string;
+  asset_id: string;
+  employee_id: string;
+  start_date: string;
+  end_date: string;
+  purpose: string | null;
+  status: string;
+  created_at: string;
+  return_info: {
+    returned?: boolean;
+    returned_at?: string;
+    condition?: string;
+    comments?: string;
+    checked_by_id?: string;
+    checked_at?: string;
+  } | null;
+};
+
 // Helper function to safely access the asset_bookings table
 // This is a temporary fix until the Supabase types are updated
 const bookingsTable = () => {
-  // @ts-ignore - Ignore TypeScript errors as we know this table exists
-  return supabase.from('asset_bookings');
+  // Use any type to bypass TypeScript checks
+  return supabase.from('asset_bookings') as any;
 };
 
 // Get all bookings
@@ -24,7 +44,7 @@ export const getAllBookings = async (): Promise<AssetBooking[]> => {
       throw error;
     }
 
-    return data.map(mapDbBookingToBooking);
+    return (data || []).map(mapDbBookingToBooking);
   } catch (error) {
     console.error("Error in getAllBookings:", error);
     return [];
@@ -44,7 +64,7 @@ export const getBookingsByAssetId = async (assetId: string): Promise<AssetBookin
       throw error;
     }
 
-    return data.map(mapDbBookingToBooking);
+    return (data || []).map(mapDbBookingToBooking);
   } catch (error) {
     console.error(`Error in getBookingsByAssetId for ${assetId}:`, error);
     return [];
@@ -64,7 +84,7 @@ export const getBookingsByEmployeeId = async (employeeId: string): Promise<Asset
       throw error;
     }
 
-    return data.map(mapDbBookingToBooking);
+    return (data || []).map(mapDbBookingToBooking);
   } catch (error) {
     console.error(`Error in getBookingsByEmployeeId for ${employeeId}:`, error);
     return [];
@@ -84,7 +104,7 @@ export const getBookingById = async (bookingId: string): Promise<AssetBooking | 
       throw error;
     }
 
-    return mapDbBookingToBooking(data);
+    return data ? mapDbBookingToBooking(data) : null;
   } catch (error) {
     console.error(`Error in getBookingById for ${bookingId}:`, error);
     return null;
@@ -103,8 +123,10 @@ export const isAssetAvailableForBooking = async (
     let query = bookingsTable()
       .select('id')
       .eq('asset_id', assetId)
-      .not('status', 'eq', 'canceled')
-      .or(`start_date,end_date.overlaps.[${startDate},${endDate}]`);
+      .not('status', 'eq', 'canceled');
+    
+    // Add the date range overlap condition
+    query = query.or(`start_date,end_date.overlaps.[${startDate},${endDate}]`);
 
     // Exclude the current booking if we're updating
     if (excludeBookingId) {
@@ -119,7 +141,7 @@ export const isAssetAvailableForBooking = async (
     }
 
     // If there are no overlapping bookings, the asset is available
-    return data.length === 0;
+    return (data || []).length === 0;
   } catch (error) {
     console.error(`Error in isAssetAvailableForBooking for ${assetId}:`, error);
     return false;
@@ -153,17 +175,19 @@ export const createBooking = async (
       status = 'completed';
     }
 
-    // Create the booking record using the correct table name
+    // Create the booking record using a more direct approach
+    const bookingData = {
+      asset_id: assetId,
+      employee_id: employeeId,
+      start_date: startDate,
+      end_date: endDate,
+      purpose: purpose || null,
+      status: status,
+      created_at: new Date().toISOString()
+    };
+
     const { data, error } = await bookingsTable()
-      .insert({
-        asset_id: assetId,
-        employee_id: employeeId,
-        start_date: startDate,
-        end_date: endDate,
-        purpose: purpose || null,
-        status: status,
-        created_at: new Date().toISOString()
-      })
+      .insert(bookingData)
       .select()
       .single();
 
@@ -183,7 +207,7 @@ export const createBooking = async (
       }
     }
 
-    return mapDbBookingToBooking(data);
+    return data ? mapDbBookingToBooking(data) : null;
   } catch (error) {
     console.error("Error in createBooking:", error);
     return null;
@@ -208,7 +232,7 @@ export const updateBookingStatus = async (
     }
 
     // If changing to completed, we might need to update the asset status
-    if (status === 'completed' || status === 'canceled') {
+    if ((status === 'completed' || status === 'canceled') && data) {
       const booking = mapDbBookingToBooking(data);
       const asset = await getAssetById(booking.assetId);
       
@@ -223,7 +247,7 @@ export const updateBookingStatus = async (
       }
     }
 
-    return mapDbBookingToBooking(data);
+    return data ? mapDbBookingToBooking(data) : null;
   } catch (error) {
     console.error(`Error in updateBookingStatus for ${bookingId}:`, error);
     return null;
@@ -259,6 +283,10 @@ export const recordAssetReturn = async (
     if (error) {
       console.error(`Error recording return for booking ${bookingId}:`, error);
       throw error;
+    }
+
+    if (!data) {
+      throw new Error(`No booking found with ID ${bookingId}`);
     }
 
     // Reset the asset status to pool
@@ -325,7 +353,7 @@ export const updateBookingDates = async (
       throw error;
     }
 
-    return mapDbBookingToBooking(data);
+    return data ? mapDbBookingToBooking(data) : null;
   } catch (error) {
     console.error(`Error in updateBookingDates for ${bookingId}:`, error);
     return null;
@@ -361,7 +389,7 @@ export const getCurrentOrUpcomingBooking = async (assetId: string): Promise<Asse
     const now = new Date().toISOString();
     
     // First check for active booking
-    let query = bookingsTable()
+    const { data: activeBookings, error: activeError } = await bookingsTable()
       .select('*')
       .eq('asset_id', assetId)
       .eq('status', 'active')
@@ -370,9 +398,11 @@ export const getCurrentOrUpcomingBooking = async (assetId: string): Promise<Asse
       .order('start_date', { ascending: true })
       .limit(1);
     
-    const { data: activeBookings, error: activeError } = await query;
+    if (activeError) {
+      throw activeError;
+    }
     
-    if (activeBookings && activeBookings.length > 0 && !activeError) {
+    if (activeBookings && activeBookings.length > 0) {
       return mapDbBookingToBooking(activeBookings[0]);
     }
     
@@ -385,7 +415,11 @@ export const getCurrentOrUpcomingBooking = async (assetId: string): Promise<Asse
       .order('start_date', { ascending: true })
       .limit(1);
     
-    if (upcomingBookings && upcomingBookings.length > 0 && !upcomingError) {
+    if (upcomingError) {
+      throw upcomingError;
+    }
+    
+    if (upcomingBookings && upcomingBookings.length > 0) {
       return mapDbBookingToBooking(upcomingBookings[0]);
     }
     
@@ -397,13 +431,13 @@ export const getCurrentOrUpcomingBooking = async (assetId: string): Promise<Asse
 };
 
 // Helper function to map database booking to our type
-const mapDbBookingToBooking = (dbBooking: any): AssetBooking => {
+const mapDbBookingToBooking = (dbBooking: RawBooking): AssetBooking => {
   let returnInfo = null;
   if (dbBooking.return_info) {
     returnInfo = {
       returned: dbBooking.return_info.returned || false,
       returnedAt: dbBooking.return_info.returned_at,
-      condition: dbBooking.return_info.condition,
+      condition: dbBooking.return_info.condition as BookingReturnCondition,
       comments: dbBooking.return_info.comments,
       checkedById: dbBooking.return_info.checked_by_id,
       checkedAt: dbBooking.return_info.checked_at
