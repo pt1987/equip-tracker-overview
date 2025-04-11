@@ -54,6 +54,8 @@ export default function BookingDialog({
   const [employeeId, setEmployeeId] = useState("");
   const [purpose, setPurpose] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [startDateOpen, setStartDateOpen] = useState(false);
+  const [endDateOpen, setEndDateOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -62,6 +64,17 @@ export default function BookingDialog({
       setEmployeeId(employees[0].id);
     }
   }, [employees, employeeId]);
+
+  // Handle date selection and close popover
+  const handleStartDateSelect = (date: Date | undefined) => {
+    setStartDate(date);
+    setStartDateOpen(false);
+  };
+
+  const handleEndDateSelect = (date: Date | undefined) => {
+    setEndDate(date);
+    setEndDateOpen(false);
+  };
 
   const handleBook = async () => {
     if (!startDate || !endDate || !employeeId) {
@@ -94,11 +107,23 @@ export default function BookingDialog({
 
     setIsLoading(true);
     try {
+      // Format dates to ISO string to avoid serialization issues
+      const startDateISO = startDateTime.toISOString();
+      const endDateISO = endDateTime.toISOString();
+
+      console.log("Booking asset with dates:", {
+        assetId: asset.id,
+        employeeId,
+        startDate: startDateISO,
+        endDate: endDateISO,
+        purpose
+      });
+
       const booking = await createBooking(
         asset.id,
         employeeId,
-        startDateTime.toISOString(),
-        endDateTime.toISOString(),
+        startDateISO,
+        endDateISO,
         purpose
       );
 
@@ -112,6 +137,7 @@ export default function BookingDialog({
         throw new Error("Buchung konnte nicht erstellt werden");
       }
     } catch (error: any) {
+      console.error("Booking error:", error);
       toast({
         variant: "destructive",
         title: "Fehler bei der Buchung",
@@ -159,7 +185,7 @@ export default function BookingDialog({
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label>Startdatum</Label>
-              <Popover>
+              <Popover open={startDateOpen} onOpenChange={setStartDateOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
@@ -173,7 +199,7 @@ export default function BookingDialog({
                   <Calendar
                     mode="single"
                     selected={startDate}
-                    onSelect={setStartDate}
+                    onSelect={handleStartDateSelect}
                     initialFocus
                   />
                 </PopoverContent>
@@ -200,7 +226,7 @@ export default function BookingDialog({
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label>Enddatum</Label>
-              <Popover>
+              <Popover open={endDateOpen} onOpenChange={setEndDateOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
@@ -214,7 +240,7 @@ export default function BookingDialog({
                   <Calendar
                     mode="single"
                     selected={endDate}
-                    onSelect={setEndDate}
+                    onSelect={handleEndDateSelect}
                     initialFocus
                   />
                 </PopoverContent>

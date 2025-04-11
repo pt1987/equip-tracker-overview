@@ -68,7 +68,7 @@ export default function AssetBookingSection({ asset, employees, refetchAsset }: 
     refetchAsset();
   };
   
-  // Bestimme den Verfügbarkeitsstatus
+  // Determine the availability status
   const getAvailabilityStatus = () => {
     if (currentBooking && currentBooking.status === 'active') {
       return "booked";
@@ -79,7 +79,7 @@ export default function AssetBookingSection({ asset, employees, refetchAsset }: 
     }
   };
   
-  // Zähle zukünftige Buchungen
+  // Count upcoming bookings
   const countUpcomingBookings = () => {
     return bookings.filter(b => b.status === 'reserved').length;
   };
@@ -111,7 +111,7 @@ export default function AssetBookingSection({ asset, employees, refetchAsset }: 
               <RefreshCw className="h-4 w-4 mr-1" />
               Aktualisieren
             </Button>
-            {(asset.status === 'pool' || asset.isPoolDevice) && (currentBooking === null || currentBooking?.status !== 'active') && (
+            {(asset.status === 'pool' || asset.isPoolDevice === true) && (currentBooking === null || currentBooking?.status !== 'active') && (
               <Button
                 size="sm"
                 onClick={handleBook}
