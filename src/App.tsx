@@ -23,6 +23,7 @@ import NotFound from "./pages/NotFound";
 import Reporting from "./pages/Reporting";
 import Depreciation from "./pages/Depreciation";
 import HardwareOrder from "./pages/HardwareOrder";
+import AssetBookings from "./pages/AssetBookings";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -85,6 +86,7 @@ const AppContent = () => {
                     <Route path="/reporting" element={<Reporting />} />
                     <Route path="/depreciation" element={<Depreciation />} />
                     <Route path="/hardware-order" element={<HardwareOrder />} />
+                    <Route path="/bookings" element={<AssetBookings />} />
                     
                     {/* Catch-all route */}
                     <Route path="*" element={<NotFound />} />

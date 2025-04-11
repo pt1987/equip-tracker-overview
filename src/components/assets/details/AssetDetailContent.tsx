@@ -1,10 +1,11 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { QueryClient } from "@tanstack/react-query";
+import { useQuery, QueryClient } from "@tanstack/react-query";
 import { Asset, AssetHistoryEntry } from "@/lib/types";
 import { updateAsset } from "@/data/assets";
 import { Card, CardContent } from "@/components/ui/card";
+import { getEmployees } from "@/data/employees";
 
 import AssetDetailView from "@/components/assets/AssetDetailView";
 import AssetDetailEdit from "@/components/assets/AssetDetailEdit";
@@ -12,6 +13,7 @@ import EmployeeSection from "@/components/assets/details/EmployeeSection";
 import DocumentSection from "@/components/assets/details/DocumentSection";
 import HistorySection from "@/components/assets/details/HistorySection";
 import DepreciationSection from "@/components/assets/details/DepreciationSection";
+import AssetBookingSection from "@/components/assets/AssetBookingSection";
 import { useAssetDocuments } from "@/hooks/useAssetDocuments";
 
 interface AssetDetailContentProps {
@@ -39,6 +41,11 @@ export default function AssetDetailContent({
     addDocument, 
     deleteDocument 
   } = useAssetDocuments(asset.id, toast);
+
+  const { data: employees = [] } = useQuery({
+    queryKey: ["employees"],
+    queryFn: getEmployees
+  });
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -74,7 +81,8 @@ export default function AssetDetailContent({
         warrantyExpiryDate: warrantyExpiryDate,
         warrantyInfo: formData.hasWarranty ? formData.warrantyInfo || null : null,
         imageUrl: formData.imageUrl || null,
-        employeeId: formData.employeeId || null
+        employeeId: formData.employeeId || null,
+        isPoolDevice: formData.isPoolDevice || false
       };
       
       await updateAsset(updatedAsset);
@@ -104,6 +112,12 @@ export default function AssetDetailContent({
     }
   };
 
+  const refetchAsset = () => {
+    queryClient.invalidateQueries({
+      queryKey: ["asset", asset.id]
+    });
+  };
+
   return (
     <>
       <Card className="shadow-sm">
@@ -128,6 +142,15 @@ export default function AssetDetailContent({
 
       {!isEditing && (
         <>
+          {/* Show booking section for pool devices */}
+          {asset.isPoolDevice && (
+            <AssetBookingSection 
+              asset={asset}
+              employees={employees}
+              refetchAsset={refetchAsset}
+            />
+          )}
+
           {/* Add DepreciationSection */}
           <DepreciationSection asset={asset} />
 

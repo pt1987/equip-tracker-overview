@@ -46,6 +46,7 @@ export interface Asset {
   imageUrl?: string;
   isFixedAsset?: boolean;
   isGWG?: boolean;
+  isPoolDevice?: boolean;  // New field for pool device
   netPurchasePrice?: number;
   usageDuration?: number;
   commissioningDate?: string;
@@ -242,3 +243,36 @@ export interface AssetBookValue {
   totalMonths: number;
   isFullyDepreciated: boolean;
 }
+
+export interface AssetBooking {
+  id: string;
+  assetId: string;
+  employeeId: string;
+  startDate: string;
+  endDate: string;
+  purpose?: string;
+  status: BookingStatus;
+  createdAt: string;
+  returnInfo?: BookingReturn;
+}
+
+export type BookingStatus = 
+  | 'reserved'  // Future booking
+  | 'active'    // Current booking
+  | 'completed' // Past booking
+  | 'canceled'; // Canceled booking
+
+export interface BookingReturn {
+  returned: boolean;
+  returnedAt?: string;
+  condition: BookingReturnCondition;
+  comments?: string;
+  checkedById?: string;
+  checkedAt?: string;
+}
+
+export type BookingReturnCondition = 
+  | 'good'       // In good condition
+  | 'damaged'    // Damaged
+  | 'incomplete' // Missing accessories
+  | 'lost';      // Lost device
