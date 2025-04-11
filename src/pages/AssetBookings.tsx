@@ -35,7 +35,7 @@ export default function AssetBookings() {
       queryFn: getAllBookings
     });
   
-  const { data: assets, isLoading: isLoadingAssets } = 
+  const { data: assets = [], isLoading: isLoadingAssets } = 
     useQuery({
       queryKey: ["assets"],
       queryFn: getAssets
@@ -47,8 +47,11 @@ export default function AssetBookings() {
       queryFn: getEmployees
     });
   
-  // Filter assets that are pool devices
-  const poolAssets = assets?.filter(asset => asset.isPoolDevice === true) || [];
+  // Filter assets that are pool devices - fixed to include both is_pool_device and status='pool'
+  const poolAssets = assets.filter(asset => 
+    asset.isPoolDevice === true || 
+    asset.status === 'pool'
+  );
   
   // Filter by asset type
   const filteredAssets = selectedAssetType === "all"
