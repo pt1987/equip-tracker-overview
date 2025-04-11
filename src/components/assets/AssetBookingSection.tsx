@@ -111,7 +111,7 @@ export default function AssetBookingSection({ asset, employees, refetchAsset }: 
               <RefreshCw className="h-4 w-4 mr-1" />
               Aktualisieren
             </Button>
-            {(asset.status === 'pool' || asset.isPoolDevice) && !currentBooking?.status === 'active' && (
+            {(asset.status === 'pool' || asset.isPoolDevice) && (currentBooking === null || currentBooking?.status !== 'active') && (
               <Button
                 size="sm"
                 onClick={handleBook}
