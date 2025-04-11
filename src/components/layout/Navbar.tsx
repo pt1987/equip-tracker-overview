@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -16,7 +15,8 @@ import {
   Package,
   Shield,
   LogIn,
-  LogOut
+  LogOut,
+  Calendar
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -45,6 +45,7 @@ export default function Navbar() {
     { to: "/employees", label: "Employees", icon: <Users size={20} /> },
     { to: "/history", label: "History", icon: <Clock size={20} /> },
     { to: "/pool-assets", label: "Pool Assets", icon: <CircleDot size={20} /> },
+    { to: "/bookings", label: "Buchungen", icon: <Calendar size={20} /> },
     { to: "/reporting", label: "Reporting", icon: <FileBarChart size={20} /> },
     { to: "/hardware-order", label: "Hardware-Bestellung", icon: <Package size={20} /> },
   ];

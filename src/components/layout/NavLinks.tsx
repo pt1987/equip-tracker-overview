@@ -70,7 +70,7 @@ export const NavLinks = () => {
       />
       <NavLink href="/employees" icon={<Users size={16} />} label="Mitarbeiter" />
       <NavLink href="/pool-assets" icon={<PackageSearch size={16} />} label="Pool-Assets" />
-      <NavLink href="/bookings" icon={<Calendar size={16} />} label="Buchungen" hasDividerAbove />
+      <NavLink href="/bookings" icon={<Calendar size={16} />} label="Buchungen" />
       <NavLink
         href="/history"
         icon={<History size={16} />}
