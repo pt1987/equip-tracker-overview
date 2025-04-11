@@ -92,7 +92,9 @@ export const translateStatus = (status: AssetStatus): string => {
     'in_use': 'In Benutzung',
     'defective': 'Defekt',
     'repair': 'In Reparatur',
-    'pool': 'Im Pool'
+    'pool': 'Im Pool',
+    'disposed': 'Entsorgt',
+    'sold': 'Verkauft'
   };
   
   return statusMap[status] || status;
@@ -104,6 +106,7 @@ export const getActionTypeForStatusChange = (oldStatus: AssetStatus, newStatus: 
   if (newStatus === 'pool' && oldStatus !== 'ordered' && oldStatus !== 'delivered') return 'return';
   if (newStatus === 'defective') return 'status_change';
   if (oldStatus === 'ordered' && newStatus === 'delivered') return 'delivery';
+  if (newStatus === 'disposed') return 'dispose';
   
   return 'status_change';
 };

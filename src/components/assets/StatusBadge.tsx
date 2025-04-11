@@ -46,6 +46,18 @@ export default function StatusBadge({ status, size = "md" }: StatusBadgeProps) {
           text: "text-gray-800",
           label: "Pool"
         };
+      case "disposed":
+        return {
+          bg: "bg-slate-100",
+          text: "text-slate-800",
+          label: "Entsorgt"
+        };
+      case "sold":
+        return {
+          bg: "bg-emerald-100",
+          text: "text-emerald-800",
+          label: "Verkauft"
+        };
       default:
         return {
           bg: "bg-gray-100",
@@ -76,6 +88,8 @@ export default function StatusBadge({ status, size = "md" }: StatusBadgeProps) {
         status === "defective" && "bg-red-500",
         status === "repair" && "bg-amber-500",
         status === "pool" && "bg-gray-500",
+        status === "disposed" && "bg-slate-500",
+        status === "sold" && "bg-emerald-500",
       )} />
       {label}
     </div>
