@@ -23,6 +23,18 @@ export const assetFormSchema = z.object({
   contractDuration: z.string().optional(),
   contractName: z.string().optional(),
   relatedAssetId: z.string().optional(),
+  
+  // New fields for the depreciation module
+  isFixedAsset: z.boolean().optional(),
+  isGWG: z.boolean().optional(),
+  netPurchasePrice: z.coerce.number().optional(),
+  usageDuration: z.coerce.number().optional(),
+  commissioningDate: z.string().optional(),
+  invoiceNumber: z.string().optional(),
+  disposalDate: z.string().optional(),
+  notes: z.string().optional(),
+  department: z.string().optional(),
+  location: z.string().optional(),
 });
 
 export type AssetFormValues = z.infer<typeof assetFormSchema>;

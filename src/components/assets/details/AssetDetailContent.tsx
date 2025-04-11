@@ -11,6 +11,7 @@ import AssetDetailEdit from "@/components/assets/AssetDetailEdit";
 import EmployeeSection from "@/components/assets/details/EmployeeSection";
 import DocumentSection from "@/components/assets/details/DocumentSection";
 import HistorySection from "@/components/assets/details/HistorySection";
+import DepreciationSection from "@/components/assets/details/DepreciationSection";
 import { useAssetDocuments } from "@/hooks/useAssetDocuments";
 
 interface AssetDetailContentProps {
@@ -127,6 +128,9 @@ export default function AssetDetailContent({
 
       {!isEditing && (
         <>
+          {/* Add DepreciationSection */}
+          <DepreciationSection asset={asset} />
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <EmployeeSection employeeId={asset.employeeId} />
             <DocumentSection 

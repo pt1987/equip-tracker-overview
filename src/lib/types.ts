@@ -1,11 +1,12 @@
-
 export type AssetStatus = 
   | 'ordered' 
   | 'delivered' 
   | 'in_use' 
   | 'defective' 
   | 'repair' 
-  | 'pool';
+  | 'pool'
+  | 'disposed' 
+  | 'sold';
 
 export type AssetType = 
   | 'laptop' 
@@ -43,6 +44,16 @@ export interface Asset {
   connectedAssetId?: string;
   relatedAssetId?: string;
   imageUrl?: string;
+  isFixedAsset?: boolean;
+  isGWG?: boolean;
+  netPurchasePrice?: number;
+  usageDuration?: number;
+  commissioningDate?: string;
+  invoiceNumber?: string;
+  disposalDate?: string;
+  notes?: string;
+  department?: string;
+  location?: string;
 }
 
 export interface Employee {
@@ -52,7 +63,7 @@ export interface Employee {
   email: string;
   position: string;
   cluster: string;
-  imageUrl?: string; // Make imageUrl optional
+  imageUrl?: string;
   startDate: string;
   entryDate?: string;
   budget: number;
@@ -67,7 +78,8 @@ export type AssetHistoryAction =
   | 'status_change' 
   | 'repair'
   | 'return'
-  | 'dispose';
+  | 'dispose'
+  | 'depreciation_change';
 
 export interface AssetHistoryEntry {
   id: string;
@@ -97,7 +109,6 @@ export interface AssetStatusDistribution {
   count: number;
 }
 
-// New types for reporting
 export interface OrderTimeline {
   employeeId: string;
   employeeName: string;
@@ -177,4 +188,36 @@ export interface EmployeeForm {
   notes?: string;
   documentUrl?: string;
   emailSent: boolean;
+}
+
+export interface DepreciationSettings {
+  assetTypes: {
+    [key in AssetType]?: {
+      defaultDuration: number;
+      minDuration: number;
+      maxDuration: number;
+    }
+  };
+  gwgThreshold: number;
+}
+
+export interface DepreciationEntry {
+  id: string;
+  assetId: string;
+  year: number;
+  month: number;
+  amount: number;
+  currentBookValue: number;
+  createdAt: string;
+}
+
+export interface AssetBookValue {
+  currentBookValue: number;
+  originalValue: number;
+  depreciationPercentage: number;
+  monthlyDepreciation: number;
+  annualDepreciation: number;
+  remainingMonths: number;
+  totalMonths: number;
+  isFullyDepreciated: boolean;
 }

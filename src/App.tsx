@@ -21,6 +21,7 @@ import CreateEditAsset from "./pages/CreateEditAsset";
 import CreateEditEmployee from "./pages/CreateEditEmployee";
 import NotFound from "./pages/NotFound";
 import Reporting from "./pages/Reporting";
+import Depreciation from "./pages/Depreciation";
 import HardwareOrder from "./pages/HardwareOrder";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
@@ -82,6 +83,7 @@ const AppContent = () => {
                     <Route path="/employee/create" element={<CreateEditEmployee />} />
                     <Route path="/employee/edit/:id" element={<CreateEditEmployee />} />
                     <Route path="/reporting" element={<Reporting />} />
+                    <Route path="/depreciation" element={<Depreciation />} />
                     <Route path="/hardware-order" element={<HardwareOrder />} />
                     
                     {/* Catch-all route */}
