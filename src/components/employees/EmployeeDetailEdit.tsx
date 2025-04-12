@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Employee } from "@/lib/types";
 import { Form } from "@/components/ui/form";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { employeeFormSchema, EmployeeFormValues, competenceLevels } from "./EmployeeFormTypes";
 import EmployeeFormFields from "./EmployeeForm";
 import EmployeeImageUpload from "./EmployeeImageUpload";
@@ -21,14 +21,11 @@ export default function EmployeeDetailEdit({
 }: EmployeeDetailEditProps) {
   const [imagePreview, setImagePreview] = useState(employee.imageUrl || "");
   
-  // Debug: Log the employee object to verify email exists
-  console.log("Employee data in EmployeeDetailEdit:", employee);
-  
   // Ensure competenceLevel is one of the valid values from our enum
   const validCompetenceLevel = employee.competenceLevel && 
     competenceLevels.includes(employee.competenceLevel as any) 
       ? employee.competenceLevel as (typeof competenceLevels)[number]
-      : "Junior" as const; // Default to Junior if not valid
+      : "Junior" as const;
   
   const form = useForm<EmployeeFormValues>({
     resolver: zodResolver(employeeFormSchema),
@@ -37,7 +34,7 @@ export default function EmployeeDetailEdit({
       lastName: employee.lastName,
       email: employee.email || "",
       position: employee.position,
-      cluster: employee.cluster as any, // Cast to any to handle potential type mismatch
+      cluster: employee.cluster as any,
       competenceLevel: validCompetenceLevel, 
       entryDate: new Date(employee.startDate).toISOString().split('T')[0],
       budget: employee.budget,
@@ -45,31 +42,17 @@ export default function EmployeeDetailEdit({
     },
   });
   
-  useEffect(() => {
-    console.log("Setting email in form to:", employee.email);
-    form.setValue("firstName", employee.firstName);
-    form.setValue("lastName", employee.lastName);
-    form.setValue("email", employee.email || "");
-    form.setValue("position", employee.position);
-    form.setValue("cluster", employee.cluster as any);
-    form.setValue("competenceLevel", validCompetenceLevel);
-    form.setValue("entryDate", new Date(employee.startDate).toISOString().split('T')[0]);
-    form.setValue("budget", employee.budget);
-    form.setValue("profileImage", employee.imageUrl || "");
-  }, [employee, form, validCompetenceLevel]);
-  
   const handleImageChange = (imageUrl: string) => {
     setImagePreview(imageUrl);
     form.setValue("profileImage", imageUrl);
   };
   
-  const handleSubmit = (data: EmployeeFormValues) => {
-    console.log("Submitting form with data:", data);
+  const handleSubmit = async (data: EmployeeFormValues) => {
     onSave({
       ...data, 
       startDate: new Date(data.entryDate),
       imageUrl: data.profileImage,
-      email: data.email // Explicitly include email in the save data
+      email: data.email
     });
   };
   

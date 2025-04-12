@@ -26,7 +26,6 @@ export function useEmployeeForm(id: string | undefined) {
         try {
           const employeeData = await getEmployeeById(id);
           if (employeeData) {
-            console.log("Loaded employee data:", employeeData);
             setEmployee(employeeData);
             setImagePreview(employeeData.imageUrl || null);
           }
@@ -52,11 +51,8 @@ export function useEmployeeForm(id: string | undefined) {
 
   const handleSubmit = async (data: EmployeeFormValues) => {
     setIsSubmitting(true);
-    console.log("Submit handler called with data:", data);
     
     try {
-      console.log("Form submitted with data:", data);
-      
       let imageUrl = data.profileImage;
       
       if (isEditing && id) {
@@ -66,15 +62,13 @@ export function useEmployeeForm(id: string | undefined) {
         }
         
         // Update existing employee
-        // Note: competenceLevel is kept in frontend state but not saved to the DB
-        // since there's no corresponding column
         const success = await updateEmployee(id, {
           first_name: data.firstName,
           last_name: data.lastName,
           email: data.email,
           position: data.position,
           cluster: data.cluster,
-          competence_level: data.competenceLevel, // This will be filtered out in the update function
+          competence_level: data.competenceLevel,
           start_date: data.entryDate,
           budget: data.budget,
           image_url: imageUrl || null,
@@ -92,7 +86,7 @@ export function useEmployeeForm(id: string | undefined) {
           email: data.email,
           position: data.position,
           cluster: data.cluster,
-          competence_level: data.competenceLevel, // This will be filtered out in the create function
+          competence_level: data.competenceLevel,
           start_date: data.entryDate,
           budget: data.budget,
           image_url: null,

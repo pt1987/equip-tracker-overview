@@ -20,9 +20,6 @@ export const updateEmployee = async (id: string, employeeData: {
   profile_image?: string | null;
 }): Promise<boolean> => {
   try {
-    console.log(`Updating employee ${id} with data:`, employeeData);
-    
-    // Update the employee record
     const { error } = await supabase
       .from('employees')
       .update({
@@ -45,7 +42,6 @@ export const updateEmployee = async (id: string, employeeData: {
       throw error;
     }
     
-    console.log("Employee update completed successfully");
     return true;
   } catch (error) {
     console.error("Error in updateEmployee function:", error);

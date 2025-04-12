@@ -1,7 +1,7 @@
 
 import { z } from "zod";
 
-// Definierte Werte für Cluster und Kompetenzlevel
+// Defined values for Cluster and competence level
 export const availableClusters = [
   "Adoption",
   "Backoffice",
@@ -22,7 +22,7 @@ export const competenceLevels = [
   "Senior",
 ] as const;
 
-// Schema für das Formular
+// Schema for the employee form
 export const employeeFormSchema = z.object({
   firstName: z.string().min(1, "Bitte geben Sie einen Vornamen ein"),
   lastName: z.string().min(1, "Bitte geben Sie einen Nachnamen ein"),
