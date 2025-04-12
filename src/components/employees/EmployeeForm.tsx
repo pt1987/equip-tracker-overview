@@ -22,7 +22,7 @@ export default function EmployeeFormFields() {
   const form = useFormContext<EmployeeFormValues>();
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
       <FormField
         control={form.control}
         name="firstName"
@@ -99,7 +99,7 @@ export default function EmployeeFormFields() {
                   <SelectValue placeholder="Cluster auswählen" />
                 </SelectTrigger>
               </FormControl>
-              <SelectContent className="w-full bg-popover shadow-md">
+              <SelectContent className="w-full bg-popover z-50 shadow-md">
                 {availableClusters.map((cluster) => (
                   <SelectItem key={cluster} value={cluster}>
                     {cluster}
@@ -128,7 +128,7 @@ export default function EmployeeFormFields() {
                   <SelectValue placeholder="Kompetenzlevel auswählen" />
                 </SelectTrigger>
               </FormControl>
-              <SelectContent className="w-full bg-popover shadow-md">
+              <SelectContent className="w-full bg-popover z-50 shadow-md">
                 {competenceLevels.map((level) => (
                   <SelectItem key={level} value={level}>
                     {level}

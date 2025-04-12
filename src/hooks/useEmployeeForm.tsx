@@ -65,15 +65,16 @@ export function useEmployeeForm(id: string | undefined) {
           imageUrl = await uploadEmployeeImage(selectedImage, id);
         }
         
-        // Important: convert the competenceLevel to string for DB storage
         // Update existing employee
+        // Note: competenceLevel is kept in frontend state but not saved to the DB
+        // since there's no corresponding column
         const success = await updateEmployee(id, {
           first_name: data.firstName,
           last_name: data.lastName,
           email: data.email,
           position: data.position,
           cluster: data.cluster,
-          competence_level: data.competenceLevel,
+          competence_level: data.competenceLevel, // This will be filtered out in the update function
           start_date: data.entryDate,
           budget: data.budget,
           image_url: imageUrl || null,
@@ -91,7 +92,7 @@ export function useEmployeeForm(id: string | undefined) {
           email: data.email,
           position: data.position,
           cluster: data.cluster,
-          competence_level: data.competenceLevel,
+          competence_level: data.competenceLevel, // This will be filtered out in the create function
           start_date: data.entryDate,
           budget: data.budget,
           image_url: null,

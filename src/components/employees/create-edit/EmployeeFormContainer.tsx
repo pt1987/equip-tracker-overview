@@ -42,7 +42,7 @@ export function EmployeeFormContainer({
       // Ensure competenceLevel is one of the valid values from our enum
       const validCompetenceLevel = employee.competenceLevel && 
         competenceLevels.includes(employee.competenceLevel as any) 
-          ? employee.competenceLevel as any
+          ? employee.competenceLevel as (typeof competenceLevels)[number]
           : "Junior" as const; // Default to Junior if not valid
           
       form.reset({

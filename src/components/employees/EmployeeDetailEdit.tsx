@@ -27,7 +27,7 @@ export default function EmployeeDetailEdit({
   // Ensure competenceLevel is one of the valid values from our enum
   const validCompetenceLevel = employee.competenceLevel && 
     competenceLevels.includes(employee.competenceLevel as any) 
-      ? employee.competenceLevel as any
+      ? employee.competenceLevel as (typeof competenceLevels)[number]
       : "Junior" as const; // Default to Junior if not valid
   
   const form = useForm<EmployeeFormValues>({
@@ -77,13 +77,15 @@ export default function EmployeeDetailEdit({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <div className="flex flex-col md:flex-row gap-6">
-          <EmployeeImageUpload
-            initialImageUrl={employee.imageUrl}
-            employeeId={employee.id}
-            onImageChange={handleImageChange}
-            onSave={form.handleSubmit(handleSubmit)}
-            onCancel={onCancel}
-          />
+          <div className="w-full md:w-1/3">
+            <EmployeeImageUpload
+              initialImageUrl={employee.imageUrl}
+              employeeId={employee.id}
+              onImageChange={handleImageChange}
+              onSave={form.handleSubmit(handleSubmit)}
+              onCancel={onCancel}
+            />
+          </div>
           
           <div className="flex-1">
             <EmployeeFormFields />
