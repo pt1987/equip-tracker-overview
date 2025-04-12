@@ -32,7 +32,7 @@ export const updateEmployee = async (id: string, employeeData: {
         cluster: employeeData.cluster,
         competence_level: employeeData.competence_level,
         start_date: employeeData.start_date,
-        entry_date: employeeData.start_date,
+        entry_date: employeeData.start_date, // Sync entry_date with start_date
         budget: employeeData.budget,
         image_url: employeeData.image_url,
         profile_image: employeeData.profile_image,
