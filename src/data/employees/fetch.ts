@@ -17,6 +17,7 @@ export const getEmployeeById = async (id: string): Promise<Employee | null> => {
         last_name,
         position,
         cluster,
+        competence_level,
         start_date,
         entry_date,
         budget,
@@ -42,6 +43,7 @@ export const getEmployeeById = async (id: string): Promise<Employee | null> => {
       email: data.email || '',
       position: data.position,
       cluster: data.cluster,
+      competenceLevel: data.competence_level || 'Junior',
       startDate: data.start_date || '',
       entryDate: data.entry_date,
       budget: data.budget || 0,
@@ -69,6 +71,7 @@ export const getEmployees = async (): Promise<Employee[]> => {
         last_name,
         position,
         cluster,
+        competence_level,
         start_date,
         entry_date,
         budget,
@@ -92,6 +95,7 @@ export const getEmployees = async (): Promise<Employee[]> => {
       email: emp.email || '',
       position: emp.position,
       cluster: emp.cluster,
+      competenceLevel: emp.competence_level || 'Junior',
       startDate: emp.start_date || '',
       entryDate: emp.entry_date,
       budget: emp.budget || 0,
@@ -104,4 +108,3 @@ export const getEmployees = async (): Promise<Employee[]> => {
     return [];
   }
 };
-

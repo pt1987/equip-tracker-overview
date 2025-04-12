@@ -227,6 +227,7 @@ export type Database = {
         Row: {
           budget: number
           cluster: string
+          competence_level: string | null
           created_at: string | null
           email: string | null
           entry_date: string | null
@@ -244,6 +245,7 @@ export type Database = {
         Insert: {
           budget?: number
           cluster: string
+          competence_level?: string | null
           created_at?: string | null
           email?: string | null
           entry_date?: string | null
@@ -261,6 +263,7 @@ export type Database = {
         Update: {
           budget?: number
           cluster?: string
+          competence_level?: string | null
           created_at?: string | null
           email?: string | null
           entry_date?: string | null

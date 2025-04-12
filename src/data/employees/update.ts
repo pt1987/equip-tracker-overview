@@ -22,24 +22,21 @@ export const updateEmployee = async (id: string, employeeData: {
   try {
     console.log(`Updating employee ${id} with data:`, employeeData);
     
-    // Store competence_level in the frontend state but don't send it to the database
-    // since the column doesn't exist in the database
-    const { competence_level, ...dbData } = employeeData;
-    
     // Update the employee record
     const { error } = await supabase
       .from('employees')
       .update({
-        first_name: dbData.first_name,
-        last_name: dbData.last_name,
-        position: dbData.position,
-        cluster: dbData.cluster,
-        start_date: dbData.start_date,
-        entry_date: dbData.start_date,
-        budget: dbData.budget,
-        image_url: dbData.image_url,
-        profile_image: dbData.profile_image,
-        email: dbData.email,
+        first_name: employeeData.first_name,
+        last_name: employeeData.last_name,
+        position: employeeData.position,
+        cluster: employeeData.cluster,
+        competence_level: employeeData.competence_level,
+        start_date: employeeData.start_date,
+        entry_date: employeeData.start_date,
+        budget: employeeData.budget,
+        image_url: employeeData.image_url,
+        profile_image: employeeData.profile_image,
+        email: employeeData.email,
       })
       .eq('id', id);
       
