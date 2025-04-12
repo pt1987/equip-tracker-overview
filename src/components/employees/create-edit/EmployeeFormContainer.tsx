@@ -43,7 +43,7 @@ export function EmployeeFormContainer({
       const validCompetenceLevel = employee.competenceLevel && 
         competenceLevels.includes(employee.competenceLevel as any) 
           ? employee.competenceLevel as any
-          : "Junior"; // Default to Junior if not valid
+          : "Junior" as const; // Default to Junior if not valid
           
       form.reset({
         firstName: employee.firstName || "",

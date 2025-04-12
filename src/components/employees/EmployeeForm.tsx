@@ -87,7 +87,7 @@ export default function EmployeeFormFields() {
         control={form.control}
         name="cluster"
         render={({ field }) => (
-          <FormItem>
+          <FormItem className="w-full">
             <FormLabel>Cluster</FormLabel>
             <Select 
               onValueChange={field.onChange} 
@@ -95,11 +95,11 @@ export default function EmployeeFormFields() {
               value={field.value}
             >
               <FormControl>
-                <SelectTrigger>
+                <SelectTrigger className="w-full bg-background">
                   <SelectValue placeholder="Cluster auswählen" />
                 </SelectTrigger>
               </FormControl>
-              <SelectContent>
+              <SelectContent className="w-full bg-popover shadow-md">
                 {availableClusters.map((cluster) => (
                   <SelectItem key={cluster} value={cluster}>
                     {cluster}
@@ -116,7 +116,7 @@ export default function EmployeeFormFields() {
         control={form.control}
         name="competenceLevel"
         render={({ field }) => (
-          <FormItem>
+          <FormItem className="w-full">
             <FormLabel>Kompetenzlevel</FormLabel>
             <Select 
               onValueChange={field.onChange} 
@@ -124,11 +124,11 @@ export default function EmployeeFormFields() {
               value={field.value}
             >
               <FormControl>
-                <SelectTrigger>
+                <SelectTrigger className="w-full bg-background">
                   <SelectValue placeholder="Kompetenzlevel auswählen" />
                 </SelectTrigger>
               </FormControl>
-              <SelectContent>
+              <SelectContent className="w-full bg-popover shadow-md">
                 {competenceLevels.map((level) => (
                   <SelectItem key={level} value={level}>
                     {level}

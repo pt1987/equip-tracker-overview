@@ -52,6 +52,8 @@ export function useEmployeeForm(id: string | undefined) {
 
   const handleSubmit = async (data: EmployeeFormValues) => {
     setIsSubmitting(true);
+    console.log("Submit handler called with data:", data);
+    
     try {
       console.log("Form submitted with data:", data);
       
@@ -63,6 +65,7 @@ export function useEmployeeForm(id: string | undefined) {
           imageUrl = await uploadEmployeeImage(selectedImage, id);
         }
         
+        // Important: convert the competenceLevel to string for DB storage
         // Update existing employee
         const success = await updateEmployee(id, {
           first_name: data.firstName,
@@ -121,9 +124,9 @@ export function useEmployeeForm(id: string | undefined) {
     } catch (error) {
       console.error("Error saving employee:", error);
       toast({
+        variant: "destructive",
         title: "Fehler",
         description: `Ein Fehler ist aufgetreten: ${(error as Error).message}`,
-        variant: "destructive"
       });
     } finally {
       setIsSubmitting(false);

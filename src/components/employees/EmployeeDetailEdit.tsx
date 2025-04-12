@@ -28,7 +28,7 @@ export default function EmployeeDetailEdit({
   const validCompetenceLevel = employee.competenceLevel && 
     competenceLevels.includes(employee.competenceLevel as any) 
       ? employee.competenceLevel as any
-      : "Junior"; // Default to Junior if not valid
+      : "Junior" as const; // Default to Junior if not valid
   
   const form = useForm<EmployeeFormValues>({
     resolver: zodResolver(employeeFormSchema),

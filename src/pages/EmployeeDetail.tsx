@@ -13,6 +13,7 @@ import AssetSection from "@/components/employees/details/AssetSection";
 import BudgetSection from "@/components/employees/details/BudgetSection";
 import QuickStatsSection from "@/components/employees/details/QuickStatsSection";
 import { EmployeeDetailLoading, EmployeeNotFound } from "@/components/employees/details/EmployeeLoadingState";
+import { competenceLevels } from "@/components/employees/EmployeeFormTypes";
 
 const EmployeeDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -55,11 +56,17 @@ const EmployeeDetail = () => {
   };
   
   const handleSave = async (data: any) => {
-    console.log("Updated employee data:", data);
+    console.log("Saving employee with data:", data);
     
     if (employee && id) {
       try {
         console.log("Saving employee with email:", data.email);
+        
+        // Validate competence level
+        const validCompetenceLevel = data.competenceLevel && 
+          competenceLevels.includes(data.competenceLevel as any) 
+            ? data.competenceLevel 
+            : "Junior";
         
         // Save to database - ensure email is included
         const success = await updateEmployee(id, {
@@ -68,7 +75,7 @@ const EmployeeDetail = () => {
           email: data.email, // Explicitly include email
           position: data.position,
           cluster: data.cluster,
-          competence_level: data.competenceLevel,
+          competence_level: validCompetenceLevel,
           start_date: data.entryDate || data.startDate,
           budget: data.budget,
           image_url: data.imageUrl || data.profileImage,
@@ -87,7 +94,7 @@ const EmployeeDetail = () => {
           email: data.email, // Ensure email is in the updated state
           position: data.position,
           cluster: data.cluster, 
-          competenceLevel: data.competenceLevel,
+          competenceLevel: validCompetenceLevel,
           startDate: typeof data.startDate === 'object' ? data.startDate.toISOString() : data.startDate,
           imageUrl: data.imageUrl || data.profileImage,
           budget: data.budget,
