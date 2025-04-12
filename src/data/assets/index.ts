@@ -1,5 +1,5 @@
 
-// Export all functions from the asset modules with proper naming to avoid conflicts
+// Export all asset-related functions with namespaces to avoid conflicts
 
 // Export from fetch.ts
 export {
