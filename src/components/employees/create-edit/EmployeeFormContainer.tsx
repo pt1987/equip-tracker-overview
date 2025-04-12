@@ -2,7 +2,7 @@
 import { Form } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { employeeFormSchema, EmployeeFormValues } from "@/components/employees/EmployeeFormTypes";
+import { employeeFormSchema, EmployeeFormValues, competenceLevels } from "@/components/employees/EmployeeFormTypes";
 import { useEffect } from "react";
 import { Employee } from "@/lib/types";
 
@@ -27,7 +27,7 @@ export function EmployeeFormContainer({
       email: "",
       position: "",
       cluster: "Development",
-      competenceLevel: "Junior",
+      competenceLevel: "Junior" as const,
       entryDate: new Date().toISOString().split('T')[0],
       budget: 5000,
       profileImage: "",
@@ -38,13 +38,20 @@ export function EmployeeFormContainer({
   useEffect(() => {
     if (employee) {
       console.log("Setting form values from employee:", employee);
+
+      // Ensure competenceLevel is one of the valid values from our enum
+      const validCompetenceLevel = employee.competenceLevel && 
+        competenceLevels.includes(employee.competenceLevel as any) 
+          ? employee.competenceLevel as any
+          : "Junior"; // Default to Junior if not valid
+          
       form.reset({
         firstName: employee.firstName || "",
         lastName: employee.lastName || "",
         email: employee.email || "",
         position: employee.position || "",
         cluster: employee.cluster as any || "Development",
-        competenceLevel: employee.competenceLevel || "Junior",
+        competenceLevel: validCompetenceLevel,
         entryDate: employee.startDate ? new Date(employee.startDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
         budget: employee.budget || 5000,
         profileImage: employee.imageUrl || "",

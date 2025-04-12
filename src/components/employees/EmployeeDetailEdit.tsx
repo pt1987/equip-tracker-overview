@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Employee } from "@/lib/types";
 import { Form } from "@/components/ui/form";
 import { useState, useEffect } from "react";
-import { employeeFormSchema, EmployeeFormValues } from "./EmployeeFormTypes";
+import { employeeFormSchema, EmployeeFormValues, competenceLevels } from "./EmployeeFormTypes";
 import EmployeeFormFields from "./EmployeeForm";
 import EmployeeImageUpload from "./EmployeeImageUpload";
 
@@ -24,6 +24,12 @@ export default function EmployeeDetailEdit({
   // Debug: Log the employee object to verify email exists
   console.log("Employee data in EmployeeDetailEdit:", employee);
   
+  // Ensure competenceLevel is one of the valid values from our enum
+  const validCompetenceLevel = employee.competenceLevel && 
+    competenceLevels.includes(employee.competenceLevel as any) 
+      ? employee.competenceLevel as any
+      : "Junior"; // Default to Junior if not valid
+  
   const form = useForm<EmployeeFormValues>({
     resolver: zodResolver(employeeFormSchema),
     defaultValues: {
@@ -32,7 +38,7 @@ export default function EmployeeDetailEdit({
       email: employee.email || "",
       position: employee.position,
       cluster: employee.cluster as any, // Cast to any to handle potential type mismatch
-      competenceLevel: employee.competenceLevel || "Junior", // Fallback to Junior if not set
+      competenceLevel: validCompetenceLevel, 
       entryDate: new Date(employee.startDate).toISOString().split('T')[0],
       budget: employee.budget,
       profileImage: employee.imageUrl || "",
@@ -46,11 +52,11 @@ export default function EmployeeDetailEdit({
     form.setValue("email", employee.email || "");
     form.setValue("position", employee.position);
     form.setValue("cluster", employee.cluster as any);
-    form.setValue("competenceLevel", employee.competenceLevel || "Junior");
+    form.setValue("competenceLevel", validCompetenceLevel);
     form.setValue("entryDate", new Date(employee.startDate).toISOString().split('T')[0]);
     form.setValue("budget", employee.budget);
     form.setValue("profileImage", employee.imageUrl || "");
-  }, [employee, form]);
+  }, [employee, form, validCompetenceLevel]);
   
   const handleImageChange = (imageUrl: string) => {
     setImagePreview(imageUrl);
