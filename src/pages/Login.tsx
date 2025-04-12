@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import PageTransition from "@/components/layout/PageTransition";
 import { useAuth } from "@/hooks/use-auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { supabase } from "@/integrations/supabase/client";
 
 // Login-Formular-Schema
 const loginSchema = z.object({
@@ -26,6 +28,8 @@ const signupSchema = z.object({
   email: z.string().email({ message: "Ungültige E-Mail-Adresse." }),
   password: z.string().min(8, { message: "Passwort muss mindestens 8 Zeichen lang sein." }),
   passwordConfirm: z.string().min(8, { message: "Passwort muss mindestens 8 Zeichen lang sein." }),
+  position: z.string().min(2, { message: "Position muss mindestens 2 Zeichen lang sein." }),
+  cluster: z.string().min(2, { message: "Abteilung muss mindestens 2 Zeichen lang sein." }),
 }).refine((data) => data.password === data.passwordConfirm, {
   message: "Passwörter stimmen nicht überein",
   path: ["passwordConfirm"],
@@ -52,7 +56,7 @@ export default function Login() {
     console.log("Login page - Checking auth state for redirect:", { isAuthenticated, authLoading });
     if (!authLoading && isAuthenticated) {
       console.log("Login page - User is authenticated, redirecting to dashboard");
-      navigate("/admin/dashboard");
+      navigate("/");
     }
   }, [isAuthenticated, authLoading, navigate]);
 
@@ -71,6 +75,8 @@ export default function Login() {
       email: "",
       password: "",
       passwordConfirm: "",
+      position: "",
+      cluster: "",
     },
   });
 
@@ -85,7 +91,7 @@ export default function Login() {
       if (success) {
         toast({
           title: "Erfolgreich angemeldet",
-          description: "Willkommen im Admin-Bereich.",
+          description: "Willkommen im Asset-Tracker.",
         });
         
         // The redirect will happen in the useEffect when isAuthenticated updates
@@ -108,25 +114,98 @@ export default function Login() {
     }
   };
 
+  // Helper function to create an employee record
+  const createEmployeeRecord = async (userId: string, userData: SignupFormValues) => {
+    try {
+      const nameParts = userData.name.split(" ");
+      const firstName = nameParts[0] || "";
+      const lastName = nameParts.slice(1).join(" ") || "";
+      
+      // Create employee record
+      const { error } = await supabase.from('employees').insert({
+        id: userId,
+        first_name: firstName,
+        last_name: lastName,
+        email: userData.email,
+        position: userData.position,
+        cluster: userData.cluster,
+        start_date: new Date().toISOString().split('T')[0],
+        budget: 5000,
+        used_budget: 0
+      });
+      
+      if (error) {
+        console.error("Error creating employee record:", error);
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error("Error in createEmployeeRecord:", error);
+      return false;
+    }
+  };
+
   const onSignupSubmit = async (data: SignupFormValues) => {
     setIsLoading(true);
     
     try {
-      const success = await signup(data.email, data.password, data.name);
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          data: {
+            name: data.name,
+            position: data.position,
+            cluster: data.cluster
+          },
+        },
+      });
       
-      if (success) {
+      if (authError) {
+        console.error("Signup error:", authError);
         toast({
-          title: "Registrierung erfolgreich",
-          description: "Sie können sich jetzt anmelden.",
+          variant: "destructive",
+          title: "Registrierung fehlgeschlagen",
+          description: authError.message,
         });
-        
-        setActiveTab("login");
-        signupForm.reset();
+        setIsLoading(false);
+        return false;
       }
-    } catch (error) {
-      console.error("Signup error:", error);
-    } finally {
+      
+      // If we have a user, manually create the employee record
+      if (authData.user) {
+        const employeeCreated = await createEmployeeRecord(authData.user.id, data);
+        
+        if (!employeeCreated) {
+          toast({
+            variant: "destructive",
+            title: "Registrierung unvollständig",
+            description: "Benutzerkonto wurde erstellt, aber das Mitarbeiterprofil konnte nicht angelegt werden.",
+          });
+          setIsLoading(false);
+          return false;
+        }
+      }
+      
+      toast({
+        title: "Registrierung erfolgreich",
+        description: "Sie können sich jetzt anmelden.",
+      });
+      
+      setActiveTab("login");
+      signupForm.reset();
       setIsLoading(false);
+      return true;
+    } catch (error: any) {
+      console.error("Signup error:", error);
+      toast({
+        variant: "destructive",
+        title: "Fehler bei der Registrierung",
+        description: error.message || "Bitte versuchen Sie es später erneut.",
+      });
+      setIsLoading(false);
+      return false;
     }
   };
 
@@ -279,6 +358,48 @@ export default function Login() {
                               <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                               <Input 
                                 placeholder="name@example.com" 
+                                className="pl-10" 
+                                {...field} 
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={signupForm.control}
+                      name="position"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Position</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                              <Input 
+                                placeholder="Entwickler" 
+                                className="pl-10" 
+                                {...field} 
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={signupForm.control}
+                      name="cluster"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Abteilung</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                              <Input 
+                                placeholder="IT" 
                                 className="pl-10" 
                                 {...field} 
                               />

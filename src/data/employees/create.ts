@@ -18,8 +18,52 @@ export const createEmployee = async (employeeData: {
   profile_image?: string | null;
 }): Promise<string> => {
   try {
-    // Generate a UUID for the employee
-    const employeeId = crypto.randomUUID();
+    // Check if a profile with this email already exists
+    const { data: existingProfiles, error: profileError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', employeeData.email)
+      .limit(1);
+
+    if (profileError) {
+      console.error("Error checking existing profiles:", profileError);
+      throw new Error(`Failed to check existing profiles: ${profileError.message}`);
+    }
+
+    let employeeId: string;
+    
+    if (existingProfiles && existingProfiles.length > 0) {
+      // Use the existing profile ID
+      employeeId = existingProfiles[0].id;
+      
+      // Check if employee already exists with this ID
+      const { data: existingEmployee } = await supabase
+        .from('employees')
+        .select('id')
+        .eq('id', employeeId)
+        .limit(1);
+        
+      if (existingEmployee && existingEmployee.length > 0) {
+        throw new Error(`An employee with this email already exists: ${employeeData.email}`);
+      }
+    } else {
+      // Generate a UUID for the employee if no profile exists
+      employeeId = crypto.randomUUID();
+      
+      // Create a profile for this employee to enable future authentication
+      const { error: createProfileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: employeeId,
+          email: employeeData.email,
+          name: `${employeeData.first_name} ${employeeData.last_name}`
+        });
+        
+      if (createProfileError) {
+        console.error("Failed to create profile for employee:", createProfileError);
+        throw new Error(`Failed to create profile for employee: ${createProfileError.message}`);
+      }
+    }
     
     // Create the employee record
     const { error } = await supabase

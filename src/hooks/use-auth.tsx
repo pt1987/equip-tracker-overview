@@ -4,12 +4,15 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Session, User } from "@supabase/supabase-js";
+import { getEmployeeById } from "@/data/employees";
+import { Employee } from "@/lib/types";
 
 interface UserProfile {
   id: string;
   email: string;
   name: string | null;
   role: string | null;
+  employeeData: Employee | null;
 }
 
 interface AuthContextType {
@@ -54,11 +57,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
               if (data && !error) {
                 console.log("User profile found:", data);
+                
+                // Fetch employee data if available
+                const employeeData = await getEmployeeById(data.id);
+                console.log("Employee data:", employeeData);
+
                 setUser({
                   id: data.id,
                   email: data.email,
                   name: data.name,
-                  role: data.role
+                  role: data.role,
+                  employeeData: employeeData
                 });
               } else {
                 console.log("Profile not found. Using auth data as fallback.");
@@ -70,7 +79,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                   id: currentSession.user.id,
                   email: currentSession.user.email || '',
                   name: currentSession.user.user_metadata?.name || null,
-                  role: 'user'
+                  role: 'user',
+                  employeeData: null
                 });
               }
               setLoading(false);
@@ -108,11 +118,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
             if (data && !error) {
               console.log("User profile loaded:", data);
+              
+              // Fetch employee data if available
+              const employeeData = await getEmployeeById(data.id);
+              console.log("Employee data:", employeeData);
+
               setUser({
                 id: data.id,
                 email: data.email,
                 name: data.name,
-                role: data.role
+                role: data.role,
+                employeeData: employeeData
               });
             } else {
               console.log("Using auth data for user profile");
@@ -124,7 +140,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 id: currentSession.user.id,
                 email: currentSession.user.email || '',
                 name: currentSession.user.user_metadata?.name || null,
-                role: 'user'
+                role: 'user',
+                employeeData: null
               });
             }
           } catch (err) {
@@ -288,7 +305,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     isAuthenticated: !!user,
     loading,
     hasSession: !!session,
-    userInfo: user ? { id: user.id, email: user.email, role: user.role } : null
+    userInfo: user ? { id: user.id, email: user.email, role: user.role, hasEmployeeData: !!user.employeeData } : null
   });
 
   return (
