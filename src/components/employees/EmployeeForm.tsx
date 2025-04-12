@@ -16,7 +16,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useFormContext } from "react-hook-form";
-import { EmployeeFormValues } from "./EmployeeFormTypes";
+import { EmployeeFormValues, availableClusters, competenceLevels } from "./EmployeeFormTypes";
 
 export default function EmployeeFormFields() {
   const form = useFormContext<EmployeeFormValues>();
@@ -100,13 +100,45 @@ export default function EmployeeFormFields() {
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="development">Entwicklung</SelectItem>
-                <SelectItem value="design">Design</SelectItem>
-                <SelectItem value="operations">Betrieb</SelectItem>
-                <SelectItem value="management">Management</SelectItem>
-                <SelectItem value="sales">Vertrieb</SelectItem>
+                {availableClusters.map((cluster) => (
+                  <SelectItem key={cluster} value={cluster}>
+                    {cluster}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="competenceLevel"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Kompetenzlevel</FormLabel>
+            <Select 
+              onValueChange={field.onChange} 
+              defaultValue={field.value}
+              value={field.value}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Kompetenzlevel auswählen" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {competenceLevels.map((level) => (
+                  <SelectItem key={level} value={level}>
+                    {level}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormDescription>
+              Internes Kompetenzlevel des Mitarbeiters
+            </FormDescription>
             <FormMessage />
           </FormItem>
         )}

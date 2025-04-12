@@ -68,6 +68,7 @@ const EmployeeDetail = () => {
           email: data.email, // Explicitly include email
           position: data.position,
           cluster: data.cluster,
+          competence_level: data.competenceLevel,
           start_date: data.entryDate || data.startDate,
           budget: data.budget,
           image_url: data.imageUrl || data.profileImage,
@@ -86,6 +87,7 @@ const EmployeeDetail = () => {
           email: data.email, // Ensure email is in the updated state
           position: data.position,
           cluster: data.cluster, 
+          competenceLevel: data.competenceLevel,
           startDate: typeof data.startDate === 'object' ? data.startDate.toISOString() : data.startDate,
           imageUrl: data.imageUrl || data.profileImage,
           budget: data.budget,

@@ -29,9 +29,10 @@ export default function EmployeeDetailEdit({
     defaultValues: {
       firstName: employee.firstName,
       lastName: employee.lastName,
-      email: employee.email || "", // Ensure email is initialized, even if empty
+      email: employee.email || "",
       position: employee.position,
-      cluster: employee.cluster,
+      cluster: employee.cluster as any, // Cast to any to handle potential type mismatch
+      competenceLevel: employee.competenceLevel || "Junior", // Fallback to Junior if not set
       entryDate: new Date(employee.startDate).toISOString().split('T')[0],
       budget: employee.budget,
       profileImage: employee.imageUrl || "",
@@ -44,7 +45,8 @@ export default function EmployeeDetailEdit({
     form.setValue("lastName", employee.lastName);
     form.setValue("email", employee.email || "");
     form.setValue("position", employee.position);
-    form.setValue("cluster", employee.cluster);
+    form.setValue("cluster", employee.cluster as any);
+    form.setValue("competenceLevel", employee.competenceLevel || "Junior");
     form.setValue("entryDate", new Date(employee.startDate).toISOString().split('T')[0]);
     form.setValue("budget", employee.budget);
     form.setValue("profileImage", employee.imageUrl || "");

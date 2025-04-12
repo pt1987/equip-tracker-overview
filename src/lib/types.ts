@@ -1,3 +1,4 @@
+
 export type AssetStatus = 
   | 'ordered' 
   | 'delivered' 
@@ -64,6 +65,7 @@ export interface Employee {
   email: string;
   position: string;
   cluster: string;
+  competenceLevel?: string;
   imageUrl?: string;
   startDate: string;
   entryDate?: string;

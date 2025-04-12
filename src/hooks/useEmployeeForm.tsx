@@ -48,8 +48,6 @@ export function useEmployeeForm(id: string | undefined) {
 
   const handleImageChange = (file: File) => {
     setSelectedImage(file);
-    
-    // Create preview is now handled in the EmployeeImagePreview component
   };
 
   const handleSubmit = async (data: EmployeeFormValues) => {
@@ -72,6 +70,7 @@ export function useEmployeeForm(id: string | undefined) {
           email: data.email,
           position: data.position,
           cluster: data.cluster,
+          competence_level: data.competenceLevel,
           start_date: data.entryDate,
           budget: data.budget,
           image_url: imageUrl || null,
@@ -89,6 +88,7 @@ export function useEmployeeForm(id: string | undefined) {
           email: data.email,
           position: data.position,
           cluster: data.cluster,
+          competence_level: data.competenceLevel,
           start_date: data.entryDate,
           budget: data.budget,
           image_url: null,

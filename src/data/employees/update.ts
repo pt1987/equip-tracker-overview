@@ -13,6 +13,7 @@ export const updateEmployee = async (id: string, employeeData: {
   email?: string;
   position?: string;
   cluster?: string;
+  competence_level?: string;
   start_date?: string;
   budget?: number;
   image_url?: string | null;
@@ -29,6 +30,7 @@ export const updateEmployee = async (id: string, employeeData: {
         last_name: employeeData.last_name,
         position: employeeData.position,
         cluster: employeeData.cluster,
+        competence_level: employeeData.competence_level,
         start_date: employeeData.start_date,
         entry_date: employeeData.start_date,
         budget: employeeData.budget,
