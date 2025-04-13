@@ -13,6 +13,7 @@ import {
   ShoppingBag,
   Users,
   FileLineChart,
+  Shield,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -88,6 +89,16 @@ export const NavLinks = () => {
         label="Hardware-Bestellung"
         hasDividerAbove
       />
+      
+      {/* Add Admin section for users with admin role */}
+      {userRole === 'admin' && (
+        <NavLink
+          href="/admin/dashboard"
+          icon={<Shield size={16} />}
+          label="Admin Bereich"
+          hasDividerAbove
+        />
+      )}
     </div>
   );
 };
