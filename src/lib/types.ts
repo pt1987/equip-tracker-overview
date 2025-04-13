@@ -1,4 +1,3 @@
-
 export type AssetStatus = 
   | 'ordered' 
   | 'delivered' 
@@ -16,6 +15,11 @@ export type AssetType =
   | 'mouse' 
   | 'keyboard' 
   | 'accessory';
+
+export type UserRole = 
+  | 'admin'     // Administrator: Full access
+  | 'editor'    // Editor: Can edit assets and create employees
+  | 'user';     // Regular user: Can only see data and edit own assets
 
 export interface Asset {
   id: string;

@@ -1,24 +1,18 @@
 
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import {
   Calendar,
-  CircleDollarSign,
-  Clock,
   FileBarChart,
   History,
-  Inbox,
   LayoutDashboard,
-  Lightbulb,
   Laptop,
   MonitorSmartphone,
   PackageSearch,
   ShoppingBag,
-  User,
   Users,
-  Grid,
   FileLineChart,
-  BookOpen
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -32,6 +26,8 @@ interface NavLinkProps {
 export const NavLinks = () => {
   const { pathname } = useLocation();
   const isMobile = useIsMobile();
+  const { user } = useAuth();
+  const userRole = user?.role || 'user';
 
   // If on a mobile device, don't show any nav links
   if (isMobile) {

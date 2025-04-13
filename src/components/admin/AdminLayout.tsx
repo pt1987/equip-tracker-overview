@@ -49,8 +49,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [lastActivity, setLastActivity] = useState(Date.now());
   const [showInactivityWarning, setShowInactivityWarning] = useState(false);
+  const userRole = user?.role || '';
 
   useEffect(() => {
+    // Check if user has admin role, if not redirect to home
+    if (user && userRole !== 'admin') {
+      toast({
+        variant: "destructive",
+        title: "Zugriff verweigert",
+        description: "Sie haben keine Berechtigung, auf diesen Bereich zuzugreifen.",
+      });
+      navigate("/");
+    }
+    
     const handleActivity = () => {
       setLastActivity(Date.now());
       setShowInactivityWarning(false);
@@ -74,7 +85,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       window.removeEventListener("keypress", handleActivity);
       clearInterval(inactivityInterval);
     };
-  }, [lastActivity]);
+  }, [lastActivity, navigate, toast, user, userRole]);
 
   const handleLogout = (message?: string) => {
     logout();
@@ -93,6 +104,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   const isCurrentPath = (path: string) => location.pathname === path;
+
+  // Render empty state if user doesn't have admin role
+  if (user && userRole !== 'admin') {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background flex">

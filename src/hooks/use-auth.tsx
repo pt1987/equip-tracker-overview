@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -11,7 +10,7 @@ interface UserProfile {
   id: string;
   email: string;
   name: string | null;
-  role: string | null;
+  role: string | null; // 'admin', 'editor', 'user'
   employeeData: Employee | null;
 }
 
@@ -79,7 +78,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                   id: currentSession.user.id,
                   email: currentSession.user.email || '',
                   name: currentSession.user.user_metadata?.name || null,
-                  role: 'user',
+                  role: 'user', // Default role for users without a profile
                   employeeData: null
                 });
               }

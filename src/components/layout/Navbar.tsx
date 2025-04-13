@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -29,7 +30,7 @@ export default function Navbar() {
   const isMobile = useIsMobile();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { user, logout, isAuthenticated } = useAuth();
-  const isAdmin = user?.role === "admin";
+  const userRole = user?.role || 'user';
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -39,27 +40,35 @@ export default function Navbar() {
     setIsSidebarOpen(false);
   }, [location]);
 
+  // Define access rights based on user role
+  const canAccessAdmin = userRole === 'admin';
+  const canEditAssets = ['admin', 'editor'].includes(userRole);
+  const canCreateEmployee = ['admin', 'editor'].includes(userRole);
+
   const menuItems = [
     { to: "/", label: "Dashboard", icon: <BarChart3 size={20} /> },
     { to: "/assets", label: "Assets", icon: <MonitorSmartphone size={20} /> },
-    { to: "/employees", label: "Employees", icon: <Users size={20} /> },
-    { to: "/history", label: "History", icon: <Clock size={20} /> },
-    { to: "/pool-assets", label: "Pool Assets", icon: <CircleDot size={20} /> },
+    { to: "/employees", label: "Mitarbeiter", icon: <Users size={20} /> },
+    { to: "/history", label: "Historie", icon: <Clock size={20} /> },
+    { to: "/pool-assets", label: "Pool-Assets", icon: <CircleDot size={20} /> },
     { to: "/bookings", label: "Buchungen", icon: <Calendar size={20} /> },
     { to: "/reporting", label: "Reporting", icon: <FileBarChart size={20} /> },
     { to: "/hardware-order", label: "Hardware-Bestellung", icon: <Package size={20} /> },
   ];
 
-  const createLinks = [
-    { to: "/asset/create", label: "Create Asset", icon: <PlusCircle size={20} /> },
-    { to: "/employee/create", label: "Create Employee", icon: <UserPlus size={20} /> },
-  ];
+  // Create links based on permissions
+  const createLinks = [];
+  if (canEditAssets) {
+    createLinks.push({ to: "/asset/create", label: "Asset erstellen", icon: <PlusCircle size={20} /> });
+  }
+  if (canCreateEmployee) {
+    createLinks.push({ to: "/employee/create", label: "Mitarbeiter erstellen", icon: <UserPlus size={20} /> });
+  }
   
-  const adminLinks = isAdmin ? [
+  const adminLinks = canAccessAdmin ? [
     { to: "/admin/dashboard", label: "Admin Dashboard", icon: <Shield size={20} /> },
-    { to: "/admin/users", label: "User Management", icon: <Users size={20} /> },
-    { to: "/admin/roles", label: "Roles & Permissions", icon: <Shield size={20} /> },
-    { to: "/admin/logs", label: "Audit Logs", icon: <FileBarChart size={20} /> },
+    { to: "/admin/users", label: "Benutzerverwaltung", icon: <Users size={20} /> },
+    { to: "/admin/roles", label: "Rollen & Berechtigungen", icon: <Shield size={20} /> },
   ] : [];
 
   return (
@@ -104,7 +113,7 @@ export default function Navbar() {
                       </li>
                     ))}
                     
-                    {isAdmin && (
+                    {adminLinks.length > 0 && (
                       <>
                         <li className="pt-4">
                           <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
@@ -128,30 +137,34 @@ export default function Navbar() {
                       </>
                     )}
                     
-                    <li className="pt-4">
-                      <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
-                        Create New
-                      </div>
-                    </li>
-                    {createLinks.map((item) => (
-                      <li key={item.to}>
-                        <Link
-                          to={item.to}
-                          className={cn(
-                            "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
-                            location.pathname === item.to ? "font-medium bg-secondary" : ""
-                          )}
-                        >
-                          {item.icon}
-                          <span>{item.label}</span>
-                        </Link>
-                      </li>
-                    ))}
+                    {createLinks.length > 0 && (
+                      <>
+                        <li className="pt-4">
+                          <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
+                            Erstellen
+                          </div>
+                        </li>
+                        {createLinks.map((item) => (
+                          <li key={item.to}>
+                            <Link
+                              to={item.to}
+                              className={cn(
+                                "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
+                                location.pathname === item.to ? "font-medium bg-secondary" : ""
+                              )}
+                            >
+                              {item.icon}
+                              <span>{item.label}</span>
+                            </Link>
+                          </li>
+                        ))}
+                      </>
+                    )}
                     
                     {/* Authentication section */}
                     <li className="pt-4">
                       <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
-                        Account
+                        Konto
                       </div>
                     </li>
                     {isAuthenticated ? (
@@ -162,7 +175,7 @@ export default function Navbar() {
                           onClick={() => logout()}
                         >
                           <LogOut size={20} className="mr-3" />
-                          <span>Logout</span>
+                          <span>Abmelden</span>
                         </Button>
                       </li>
                     ) : (
@@ -175,7 +188,7 @@ export default function Navbar() {
                           )}
                         >
                           <LogIn size={20} />
-                          <span>Login</span>
+                          <span>Anmelden</span>
                         </Link>
                       </li>
                     )}
@@ -195,7 +208,7 @@ export default function Navbar() {
             <Link to="/login">
               <Button variant="outline" size="sm">
                 <LogIn className="h-4 w-4 mr-2" />
-                Login
+                Anmelden
               </Button>
             </Link>
           )}
@@ -207,7 +220,7 @@ export default function Navbar() {
               onClick={() => logout()}
             >
               <LogOut className="h-4 w-4 mr-2" />
-              Logout
+              Abmelden
             </Button>
           )}
         </div>
@@ -236,7 +249,7 @@ export default function Navbar() {
                 </li>
               ))}
               
-              {isAdmin && (
+              {adminLinks.length > 0 && (
                 <>
                   <li className="pt-4">
                     <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
@@ -260,30 +273,34 @@ export default function Navbar() {
                 </>
               )}
               
-              <li className="pt-4">
-                <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
-                  Create New
-                </div>
-              </li>
-              {createLinks.map((item) => (
-                <li key={item.to}>
-                  <Link
-                    to={item.to}
-                    className={cn(
-                      "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
-                      location.pathname === item.to ? "font-medium bg-secondary" : ""
-                    )}
-                  >
-                    {item.icon}
-                    <span>{item.label}</span>
-                  </Link>
-                </li>
-              ))}
+              {createLinks.length > 0 && (
+                <>
+                  <li className="pt-4">
+                    <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
+                      Erstellen
+                    </div>
+                  </li>
+                  {createLinks.map((item) => (
+                    <li key={item.to}>
+                      <Link
+                        to={item.to}
+                        className={cn(
+                          "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
+                          location.pathname === item.to ? "font-medium bg-secondary" : ""
+                        )}
+                      >
+                        {item.icon}
+                        <span>{item.label}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </>
+              )}
               
               {/* Authentication section */}
               <li className="pt-4">
                 <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
-                  Account
+                  Konto
                 </div>
               </li>
               {isAuthenticated ? (
@@ -294,7 +311,7 @@ export default function Navbar() {
                     onClick={() => logout()}
                   >
                     <LogOut size={20} className="mr-3" />
-                    <span>Logout</span>
+                    <span>Abmelden</span>
                   </Button>
                 </li>
               ) : (
@@ -307,7 +324,7 @@ export default function Navbar() {
                     )}
                   >
                     <LogIn size={20} />
-                    <span>Login</span>
+                    <span>Anmelden</span>
                   </Link>
                 </li>
               )}
