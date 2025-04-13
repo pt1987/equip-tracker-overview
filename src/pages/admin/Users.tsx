@@ -1,8 +1,9 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 import PageTransition from "@/components/layout/PageTransition";
 import { Button } from "@/components/ui/button";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Check, X, UserCog, Trash } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,15 +13,211 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { getRoles } from "@/data/mockData";
+import { format, formatDistanceToNow } from "date-fns";
+import { de } from "date-fns/locale";
+import { useAuth } from "@/hooks/use-auth";
+import { Skeleton } from "@/components/ui/skeleton";
+
+interface User {
+  id: string;
+  email: string;
+  name: string | null;
+  role: string;
+  lastSignInAt: string | null;
+  createdAt: string;
+}
 
 export default function Users() {
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [userRoleDialogOpen, setUserRoleDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedRole, setSelectedRole] = useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const { toast } = useToast();
+  const { user: currentUser } = useAuth();
+
+  const roles = getRoles();
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      
+      // Get users from profiles table (which has roles)
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('*');
+
+      if (profilesError) {
+        console.error("Error fetching profiles:", profilesError);
+        toast({
+          variant: "destructive",
+          title: "Fehler beim Laden der Benutzer",
+          description: profilesError.message,
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Get auth users data to get last sign in time
+      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+
+      if (authError) {
+        console.error("Error fetching auth users:", authError);
+      }
+
+      const usersWithDetails = profiles.map(profile => {
+        // Find matching auth user
+        const authUser = authUsers?.users?.find(u => u.id === profile.id);
+        
+        return {
+          id: profile.id,
+          email: profile.email,
+          name: profile.name,
+          role: profile.role || 'user',
+          lastSignInAt: authUser?.last_sign_in_at || null,
+          createdAt: profile.created_at
+        };
+      });
+
+      setUsers(usersWithDetails);
+    } catch (error: any) {
+      console.error("Error in fetchUsers:", error);
+      toast({
+        variant: "destructive",
+        title: "Fehler beim Laden der Benutzer",
+        description: error.message || "Ein unerwarteter Fehler ist aufgetreten",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredUsers = users.filter(user => {
+    // Search filter
+    const matchesSearch = 
+      searchQuery.trim() === '' || 
+      user.email.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      (user.name && user.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    // Role filter
+    const matchesRole = 
+      roleFilter === 'all' || 
+      user.role === roleFilter;
+    
+    // Status filter - for now, we consider all users active
+    const matchesStatus = 
+      statusFilter === 'all' || 
+      statusFilter === 'active';
+    
+    return matchesSearch && matchesRole && matchesStatus;
+  });
+
+  const openRoleDialog = (user: User) => {
+    setSelectedUser(user);
+    setSelectedRole(user.role);
+    setUserRoleDialogOpen(true);
+  };
+
+  const openDeleteDialog = (user: User) => {
+    setSelectedUser(user);
+    setDeleteDialogOpen(true);
+  };
+
+  const updateUserRole = async () => {
+    if (!selectedUser || !selectedRole) return;
+    
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ role: selectedRole })
+        .eq('id', selectedUser.id);
+      
+      if (error) throw error;
+      
+      // Update local state
+      setUsers(users.map(u => 
+        u.id === selectedUser.id ? {...u, role: selectedRole} : u
+      ));
+      
+      toast({
+        title: "Rolle aktualisiert",
+        description: `Die Rolle von ${selectedUser.email} wurde auf ${selectedRole} aktualisiert.`,
+      });
+      
+      setUserRoleDialogOpen(false);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Fehler beim Aktualisieren der Rolle",
+        description: error.message || "Ein unerwarteter Fehler ist aufgetreten",
+      });
+    }
+  };
+
+  const getRoleBadgeColor = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return "bg-red-500 hover:bg-red-600";
+      case 'editor':
+        return "bg-blue-500 hover:bg-blue-600";
+      default:
+        return "bg-gray-500 hover:bg-gray-600";
+    }
+  };
+
+  const getRoleDisplayName = (roleId: string) => {
+    const role = roles.find(r => r.id === roleId);
+    return role ? role.name : roleId;
+  };
+
+  const handleDeleteUser = async () => {
+    if (!selectedUser) return;
+    
+    try {
+      // Delete user from auth (which should cascade to profiles due to FK constraints)
+      const { error } = await supabase.auth.admin.deleteUser(selectedUser.id);
+      
+      if (error) throw error;
+      
+      // Update local state
+      setUsers(users.filter(u => u.id !== selectedUser.id));
+      
+      toast({
+        title: "Benutzer gelöscht",
+        description: `${selectedUser.email} wurde erfolgreich gelöscht.`,
+      });
+      
+      setDeleteDialogOpen(false);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Fehler beim Löschen des Benutzers",
+        description: error.message || "Ein unerwarteter Fehler ist aufgetreten",
+      });
+    }
+  };
 
   return (
     <PageTransition>
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-8 p-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Benutzerverwaltung</h1>
@@ -83,15 +280,141 @@ export default function Users() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center">
-                    Keine Benutzer gefunden.
-                  </TableCell>
-                </TableRow>
+                {loading ? (
+                  Array(3).fill(0).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell><Skeleton className="h-6 w-24" /></TableCell>
+                      <TableCell><Skeleton className="h-6 w-32" /></TableCell>
+                      <TableCell><Skeleton className="h-6 w-24" /></TableCell>
+                      <TableCell><Skeleton className="h-6 w-20" /></TableCell>
+                      <TableCell><Skeleton className="h-6 w-28" /></TableCell>
+                      <TableCell><Skeleton className="h-6 w-20" /></TableCell>
+                    </TableRow>
+                  ))
+                ) : filteredUsers.length > 0 ? (
+                  filteredUsers.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell>{user.name || '-'}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>
+                        <Badge 
+                          className={getRoleBadgeColor(user.role)}
+                          onClick={() => currentUser?.id !== user.id && openRoleDialog(user)}
+                          style={{ cursor: currentUser?.id !== user.id ? 'pointer' : 'default' }}
+                        >
+                          {getRoleDisplayName(user.role)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="bg-green-100 border-green-200 text-green-800">
+                          Aktiv
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {user.lastSignInAt ? (
+                          formatDistanceToNow(new Date(user.lastSignInAt), { 
+                            addSuffix: true, 
+                            locale: de 
+                          })
+                        ) : 'Nie'}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => openRoleDialog(user)}
+                            disabled={currentUser?.id === user.id}
+                            title="Rolle bearbeiten"
+                          >
+                            <UserCog className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => openDeleteDialog(user)}
+                            disabled={currentUser?.id === user.id}
+                            title="Benutzer löschen"
+                          >
+                            <Trash className="h-4 w-4 text-red-500" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} className="h-24 text-center">
+                      Keine Benutzer gefunden.
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </div>
         </div>
+
+        {/* Role Change Dialog */}
+        <Dialog open={userRoleDialogOpen} onOpenChange={setUserRoleDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Benutzerrolle ändern</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="mb-4">
+                Benutzer: <strong>{selectedUser?.email}</strong>
+              </p>
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Rolle auswählen:</p>
+                <Select value={selectedRole} onValueChange={setSelectedRole}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Rolle auswählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {roles.map(role => (
+                      <SelectItem key={role.id} value={role.id}>
+                        {role.name} - {role.description}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setUserRoleDialogOpen(false)}>
+                Abbrechen
+              </Button>
+              <Button onClick={updateUserRole}>
+                Speichern
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete User Dialog */}
+        <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Benutzer löschen</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p>
+                Sind Sie sicher, dass Sie den Benutzer <strong>{selectedUser?.email}</strong> löschen möchten?
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Diese Aktion kann nicht rückgängig gemacht werden.
+              </p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+                Abbrechen
+              </Button>
+              <Button variant="destructive" onClick={handleDeleteUser}>
+                Löschen
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </PageTransition>
   );

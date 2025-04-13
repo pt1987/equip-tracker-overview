@@ -17,6 +17,12 @@ export {
   getEmployeeAssetsSummary 
 } from './employees';
 
+export {
+  getUsers,
+  updateUserRole,
+  deleteUser
+} from './users';
+
 // Re-export any helper functions that might still be useful
 export * from './helpers';
 
