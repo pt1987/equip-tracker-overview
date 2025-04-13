@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PageTransition from "@/components/layout/PageTransition";
 import { Button } from "@/components/ui/button";
 import { FileDown, Search, Filter, Calendar, ArrowUpDown, RefreshCcw } from "lucide-react";
@@ -36,36 +36,28 @@ import { format } from "date-fns";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
 
-// Mock log data
-const mockLogs = [
-  { id: 1, user: "Max Mustermann", action: "login", resource: "auth", details: "Successful login", ipAddress: "192.168.1.1", timestamp: "2023-05-15T08:30:15" },
-  { id: 2, user: "Lisa Wagner", action: "create", resource: "user", details: "Created user 'thomas.schmidt'", ipAddress: "192.168.1.2", timestamp: "2023-05-15T09:45:22" },
-  { id: 3, user: "Admin", action: "update", resource: "role", details: "Updated permissions for role 'Editor'", ipAddress: "192.168.1.1", timestamp: "2023-05-15T10:15:30" },
-  { id: 4, user: "Thomas Schmidt", action: "login", resource: "auth", details: "Successful login", ipAddress: "192.168.1.3", timestamp: "2023-05-15T11:22:45" },
-  { id: 5, user: "Admin", action: "delete", resource: "user", details: "Deleted user 'john.doe'", ipAddress: "192.168.1.1", timestamp: "2023-05-15T13:45:12" },
-  { id: 6, user: "Lisa Wagner", action: "update", resource: "user", details: "Updated profile for 'anna.becker'", ipAddress: "192.168.1.2", timestamp: "2023-05-15T14:15:33" },
-  { id: 7, user: "Max Mustermann", action: "logout", resource: "auth", details: "User logout", ipAddress: "192.168.1.1", timestamp: "2023-05-15T15:30:00" },
-  { id: 8, user: "Admin", action: "create", resource: "role", details: "Created new role 'Moderator'", ipAddress: "192.168.1.1", timestamp: "2023-05-14T09:20:15" },
-  { id: 9, user: "Julia Fischer", action: "login", resource: "auth", details: "Successful login", ipAddress: "192.168.1.4", timestamp: "2023-05-14T10:45:22" },
-  { id: 10, user: "Thomas Schmidt", action: "update", resource: "user", details: "Updated password", ipAddress: "192.168.1.3", timestamp: "2023-05-14T14:15:30" },
-  { id: 11, user: "Lisa Wagner", action: "logout", resource: "auth", details: "User logout", ipAddress: "192.168.1.2", timestamp: "2023-05-14T16:30:45" },
-  { id: 12, user: "Admin", action: "create", resource: "user", details: "Created user 'max.weber'", ipAddress: "192.168.1.1", timestamp: "2023-05-13T09:45:12" },
-  { id: 13, user: "Julia Fischer", action: "update", resource: "user", details: "Updated profile for 'leon.meyer'", ipAddress: "192.168.1.4", timestamp: "2023-05-13T13:15:33" },
-  { id: 14, user: "Admin", action: "logout", resource: "auth", details: "User logout", ipAddress: "192.168.1.1", timestamp: "2023-05-13T17:30:00" },
-  { id: 15, user: "System", action: "backup", resource: "system", details: "Automatic system backup", ipAddress: "127.0.0.1", timestamp: "2023-05-13T23:00:15" },
-];
+// Interface for log entries
+interface LogEntry {
+  id: string;
+  user: string;
+  action: string;
+  resource: string;
+  details: string;
+  ipAddress: string;
+  timestamp: string;
+}
 
-// Audit log stats
-const logStats = {
-  totalLogs: 1245,
-  loginAttempts: 567,
-  failedLogins: 23,
-  userChanges: 89,
-  roleChanges: 12
-};
+// Interface for log stats
+interface LogStats {
+  totalLogs: number;
+  loginAttempts: number;
+  failedLogins: number;
+  userChanges: number;
+  roleChanges: number;
+}
 
 export default function Logs() {
-  const [logs, setLogs] = useState(mockLogs);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [actionFilter, setActionFilter] = useState("all");
   const [resourceFilter, setResourceFilter] = useState("all");
@@ -79,7 +71,27 @@ export default function Logs() {
     ipAddress: true,
     timestamp: true
   });
+  const [stats, setStats] = useState<LogStats>({
+    totalLogs: 0,
+    loginAttempts: 0,
+    failedLogins: 0,
+    userChanges: 0,
+    roleChanges: 0
+  });
   const { toast } = useToast();
+
+  useEffect(() => {
+    // In einer echten Anwendung würden hier die Logs von einer API oder Datenbank geladen
+    // Für jetzt lassen wir die Tabelle leer, da keine Mockup-Daten verwendet werden sollen
+    setLogs([]);
+    setStats({
+      totalLogs: 0,
+      loginAttempts: 0,
+      failedLogins: 0,
+      userChanges: 0,
+      roleChanges: 0
+    });
+  }, []);
 
   // Function to handle log filtering
   const filteredLogs = logs
@@ -169,7 +181,10 @@ export default function Logs() {
                 </DropdownMenuCheckboxItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button variant="outline" onClick={() => setLogs(mockLogs)}>
+            <Button variant="outline" onClick={() => toast({
+              title: "Aktualisiert",
+              description: "Die Logs wurden aktualisiert.",
+            })}>
               <RefreshCcw className="mr-2 h-4 w-4" />
               Aktualisieren
             </Button>
@@ -182,7 +197,7 @@ export default function Logs() {
               <CardTitle className="text-sm font-medium">Gesamt-Logs</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{logStats.totalLogs}</div>
+              <div className="text-2xl font-bold">{stats.totalLogs}</div>
               <p className="text-xs text-muted-foreground">Im System erfasst</p>
             </CardContent>
           </Card>
@@ -192,9 +207,9 @@ export default function Logs() {
               <CardTitle className="text-sm font-medium">Login-Versuche</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{logStats.loginAttempts}</div>
+              <div className="text-2xl font-bold">{stats.loginAttempts}</div>
               <p className="text-xs text-muted-foreground">
-                Davon {logStats.failedLogins} fehlgeschlagen
+                Davon {stats.failedLogins} fehlgeschlagen
               </p>
             </CardContent>
           </Card>
@@ -204,7 +219,7 @@ export default function Logs() {
               <CardTitle className="text-sm font-medium">Benutzeränderungen</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{logStats.userChanges}</div>
+              <div className="text-2xl font-bold">{stats.userChanges}</div>
               <p className="text-xs text-muted-foreground">
                 Erstellungen, Aktualisierungen, Löschungen
               </p>
@@ -216,7 +231,7 @@ export default function Logs() {
               <CardTitle className="text-sm font-medium">Rollenänderungen</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{logStats.roleChanges}</div>
+              <div className="text-2xl font-bold">{stats.roleChanges}</div>
               <p className="text-xs text-muted-foreground">
                 Änderungen an Rollen und Berechtigungen
               </p>
@@ -366,7 +381,7 @@ export default function Logs() {
                       colSpan={Object.values(visibleColumns).filter(Boolean).length} 
                       className="h-24 text-center"
                     >
-                      Keine Logs gefunden, die den Filterkriterien entsprechen.
+                      Keine Logs gefunden. Die Audit-Log-Funktion ist in Entwicklung.
                     </TableCell>
                   </TableRow>
                 )}
