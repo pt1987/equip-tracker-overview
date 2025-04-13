@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { 
@@ -42,18 +41,17 @@ const NavItem = ({ to, icon, label, active, onClick }: NavItemProps) => (
 );
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { user, logout } = useAuth();
+  const { user, hasPermission, logout } = useAuth();
   const { toast } = useToast();
   const location = useLocation();
   const navigate = useNavigate();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [lastActivity, setLastActivity] = useState(Date.now());
   const [showInactivityWarning, setShowInactivityWarning] = useState(false);
-  const userRole = user?.role || '';
 
   useEffect(() => {
-    // Check if user has admin role, if not redirect to home
-    if (user && userRole !== 'admin') {
+    // Check if user has admin access, if not redirect to home
+    if (user && !hasPermission('canAccessAdmin')) {
       toast({
         variant: "destructive",
         title: "Zugriff verweigert",
@@ -85,7 +83,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       window.removeEventListener("keypress", handleActivity);
       clearInterval(inactivityInterval);
     };
-  }, [lastActivity, navigate, toast, user, userRole]);
+  }, [lastActivity, navigate, toast, user, hasPermission]);
 
   const handleLogout = (message?: string) => {
     logout();
@@ -106,7 +104,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const isCurrentPath = (path: string) => location.pathname === path;
 
   // Render empty state if user doesn't have admin role
-  if (user && userRole !== 'admin') {
+  if (user && !hasPermission('canAccessAdmin')) {
     return null;
   }
 

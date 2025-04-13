@@ -21,6 +21,16 @@ export type UserRole =
   | 'editor'    // Editor: Can edit assets and create employees
   | 'user';     // Regular user: Can only see data and edit own assets
 
+export interface UserPermissions {
+  canAccessAdmin: boolean;
+  canEditAssets: boolean;
+  canCreateEmployees: boolean;
+  canEditEmployees: boolean;
+  canEditOwnAssets: boolean;
+  canEditOwnProfile: boolean;
+  canViewReports: boolean;
+}
+
 export interface Asset {
   id: string;
   name: string;

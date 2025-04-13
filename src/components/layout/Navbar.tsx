@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -29,8 +28,7 @@ export default function Navbar() {
   const location = useLocation();
   const isMobile = useIsMobile();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { user, logout, isAuthenticated } = useAuth();
-  const userRole = user?.role || 'user';
+  const { user, logout, isAuthenticated, hasPermission } = useAuth();
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -40,11 +38,7 @@ export default function Navbar() {
     setIsSidebarOpen(false);
   }, [location]);
 
-  // Define access rights based on user role
-  const canAccessAdmin = userRole === 'admin';
-  const canEditAssets = ['admin', 'editor'].includes(userRole);
-  const canCreateEmployee = ['admin', 'editor'].includes(userRole);
-
+  // Define menu items
   const menuItems = [
     { to: "/", label: "Dashboard", icon: <BarChart3 size={20} /> },
     { to: "/assets", label: "Assets", icon: <MonitorSmartphone size={20} /> },
@@ -58,14 +52,14 @@ export default function Navbar() {
 
   // Create links based on permissions
   const createLinks = [];
-  if (canEditAssets) {
+  if (hasPermission('canEditAssets')) {
     createLinks.push({ to: "/asset/create", label: "Asset erstellen", icon: <PlusCircle size={20} /> });
   }
-  if (canCreateEmployee) {
+  if (hasPermission('canCreateEmployees')) {
     createLinks.push({ to: "/employee/create", label: "Mitarbeiter erstellen", icon: <UserPlus size={20} /> });
   }
   
-  const adminLinks = canAccessAdmin ? [
+  const adminLinks = hasPermission('canAccessAdmin') ? [
     { to: "/admin/dashboard", label: "Admin Dashboard", icon: <Shield size={20} /> },
     { to: "/admin/users", label: "Benutzerverwaltung", icon: <Users size={20} /> },
     { to: "/admin/roles", label: "Rollen & Berechtigungen", icon: <Shield size={20} /> },

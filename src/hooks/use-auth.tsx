@@ -4,14 +4,15 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Session, User } from "@supabase/supabase-js";
 import { getEmployeeById } from "@/data/employees";
-import { Employee } from "@/lib/types";
+import { Employee, UserPermissions, UserRole } from "@/lib/types";
 
 interface UserProfile {
   id: string;
   email: string;
   name: string | null;
-  role: string | null; // 'admin', 'editor', 'user'
+  role: UserRole | null;
   employeeData: Employee | null;
+  permissions: UserPermissions;
 }
 
 interface AuthContextType {
@@ -22,9 +23,49 @@ interface AuthContextType {
   logout: () => Promise<void>;
   loading: boolean;
   session: Session | null;
+  hasPermission: (permission: keyof UserPermissions) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const getUserPermissions = (role: UserRole | null): UserPermissions => {
+  const defaultPermissions: UserPermissions = {
+    canAccessAdmin: false,
+    canEditAssets: false,
+    canCreateEmployees: false,
+    canEditEmployees: false,
+    canEditOwnAssets: true,
+    canEditOwnProfile: true,
+    canViewReports: true
+  };
+
+  switch (role) {
+    case 'admin':
+      return {
+        canAccessAdmin: true,
+        canEditAssets: true,
+        canCreateEmployees: true,
+        canEditEmployees: true,
+        canEditOwnAssets: true,
+        canEditOwnProfile: true,
+        canViewReports: true
+      };
+    case 'editor':
+      return {
+        canAccessAdmin: false,
+        canEditAssets: true,
+        canCreateEmployees: true,
+        canEditEmployees: true,
+        canEditOwnAssets: true,
+        canEditOwnProfile: true,
+        canViewReports: true
+      };
+    case 'user':
+      return defaultPermissions;
+    default:
+      return defaultPermissions;
+  }
+};
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -36,7 +77,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     console.log("Setting up auth state listener");
     
-    // First: Set up the auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
         console.log(`Auth state changed. Event: ${event}. Session: ${currentSession ? 'exists' : 'null'}`);
@@ -45,7 +85,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (currentSession?.user) {
           console.log("User is authenticated. Fetching profile data.");
           
-          // Use setTimeout to prevent deadlocks with Supabase auth
           setTimeout(async () => {
             try {
               const { data, error } = await supabase
@@ -56,17 +95,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
               if (data && !error) {
                 console.log("User profile found:", data);
+                const userRole = (data.role || 'user') as UserRole;
                 
-                // Fetch employee data if available
                 const employeeData = await getEmployeeById(data.id);
                 console.log("Employee data:", employeeData);
+                
+                const permissions = getUserPermissions(userRole);
+                console.log("User permissions:", permissions);
 
                 setUser({
                   id: data.id,
                   email: data.email,
                   name: data.name,
-                  role: data.role,
-                  employeeData: employeeData
+                  role: userRole,
+                  employeeData: employeeData,
+                  permissions: permissions
                 });
               } else {
                 console.log("Profile not found. Using auth data as fallback.");
@@ -74,12 +117,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                   console.error("Error fetching profile:", error);
                 }
                 
+                const defaultRole = 'user' as UserRole;
+                
                 setUser({
                   id: currentSession.user.id,
                   email: currentSession.user.email || '',
                   name: currentSession.user.user_metadata?.name || null,
-                  role: 'user', // Default role for users without a profile
-                  employeeData: null
+                  role: defaultRole,
+                  employeeData: null,
+                  permissions: getUserPermissions(defaultRole)
                 });
               }
               setLoading(false);
@@ -98,7 +144,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     console.log("Checking for existing session");
     
-    // Second: Check for an existing session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       console.log("Initial session check:", currentSession ? 'Session exists' : 'No session');
       setSession(currentSession);
@@ -106,7 +151,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (currentSession?.user) {
         console.log("User is logged in, fetching profile data");
         
-        // Use setTimeout to prevent deadlocks with Supabase auth
         setTimeout(async () => {
           try {
             const { data, error } = await supabase
@@ -117,17 +161,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
             if (data && !error) {
               console.log("User profile loaded:", data);
+              const userRole = (data.role || 'user') as UserRole;
               
-              // Fetch employee data if available
               const employeeData = await getEmployeeById(data.id);
               console.log("Employee data:", employeeData);
+              
+              const permissions = getUserPermissions(userRole);
+              console.log("User permissions:", permissions);
 
               setUser({
                 id: data.id,
                 email: data.email,
                 name: data.name,
-                role: data.role,
-                employeeData: employeeData
+                role: userRole,
+                employeeData: employeeData,
+                permissions: permissions
               });
             } else {
               console.log("Using auth data for user profile");
@@ -135,12 +183,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 console.error("Error fetching profile:", error);
               }
               
+              const defaultRole = 'user' as UserRole;
+              
               setUser({
                 id: currentSession.user.id,
                 email: currentSession.user.email || '',
                 name: currentSession.user.user_metadata?.name || null,
-                role: 'user',
-                employeeData: null
+                role: defaultRole,
+                employeeData: null,
+                permissions: getUserPermissions(defaultRole)
               });
             }
           } catch (err) {
@@ -165,6 +216,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       cleanup();
     };
   }, []);
+
+  const hasPermission = (permission: keyof UserPermissions): boolean => {
+    if (!user) return false;
+    return user.permissions[permission];
+  };
 
   const setupInactivityTimeout = () => {
     let inactivityTimer: number | null = null;
@@ -221,9 +277,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       console.log("Login successful, session:", data.session ? "exists" : "null");
-      
-      // No need to navigate here, the onAuthStateChange handler will update the state
-      // and the component will redirect based on the isAuthenticated state
       
       return true;
     } catch (error: any) {
@@ -297,14 +350,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     login,
     signup,
     logout,
-    loading
+    loading,
+    hasPermission
   };
   
   console.log("Auth context current state:", {
     isAuthenticated: !!user,
     loading,
     hasSession: !!session,
-    userInfo: user ? { id: user.id, email: user.email, role: user.role, hasEmployeeData: !!user.employeeData } : null
+    userInfo: user ? { 
+      id: user.id, 
+      email: user.email, 
+      role: user.role, 
+      permissions: user.permissions,
+      hasEmployeeData: !!user.employeeData 
+    } : null
   });
 
   return (

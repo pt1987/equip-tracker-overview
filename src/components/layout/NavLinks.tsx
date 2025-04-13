@@ -27,8 +27,7 @@ interface NavLinkProps {
 export const NavLinks = () => {
   const { pathname } = useLocation();
   const isMobile = useIsMobile();
-  const { user } = useAuth();
-  const userRole = user?.role || 'user';
+  const { user, hasPermission } = useAuth();
 
   // If on a mobile device, don't show any nav links
   if (isMobile) {
@@ -90,8 +89,8 @@ export const NavLinks = () => {
         hasDividerAbove
       />
       
-      {/* Add Admin section for users with admin role */}
-      {userRole === 'admin' && (
+      {/* Add Admin section for users with admin permission */}
+      {hasPermission('canAccessAdmin') && (
         <NavLink
           href="/admin/dashboard"
           icon={<Shield size={16} />}
