@@ -63,7 +63,14 @@ export default function Users() {
       setLoading(true);
       
       const usersData = await getUsers();
-      setUsers(usersData);
+      
+      // Ensure that the role property is cast to UserRole type
+      const typedUsersData = usersData.map(user => ({
+        ...user,
+        role: user.role as UserRole
+      }));
+      
+      setUsers(typedUsersData);
     } catch (error: any) {
       console.error("Error in fetchUsers:", error);
       toast({
@@ -332,7 +339,10 @@ export default function Users() {
               </p>
               <div className="space-y-1">
                 <p className="text-sm font-medium">Rolle auswählen:</p>
-                <Select value={selectedRole} onValueChange={setSelectedRole}>
+                <Select 
+                  value={selectedRole} 
+                  onValueChange={(value: string) => setSelectedRole(value as UserRole)}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Rolle auswählen" />
                   </SelectTrigger>
