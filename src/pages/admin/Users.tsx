@@ -28,12 +28,13 @@ import { de } from "date-fns/locale";
 import { useAuth } from "@/hooks/use-auth";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getUsers, updateUserRole, deleteUser } from "@/data/users";
+import { UserRole } from "@/lib/types";
 
 interface User {
   id: string;
   email: string;
   name: string | null;
-  role: string;
+  role: UserRole;
   lastSignInAt: string | null;
   createdAt: string;
 }
@@ -46,7 +47,7 @@ export default function Users() {
   const [loading, setLoading] = useState(true);
   const [userRoleDialogOpen, setUserRoleDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [selectedRole, setSelectedRole] = useState("");
+  const [selectedRole, setSelectedRole] = useState<UserRole>("user");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
   const { user: currentUser } = useAuth();
