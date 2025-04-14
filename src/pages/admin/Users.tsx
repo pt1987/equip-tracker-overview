@@ -27,6 +27,7 @@ import { format, formatDistanceToNow } from "date-fns";
 import { de } from "date-fns/locale";
 import { useAuth } from "@/hooks/use-auth";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getUsers, updateUserRole, deleteUser } from "@/data/users";
 
 interface User {
   id: string;
@@ -60,44 +61,8 @@ export default function Users() {
     try {
       setLoading(true);
       
-      // Get users from profiles table (which has roles)
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('*');
-
-      if (profilesError) {
-        console.error("Error fetching profiles:", profilesError);
-        toast({
-          variant: "destructive",
-          title: "Fehler beim Laden der Benutzer",
-          description: profilesError.message,
-        });
-        setLoading(false);
-        return;
-      }
-
-      // Get auth users data to get last sign in time
-      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
-
-      if (authError) {
-        console.error("Error fetching auth users:", authError);
-      }
-
-      const usersWithDetails = profiles.map(profile => {
-        // Find matching auth user
-        const authUser = authUsers?.users?.find(u => u.id === profile.id);
-        
-        return {
-          id: profile.id,
-          email: profile.email,
-          name: profile.name,
-          role: profile.role || 'user',
-          lastSignInAt: authUser?.last_sign_in_at || null,
-          createdAt: profile.created_at
-        };
-      });
-
-      setUsers(usersWithDetails);
+      const usersData = await getUsers();
+      setUsers(usersData);
     } catch (error: any) {
       console.error("Error in fetchUsers:", error);
       toast({
@@ -141,16 +106,15 @@ export default function Users() {
     setDeleteDialogOpen(true);
   };
 
-  const updateUserRole = async () => {
+  const handleUpdateUserRole = async () => {
     if (!selectedUser || !selectedRole) return;
     
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ role: selectedRole })
-        .eq('id', selectedUser.id);
+      const success = await updateUserRole(selectedUser.id, selectedRole);
       
-      if (error) throw error;
+      if (!success) {
+        throw new Error("Failed to update user role");
+      }
       
       // Update local state
       setUsers(users.map(u => 
@@ -192,10 +156,11 @@ export default function Users() {
     if (!selectedUser) return;
     
     try {
-      // Delete user from auth (which should cascade to profiles due to FK constraints)
-      const { error } = await supabase.auth.admin.deleteUser(selectedUser.id);
+      const success = await deleteUser(selectedUser.id);
       
-      if (error) throw error;
+      if (!success) {
+        throw new Error("Failed to delete user");
+      }
       
       // Update local state
       setUsers(users.filter(u => u.id !== selectedUser.id));
@@ -384,7 +349,7 @@ export default function Users() {
               <Button variant="outline" onClick={() => setUserRoleDialogOpen(false)}>
                 Abbrechen
               </Button>
-              <Button onClick={updateUserRole}>
+              <Button onClick={handleUpdateUserRole}>
                 Speichern
               </Button>
             </DialogFooter>
