@@ -4,7 +4,6 @@ import { ClientSecretCredential } from '@azure/identity';
 
 /**
  * Creates a Microsoft Graph client using the provided credentials
- * NOTE: This should only be used in a secure environment, not directly in the browser
  */
 export function createIntuneClient(tenantId: string, clientId: string, clientSecret: string) {
   const credential = new ClientSecretCredential(tenantId, clientId, clientSecret);
@@ -23,8 +22,6 @@ export function createIntuneClient(tenantId: string, clientId: string, clientSec
 
 /**
  * Get device information from Intune by name
- * This is a mock function that returns a simulated response for demo purposes
- * In production, this would be implemented as a backend API endpoint
  */
 export async function getDeviceByName(
   tenantId: string, 
@@ -33,26 +30,69 @@ export async function getDeviceByName(
   deviceName: string
 ) {
   try {
-    console.log(`Attempting to search for device: ${deviceName}`);
-    
-    // For demo purposes, simulate a successful response without actually calling the Microsoft Graph API
-    // In production, this would call an API endpoint on your server that uses the Microsoft Graph SDK
-    
-    if (deviceName && tenantId && clientId && clientSecret) {
-      // Simulate an API response
-      return { 
-        device: {
-          deviceName: deviceName,
-          complianceState: "compliant",
-          lastLoggedOnDateTime: new Date().toISOString(),
-          userPrincipalName: "demo.user@example.com"
-        }
-      };
-    } else {
+    const client = createIntuneClient(tenantId, clientId, clientSecret);
+
+    const response = await client
+      .api(`/deviceManagement/managedDevices`)
+      .filter(`deviceName eq '${deviceName}'`)
+      .select('deviceName,complianceState,lastLoggedOnDateTime,userPrincipalName')
+      .get();
+
+    if (response.value.length === 0) {
       return { error: 'Kein Gerät mit diesem Namen gefunden' };
     }
+
+    return { device: response.value[0] };
   } catch (error: any) {
     console.error("Error in getDeviceByName:", error);
+    return { error: 'Fehler bei Verbindung zur Microsoft Graph API', details: error.message };
+  }
+}
+
+/**
+ * Get all devices from Intune
+ */
+export async function getAllDevices(
+  tenantId: string,
+  clientId: string,
+  clientSecret: string,
+  limit: number = 50
+) {
+  try {
+    const client = createIntuneClient(tenantId, clientId, clientSecret);
+    
+    const response = await client
+      .api(`/deviceManagement/managedDevices`)
+      .top(limit)
+      .select('deviceName,complianceState,lastLoggedOnDateTime,userPrincipalName,operatingSystem,osVersion')
+      .get();
+
+    return { devices: response.value };
+  } catch (error: any) {
+    console.error("Error in getAllDevices:", error);
+    return { error: 'Fehler bei Verbindung zur Microsoft Graph API', details: error.message };
+  }
+}
+
+/**
+ * Get device compliance policies
+ */
+export async function getCompliancePolicies(
+  tenantId: string,
+  clientId: string,
+  clientSecret: string
+) {
+  try {
+    const client = createIntuneClient(tenantId, clientId, clientSecret);
+    
+    const response = await client
+      .api(`/deviceManagement/deviceCompliancePolicies`)
+      .select('id,displayName,description,version')
+      .get();
+
+    return { policies: response.value };
+  } catch (error: any) {
+    console.error("Error in getCompliancePolicies:", error);
     return { error: 'Fehler bei Verbindung zur Microsoft Graph API', details: error.message };
   }
 }
