@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getDeviceByName } from '@/utils/intuneClient';
-import { ExclamationTriangleIcon, CheckCircledIcon } from '@radix-ui/react-icons';
+import { AlertTriangle, CheckCircle } from 'lucide-react';
 
 const IntuneIntegration = () => {
   const [tenantId, setTenantId] = useState('');
@@ -105,7 +105,7 @@ const IntuneIntegration = () => {
 
         {error && (
           <Alert variant="destructive" className="mt-4">
-            <ExclamationTriangleIcon className="h-4 w-4" />
+            <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Fehler</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
           </Alert>
@@ -113,7 +113,7 @@ const IntuneIntegration = () => {
 
         {result && (
           <Alert className="mt-4 bg-green-50 text-green-800 dark:bg-green-900 dark:text-green-300">
-            <CheckCircledIcon className="h-4 w-4" />
+            <CheckCircle className="h-4 w-4" />
             <AlertTitle>Gerät gefunden</AlertTitle>
             <AlertDescription className="mt-2">
               <div className="grid grid-cols-2 gap-2 text-sm">
