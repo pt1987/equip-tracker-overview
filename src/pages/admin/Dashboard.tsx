@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import PageTransition from "@/components/layout/PageTransition";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,8 +7,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { motion } from "framer-motion";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import { getEmployees } from "@/data/employees";
+import { Employee } from "@/lib/types";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Link } from "react-router-dom";
+import { format } from "date-fns";
+import { de } from "date-fns/locale";
 
-// Interface for admin stats
 interface AdminStats {
   totalUsers: number;
   newUsers: number;
@@ -26,23 +31,36 @@ export default function AdminDashboard() {
     securityAlerts: 0
   });
   const [greeting, setGreeting] = useState("");
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Set greeting based on time of day
     const hour = new Date().getHours();
     if (hour < 12) setGreeting("Guten Morgen");
     else if (hour < 18) setGreeting("Guten Tag");
     else setGreeting("Guten Abend");
     
-    // In a real application, stats would be fetched from an API or database
-    // For now, we'll just set some minimal example data
     setStats({
-      totalUsers: 1,  // At least one user (the current admin)
+      totalUsers: 1,
       newUsers: 0,
-      activeUsers: 1, // The current admin is active
+      activeUsers: 1,
       securityAlerts: 0
     });
+
+    fetchEmployees();
   }, []);
+
+  const fetchEmployees = async () => {
+    try {
+      setLoading(true);
+      const data = await getEmployees();
+      setEmployees(data);
+    } catch (error) {
+      console.error("Error fetching employees:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <PageTransition>
@@ -163,6 +181,93 @@ export default function AdminDashboard() {
             </Card>
           </motion.div>
         </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+          className="col-span-2"
+        >
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle>Mitarbeiter</CardTitle>
+              <CardDescription>
+                Übersicht aller registrierten Mitarbeiter
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="flex justify-center py-4">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+              ) : employees.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Position</TableHead>
+                      <TableHead>Cluster</TableHead>
+                      <TableHead>Eintritt</TableHead>
+                      <TableHead>Budget</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {employees.slice(0, 5).map((employee) => (
+                      <TableRow key={employee.id}>
+                        <TableCell>
+                          <div className="flex items-center space-x-3">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src={employee.imageUrl} alt={`${employee.firstName} ${employee.lastName}`} />
+                              <AvatarFallback>{employee.firstName?.[0]}{employee.lastName?.[0]}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <Link 
+                                to={`/employee/${employee.id}`}
+                                className="font-medium hover:underline"
+                              >
+                                {employee.firstName} {employee.lastName}
+                              </Link>
+                              {employee.email && (
+                                <p className="text-xs text-muted-foreground">{employee.email}</p>
+                              )}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>{employee.position}</TableCell>
+                        <TableCell>{employee.cluster}</TableCell>
+                        <TableCell>
+                          {employee.entryDate && format(new Date(employee.entryDate), 'dd.MM.yyyy', { locale: de })}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center">
+                            <span className="font-medium">{employee.usedBudget.toFixed(2)} €</span>
+                            <span className="mx-1 text-muted-foreground">/</span>
+                            <span>{employee.budget.toFixed(2)} €</span>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div className="py-4 text-center text-muted-foreground">
+                  <p>Keine Mitarbeiter gefunden.</p>
+                  <Link to="/employees" className="text-primary hover:underline mt-2 inline-block">
+                    Mitarbeiter hinzufügen
+                  </Link>
+                </div>
+              )}
+              
+              {employees.length > 5 && (
+                <div className="mt-4 text-right">
+                  <Link to="/employees" className="text-primary hover:underline text-sm">
+                    Alle {employees.length} Mitarbeiter anzeigen
+                  </Link>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
 
         <div className="grid gap-6 md:grid-cols-2">
           <motion.div
