@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import PageTransition from "@/components/layout/PageTransition";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, Check, X, UserCog, Trash } from "lucide-react";
+import { Plus, Search, UserCog, Trash } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -21,14 +20,16 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { getRoles } from "@/data/mockData";
 import { format, formatDistanceToNow } from "date-fns";
 import { de } from "date-fns/locale";
 import { useAuth } from "@/hooks/use-auth";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getUsers, updateUserRole, deleteUser } from "@/data/users";
+import { getUsers, updateUserRole, deleteUser, createUser } from "@/data/users";
 import { UserRole } from "@/lib/types";
+import { Label } from "@/components/ui/label";
 
 interface User {
   id: string;
@@ -37,6 +38,8 @@ interface User {
   role: UserRole;
   lastSignInAt: string | null;
   createdAt: string;
+  position?: string;
+  department?: string;
 }
 
 export default function Users() {
@@ -49,6 +52,12 @@ export default function Users() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedRole, setSelectedRole] = useState<UserRole>("user");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [newUser, setNewUser] = useState({
+    email: "",
+    name: "",
+    role: "user" as UserRole
+  });
   const { toast } = useToast();
   const { user: currentUser } = useAuth();
 
@@ -114,6 +123,15 @@ export default function Users() {
     setDeleteDialogOpen(true);
   };
 
+  const openCreateDialog = () => {
+    setNewUser({
+      email: "",
+      name: "",
+      role: "user"
+    });
+    setCreateDialogOpen(true);
+  };
+
   const handleUpdateUserRole = async () => {
     if (!selectedUser || !selectedRole) return;
     
@@ -139,6 +157,48 @@ export default function Users() {
       toast({
         variant: "destructive",
         title: "Fehler beim Aktualisieren der Rolle",
+        description: error.message || "Ein unerwarteter Fehler ist aufgetreten",
+      });
+    }
+  };
+
+  const handleCreateUser = async () => {
+    try {
+      if (!newUser.email || !newUser.name) {
+        toast({
+          variant: "destructive",
+          title: "Ungültige Eingabe",
+          description: "Bitte füllen Sie alle erforderlichen Felder aus.",
+        });
+        return;
+      }
+      
+      const userId = await createUser(newUser);
+      
+      if (!userId) {
+        throw new Error("Failed to create user");
+      }
+      
+      // Add new user to local state
+      setUsers([...users, {
+        id: userId,
+        email: newUser.email,
+        name: newUser.name,
+        role: newUser.role,
+        lastSignInAt: null,
+        createdAt: new Date().toISOString()
+      }]);
+      
+      toast({
+        title: "Benutzer erstellt",
+        description: `${newUser.email} wurde erfolgreich erstellt.`,
+      });
+      
+      setCreateDialogOpen(false);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Fehler beim Erstellen des Benutzers",
         description: error.message || "Ein unerwarteter Fehler ist aufgetreten",
       });
     }
@@ -198,7 +258,7 @@ export default function Users() {
               Verwalten Sie alle Benutzer und deren Berechtigungen
             </p>
           </div>
-          <Button>
+          <Button onClick={openCreateDialog}>
             <Plus className="mr-2 h-4 w-4" />
             Benutzer hinzufügen
           </Button>
@@ -247,8 +307,8 @@ export default function Users() {
                   <TableHead>Name</TableHead>
                   <TableHead>E-Mail</TableHead>
                   <TableHead>Rolle</TableHead>
+                  <TableHead>Position/Abteilung</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Letzter Login</TableHead>
                   <TableHead className="text-right">Aktionen</TableHead>
                 </TableRow>
               </TableHeader>
@@ -260,7 +320,7 @@ export default function Users() {
                       <TableCell><Skeleton className="h-6 w-32" /></TableCell>
                       <TableCell><Skeleton className="h-6 w-24" /></TableCell>
                       <TableCell><Skeleton className="h-6 w-20" /></TableCell>
-                      <TableCell><Skeleton className="h-6 w-28" /></TableCell>
+                      <TableCell><Skeleton className="h-6 w-20" /></TableCell>
                       <TableCell><Skeleton className="h-6 w-20" /></TableCell>
                     </TableRow>
                   ))
@@ -279,17 +339,14 @@ export default function Users() {
                         </Badge>
                       </TableCell>
                       <TableCell>
+                        {user.position ? (
+                          <span>{user.position} {user.department ? `(${user.department})` : ''}</span>
+                        ) : '-'}
+                      </TableCell>
+                      <TableCell>
                         <Badge variant="outline" className="bg-green-100 border-green-200 text-green-800">
                           Aktiv
                         </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {user.lastSignInAt ? (
-                          formatDistanceToNow(new Date(user.lastSignInAt), { 
-                            addSuffix: true, 
-                            locale: de 
-                          })
-                        ) : 'Nie'}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
@@ -387,6 +444,65 @@ export default function Users() {
               </Button>
               <Button variant="destructive" onClick={handleDeleteUser}>
                 Löschen
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create User Dialog */}
+        <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Neuen Benutzer erstellen</DialogTitle>
+              <DialogDescription>
+                Erstellen Sie einen neuen Benutzer für die Asset Management Plattform.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  value={newUser.name}
+                  onChange={(e) => setNewUser({...newUser, name: e.target.value})}
+                  placeholder="Max Mustermann"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">E-Mail</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={newUser.email}
+                  onChange={(e) => setNewUser({...newUser, email: e.target.value})}
+                  placeholder="max.mustermann@beispiel.de"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="role">Rolle</Label>
+                <Select 
+                  value={newUser.role} 
+                  onValueChange={(value: string) => setNewUser({...newUser, role: value as UserRole})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Rolle auswählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {roles.map(role => (
+                      <SelectItem key={role.id} value={role.id}>
+                        {role.name} - {role.description}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
+                Abbrechen
+              </Button>
+              <Button onClick={handleCreateUser}>
+                Erstellen
               </Button>
             </DialogFooter>
           </DialogContent>

@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -53,15 +54,13 @@ const AppContent = () => {
                     <Route path="/users" element={<Users />} />
                     <Route path="/roles" element={<Roles />} />
                     <Route path="/logs" element={<Logs />} />
+                    <Route path="/intune" element={<Intune />} />
                     <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
                   </Routes>
                 </AdminLayout>
               </ProtectedRoute>
             } 
           />
-
-          {/* Intune admin page */}
-          <Route path="/admin/intune" element={<AdminLayout><Intune /></AdminLayout>} />
 
           {/* Auth Routes */}
           <Route path="/login" element={<Login />} />

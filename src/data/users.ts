@@ -34,13 +34,20 @@ export const updateUserRole = async (userId: string, role: UserRole): Promise<bo
  */
 export const deleteUser = async (userId: string): Promise<boolean> => {
   try {
-    const { error } = await supabase.auth.admin.deleteUser(userId);
+    // First delete the user's profile
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .delete()
+      .eq('id', userId);
 
-    if (error) {
-      console.error("Error deleting user:", error);
+    if (profileError) {
+      console.error("Error deleting user profile:", profileError);
       return false;
     }
 
+    // We can't directly delete from auth.users with the client SDK
+    // This would require a server-side function with admin rights
+    // For now, we'll just delete the user's profile
     return true;
   } catch (error) {
     console.error("Error in deleteUser:", error);
@@ -54,7 +61,7 @@ export const deleteUser = async (userId: string): Promise<boolean> => {
  */
 export const getUsers = async () => {
   try {
-    // Get users from profiles table (which has roles)
+    // Get all profiles (which includes employees and admins)
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
       .select('*');
@@ -64,32 +71,69 @@ export const getUsers = async () => {
       return [];
     }
 
-    // Try to get auth users data to get last sign in time
-    let authUsers = { users: [] };
-    try {
-      const { data, error: authError } = await supabase.auth.admin.listUsers();
-      if (!authError && data) {
-        authUsers = data;
-      }
-    } catch (authError) {
-      console.error("Error fetching auth users:", authError);
+    // Get all employees to merge data
+    const { data: employees, error: employeesError } = await supabase
+      .from('employees')
+      .select('*');
+
+    if (employeesError) {
+      console.error("Error fetching employees:", employeesError);
     }
 
     return profiles.map(profile => {
-      // Find matching auth user
-      const authUser = authUsers?.users?.find(u => u.id === profile.id);
+      // Find matching employee data if exists
+      const employeeData = employees?.find(e => e.id === profile.id || e.email === profile.email);
       
       return {
         id: profile.id,
         email: profile.email,
-        name: profile.name,
+        name: profile.name || (employeeData ? `${employeeData.first_name} ${employeeData.last_name}` : null),
         role: profile.role || 'user',
-        lastSignInAt: authUser?.last_sign_in_at || null,
-        createdAt: profile.created_at
+        lastSignInAt: null, // We can't get this from client SDK
+        createdAt: profile.created_at,
+        // Add additional employee info if available
+        position: employeeData?.position,
+        department: employeeData?.cluster
       };
     });
   } catch (error) {
     console.error("Error in getUsers:", error);
     return [];
+  }
+};
+
+/**
+ * Creates a new user in the system
+ * @param userData The user data to create
+ * @returns The newly created user ID or null on error
+ */
+export const createUser = async (userData: {
+  email: string;
+  name: string;
+  role: UserRole;
+}): Promise<string | null> => {
+  try {
+    // Generate a unique ID for the new user
+    const userId = crypto.randomUUID();
+    
+    // Create the user profile
+    const { error } = await supabase
+      .from('profiles')
+      .insert({
+        id: userId,
+        email: userData.email,
+        name: userData.name,
+        role: userData.role
+      });
+
+    if (error) {
+      console.error("Error creating user:", error);
+      return null;
+    }
+
+    return userId;
+  } catch (error) {
+    console.error("Error in createUser:", error);
+    return null;
   }
 };

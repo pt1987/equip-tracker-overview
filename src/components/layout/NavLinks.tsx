@@ -100,6 +100,11 @@ export const NavLinks = () => {
             hasDividerAbove
           />
           <NavLink
+            href="/admin/users"
+            icon={<Users size={16} />}
+            label="Benutzerverwaltung"
+          />
+          <NavLink
             href="/admin/intune"
             icon={<Server size={16} />}
             label="Intune"
