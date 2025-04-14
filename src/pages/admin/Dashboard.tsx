@@ -14,6 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
+import IntuneIntegration from "@/components/admin/IntuneIntegration";
 
 interface AdminStats {
   totalUsers: number;
@@ -182,94 +183,103 @@ export default function AdminDashboard() {
           </motion.div>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
-          className="col-span-2"
-        >
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle>Mitarbeiter</CardTitle>
-              <CardDescription>
-                Übersicht aller registrierten Mitarbeiter
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="flex justify-center py-4">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                </div>
-              ) : employees.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Position</TableHead>
-                      <TableHead>Cluster</TableHead>
-                      <TableHead>Eintritt</TableHead>
-                      <TableHead>Budget</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {employees.slice(0, 5).map((employee) => (
-                      <TableRow key={employee.id}>
-                        <TableCell>
-                          <div className="flex items-center space-x-3">
-                            <Avatar className="h-8 w-8">
-                              <AvatarImage src={employee.imageUrl} alt={`${employee.firstName} ${employee.lastName}`} />
-                              <AvatarFallback>{employee.firstName?.[0]}{employee.lastName?.[0]}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <Link 
-                                to={`/employee/${employee.id}`}
-                                className="font-medium hover:underline"
-                              >
-                                {employee.firstName} {employee.lastName}
-                              </Link>
-                              {employee.email && (
-                                <p className="text-xs text-muted-foreground">{employee.email}</p>
-                              )}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>{employee.position}</TableCell>
-                        <TableCell>{employee.cluster}</TableCell>
-                        <TableCell>
-                          {employee.entryDate && format(new Date(employee.entryDate), 'dd.MM.yyyy', { locale: de })}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center">
-                            <span className="font-medium">{employee.usedBudget.toFixed(2)} €</span>
-                            <span className="mx-1 text-muted-foreground">/</span>
-                            <span>{employee.budget.toFixed(2)} €</span>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <div className="py-4 text-center text-muted-foreground">
-                  <p>Keine Mitarbeiter gefunden.</p>
-                  <Link to="/employees" className="text-primary hover:underline mt-2 inline-block">
-                    Mitarbeiter hinzufügen
-                  </Link>
-                </div>
-              )}
-              
-              {employees.length > 5 && (
-                <div className="mt-4 text-right">
-                  <Link to="/employees" className="text-primary hover:underline text-sm">
-                    Alle {employees.length} Mitarbeiter anzeigen
-                  </Link>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
-
         <div className="grid gap-6 md:grid-cols-2">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="col-span-1 md:col-span-2"
+          >
+            <IntuneIntegration />
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+            className="col-span-1 md:col-span-2"
+          >
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle>Mitarbeiter</CardTitle>
+                <CardDescription>
+                  Übersicht aller registrierten Mitarbeiter
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="flex justify-center py-4">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  </div>
+                ) : employees.length > 0 ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Position</TableHead>
+                        <TableHead>Cluster</TableHead>
+                        <TableHead>Eintritt</TableHead>
+                        <TableHead>Budget</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {employees.slice(0, 5).map((employee) => (
+                        <TableRow key={employee.id}>
+                          <TableCell>
+                            <div className="flex items-center space-x-3">
+                              <Avatar className="h-8 w-8">
+                                <AvatarImage src={employee.imageUrl} alt={`${employee.firstName} ${employee.lastName}`} />
+                                <AvatarFallback>{employee.firstName?.[0]}{employee.lastName?.[0]}</AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <Link 
+                                  to={`/employee/${employee.id}`}
+                                  className="font-medium hover:underline"
+                                >
+                                  {employee.firstName} {employee.lastName}
+                                </Link>
+                                {employee.email && (
+                                  <p className="text-xs text-muted-foreground">{employee.email}</p>
+                                )}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>{employee.position}</TableCell>
+                          <TableCell>{employee.cluster}</TableCell>
+                          <TableCell>
+                            {employee.entryDate && format(new Date(employee.entryDate), 'dd.MM.yyyy', { locale: de })}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center">
+                              <span className="font-medium">{employee.usedBudget.toFixed(2)} €</span>
+                              <span className="mx-1 text-muted-foreground">/</span>
+                              <span>{employee.budget.toFixed(2)} €</span>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <div className="py-4 text-center text-muted-foreground">
+                    <p>Keine Mitarbeiter gefunden.</p>
+                    <Link to="/employees" className="text-primary hover:underline mt-2 inline-block">
+                      Mitarbeiter hinzufügen
+                    </Link>
+                  </div>
+                )}
+                
+                {employees.length > 5 && (
+                  <div className="mt-4 text-right">
+                    <Link to="/employees" className="text-primary hover:underline text-sm">
+                      Alle {employees.length} Mitarbeiter anzeigen
+                    </Link>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -313,6 +323,12 @@ export default function AdminDashboard() {
                       <h4 className="text-sm font-medium">Admin-Bereich erfolgreich eingerichtet</h4>
                       <p className="text-xs text-muted-foreground mt-1">
                         Der Admin-Bereich wurde erfolgreich eingerichtet. Sie können jetzt Benutzer verwalten und Rollen zuweisen.
+                      </p>
+                    </div>
+                    <div className="p-3 border rounded-md">
+                      <h4 className="text-sm font-medium">Microsoft Intune Integration verfügbar</h4>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Die Intune-Integration wurde hinzugefügt. Sie können jetzt Geräte aus Ihrer Microsoft Intune-Umgebung abfragen.
                       </p>
                     </div>
                   </div>

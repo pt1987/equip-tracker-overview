@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -30,6 +29,7 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import Users from "./pages/admin/Users";
 import Roles from "./pages/admin/Roles";
 import Logs from "./pages/admin/Logs";
+import Intune from "./pages/admin/Intune";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +59,9 @@ const AppContent = () => {
               </ProtectedRoute>
             } 
           />
+
+          {/* Intune admin page */}
+          <Route path="/admin/intune" element={<AdminLayout><Intune /></AdminLayout>} />
 
           {/* Auth Routes */}
           <Route path="/login" element={<Login />} />

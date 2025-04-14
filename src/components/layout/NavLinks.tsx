@@ -14,6 +14,7 @@ import {
   Users,
   FileLineChart,
   Shield,
+  Server,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -91,12 +92,19 @@ export const NavLinks = () => {
       
       {/* Add Admin section for users with admin permission */}
       {hasPermission('canAccessAdmin') && (
-        <NavLink
-          href="/admin/dashboard"
-          icon={<Shield size={16} />}
-          label="Admin Bereich"
-          hasDividerAbove
-        />
+        <>
+          <NavLink
+            href="/admin/dashboard"
+            icon={<Shield size={16} />}
+            label="Admin Bereich"
+            hasDividerAbove
+          />
+          <NavLink
+            href="/admin/intune"
+            icon={<Server size={16} />}
+            label="Intune"
+          />
+        </>
       )}
     </div>
   );

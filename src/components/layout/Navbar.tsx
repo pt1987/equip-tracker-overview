@@ -16,7 +16,8 @@ import {
   Shield,
   LogIn,
   LogOut,
-  Calendar
+  Calendar,
+  Server
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -38,7 +39,6 @@ export default function Navbar() {
     setIsSidebarOpen(false);
   }, [location]);
 
-  // Define menu items
   const menuItems = [
     { to: "/", label: "Dashboard", icon: <BarChart3 size={20} /> },
     { to: "/assets", label: "Assets", icon: <MonitorSmartphone size={20} /> },
@@ -50,7 +50,6 @@ export default function Navbar() {
     { to: "/hardware-order", label: "Hardware-Bestellung", icon: <Package size={20} /> },
   ];
 
-  // Create links based on permissions
   const createLinks = [];
   if (hasPermission('canEditAssets')) {
     createLinks.push({ to: "/asset/create", label: "Asset erstellen", icon: <PlusCircle size={20} /> });
@@ -63,6 +62,7 @@ export default function Navbar() {
     { to: "/admin/dashboard", label: "Admin Dashboard", icon: <Shield size={20} /> },
     { to: "/admin/users", label: "Benutzerverwaltung", icon: <Users size={20} /> },
     { to: "/admin/roles", label: "Rollen & Berechtigungen", icon: <Shield size={20} /> },
+    { to: "/admin/intune", label: "Intune Integration", icon: <Server size={20} /> },
   ] : [];
 
   return (
@@ -155,7 +155,6 @@ export default function Navbar() {
                       </>
                     )}
                     
-                    {/* Authentication section */}
                     <li className="pt-4">
                       <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
                         Konto
@@ -197,7 +196,6 @@ export default function Navbar() {
             </Link>
           </div>
           
-          {/* Add login button for mobile */}
           {!isAuthenticated && (
             <Link to="/login">
               <Button variant="outline" size="sm">
@@ -291,7 +289,6 @@ export default function Navbar() {
                 </>
               )}
               
-              {/* Authentication section */}
               <li className="pt-4">
                 <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
                   Konto
