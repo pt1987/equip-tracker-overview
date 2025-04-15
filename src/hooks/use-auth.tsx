@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 console.log("Employee data:", employeeData);
                 
                 // Get permissions for this role
-                const permissions = getRolePermissions(userRole) as UserPermissions;
+                const permissions = getRolePermissions(userRole);
                 console.log("User permissions:", permissions);
 
                 setUser({
@@ -91,7 +91,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                   name: currentSession.user.user_metadata?.name || null,
                   role: defaultRole,
                   employeeData: null,
-                  permissions: getRolePermissions(defaultRole) as UserPermissions
+                  permissions: getRolePermissions(defaultRole)
                 });
               }
               setLoading(false);
@@ -134,7 +134,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               console.log("Employee data:", employeeData);
               
               // Get permissions for this role
-              const permissions = getRolePermissions(userRole) as UserPermissions;
+              const permissions = getRolePermissions(userRole);
               console.log("User permissions:", permissions);
 
               setUser({
@@ -159,7 +159,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 name: currentSession.user.user_metadata?.name || null,
                 role: defaultRole,
                 employeeData: null,
-                permissions: getRolePermissions(defaultRole) as UserPermissions
+                permissions: getRolePermissions(defaultRole)
               });
             }
           } catch (err) {

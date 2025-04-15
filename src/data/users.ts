@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { UserRole } from "@/lib/types";
+import { UserPermissions, UserRole } from "@/lib/types";
 
 /**
  * Updates a user's role in the database
@@ -152,10 +152,11 @@ export const createUser = async (userData: {
  * @param permission The permission to check
  * @returns True if the user has the permission
  */
-export const hasPermission = (role: UserRole | null, permission: keyof UserRole): boolean => {
+export const hasPermission = (role: UserRole | null, permission: keyof UserPermissions): boolean => {
   // Get the permissions for this role
   const permissions = getRolePermissions(role);
-  return permissions[permission] || false;
+  // Fix: Use explicit boolean check to ensure we return a boolean
+  return Boolean(permissions[permission]);
 };
 
 /**
@@ -163,9 +164,9 @@ export const hasPermission = (role: UserRole | null, permission: keyof UserRole)
  * @param role The role to get permissions for
  * @returns The permissions object
  */
-export const getRolePermissions = (role: UserRole | null): Record<string, boolean> => {
+export const getRolePermissions = (role: UserRole | null): UserPermissions => {
   // Default permissions (for regular users)
-  const defaultPermissions: Record<string, boolean> = {
+  const defaultPermissions: UserPermissions = {
     canAccessAdmin: false,
     canEditAssets: false,
     canCreateEmployees: false,
