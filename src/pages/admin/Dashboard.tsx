@@ -14,7 +14,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
-import IntuneIntegration from "@/components/admin/IntuneIntegration";
 
 interface AdminStats {
   totalUsers: number;
@@ -187,15 +186,6 @@ export default function AdminDashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="col-span-1 md:col-span-2"
-          >
-            <IntuneIntegration />
-          </motion.div>
-          
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
             className="col-span-1 md:col-span-2"
           >
@@ -328,7 +318,7 @@ export default function AdminDashboard() {
                     <div className="p-3 border rounded-md">
                       <h4 className="text-sm font-medium">Microsoft Intune Integration verfügbar</h4>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Die Intune-Integration wurde hinzugefügt. Sie können jetzt Geräte aus Ihrer Microsoft Intune-Umgebung abfragen.
+                        Die Intune-Integration wurde auf der dedizierten Intune-Seite hinzugefügt.
                       </p>
                     </div>
                   </div>

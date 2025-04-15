@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { 
@@ -9,7 +10,8 @@ import {
   ChevronRight, 
   Menu,
   X,
-  Home
+  Home,
+  Server
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -99,6 +101,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { to: "/admin/users", icon: <Users className="h-5 w-5" />, label: "Benutzer" },
     { to: "/admin/roles", icon: <Shield className="h-5 w-5" />, label: "Rollen & Berechtigungen" },
     { to: "/admin/logs", icon: <FileText className="h-5 w-5" />, label: "Audit-Logs" },
+    { to: "/admin/intune", icon: <Server className="h-5 w-5" />, label: "Intune" },
   ];
 
   const isCurrentPath = (path: string) => location.pathname === path;
