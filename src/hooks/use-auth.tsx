@@ -26,6 +26,7 @@ interface AuthContextType {
   loading: boolean;
   session: Session | null;
   hasPermission: (permission: keyof UserPermissions) => boolean;
+  refreshUserData: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -36,6 +37,75 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Helper to fetch user profile data
+  const fetchUserProfileData = async (userId: string, userEmail: string | null, userName: string | null = null) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (data && !error) {
+        console.log("User profile found:", data);
+        const userRole = (data.role || 'user') as UserRole;
+        
+        // Get employee data if any
+        const employeeData = await getEmployeeById(data.id);
+        console.log("Employee data:", employeeData);
+        
+        // Get permissions for this role
+        const permissions = getRolePermissions(userRole);
+        console.log("User permissions:", permissions);
+
+        return {
+          id: data.id,
+          email: data.email,
+          name: data.name,
+          role: userRole,
+          employeeData: employeeData,
+          permissions: permissions
+        };
+      } else {
+        console.log("Profile not found. Using auth data as fallback.");
+        if (error) {
+          console.error("Error fetching profile:", error);
+        }
+        
+        const defaultRole = 'user' as UserRole;
+        
+        return {
+          id: userId,
+          email: userEmail || '',
+          name: userName || null,
+          role: defaultRole,
+          employeeData: null,
+          permissions: getRolePermissions(defaultRole)
+        };
+      }
+    } catch (err) {
+      console.error("Error fetching user profile:", err);
+      throw err;
+    }
+  };
+
+  // Function to refresh user data
+  const refreshUserData = async () => {
+    if (!session?.user) return;
+    
+    try {
+      console.log("Refreshing user data for:", session.user.id);
+      const userData = await fetchUserProfileData(
+        session.user.id, 
+        session.user.email,
+        session.user.user_metadata?.name
+      );
+      setUser(userData);
+    } catch (err) {
+      console.error("Error refreshing user data:", err);
+    }
+  };
 
   useEffect(() => {
     console.log("Setting up auth state listener");
@@ -51,49 +121,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           // Important: Use setTimeout to avoid Supabase recursion issues
           setTimeout(async () => {
             try {
-              const { data, error } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', currentSession.user.id)
-                .single();
-
-              if (data && !error) {
-                console.log("User profile found:", data);
-                const userRole = (data.role || 'user') as UserRole;
-                
-                // Get employee data if any
-                const employeeData = await getEmployeeById(data.id);
-                console.log("Employee data:", employeeData);
-                
-                // Get permissions for this role
-                const permissions = getRolePermissions(userRole);
-                console.log("User permissions:", permissions);
-
-                setUser({
-                  id: data.id,
-                  email: data.email,
-                  name: data.name,
-                  role: userRole,
-                  employeeData: employeeData,
-                  permissions: permissions
-                });
-              } else {
-                console.log("Profile not found. Using auth data as fallback.");
-                if (error) {
-                  console.error("Error fetching profile:", error);
-                }
-                
-                const defaultRole = 'user' as UserRole;
-                
-                setUser({
-                  id: currentSession.user.id,
-                  email: currentSession.user.email || '',
-                  name: currentSession.user.user_metadata?.name || null,
-                  role: defaultRole,
-                  employeeData: null,
-                  permissions: getRolePermissions(defaultRole)
-                });
-              }
+              const userData = await fetchUserProfileData(
+                currentSession.user.id,
+                currentSession.user.email,
+                currentSession.user.user_metadata?.name
+              );
+              setUser(userData);
               setLoading(false);
             } catch (err) {
               console.error("Error in auth state change handler:", err);
@@ -119,49 +152,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         
         setTimeout(async () => {
           try {
-            const { data, error } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', currentSession.user.id)
-              .single();
-
-            if (data && !error) {
-              console.log("User profile loaded:", data);
-              const userRole = (data.role || 'user') as UserRole;
-              
-              // Get employee data if any
-              const employeeData = await getEmployeeById(data.id);
-              console.log("Employee data:", employeeData);
-              
-              // Get permissions for this role
-              const permissions = getRolePermissions(userRole);
-              console.log("User permissions:", permissions);
-
-              setUser({
-                id: data.id,
-                email: data.email,
-                name: data.name,
-                role: userRole,
-                employeeData: employeeData,
-                permissions: permissions
-              });
-            } else {
-              console.log("Using auth data for user profile");
-              if (error) {
-                console.error("Error fetching profile:", error);
-              }
-              
-              const defaultRole = 'user' as UserRole;
-              
-              setUser({
-                id: currentSession.user.id,
-                email: currentSession.user.email || '',
-                name: currentSession.user.user_metadata?.name || null,
-                role: defaultRole,
-                employeeData: null,
-                permissions: getRolePermissions(defaultRole)
-              });
-            }
+            const userData = await fetchUserProfileData(
+              currentSession.user.id,
+              currentSession.user.email,
+              currentSession.user.user_metadata?.name
+            );
+            setUser(userData);
           } catch (err) {
             console.error("Error in session check:", err);
           } finally {
@@ -319,7 +315,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     signup,
     logout,
     loading,
-    hasPermission
+    hasPermission,
+    refreshUserData
   };
   
   console.log("Auth context current state:", {

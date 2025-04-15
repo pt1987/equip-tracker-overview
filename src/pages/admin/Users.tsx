@@ -144,8 +144,8 @@ export default function Users() {
         throw new Error("Failed to update user role");
       }
       
-      // Update local state
-      setUsers(users.map(u => 
+      // Update local state immediately
+      setUsers(prevUsers => prevUsers.map(u => 
         u.id === selectedUser.id ? {...u, role: selectedRole} : u
       ));
       
