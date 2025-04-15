@@ -72,17 +72,21 @@ export const getUsers = async () => {
       return [];
     }
 
-    // Get all employee data to merge with profiles
+    // Get all employee data 
     const { data: employees, error: employeesError } = await supabase
       .from('employees')
       .select('*');
 
     if (employeesError) {
       console.error("Error fetching employees:", employeesError);
+      return [];
     }
 
-    // Merge profile data with employee data where applicable
-    return profiles.map(profile => {
+    // Create a map of existing profile IDs for quick lookup
+    const profileIds = new Set(profiles.map(profile => profile.id));
+    
+    // Process profile users first
+    let allUsers = profiles.map(profile => {
       // Find matching employee data if it exists
       const employeeData = employees?.find(e => 
         e.id === profile.id || 
@@ -95,15 +99,40 @@ export const getUsers = async () => {
         email: profile.email,
         name: profile.name || (employeeData ? `${employeeData.first_name} ${employeeData.last_name}` : null),
         role: profile.role || 'user',
-        lastSignInAt: null, // Can't get this from client SDK
+        lastSignInAt: null,
         createdAt: profile.created_at,
-        // Add employee-specific info if available
         position: employeeData?.position,
         department: employeeData?.cluster,
         isEmployee: !!employeeData,
         employeeId: employeeData?.id
       };
     });
+    
+    // Now add employees that don't have profiles yet
+    for (const employee of employees || []) {
+      // Skip employees already linked to profiles
+      if (profileIds.has(employee.id) || 
+          (employee.user_id && profileIds.has(employee.user_id))) {
+        continue;
+      }
+      
+      // Add this employee as a user
+      allUsers.push({
+        id: employee.id,
+        email: employee.email || `${employee.first_name.toLowerCase()}.${employee.last_name.toLowerCase()}@example.com`,
+        name: `${employee.first_name} ${employee.last_name}`,
+        role: 'user',
+        lastSignInAt: null,
+        createdAt: employee.created_at,
+        position: employee.position,
+        department: employee.cluster,
+        isEmployee: true,
+        employeeId: employee.id
+      });
+    }
+    
+    console.log(`Total users found: ${allUsers.length} (${profiles.length} profiles, ${employees?.length || 0} employees)`);
+    return allUsers;
   } catch (error) {
     console.error("Error in getUsers:", error);
     return [];

@@ -23,8 +23,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { getRoles } from "@/data/mockData";
-import { format, formatDistanceToNow } from "date-fns";
-import { de } from "date-fns/locale";
 import { useAuth } from "@/hooks/use-auth";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getUsers, updateUserRole, deleteUser, createUser } from "@/data/users";
@@ -81,6 +79,7 @@ export default function Users() {
         role: user.role as UserRole
       }));
       
+      console.log("Fetched users:", typedUsersData.length);
       setUsers(typedUsersData);
     } catch (error: any) {
       console.error("Error in fetchUsers:", error);
