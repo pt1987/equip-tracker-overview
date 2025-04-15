@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -5,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Session, User } from "@supabase/supabase-js";
 import { getEmployeeById } from "@/data/employees";
 import { Employee, UserPermissions, UserRole } from "@/lib/types";
+import { getRolePermissions } from "@/data/users";
 
 interface UserProfile {
   id: string;
@@ -28,45 +30,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const getUserPermissions = (role: UserRole | null): UserPermissions => {
-  const defaultPermissions: UserPermissions = {
-    canAccessAdmin: false,
-    canEditAssets: false,
-    canCreateEmployees: false,
-    canEditEmployees: false,
-    canEditOwnAssets: true,
-    canEditOwnProfile: true,
-    canViewReports: true
-  };
-
-  switch (role) {
-    case 'admin':
-      return {
-        canAccessAdmin: true,
-        canEditAssets: true,
-        canCreateEmployees: true,
-        canEditEmployees: true,
-        canEditOwnAssets: true,
-        canEditOwnProfile: true,
-        canViewReports: true
-      };
-    case 'editor':
-      return {
-        canAccessAdmin: false,
-        canEditAssets: true,
-        canCreateEmployees: true,
-        canEditEmployees: true,
-        canEditOwnAssets: true,
-        canEditOwnProfile: true,
-        canViewReports: true
-      };
-    case 'user':
-      return defaultPermissions;
-    default:
-      return defaultPermissions;
-  }
-};
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -85,6 +48,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (currentSession?.user) {
           console.log("User is authenticated. Fetching profile data.");
           
+          // Important: Use setTimeout to avoid Supabase recursion issues
           setTimeout(async () => {
             try {
               const { data, error } = await supabase
@@ -97,10 +61,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 console.log("User profile found:", data);
                 const userRole = (data.role || 'user') as UserRole;
                 
+                // Get employee data if any
                 const employeeData = await getEmployeeById(data.id);
                 console.log("Employee data:", employeeData);
                 
-                const permissions = getUserPermissions(userRole);
+                // Get permissions for this role
+                const permissions = getRolePermissions(userRole) as UserPermissions;
                 console.log("User permissions:", permissions);
 
                 setUser({
@@ -125,7 +91,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                   name: currentSession.user.user_metadata?.name || null,
                   role: defaultRole,
                   employeeData: null,
-                  permissions: getUserPermissions(defaultRole)
+                  permissions: getRolePermissions(defaultRole) as UserPermissions
                 });
               }
               setLoading(false);
@@ -163,10 +129,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               console.log("User profile loaded:", data);
               const userRole = (data.role || 'user') as UserRole;
               
+              // Get employee data if any
               const employeeData = await getEmployeeById(data.id);
               console.log("Employee data:", employeeData);
               
-              const permissions = getUserPermissions(userRole);
+              // Get permissions for this role
+              const permissions = getRolePermissions(userRole) as UserPermissions;
               console.log("User permissions:", permissions);
 
               setUser({
@@ -191,7 +159,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 name: currentSession.user.user_metadata?.name || null,
                 role: defaultRole,
                 employeeData: null,
-                permissions: getUserPermissions(defaultRole)
+                permissions: getRolePermissions(defaultRole) as UserPermissions
               });
             }
           } catch (err) {
@@ -236,7 +204,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             description: "Sie wurden aufgrund von Inaktivität abgemeldet.",
           });
         }
-      }, 15 * 60 * 1000);
+      }, 15 * 60 * 1000); // 15 minutes
     };
     
     const resetInactivityTimer = () => {

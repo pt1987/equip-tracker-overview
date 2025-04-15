@@ -7,7 +7,6 @@ import {
   FileBarChart,
   History,
   LayoutDashboard,
-  Laptop,
   MonitorSmartphone,
   PackageSearch,
   ShoppingBag,
@@ -103,6 +102,11 @@ export const NavLinks = () => {
             href="/admin/users"
             icon={<Users size={16} />}
             label="Benutzerverwaltung"
+          />
+          <NavLink
+            href="/admin/roles"
+            icon={<Shield size={16} />}
+            label="Rollen & Berechtigungen"
           />
           <NavLink
             href="/admin/intune"

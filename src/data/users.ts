@@ -10,6 +10,7 @@ import { UserRole } from "@/lib/types";
  */
 export const updateUserRole = async (userId: string, role: UserRole): Promise<boolean> => {
   try {
+    // Update the user's role in the profiles table
     const { error } = await supabase
       .from('profiles')
       .update({ role })
@@ -34,7 +35,7 @@ export const updateUserRole = async (userId: string, role: UserRole): Promise<bo
  */
 export const deleteUser = async (userId: string): Promise<boolean> => {
   try {
-    // First delete the user's profile
+    // Delete the user's profile first
     const { error: profileError } = await supabase
       .from('profiles')
       .delete()
@@ -46,8 +47,8 @@ export const deleteUser = async (userId: string): Promise<boolean> => {
     }
 
     // We can't directly delete from auth.users with the client SDK
-    // This would require a server-side function with admin rights
-    // For now, we'll just delete the user's profile
+    // For comprehensive user deletion, a server-side function with admin rights would be needed
+    // Here we're just removing the profile
     return true;
   } catch (error) {
     console.error("Error in deleteUser:", error);
@@ -56,12 +57,12 @@ export const deleteUser = async (userId: string): Promise<boolean> => {
 };
 
 /**
- * Gets all users from the profiles table
- * @returns Array of users with their profile information
+ * Gets all users from the system (combines profiles with employee data)
+ * @returns Array of unified users with their profile and employee information
  */
 export const getUsers = async () => {
   try {
-    // Get all profiles (which includes employees and admins)
+    // Get all profiles first
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
       .select('*');
@@ -71,7 +72,7 @@ export const getUsers = async () => {
       return [];
     }
 
-    // Get all employees to merge data
+    // Get all employee data to merge with profiles
     const { data: employees, error: employeesError } = await supabase
       .from('employees')
       .select('*');
@@ -80,20 +81,27 @@ export const getUsers = async () => {
       console.error("Error fetching employees:", employeesError);
     }
 
+    // Merge profile data with employee data where applicable
     return profiles.map(profile => {
-      // Find matching employee data if exists
-      const employeeData = employees?.find(e => e.id === profile.id || e.email === profile.email);
+      // Find matching employee data if it exists
+      const employeeData = employees?.find(e => 
+        e.id === profile.id || 
+        e.user_id === profile.id || 
+        e.email === profile.email
+      );
       
       return {
         id: profile.id,
         email: profile.email,
         name: profile.name || (employeeData ? `${employeeData.first_name} ${employeeData.last_name}` : null),
         role: profile.role || 'user',
-        lastSignInAt: null, // We can't get this from client SDK
+        lastSignInAt: null, // Can't get this from client SDK
         createdAt: profile.created_at,
-        // Add additional employee info if available
+        // Add employee-specific info if available
         position: employeeData?.position,
-        department: employeeData?.cluster
+        department: employeeData?.cluster,
+        isEmployee: !!employeeData,
+        employeeId: employeeData?.id
       };
     });
   } catch (error) {
@@ -135,5 +143,66 @@ export const createUser = async (userData: {
   } catch (error) {
     console.error("Error in createUser:", error);
     return null;
+  }
+};
+
+/**
+ * Checks if a user has a specific permission
+ * @param role The user's role
+ * @param permission The permission to check
+ * @returns True if the user has the permission
+ */
+export const hasPermission = (role: UserRole | null, permission: keyof UserRole): boolean => {
+  // Get the permissions for this role
+  const permissions = getRolePermissions(role);
+  return permissions[permission] || false;
+};
+
+/**
+ * Gets all permissions for a specific role
+ * @param role The role to get permissions for
+ * @returns The permissions object
+ */
+export const getRolePermissions = (role: UserRole | null): Record<string, boolean> => {
+  // Default permissions (for regular users)
+  const defaultPermissions: Record<string, boolean> = {
+    canAccessAdmin: false,
+    canEditAssets: false,
+    canCreateEmployees: false,
+    canEditEmployees: false,
+    canEditOwnAssets: true,
+    canEditOwnProfile: true,
+    canViewReports: true
+  };
+
+  if (!role) {
+    return defaultPermissions;
+  }
+
+  // Role-specific permissions
+  switch (role) {
+    case 'admin':
+      return {
+        canAccessAdmin: true,
+        canEditAssets: true,
+        canCreateEmployees: true,
+        canEditEmployees: true,
+        canEditOwnAssets: true,
+        canEditOwnProfile: true,
+        canViewReports: true
+      };
+    case 'editor':
+      return {
+        canAccessAdmin: false,
+        canEditAssets: true,
+        canCreateEmployees: true,
+        canEditEmployees: true,
+        canEditOwnAssets: true,
+        canEditOwnProfile: true,
+        canViewReports: true
+      };
+    case 'user':
+    default:
+      return defaultPermissions;
   }
 };

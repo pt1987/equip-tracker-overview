@@ -40,6 +40,8 @@ interface User {
   createdAt: string;
   position?: string;
   department?: string;
+  isEmployee?: boolean;
+  employeeId?: string;
 }
 
 export default function Users() {
@@ -104,10 +106,11 @@ export default function Users() {
       roleFilter === 'all' || 
       user.role === roleFilter;
     
-    // Status filter - for now, we consider all users active
-    const matchesStatus = 
-      statusFilter === 'all' || 
-      statusFilter === 'active';
+    // Status filter - currently uses isEmployee field
+    const matchesStatus =
+      statusFilter === 'all' ||
+      (statusFilter === 'employee' && user.isEmployee) ||
+      (statusFilter === 'user' && !user.isEmployee);
     
     return matchesSearch && matchesRole && matchesStatus;
   });
@@ -292,9 +295,9 @@ export default function Users() {
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Alle Status</SelectItem>
-                  <SelectItem value="active">Aktiv</SelectItem>
-                  <SelectItem value="inactive">Inaktiv</SelectItem>
+                  <SelectItem value="all">Alle Typen</SelectItem>
+                  <SelectItem value="employee">Mitarbeiter</SelectItem>
+                  <SelectItem value="user">Regulärer User</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -308,7 +311,7 @@ export default function Users() {
                   <TableHead>E-Mail</TableHead>
                   <TableHead>Rolle</TableHead>
                   <TableHead>Position/Abteilung</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>Typ</TableHead>
                   <TableHead className="text-right">Aktionen</TableHead>
                 </TableRow>
               </TableHeader>
@@ -344,8 +347,11 @@ export default function Users() {
                         ) : '-'}
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="bg-green-100 border-green-200 text-green-800">
-                          Aktiv
+                        <Badge variant="outline" className={user.isEmployee 
+                          ? "bg-blue-100 border-blue-200 text-blue-800"
+                          : "bg-green-100 border-green-200 text-green-800"}
+                        >
+                          {user.isEmployee ? 'Mitarbeiter' : 'User'}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
