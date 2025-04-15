@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import PageTransition from "@/components/layout/PageTransition";
@@ -59,7 +58,7 @@ export default function Users() {
     role: "user" as UserRole
   });
   const { toast } = useToast();
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, refreshUserData } = useAuth();
 
   const roles = getRoles();
 
@@ -73,7 +72,6 @@ export default function Users() {
       
       const usersData = await getUsers();
       
-      // Ensure that the role property is cast to UserRole type
       const typedUsersData = usersData.map(user => ({
         ...user,
         role: user.role as UserRole
@@ -94,18 +92,15 @@ export default function Users() {
   };
 
   const filteredUsers = users.filter(user => {
-    // Search filter
     const matchesSearch = 
       searchQuery.trim() === '' || 
       user.email.toLowerCase().includes(searchQuery.toLowerCase()) || 
       (user.name && user.name.toLowerCase().includes(searchQuery.toLowerCase()));
     
-    // Role filter
     const matchesRole = 
       roleFilter === 'all' || 
       user.role === roleFilter;
     
-    // Status filter - currently uses isEmployee field
     const matchesStatus =
       statusFilter === 'all' ||
       (statusFilter === 'employee' && user.isEmployee) ||
@@ -138,16 +133,23 @@ export default function Users() {
     if (!selectedUser || !selectedRole) return;
     
     try {
+      setLoading(true);
+      
       const success = await updateUserRole(selectedUser.id, selectedRole);
       
       if (!success) {
         throw new Error("Failed to update user role");
       }
       
-      // Update local state immediately
+      console.log(`Role updated successfully for ${selectedUser.email} to ${selectedRole}`);
+      
       setUsers(prevUsers => prevUsers.map(u => 
         u.id === selectedUser.id ? {...u, role: selectedRole} : u
       ));
+      
+      if (currentUser?.id === selectedUser.id) {
+        await refreshUserData();
+      }
       
       toast({
         title: "Rolle aktualisiert",
@@ -156,11 +158,14 @@ export default function Users() {
       
       setUserRoleDialogOpen(false);
     } catch (error: any) {
+      console.error("Error updating role:", error);
       toast({
         variant: "destructive",
         title: "Fehler beim Aktualisieren der Rolle",
         description: error.message || "Ein unerwarteter Fehler ist aufgetreten",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -181,7 +186,6 @@ export default function Users() {
         throw new Error("Failed to create user");
       }
       
-      // Add new user to local state
       setUsers([...users, {
         id: userId,
         email: newUser.email,
@@ -232,7 +236,6 @@ export default function Users() {
         throw new Error("Failed to delete user");
       }
       
-      // Update local state
       setUsers(users.filter(u => u.id !== selectedUser.id));
       
       toast({
@@ -389,7 +392,6 @@ export default function Users() {
           </div>
         </div>
 
-        {/* Role Change Dialog */}
         <Dialog open={userRoleDialogOpen} onOpenChange={setUserRoleDialogOpen}>
           <DialogContent>
             <DialogHeader>
@@ -422,14 +424,13 @@ export default function Users() {
               <Button variant="outline" onClick={() => setUserRoleDialogOpen(false)}>
                 Abbrechen
               </Button>
-              <Button onClick={handleUpdateUserRole}>
-                Speichern
+              <Button onClick={handleUpdateUserRole} disabled={loading}>
+                {loading ? "Speichern..." : "Speichern"}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        {/* Delete User Dialog */}
         <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <DialogContent>
             <DialogHeader>
@@ -454,7 +455,6 @@ export default function Users() {
           </DialogContent>
         </Dialog>
 
-        {/* Create User Dialog */}
         <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
           <DialogContent>
             <DialogHeader>

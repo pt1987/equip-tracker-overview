@@ -10,6 +10,8 @@ import { UserPermissions, UserRole } from "@/lib/types";
  */
 export const updateUserRole = async (userId: string, role: UserRole): Promise<boolean> => {
   try {
+    console.log(`Updating user ${userId} role to ${role}`);
+    
     // Update the user's role in the profiles table
     const { error } = await supabase
       .from('profiles')
@@ -21,6 +23,7 @@ export const updateUserRole = async (userId: string, role: UserRole): Promise<bo
       return false;
     }
 
+    console.log(`User role updated successfully`);
     return true;
   } catch (error) {
     console.error("Error in updateUserRole:", error);
@@ -184,7 +187,7 @@ export const createUser = async (userData: {
 export const hasPermission = (role: UserRole | null, permission: keyof UserPermissions): boolean => {
   // Get the permissions for this role
   const permissions = getRolePermissions(role);
-  // Fix: Use explicit boolean check to ensure we return a boolean
+  // Use explicit boolean check to ensure we return a boolean
   return Boolean(permissions[permission]);
 };
 

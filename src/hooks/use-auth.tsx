@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -38,9 +37,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Helper to fetch user profile data
   const fetchUserProfileData = async (userId: string, userEmail: string | null, userName: string | null = null) => {
     try {
+      console.log("Fetching user profile for:", userId);
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -51,11 +51,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         console.log("User profile found:", data);
         const userRole = (data.role || 'user') as UserRole;
         
-        // Get employee data if any
         const employeeData = await getEmployeeById(data.id);
         console.log("Employee data:", employeeData);
         
-        // Get permissions for this role
         const permissions = getRolePermissions(userRole);
         console.log("User permissions:", permissions);
 
@@ -90,20 +88,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Function to refresh user data
   const refreshUserData = async () => {
-    if (!session?.user) return;
+    if (!session?.user) {
+      console.log("No session found, cannot refresh user data");
+      return;
+    }
     
     try {
       console.log("Refreshing user data for:", session.user.id);
+      setLoading(true);
+      
       const userData = await fetchUserProfileData(
         session.user.id, 
         session.user.email,
         session.user.user_metadata?.name
       );
+      
+      console.log("Refreshed user data:", userData);
       setUser(userData);
     } catch (err) {
       console.error("Error refreshing user data:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -118,7 +124,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (currentSession?.user) {
           console.log("User is authenticated. Fetching profile data.");
           
-          // Important: Use setTimeout to avoid Supabase recursion issues
           setTimeout(async () => {
             try {
               const userData = await fetchUserProfileData(
