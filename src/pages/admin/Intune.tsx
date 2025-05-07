@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import PageTransition from "@/components/layout/PageTransition";
-import IntuneIntegration from "@/components/admin/IntuneIntegration";
+import IntuneConsole from "@/components/admin/IntuneConsole";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -121,7 +121,7 @@ export default function IntuneAdminPage() {
         
         <div className="grid gap-6 md:grid-cols-2">
           <div className="md:col-span-1">
-            <IntuneIntegration onConfigUpdate={handleIntuneConfigUpdate} />
+            <IntuneConsole onConfigUpdate={handleIntuneConfigUpdate} />
           </div>
 
           <div className="md:col-span-1">
