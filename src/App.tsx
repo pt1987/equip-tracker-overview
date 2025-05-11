@@ -11,6 +11,7 @@ import { AuthProvider, ProtectedRoute } from "@/hooks/use-auth";
 import Navbar from "@/components/layout/Navbar";
 import AdminLayout from "@/components/admin/AdminLayout";
 import Dashboard from "./pages/Index";
+import LandingPage from "./pages/LandingPage";
 import Assets from "./pages/Assets";
 import Employees from "./pages/Employees";
 import AssetDetail from "./pages/AssetDetail";
@@ -43,6 +44,9 @@ const AppContent = () => {
       <Sonner />
       <AnimatePresence mode="wait">
         <Routes>
+          {/* Landing Page Route */}
+          <Route path="/" element={<LandingPage />} />
+          
           {/* Admin Routes with Admin Layout */}
           <Route 
             path="/admin/*" 
@@ -74,7 +78,7 @@ const AppContent = () => {
                 <Navbar />
                 <main className={`${isMobile ? 'pt-16' : 'md:pl-64'} max-w-full w-full`}>
                   <Routes>
-                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/assets" element={<Assets />} />
                     <Route path="/employees" element={<Employees />} />
                     <Route path="/asset/:id" element={<AssetDetail />} />
