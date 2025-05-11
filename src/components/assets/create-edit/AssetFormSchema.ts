@@ -1,6 +1,6 @@
 
 import { z } from "zod";
-import { AssetType, AssetStatus } from "@/lib/types";
+import { AssetType, AssetStatus, AssetClassification } from "@/lib/types";
 
 export const assetFormSchema = z.object({
   category: z.string().min(1, "Bitte wählen Sie eine Kategorie"),
@@ -35,6 +35,16 @@ export const assetFormSchema = z.object({
   notes: z.string().optional(),
   department: z.string().optional(),
   location: z.string().optional(),
+  
+  // ISO 27001 fields
+  classification: z.string().optional(),
+  assetOwnerId: z.string().optional(),
+  lastReviewDate: z.string().optional(),
+  nextReviewDate: z.string().optional(),
+  riskLevel: z.string().optional(),
+  isPersonalData: z.boolean().optional(),
+  disposalMethod: z.string().optional(),
+  lifecycleStage: z.string().optional(),
 });
 
 export type AssetFormValues = z.infer<typeof assetFormSchema>;

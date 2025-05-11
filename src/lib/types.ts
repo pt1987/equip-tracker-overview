@@ -31,6 +31,13 @@ export interface UserPermissions {
   canViewReports: boolean;
 }
 
+// Classification level according to ISO 27001
+export type AssetClassification = 
+  | 'public'      // Information that can be freely disclosed
+  | 'internal'    // Information for internal use only
+  | 'confidential' // Sensitive information requiring protection
+  | 'restricted';  // Highly sensitive information with strict access control
+
 export interface Asset {
   id: string;
   name: string;
@@ -70,6 +77,16 @@ export interface Asset {
   notes?: string;
   department?: string;
   location?: string;
+  
+  // ISO 27001 specific fields
+  classification?: AssetClassification;  // Information classification level
+  assetOwnerId?: string;                // Person responsible for the asset
+  lastReviewDate?: string;             // Date of last security review
+  nextReviewDate?: string;             // Date of next required review
+  riskLevel?: 'low' | 'medium' | 'high'; // Associated risk level
+  isPersonalData?: boolean;            // Whether asset contains personal data (GDPR relevance)
+  disposalMethod?: string;             // Method used for secure disposal
+  lifecycleStage?: 'procurement' | 'operation' | 'maintenance' | 'disposal'; // Current lifecycle stage
 }
 
 export interface Employee {
@@ -292,3 +309,26 @@ export type BookingReturnCondition =
   | 'damaged'    // Damaged
   | 'incomplete' // Missing accessories
   | 'lost';      // Lost device
+
+// New interface for ISO 27001 Asset Review
+export interface AssetReview {
+  id: string;
+  assetId: string;
+  reviewerId: string;
+  reviewDate: string;
+  findings: string;
+  recommendations: string;
+  nextReviewDate: string;
+  isCompliant: boolean;
+}
+
+// New interface for Asset Ownership transfer history
+export interface AssetOwnershipChange {
+  id: string;
+  assetId: string;
+  previousOwnerId: string | null;
+  newOwnerId: string;
+  changeDate: string;
+  reason: string;
+  approvedById: string;
+}

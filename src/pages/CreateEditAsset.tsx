@@ -19,7 +19,8 @@ import AssetFormBasicInfo from "@/components/assets/create-edit/AssetFormBasicIn
 import AssetFormDetails from "@/components/assets/create-edit/AssetFormDetails";
 import AssetFormWarranty from "@/components/assets/create-edit/AssetFormWarranty";
 import AssetFormRelation from "@/components/assets/create-edit/AssetFormRelation";
-import { AssetType, AssetStatus, Employee } from "@/lib/types";
+import AssetFormCompliance from "@/components/assets/create-edit/AssetFormCompliance";
+import { AssetType, AssetStatus, Employee, AssetClassification } from "@/lib/types";
 
 export default function CreateEditAsset() {
   const { id } = useParams();
@@ -63,6 +64,16 @@ export default function CreateEditAsset() {
       contractDuration: asset.contractEndDate || "",
       contractName: asset.contractName || "",
       relatedAssetId: asset.connectedAssetId || "",
+      // ISO 27001 fields
+      classification: asset.classification || "internal",
+      assetOwnerId: asset.assetOwnerId || "",
+      lastReviewDate: asset.lastReviewDate || "",
+      nextReviewDate: asset.nextReviewDate || "",
+      riskLevel: asset.riskLevel || "low",
+      isPersonalData: asset.isPersonalData || false,
+      disposalMethod: asset.disposalMethod || "",
+      lifecycleStage: asset.lifecycleStage || "operation",
+      notes: asset.notes || "",
     } : {
       category: "",
       manufacturer: "",
@@ -84,6 +95,16 @@ export default function CreateEditAsset() {
       contractDuration: "",
       contractName: "",
       relatedAssetId: "",
+      // ISO 27001 default fields
+      classification: "internal",
+      assetOwnerId: "",
+      lastReviewDate: "",
+      nextReviewDate: "",
+      riskLevel: "low",
+      isPersonalData: false,
+      disposalMethod: "",
+      lifecycleStage: "operation",
+      notes: "",
     }
   });
 
@@ -118,7 +139,17 @@ export default function CreateEditAsset() {
         contractEndDate: data.contractDuration || null,
         contractName: data.contractName || "",
         connectedAssetId: data.relatedAssetId && data.relatedAssetId !== "none" ? data.relatedAssetId : null,
-        relatedAssetId: data.relatedAssetId && data.relatedAssetId !== "none" ? data.relatedAssetId : null
+        relatedAssetId: data.relatedAssetId && data.relatedAssetId !== "none" ? data.relatedAssetId : null,
+        // ISO 27001 fields
+        classification: data.classification as AssetClassification,
+        assetOwnerId: data.assetOwnerId || null,
+        lastReviewDate: data.lastReviewDate || null,
+        nextReviewDate: data.nextReviewDate || null,
+        riskLevel: data.riskLevel as 'low' | 'medium' | 'high' || null,
+        isPersonalData: data.isPersonalData || false,
+        disposalMethod: data.disposalMethod || null,
+        lifecycleStage: data.lifecycleStage as 'procurement' | 'operation' | 'maintenance' | 'disposal' || null,
+        notes: data.notes || null,
       };
 
       if (isEditing && id) {
@@ -182,6 +213,7 @@ export default function CreateEditAsset() {
                       <TabsTrigger value="details">Erweiterte Details</TabsTrigger>
                       <TabsTrigger value="relation">Zuordnung</TabsTrigger>
                       <TabsTrigger value="warranty">Garantie</TabsTrigger>
+                      <TabsTrigger value="compliance">ISO 27001</TabsTrigger>
                     </TabsList>
                     
                     <TabsContent value="basic">
@@ -198,6 +230,10 @@ export default function CreateEditAsset() {
                     
                     <TabsContent value="warranty">
                       <AssetFormWarranty />
+                    </TabsContent>
+                    
+                    <TabsContent value="compliance">
+                      <AssetFormCompliance />
                     </TabsContent>
                   </Tabs>
                 </CardContent>

@@ -1,16 +1,19 @@
 
 import { useState, useEffect } from "react";
-import { Asset } from "@/lib/types";
+import { Asset, AssetReview } from "@/lib/types";
 import { getEmployeeById } from "@/data/employees";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Import new component parts
+// Import component parts
 import AssetImage from "./details/AssetImage";
 import AssetHeaderInfo from "./details/AssetHeaderInfo";
 import AssetTechnicalDetails from "./details/AssetTechnicalDetails";
 import ConnectedAsset from "./details/ConnectedAsset";
+import ComplianceSection from "./details/ComplianceSection";
+import AssetReviewHistory from "./details/AssetReviewHistory";
 import AssetStatusIndicator from "@/components/bookings/AssetStatusIndicator";
 import { getCurrentOrUpcomingBooking } from "@/data/bookings";
 
@@ -29,14 +32,16 @@ export default function AssetDetailView({
   const [isLoadingEmployee, setIsLoadingEmployee] = useState(false);
   const [bookingStatus, setBookingStatus] = useState<"available" | "booked" | "available-partial">("available");
   const [loadingBookingStatus, setLoadingBookingStatus] = useState(false);
+  const [currentAsset, setCurrentAsset] = useState<Asset>(asset);
+  const [activeTab, setActiveTab] = useState<"details" | "compliance">("details");
   const { toast } = useToast();
 
   useEffect(() => {
     const fetchEmployee = async () => {
-      if (asset.employeeId) {
+      if (currentAsset.employeeId) {
         setIsLoadingEmployee(true);
         try {
-          const employee = await getEmployeeById(asset.employeeId);
+          const employee = await getEmployeeById(currentAsset.employeeId);
           setEmployeeData(employee);
         } catch (error) {
           console.error("Error fetching employee data:", error);
@@ -48,10 +53,10 @@ export default function AssetDetailView({
 
     // Fetch booking status for pool devices
     const fetchBookingStatus = async () => {
-      if (asset.isPoolDevice || asset.status === 'pool') {
+      if (currentAsset.isPoolDevice || currentAsset.status === 'pool') {
         setLoadingBookingStatus(true);
         try {
-          const currentBooking = await getCurrentOrUpcomingBooking(asset.id);
+          const currentBooking = await getCurrentOrUpcomingBooking(currentAsset.id);
           if (currentBooking && currentBooking.status === 'active') {
             setBookingStatus("booked");
           } else if (currentBooking && currentBooking.status === 'reserved') {
@@ -69,17 +74,32 @@ export default function AssetDetailView({
     
     fetchEmployee();
     fetchBookingStatus();
-  }, [asset.employeeId, asset.isPoolDevice, asset.status, asset.id]);
+  }, [currentAsset.employeeId, currentAsset.isPoolDevice, currentAsset.status, currentAsset.id]);
+
+  const handleAssetUpdate = (updatedAsset: Asset) => {
+    setCurrentAsset(updatedAsset);
+  };
+
+  const handleReviewAdded = (review: AssetReview) => {
+    // In a real app, this would be saved to the database
+    // For now, just update the asset's lastReviewDate and nextReviewDate
+    const updatedAsset = {
+      ...currentAsset,
+      lastReviewDate: review.reviewDate,
+      nextReviewDate: review.nextReviewDate
+    };
+    setCurrentAsset(updatedAsset);
+  };
 
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <AssetImage imageUrl={asset.imageUrl} altText={asset.name} />
+        <AssetImage imageUrl={currentAsset.imageUrl} altText={currentAsset.name} />
         <div>
-          <AssetHeaderInfo asset={asset} onEdit={onEdit} onDelete={onDelete} />
+          <AssetHeaderInfo asset={currentAsset} onEdit={onEdit} onDelete={onDelete} />
           
           {/* Anzeigen des Pool-Status, wenn es ein Pool-Gerät ist */}
-          {(asset.isPoolDevice || asset.status === 'pool') && (
+          {(currentAsset.isPoolDevice || currentAsset.status === 'pool') && (
             <div className="mt-4 flex items-center gap-2">
               <span className="font-medium">Buchungsstatus:</span> 
               {loadingBookingStatus ? (
@@ -92,9 +112,22 @@ export default function AssetDetailView({
         </div>
       </div>
 
-      <AssetTechnicalDetails asset={asset} />
-
-      {asset.connectedAssetId && <ConnectedAsset connectedAssetId={asset.connectedAssetId} />}
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "details" | "compliance")}>
+        <TabsList>
+          <TabsTrigger value="details">Technische Details</TabsTrigger>
+          <TabsTrigger value="compliance">ISO 27001 Compliance</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="details" className="space-y-6">
+          <AssetTechnicalDetails asset={currentAsset} />
+          {currentAsset.connectedAssetId && <ConnectedAsset connectedAssetId={currentAsset.connectedAssetId} />}
+        </TabsContent>
+        
+        <TabsContent value="compliance" className="space-y-6">
+          <ComplianceSection asset={currentAsset} onAssetUpdate={handleAssetUpdate} />
+          <AssetReviewHistory asset={currentAsset} onReviewAdded={handleReviewAdded} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
