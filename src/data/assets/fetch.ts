@@ -76,7 +76,7 @@ export const getAssetHistoryByAssetId = async (assetId: string): Promise<AssetHi
       date: entry.date,
       action: entry.action as AssetHistoryAction,  // Cast string to enum type
       employeeId: entry.employee_id,
-      userId: entry.user_id || null,  // Handle missing user_id field
+      userId: null,  // Set to null by default since user_id doesn't exist in the response
       notes: entry.notes || ""
     }));
     
