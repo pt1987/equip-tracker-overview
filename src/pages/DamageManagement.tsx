@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import { Helmet } from "react-helmet";
 import { 
   AlertTriangle, 
   Calendar, 
@@ -51,9 +50,9 @@ export default function DamageManagement() {
 
   return (
     <>
-      <Helmet>
+      <head>
         <title>Schadensmanagement | Asset Tracker</title>
-      </Helmet>
+      </head>
       
       <div className="container mx-auto py-6 space-y-6">
         <div className="flex justify-between items-center">
