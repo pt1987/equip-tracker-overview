@@ -12,7 +12,7 @@ interface BookingHistorySectionProps {
   getBookingDisplayStatus: (booking: AssetBooking) => string;
   getStatusLabel: (status: string) => string;
   getStatusBadgeVariant: (status: string) => "default" | "secondary" | "destructive" | "outline";
-  assetId: string; // Add assetId prop
+  assetId: string; // Required prop
 }
 
 export default function BookingHistorySection({
@@ -20,7 +20,7 @@ export default function BookingHistorySection({
   getBookingDisplayStatus,
   getStatusLabel,
   getStatusBadgeVariant,
-  assetId // Use assetId
+  assetId
 }: BookingHistorySectionProps) {
   const isMobile = useIsMobile();
   

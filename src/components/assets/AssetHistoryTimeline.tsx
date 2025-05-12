@@ -1,5 +1,6 @@
 
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import { AssetHistoryEntry, AssetHistoryAction } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
 import { 
@@ -23,10 +24,32 @@ interface AssetHistoryTimelineProps {
 }
 
 const AssetHistoryTimeline = ({ history }: AssetHistoryTimelineProps) => {
+  // State to store user names after fetching them
+  const [userNames, setUserNames] = useState<Record<string, string>>({});
+
   // Sort history by date (newest first)
   const sortedHistory = [...history].sort((a, b) => 
     new Date(b.date).getTime() - new Date(a.date).getTime()
   );
+  
+  // Fetch user names on component mount and whenever history changes
+  useEffect(() => {
+    const fetchUserNames = async () => {
+      const userIds = [...new Set(sortedHistory.map(entry => entry.userId).filter(Boolean))];
+      const namesMap: Record<string, string> = {};
+      
+      for (const userId of userIds) {
+        if (userId) {
+          const name = await getUserNameFromId(userId);
+          namesMap[userId] = name;
+        }
+      }
+      
+      setUserNames(namesMap);
+    };
+    
+    fetchUserNames();
+  }, [sortedHistory]);
 
   const getActionIcon = (action: AssetHistoryAction) => {
     switch (action) {
@@ -146,7 +169,9 @@ const AssetHistoryTimeline = ({ history }: AssetHistoryTimelineProps) => {
                 
                 <div className="text-sm mb-1">
                   <span className="text-muted-foreground">Durch: </span>
-                  <span className="font-medium">{getUserNameFromId(entry.userId)}</span>
+                  <span className="font-medium">
+                    {entry.userId ? (userNames[entry.userId] || "Benutzer") : "System"}
+                  </span>
                 </div>
                 
                 {entry.notes && (
