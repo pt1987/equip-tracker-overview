@@ -18,7 +18,8 @@ import {
   LogOut,
   Calendar,
   Server,
-  AlertTriangle
+  AlertTriangle,
+  Home
 } from "lucide-react";
 
 interface NavigationItemsProps {
@@ -29,7 +30,8 @@ interface NavigationItemsProps {
 
 export const NavigationItems = ({ location }: NavigationItemsProps) => {
   const menuItems = [
-    { to: "/", label: "Dashboard", icon: "BarChart3" },
+    { to: "/", label: "Home", icon: "Home" },
+    { to: "/dashboard", label: "Dashboard", icon: "BarChart3" },
     { to: "/assets", label: "Assets", icon: "MonitorSmartphone" },
     { to: "/employees", label: "Mitarbeiter", icon: "Users" },
     { to: "/history", label: "Historie", icon: "Clock" },
@@ -63,6 +65,7 @@ export const NavigationItems = ({ location }: NavigationItemsProps) => {
 // Helper component for rendering icons
 NavigationItems.Icon = function NavigationIcon({ name }: { name: string }) {
   const iconMap: Record<string, React.ReactNode> = {
+    Home: <Home size={20} />,
     BarChart3: <BarChart3 size={20} />,
     MonitorSmartphone: <MonitorSmartphone size={20} />,
     Users: <Users size={20} />,
