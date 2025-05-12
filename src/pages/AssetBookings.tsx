@@ -1,32 +1,29 @@
 
 import { useState, useEffect } from "react";
-import { format, parseISO, addDays } from "date-fns";
-import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, Calendar as CalendarIcon, Filter, List, RefreshCw } from "lucide-react";
+import { AlertTriangle, Calendar as CalendarIcon, List, RefreshCw } from "lucide-react";
 import PageTransition from "@/components/layout/PageTransition";
 import { useQuery } from "@tanstack/react-query";
 import { getAllBookings, updateBookingStatuses } from "@/data/bookings";
 import { getAssets } from "@/data/assets";
 import { getEmployees } from "@/data/employees";
 import { useToast } from "@/hooks/use-toast";
-import { Asset, AssetBooking, AssetType, Employee } from "@/lib/types";
+import { AssetType } from "@/lib/types";
 import BookingList from "@/components/bookings/BookingList";
 import BookingCalendarView from "@/components/bookings/BookingCalendarView";
 import BookingDialog from "@/components/bookings/BookingDialog";
 import AssetTypeFilter from "@/components/bookings/AssetTypeFilter";
-import AssetStatusIndicator from "@/components/bookings/AssetStatusIndicator";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function AssetBookings() {
   const [view, setView] = useState<"calendar" | "list">("calendar");
   const [selectedAssetType, setSelectedAssetType] = useState<AssetType | "all">("all");
   const [showBookingDialog, setShowBookingDialog] = useState(false);
-  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+  const [selectedAsset, setSelectedAsset] = useState<any | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   
   // Fetch data
   const { data: bookings, isLoading: isLoadingBookings, refetch: refetchBookings } = 
@@ -81,8 +78,11 @@ export default function AssetBookings() {
     });
   };
   
-  const handleAssetSelect = (asset: Asset) => {
+  const handleAssetSelect = (asset: any, date?: Date) => {
     setSelectedAsset(asset);
+    if (date) {
+      setSelectedDate(date);
+    }
     setShowBookingDialog(true);
   };
   
@@ -96,32 +96,32 @@ export default function AssetBookings() {
 
   return (
     <PageTransition>
-      <div className="container mx-auto py-8 max-w-7xl">
+      <div className="container mx-auto py-6 px-4 md:px-8 max-w-7xl">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Poolgeräte Buchungen</h1>
+              <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold tracking-tight`}>Poolgeräte Buchungen</h1>
               <p className="text-muted-foreground">
-                Verwalten Sie die Buchungen für alle Poolgeräte und reservieren Sie Geräte für bestimmte Zeiträume.
+                Verwalten Sie die Buchungen für alle Poolgeräte und reservieren Sie Geräte.
               </p>
             </div>
             
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2 self-start md:self-auto">
               <Button 
                 variant="outline" 
-                size="sm" 
+                size={isMobile ? "sm" : "default"}
                 onClick={handleRefresh}
                 className="flex items-center gap-1"
               >
                 <RefreshCw className="h-4 w-4" />
-                Aktualisieren
+                {isMobile ? "" : "Aktualisieren"}
               </Button>
             </div>
           </div>
           
           <Card>
             <CardHeader className="pb-3">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
                 <div>
                   <CardTitle>Poolgeräte</CardTitle>
                   <CardDescription>
@@ -129,17 +129,17 @@ export default function AssetBookings() {
                   </CardDescription>
                 </div>
                 
-                <div className="flex gap-2 mt-2 md:mt-0">
+                <div className="flex flex-wrap gap-2 mt-2 md:mt-0 w-full md:w-auto">
                   <AssetTypeFilter 
                     selectedType={selectedAssetType} 
                     onChange={setSelectedAssetType}
                   />
                   
-                  <div className="flex border rounded-md overflow-hidden">
+                  <div className="flex border rounded-md overflow-hidden flex-grow md:flex-grow-0">
                     <Button
                       variant={view === "calendar" ? "default" : "ghost"}
                       size="sm"
-                      className="rounded-none"
+                      className="rounded-none flex-1 md:flex-auto"
                       onClick={() => setView("calendar")}
                     >
                       <CalendarIcon className="h-4 w-4 mr-1" />
@@ -148,7 +148,7 @@ export default function AssetBookings() {
                     <Button
                       variant={view === "list" ? "default" : "ghost"}
                       size="sm"
-                      className="rounded-none"
+                      className="rounded-none flex-1 md:flex-auto"
                       onClick={() => setView("list")}
                     >
                       <List className="h-4 w-4 mr-1" />

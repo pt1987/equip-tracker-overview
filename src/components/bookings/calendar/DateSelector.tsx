@@ -22,14 +22,14 @@ export default function DateSelector({
   const isMobile = useIsMobile();
   
   return (
-    <div className="mb-4">
+    <div className="mb-2">
       <h3 className="text-lg font-medium mb-2">Datum auswählen</h3>
-      <div className={`w-full flex justify-center ${isMobile ? 'mx-auto' : ''}`}>
+      <div className={`flex justify-center ${isMobile ? 'w-full' : ''}`}>
         <CalendarContainer
           mode="single"
           selected={selectedDate}
           onSelect={onDateSelect}
-          className={`rounded-md border ${isMobile ? 'w-full max-w-[350px]' : ''}`}
+          className={`rounded-md border shadow-sm ${isMobile ? 'w-full max-w-full' : ''}`}
           locale={de}
           components={{
             Day: ({ date, ...props }) => (

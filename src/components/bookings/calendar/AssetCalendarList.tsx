@@ -24,7 +24,7 @@ export default function AssetCalendarList({
   const isMobile = useIsMobile();
 
   return (
-    <ScrollArea className={`${isMobile ? 'h-[400px]' : 'h-[500px]'}`}>
+    <ScrollArea className={`${isMobile ? 'h-[calc(100vh-400px)]' : 'h-[500px]'} min-h-[300px]`}>
       <div className="space-y-3 pr-4">
         {assets.map(asset => {
           const assetBookings = getBookingsForAssetOnDate(asset, selectedDate, bookings);
@@ -33,10 +33,10 @@ export default function AssetCalendarList({
           return (
             <Card 
               key={asset.id} 
-              className={`cursor-pointer hover:bg-muted/50 transition-colors`}
+              className="cursor-pointer hover:bg-muted/50 transition-colors"
               onClick={() => onAssetSelect(asset, selectedDate)}
             >
-              <CardContent className={`${isMobile ? 'p-3' : 'p-4'}`}>
+              <CardContent className="p-3">
                 <div className="flex justify-between items-start">
                   <div>
                     <div className="font-medium">{asset.name}</div>
@@ -44,7 +44,7 @@ export default function AssetCalendarList({
                       {asset.manufacturer} {asset.model}
                     </div>
                     
-                    <div className="mt-2 flex items-center gap-2">
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
                       <Badge variant={asset.type === "laptop" ? "default" : 
                         asset.type === "tablet" ? "secondary" : 
                         asset.type === "smartphone" ? "outline" : "default"}

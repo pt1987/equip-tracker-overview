@@ -29,8 +29,8 @@ export default function BookingCalendarView({
   }, [assets, selectedDate]);
 
   return (
-    <div className={`grid ${isMobile ? 'grid-cols-1 gap-4' : 'grid-cols-1 lg:grid-cols-3 gap-6'}`}>
-      <div className={`${isMobile ? 'order-1' : 'col-span-1'}`}>
+    <div className="flex flex-col md:grid md:grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className={`${isMobile ? 'order-1' : 'lg:col-span-1'}`}>
         <DateSelector 
           selectedDate={selectedDate} 
           onDateSelect={setSelectedDate}
@@ -41,7 +41,7 @@ export default function BookingCalendarView({
         <CalendarLegend />
       </div>
       
-      <div className={`${isMobile ? 'order-2' : 'col-span-1 lg:col-span-2'}`}>
+      <div className={`${isMobile ? 'order-2 mt-4' : 'lg:col-span-2'}`}>
         <h3 className="text-lg font-medium mb-2">
           Geräte für {selectedDate ? format(selectedDate, "dd.MM.yyyy", { locale: de }) : "heute"}
         </h3>

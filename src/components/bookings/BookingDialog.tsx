@@ -1,36 +1,19 @@
 
 import { useState, useEffect } from "react";
-import { format, addHours, setHours, setMinutes } from "date-fns";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { format, addHours } from "date-fns";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Drawer, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { CalendarIcon, Clock } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { CalendarIcon } from "lucide-react";
 import { Asset, Employee } from "@/lib/types";
 import { createBooking } from "@/data/bookings";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface BookingDialogProps {
   asset: Asset;
@@ -57,6 +40,7 @@ export default function BookingDialog({
   const [startDateOpen, setStartDateOpen] = useState(false);
   const [endDateOpen, setEndDateOpen] = useState(false);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     // Set employee ID to the first employee in the list
@@ -155,6 +139,151 @@ export default function BookingDialog({
     return `${hours}:${minutes}`;
   });
 
+  // Content for both mobile and desktop views
+  const DialogContent = () => (
+    <div className="grid gap-4 py-4 overflow-y-auto max-h-[calc(100vh-200px)]">
+      <div className="grid gap-2">
+        <Label htmlFor="employee">Mitarbeiter</Label>
+        <Select value={employeeId} onValueChange={setEmployeeId}>
+          <SelectTrigger id="employee">
+            <SelectValue placeholder="Mitarbeiter auswählen" />
+          </SelectTrigger>
+          <SelectContent>
+            {employees.map((employee) => (
+              <SelectItem key={employee.id} value={employee.id}>
+                {employee.firstName} {employee.lastName}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      
+      <div className="grid grid-cols-2 gap-4">
+        <div className="grid gap-2">
+          <Label>Startdatum</Label>
+          <Popover open={startDateOpen} onOpenChange={setStartDateOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-start text-left font-normal"
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {startDate ? format(startDate, "dd.MM.yyyy") : "Datum wählen"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={startDate}
+                onSelect={handleStartDateSelect}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+        
+        <div className="grid gap-2">
+          <Label htmlFor="start-time">Startzeit</Label>
+          <Select value={startTime} onValueChange={setStartTime}>
+            <SelectTrigger id="start-time">
+              <SelectValue placeholder="Startzeit" />
+            </SelectTrigger>
+            <SelectContent>
+              {timeOptions.map((time) => (
+                <SelectItem key={`start-${time}`} value={time}>
+                  {time}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-2 gap-4">
+        <div className="grid gap-2">
+          <Label>Enddatum</Label>
+          <Popover open={endDateOpen} onOpenChange={setEndDateOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-start text-left font-normal"
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {endDate ? format(endDate, "dd.MM.yyyy") : "Datum wählen"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={endDate}
+                onSelect={handleEndDateSelect}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+        
+        <div className="grid gap-2">
+          <Label htmlFor="end-time">Endzeit</Label>
+          <Select value={endTime} onValueChange={setEndTime}>
+            <SelectTrigger id="end-time">
+              <SelectValue placeholder="Endzeit" />
+            </SelectTrigger>
+            <SelectContent>
+              {timeOptions.map((time) => (
+                <SelectItem key={`end-${time}`} value={time}>
+                  {time}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      
+      <div className="grid gap-2">
+        <Label htmlFor="purpose">Verwendungszweck (optional)</Label>
+        <Textarea
+          id="purpose"
+          value={purpose}
+          onChange={(e) => setPurpose(e.target.value)}
+          placeholder="Zweck der Buchung, z.B. Kundenmeeting, Test, etc."
+          className="resize-none"
+        />
+      </div>
+    </div>
+  );
+
+  const DialogActions = () => (
+    <>
+      <Button variant="outline" onClick={onClose}>Abbrechen</Button>
+      <Button onClick={handleBook} disabled={isLoading}>
+        {isLoading ? "Wird gebucht..." : "Buchen"}
+      </Button>
+    </>
+  );
+
+  // Render different components based on device type
+  if (isMobile) {
+    return (
+      <Drawer open={true} onOpenChange={(open) => !open && onClose()}>
+        <DrawerContent>
+          <DrawerHeader className="text-left">
+            <DrawerTitle>Poolgerät buchen</DrawerTitle>
+            <DrawerDescription>
+              Buchen Sie {asset.name} ({asset.manufacturer} {asset.model})
+            </DrawerDescription>
+          </DrawerHeader>
+          <div className="px-4">
+            <DialogContent />
+          </div>
+          <DrawerFooter className="pt-2">
+            <DialogActions />
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-md">
@@ -164,123 +293,9 @@ export default function BookingDialog({
             Buchen Sie {asset.name} ({asset.manufacturer} {asset.model}) für einen bestimmten Zeitraum.
           </DialogDescription>
         </DialogHeader>
-        
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="employee">Mitarbeiter</Label>
-            <Select value={employeeId} onValueChange={setEmployeeId}>
-              <SelectTrigger id="employee">
-                <SelectValue placeholder="Mitarbeiter auswählen" />
-              </SelectTrigger>
-              <SelectContent>
-                {employees.map((employee) => (
-                  <SelectItem key={employee.id} value={employee.id}>
-                    {employee.firstName} {employee.lastName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-2">
-              <Label>Startdatum</Label>
-              <Popover open={startDateOpen} onOpenChange={setStartDateOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-left font-normal"
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {startDate ? format(startDate, "dd.MM.yyyy") : "Datum wählen"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={startDate}
-                    onSelect={handleStartDateSelect}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="start-time">Startzeit</Label>
-              <Select value={startTime} onValueChange={setStartTime}>
-                <SelectTrigger id="start-time">
-                  <SelectValue placeholder="Startzeit" />
-                </SelectTrigger>
-                <SelectContent>
-                  {timeOptions.map((time) => (
-                    <SelectItem key={`start-${time}`} value={time}>
-                      {time}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-2">
-              <Label>Enddatum</Label>
-              <Popover open={endDateOpen} onOpenChange={setEndDateOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-left font-normal"
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {endDate ? format(endDate, "dd.MM.yyyy") : "Datum wählen"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={endDate}
-                    onSelect={handleEndDateSelect}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="end-time">Endzeit</Label>
-              <Select value={endTime} onValueChange={setEndTime}>
-                <SelectTrigger id="end-time">
-                  <SelectValue placeholder="Endzeit" />
-                </SelectTrigger>
-                <SelectContent>
-                  {timeOptions.map((time) => (
-                    <SelectItem key={`end-${time}`} value={time}>
-                      {time}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          
-          <div className="grid gap-2">
-            <Label htmlFor="purpose">Verwendungszweck (optional)</Label>
-            <Textarea
-              id="purpose"
-              value={purpose}
-              onChange={(e) => setPurpose(e.target.value)}
-              placeholder="Zweck der Buchung, z.B. Kundenmeeting, Test, etc."
-              className="resize-none"
-            />
-          </div>
-        </div>
-        
+        <DialogContent />
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Abbrechen</Button>
-          <Button onClick={handleBook} disabled={isLoading}>
-            {isLoading ? "Wird gebucht..." : "Buchen"}
-          </Button>
+          <DialogActions />
         </DialogFooter>
       </DialogContent>
     </Dialog>
