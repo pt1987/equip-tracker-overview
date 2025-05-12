@@ -140,7 +140,7 @@ export default function BookingDialog({
   });
 
   // Content for both mobile and desktop views
-  const DialogContent = () => (
+  const FormContent = () => (
     <div className="grid gap-4 py-4 overflow-y-auto max-h-[calc(100vh-200px)]">
       <div className="grid gap-2">
         <Label htmlFor="employee">Mitarbeiter</Label>
@@ -274,7 +274,7 @@ export default function BookingDialog({
             </DrawerDescription>
           </DrawerHeader>
           <div className="px-4">
-            <DialogContent />
+            <FormContent />
           </div>
           <DrawerFooter className="pt-2">
             <DialogActions />
@@ -293,7 +293,7 @@ export default function BookingDialog({
             Buchen Sie {asset.name} ({asset.manufacturer} {asset.model}) für einen bestimmten Zeitraum.
           </DialogDescription>
         </DialogHeader>
-        <DialogContent />
+        <FormContent />
         <DialogFooter>
           <DialogActions />
         </DialogFooter>
