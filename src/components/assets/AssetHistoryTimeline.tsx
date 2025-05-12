@@ -16,9 +16,9 @@ import {
   Edit,
   Calendar
 } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
-import { getUserNameFromId } from "@/data/assets/history";
+import { getUserNameFromId, getEmployeeNameFromId } from "@/data/assets/history";
 import { getEmployeeById } from "@/data/employees/fetch";
+import { Separator } from "@/components/ui/separator";
 
 interface AssetHistoryTimelineProps {
   history: AssetHistoryEntry[];
@@ -137,6 +137,17 @@ const AssetHistoryTimeline = ({ history }: AssetHistoryTimelineProps) => {
     }
   };
 
+  // Function to format multiline notes with proper line breaks
+  const formatNotes = (notes: string) => {
+    if (!notes) return null;
+    
+    return notes.split('\n').map((line, index) => (
+      <div key={index} className={index > 0 ? "mt-1" : ""}>
+        {line}
+      </div>
+    ));
+  };
+
   if (sortedHistory.length === 0) {
     return (
       <div className="text-center py-8">
@@ -200,9 +211,9 @@ const AssetHistoryTimeline = ({ history }: AssetHistoryTimelineProps) => {
                 </div>
                 
                 {entry.notes && (
-                  <div className="text-sm">
-                    <span className="text-muted-foreground">Notiz: </span>
-                    <span>{entry.notes}</span>
+                  <div className="text-sm mt-2 border-t border-secondary/20 pt-2">
+                    <div className="text-xs text-muted-foreground mb-1">Änderungen:</div>
+                    <div className="text-sm">{formatNotes(entry.notes)}</div>
                   </div>
                 )}
                 

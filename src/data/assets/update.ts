@@ -90,17 +90,22 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
           // Verify employee exists before adding history entry
           const { data: employeeExists } = await supabase
             .from('employees')
-            .select('id')
+            .select('id, first_name, last_name')
             .eq('id', asset.employeeId)
             .single();
 
           if (employeeExists) {
             // Asset was assigned to someone
+            const employeeName = `${employeeExists.first_name} ${employeeExists.last_name}`;
+            const previousEmployeeInfo = currentAsset.employeeId ? 
+              "(vorher anderer Mitarbeiter zugewiesen)" : 
+              "(vorher keinem Mitarbeiter zugewiesen)";
+              
             await addAssetHistoryEntry(
               asset.id,
               "assign",
               asset.employeeId,
-              `Asset einem Mitarbeiter zugewiesen`,
+              `Asset ${employeeExists ? employeeName : asset.employeeId} zugewiesen ${previousEmployeeInfo}`,
               userId
             );
             console.log("Added assignment change to asset history");
@@ -113,7 +118,7 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
             asset.id,
             "return",
             null, // Return to pool doesn't need employee association
-            `Asset in den Pool zurückgegeben`,
+            `Asset in den Pool zurückgegeben (vorher einem Mitarbeiter zugewiesen)`,
             userId
           );
           console.log("Added return to pool to asset history");

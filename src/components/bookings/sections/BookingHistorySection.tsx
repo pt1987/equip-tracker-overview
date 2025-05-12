@@ -59,7 +59,7 @@ export default function BookingHistorySection({
     const ensureBookingsAreInHistory = async () => {
       // This is a safeguard to ensure all existing bookings are in history
       // In a real app, you'd track this more systematically
-      if (bookings.length > 0) {
+      if (bookings.length > 0 && assetId) {
         try {
           setIsProcessing(true);
           const userId = await getUserId();

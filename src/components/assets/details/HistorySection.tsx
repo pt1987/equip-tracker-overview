@@ -22,11 +22,17 @@ export default function HistorySection({
   // Process history entries to ensure they display correctly
   useEffect(() => {
     if (!isHistoryLoading && assetHistory && assetHistory.length > 0) {
-      setHistory(assetHistory);
+      // Create a copy of history to avoid modifying the original data
+      const processedHistory = [...assetHistory];
+      
+      // Sort history entries by date (newest first)
+      processedHistory.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      
+      setHistory(processedHistory);
       setIsProcessingHistory(false);
       
       // For debugging purposes only
-      console.log("Asset history entries:", assetHistory.map(entry => ({
+      console.log("Asset history entries:", processedHistory.map(entry => ({
         id: entry.id,
         action: entry.action,
         date: entry.date,

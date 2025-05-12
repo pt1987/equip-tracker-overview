@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { AssetHistoryAction, AssetStatus } from "@/lib/types";
+import { format } from "date-fns";
 
 // Function to add an entry to the asset history
 export const addAssetHistoryEntry = async (
@@ -62,7 +63,7 @@ export const generateStatusChangeNote = (
   previousStatus: AssetStatus, 
   newStatus: AssetStatus
 ): string => {
-  return `Status geändert von ${getStatusLabel(previousStatus)} zu ${getStatusLabel(newStatus)}`;
+  return `Status geändert von "${getStatusLabel(previousStatus)}" zu "${getStatusLabel(newStatus)}"`;
 };
 
 // Function to get a user-friendly label for status
@@ -81,40 +82,75 @@ const getStatusLabel = (status: AssetStatus): string => {
   return statusLabels[status] || status;
 };
 
-// Function to generate notes about which fields were changed
+// Enhanced function to generate notes about which fields were changed with before/after values
 export const generateFieldChangeNotes = (
   previousAsset: any,
   newAsset: any
 ): string => {
   const changedFields: string[] = [];
   
-  // Check each important field for changes
-  if (previousAsset.manufacturer !== newAsset.manufacturer || previousAsset.model !== newAsset.model) {
-    changedFields.push('Geräteinformationen');
+  // Check each important field for changes and document before/after values
+  if (previousAsset.manufacturer !== newAsset.manufacturer) {
+    changedFields.push(`Hersteller: "${previousAsset.manufacturer}" → "${newAsset.manufacturer}"`);
   }
   
-  if (previousAsset.serial_number !== newAsset.serial_number || 
-      previousAsset.inventory_number !== newAsset.inventory_number) {
-    changedFields.push('Identifikation');
+  if (previousAsset.model !== newAsset.model) {
+    changedFields.push(`Modell: "${previousAsset.model}" → "${newAsset.model}"`);
   }
   
-  if (previousAsset.price !== newAsset.price || previousAsset.vendor !== newAsset.vendor) {
-    changedFields.push('Kaufdetails');
+  if (previousAsset.serial_number !== newAsset.serial_number) {
+    const oldVal = previousAsset.serial_number || '(leer)';
+    const newVal = newAsset.serial_number || '(leer)';
+    changedFields.push(`Seriennummer: "${oldVal}" → "${newVal}"`);
   }
   
-  if (previousAsset.has_warranty !== newAsset.has_warranty || 
-      previousAsset.warranty_expiry_date !== newAsset.warranty_expiry_date ||
-      previousAsset.warranty_info !== newAsset.warranty_info) {
-    changedFields.push('Garantieinformationen');
+  if (previousAsset.inventory_number !== newAsset.inventory_number) {
+    const oldVal = previousAsset.inventory_number || '(leer)';
+    const newVal = newAsset.inventory_number || '(leer)';
+    changedFields.push(`Inventarnummer: "${oldVal}" → "${newVal}"`);
+  }
+  
+  if (previousAsset.price !== newAsset.price) {
+    changedFields.push(`Preis: ${previousAsset.price} € → ${newAsset.price} €`);
+  }
+  
+  if (previousAsset.vendor !== newAsset.vendor) {
+    const oldVal = previousAsset.vendor || '(leer)';
+    const newVal = newAsset.vendor || '(leer)';
+    changedFields.push(`Verkäufer: "${oldVal}" → "${newVal}"`);
+  }
+  
+  if (previousAsset.has_warranty !== newAsset.has_warranty) {
+    const oldVal = previousAsset.has_warranty ? 'Ja' : 'Nein';
+    const newVal = newAsset.has_warranty ? 'Ja' : 'Nein';
+    changedFields.push(`Garantie: ${oldVal} → ${newVal}`);
+  }
+  
+  if (previousAsset.warranty_expiry_date !== newAsset.warranty_expiry_date) {
+    const oldDate = previousAsset.warranty_expiry_date ? 
+      format(new Date(previousAsset.warranty_expiry_date), 'dd.MM.yyyy') : '(leer)';
+    const newDate = newAsset.warranty_expiry_date ? 
+      format(new Date(newAsset.warranty_expiry_date), 'dd.MM.yyyy') : '(leer)';
+    changedFields.push(`Garantie bis: ${oldDate} → ${newDate}`);
+  }
+  
+  if (previousAsset.warranty_info !== newAsset.warranty_info) {
+    const oldVal = previousAsset.warranty_info || '(leer)';
+    const newVal = newAsset.warranty_info || '(leer)';
+    changedFields.push(`Garantiedetails: "${oldVal}" → "${newVal}"`);
   }
   
   if (previousAsset.is_pool_device !== newAsset.is_pool_device) {
-    changedFields.push('Poolgerät-Status');
+    const oldVal = previousAsset.is_pool_device ? 'Ja' : 'Nein';
+    const newVal = newAsset.is_pool_device ? 'Ja' : 'Nein';
+    changedFields.push(`Poolgerät: ${oldVal} → ${newVal}`);
   }
+  
+  // Add more fields as needed
   
   // If fields were changed, list them in the note
   if (changedFields.length > 0) {
-    return `Änderungen an: ${changedFields.join(', ')}`;
+    return changedFields.join('\n');
   }
   
   // Default message if no specific changes were detected
