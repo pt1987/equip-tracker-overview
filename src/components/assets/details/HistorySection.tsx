@@ -17,21 +17,18 @@ export default function HistorySection({
   isHistoryLoading 
 }: HistorySectionProps) {
   const [history, setHistory] = useState<AssetHistoryEntry[]>([]);
-  const [isProcessingHistory, setIsProcessingHistory] = useState(true);
 
-  // Process history entries to ensure they display correctly
+  // Log history entries for debugging
   useEffect(() => {
     if (!isHistoryLoading && assetHistory) {
-      console.log("Processing asset history entries:", assetHistory.length);
-      
-      // Create a copy of history to avoid modifying the original data
-      const processedHistory = Array.isArray(assetHistory) ? [...assetHistory] : [];
-      
-      setHistory(processedHistory);
-      setIsProcessingHistory(false);
+      console.log("Asset history entries received:", assetHistory.length);
+      if (assetHistory.length > 0) {
+        console.log("Sample entry:", assetHistory[0]);
+      }
+      setHistory(Array.isArray(assetHistory) ? assetHistory : []);
     } else if (!isHistoryLoading) {
       console.log("No history entries to process");
-      setIsProcessingHistory(false);
+      setHistory([]);
     }
   }, [assetHistory, isHistoryLoading]);
 
@@ -46,7 +43,7 @@ export default function HistorySection({
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
-        {!isHistoryLoading && !isProcessingHistory ? (
+        {!isHistoryLoading ? (
           history && history.length > 0 ? (
             <AssetHistoryTimeline history={history} />
           ) : (

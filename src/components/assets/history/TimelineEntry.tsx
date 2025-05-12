@@ -34,13 +34,13 @@ const TimelineEntry = ({ entry, index, userNames, employeeNames }: TimelineEntry
     // Check if the notes contain multiple lines (change details)
     if (entry.notes.includes('\n')) {
       return entry.notes.split('\n').map((line, i) => (
-        <div key={i} className={`${i > 0 ? "mt-1" : ""} text-sm`}>
+        <div key={i} className={`${i > 0 ? "mt-1" : ""} text-sm break-words`}>
           {line}
         </div>
       ));
     }
     
-    return <div className="text-sm">{entry.notes}</div>;
+    return <div className="text-sm break-words">{entry.notes}</div>;
   };
   
   return (
@@ -77,7 +77,7 @@ const TimelineEntry = ({ entry, index, userNames, employeeNames }: TimelineEntry
             <div className="text-sm mb-1">
               <span className="text-muted-foreground">Mitarbeiter: </span>
               <span className="font-medium">
-                {employeeNames[entry.employeeId] || "Unbekannt"}
+                {employeeNames[entry.employeeId] || "Wird geladen..."}
               </span>
             </div>
           )}
@@ -85,7 +85,7 @@ const TimelineEntry = ({ entry, index, userNames, employeeNames }: TimelineEntry
           <div className="text-sm mb-1">
             <span className="text-muted-foreground">Durch: </span>
             <span className="font-medium">
-              {entry.userId ? (userNames[entry.userId] || "Unbekannt") : "System"}
+              {entry.userId ? (userNames[entry.userId] || "Wird geladen...") : "System"}
             </span>
           </div>
           

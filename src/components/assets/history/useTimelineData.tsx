@@ -42,7 +42,7 @@ export const useTimelineData = (history: AssetHistoryEntry[]) => {
         console.log("Unique user IDs found:", userIds);
         const namesMap: Record<string, string> = {};
         
-        for (const userId of userIds) {
+        await Promise.all(userIds.map(async (userId) => {
           try {
             const name = await getUserNameFromId(userId);
             namesMap[userId] = name;
@@ -51,7 +51,7 @@ export const useTimelineData = (history: AssetHistoryEntry[]) => {
             console.error(`Error fetching name for user ${userId}:`, error);
             namesMap[userId] = "Unbekannt";
           }
-        }
+        }));
         
         setUserNames(namesMap);
       } catch (error) {
@@ -92,7 +92,7 @@ export const useTimelineData = (history: AssetHistoryEntry[]) => {
         
         const namesMap: Record<string, string> = {};
         
-        for (const employeeId of employeeIds) {
+        await Promise.all(employeeIds.map(async (employeeId) => {
           try {
             const name = await getEmployeeNameFromId(employeeId);
             namesMap[employeeId] = name;
@@ -101,7 +101,7 @@ export const useTimelineData = (history: AssetHistoryEntry[]) => {
             console.error(`Error fetching employee ${employeeId}:`, error);
             namesMap[employeeId] = "Unbekannt";
           }
-        }
+        }));
         
         setEmployeeNames(namesMap);
         

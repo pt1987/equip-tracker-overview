@@ -19,6 +19,7 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
     let currentAsset = previousAsset;
     
     if (!currentAsset) {
+      console.log("No previous asset provided, fetching current state from database");
       const { data: fetchedAsset, error: fetchError } = await supabase
         .from('assets')
         .select('*')
@@ -31,6 +32,7 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
       }
       
       currentAsset = mapDbAssetToAsset(fetchedAsset);
+      console.log("Current asset state fetched:", currentAsset);
     }
     
     const dbAsset = mapAssetToDbAsset(asset);
@@ -60,15 +62,23 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
       throw new Error(`No asset returned after update for ID: ${asset.id}`);
     }
     
+    console.log("Asset updated successfully in database:", data.id);
+    
     try {
       // Get current user ID for tracking who made the change
       const userId = await getUserId();
       console.log("Current user making the change:", userId);
       
+      if (!originalAsset) {
+        console.warn("No original asset data available for history comparison");
+        return mapDbAssetToAsset(data);
+      }
+      
       // First, check for important individual changes that need their own entries
       
       // Check if status has changed and add history entry if it has
-      if (originalAsset && originalAsset.status !== asset.status) {
+      if (originalAsset.status !== asset.status) {
+        console.log(`Status changed: ${originalAsset.status} -> ${asset.status}`);
         const actionType = getActionTypeForStatusChange(
           originalAsset.status as AssetStatus, 
           asset.status as AssetStatus
@@ -91,7 +101,8 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
       }
       
       // Check if employee assignment has changed
-      if (originalAsset && originalAsset.employeeId !== asset.employeeId) {
+      if (originalAsset.employeeId !== asset.employeeId) {
+        console.log(`Employee assignment changed: ${originalAsset.employeeId} -> ${asset.employeeId}`);
         if (asset.employeeId) {
           // Asset was assigned to someone
           await addAssetHistoryEntry(
@@ -116,27 +127,25 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
       }
       
       // Record general field changes
-      if (originalAsset && JSON.stringify(originalAsset) !== JSON.stringify(asset)) {
-        // Check if there are field changes besides status and employee
-        const changeNotes = generateFieldChangeNotes(originalAsset, dbAsset);
-        
-        if (changeNotes !== 'Allgemeine Aktualisierung') {
-          await addAssetHistoryEntry(
-            asset.id,
-            "edit",
-            asset.employeeId, // Include the employee if this asset is assigned
-            changeNotes,
-            userId
-          );
-          console.log("Added field changes history entry with notes:", changeNotes);
-        }
+      const changeNotes = generateFieldChangeNotes(originalAsset, asset);
+      
+      if (changeNotes !== 'Allgemeine Aktualisierung') {
+        console.log("Field changes detected, adding history entry");
+        await addAssetHistoryEntry(
+          asset.id,
+          "edit",
+          asset.employeeId, // Include the employee if this asset is assigned
+          changeNotes,
+          userId
+        );
+        console.log("Added field changes history entry with notes:", changeNotes);
+      } else {
+        console.log("No significant field changes detected");
       }
     } catch (historyError) {
       console.error("Error updating asset history entries:", historyError);
       // Continue with asset update even if history entries fail
     }
-    
-    console.log("Asset updated successfully:", data.id);
     
     return mapDbAssetToAsset(data);
   } catch (error) {

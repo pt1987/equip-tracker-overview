@@ -17,7 +17,7 @@ export const addAssetHistoryEntry = async (
     // Make sure user ID is not undefined to prevent "System" attribution when a user is actually logged in
     const actualUserId = userId || null;
     
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('asset_history')
       .insert({
         asset_id: assetId,
@@ -26,19 +26,17 @@ export const addAssetHistoryEntry = async (
         notes,
         user_id: actualUserId,
         date: new Date().toISOString() // Ensure we use current timestamp
-      })
-      .select();
+      });
       
     if (error) {
       console.error("Error adding asset history entry:", error);
       throw error;
     }
     
-    console.log(`Added ${action} history entry for asset ${assetId} by user ${userId || 'System'}:`, data);
-    return;
+    console.log(`Added ${action} history entry for asset ${assetId} by user ${userId || 'System'}`);
   } catch (error) {
     console.error("Failed to add history entry:", error);
-    // We don't re-throw here to prevent blocking asset operations if history fails
+    throw error; // Re-throw to ensure calling code knows something went wrong
   }
 };
 
@@ -164,7 +162,11 @@ export const generateFieldChangeNotes = (
     changedFields.push(`Status: "${getStatusLabel(previousAsset.status)}" → "${getStatusLabel(newAsset.status)}"`);
   }
   
-  // Add more field checks as needed
+  if (previousAsset.employee_id !== newAsset.employee_id) {
+    const oldVal = previousAsset.employee_id || '(nicht zugewiesen)';
+    const newVal = newAsset.employee_id || '(nicht zugewiesen)';
+    changedFields.push(`Mitarbeiter-ID: "${oldVal}" → "${newVal}"`);
+  }
   
   // If fields were changed, list them in the note
   if (changedFields.length > 0) {
@@ -180,7 +182,6 @@ export const getUserNameFromId = async (userId: string | null | undefined): Prom
   if (!userId) return "System";
   
   try {
-    console.log(`Getting username for user ID: ${userId}`);
     // Try to get the username from profiles table
     const { data, error } = await supabase
       .from('profiles')
@@ -194,8 +195,7 @@ export const getUserNameFromId = async (userId: string | null | undefined): Prom
     }
     
     // Return the name if found, otherwise a generic name or email
-    if (data) {
-      console.log(`Found profile for ${userId}:`, data);
+    if (data && (data.name || data.email)) {
       return data.name || data.email || "Benutzer";
     } else {
       // Try to get the username directly from auth.users via the safe function
@@ -207,7 +207,6 @@ export const getUserNameFromId = async (userId: string | null | undefined): Prom
         return "Benutzer";
       }
       
-      console.log(`Found email for ${userId} via RPC:`, userData);
       return userData || "Benutzer";
     }
   } catch (error) {
@@ -230,13 +229,13 @@ export const getEmployeeNameFromId = async (employeeId: string | null | undefine
     
     if (error) {
       console.error("Error fetching employee:", error);
-      return employeeId;
+      return "Unbekannter Mitarbeiter";
     }
     
     // Return the name if found, otherwise return the ID
-    return data ? `${data.first_name} ${data.last_name}` : employeeId;
+    return data ? `${data.first_name} ${data.last_name}` : "Unbekannter Mitarbeiter";
   } catch (error) {
     console.error("Error in getEmployeeNameFromId:", error);
-    return employeeId;
+    return "Unbekannter Mitarbeiter";
   }
 };

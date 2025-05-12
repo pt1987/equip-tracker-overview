@@ -32,6 +32,10 @@ const AssetHistoryTimeline = ({ history }: AssetHistoryTimelineProps) => {
     );
   }
 
+  console.log("Rendering timeline with entries:", sortedHistory.length);
+  console.log("User names loaded:", Object.keys(userNames).length);
+  console.log("Employee names loaded:", Object.keys(employeeNames).length);
+
   return (
     <div className="relative pb-4">
       {/* Timeline line */}
