@@ -8,8 +8,12 @@ import { useAssetForm } from "@/hooks/useAssetForm";
 import FormTabs from "@/components/assets/create-edit/FormTabs";
 import FormActions from "@/components/assets/create-edit/FormActions";
 import FormHeader from "@/components/assets/create-edit/FormHeader";
+import { useToast } from "@/hooks/use-toast";
+import { useEffect } from "react";
 
 export default function CreateEditAsset() {
+  const { toast } = useToast();
+  
   const {
     isEditing,
     form,
@@ -21,9 +25,35 @@ export default function CreateEditAsset() {
     assets
   } = useAssetForm();
 
+  // Display toast when form is submitted successfully
+  useEffect(() => {
+    if (mutation.isSuccess) {
+      toast({
+        title: isEditing ? "Asset aktualisiert" : "Asset erstellt",
+        description: `${form.getValues("manufacturer")} ${form.getValues("model")} wurde erfolgreich ${isEditing ? 'aktualisiert' : 'erstellt'}.`,
+      });
+    }
+  }, [mutation.isSuccess, form, isEditing, toast]);
+
+  // Display error toast when mutation fails
+  useEffect(() => {
+    if (mutation.isError) {
+      toast({
+        variant: "destructive",
+        title: isEditing ? "Fehler beim Aktualisieren" : "Fehler beim Erstellen",
+        description: "Das Asset konnte nicht gespeichert werden.",
+      });
+    }
+  }, [mutation.isError, isEditing, toast]);
+
   const { data: employees = [] } = useQuery({
     queryKey: ["employees"],
     queryFn: getEmployees
+  });
+
+  const handleFormSubmit = form.handleSubmit((data) => {
+    console.log("Form submitted with data:", data);
+    onSubmit(data);
   });
 
   return (
@@ -33,7 +63,7 @@ export default function CreateEditAsset() {
           <FormHeader isEditing={isEditing} />
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={handleFormSubmit} className="space-y-6">
               <Card>
                 <CardHeader>
                   <CardTitle>Asset Details</CardTitle>
