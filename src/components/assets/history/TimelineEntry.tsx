@@ -77,7 +77,7 @@ const TimelineEntry = ({ entry, index, userNames, employeeNames }: TimelineEntry
             <div className="text-sm mb-1">
               <span className="text-muted-foreground">Mitarbeiter: </span>
               <span className="font-medium">
-                {employeeNames[entry.employeeId] || "Wird geladen..."}
+                {employeeNames[entry.employeeId] || "Unbekannt"}
               </span>
             </div>
           )}
@@ -85,7 +85,7 @@ const TimelineEntry = ({ entry, index, userNames, employeeNames }: TimelineEntry
           <div className="text-sm mb-1">
             <span className="text-muted-foreground">Durch: </span>
             <span className="font-medium">
-              {entry.userId ? (userNames[entry.userId] || "Wird geladen...") : "System"}
+              {entry.userId ? (userNames[entry.userId] || "Unbekannt") : "System"}
             </span>
           </div>
           

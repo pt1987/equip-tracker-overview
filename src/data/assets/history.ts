@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { AssetHistoryAction, AssetStatus } from "@/lib/types";
+import { Asset, AssetHistoryAction, AssetStatus } from "@/lib/types";
 import { format } from "date-fns";
 
 // Function to add an entry to the asset history
@@ -14,9 +14,6 @@ export const addAssetHistoryEntry = async (
   try {
     console.log(`Adding history entry: asset=${assetId}, action=${action}, notes=${notes}`);
     
-    // Make sure user ID is not undefined to prevent "System" attribution when a user is actually logged in
-    const actualUserId = userId || null;
-    
     const { error } = await supabase
       .from('asset_history')
       .insert({
@@ -24,8 +21,7 @@ export const addAssetHistoryEntry = async (
         action,
         employee_id: employeeId,
         notes,
-        user_id: actualUserId,
-        date: new Date().toISOString() // Ensure we use current timestamp
+        date: new Date().toISOString() // Use current timestamp
       });
       
     if (error) {
@@ -33,10 +29,10 @@ export const addAssetHistoryEntry = async (
       throw error;
     }
     
-    console.log(`Added ${action} history entry for asset ${assetId} by user ${userId || 'System'}`);
+    console.log(`Successfully added ${action} history entry for asset ${assetId}`);
   } catch (error) {
     console.error("Failed to add history entry:", error);
-    throw error; // Re-throw to ensure calling code knows something went wrong
+    throw error;
   }
 };
 
@@ -82,20 +78,20 @@ const getStatusLabel = (status: AssetStatus): string => {
   return statusLabels[status] || status;
 };
 
-// Enhanced function to generate notes about which fields were changed with before/after values
+// Function to generate notes about which fields were changed with before/after values
 export const generateFieldChangeNotes = (
   previousAsset: any,
   newAsset: any
 ): string => {
   const changedFields: string[] = [];
   
-  // Check each important field for changes and document before/after values
+  // Compare important fields and document changes
   if (previousAsset.manufacturer !== newAsset.manufacturer) {
-    changedFields.push(`Hersteller: "${previousAsset.manufacturer}" → "${newAsset.manufacturer}"`);
+    changedFields.push(`Hersteller: "${previousAsset.manufacturer || '(leer)'}" → "${newAsset.manufacturer || '(leer)'}""`);
   }
   
   if (previousAsset.model !== newAsset.model) {
-    changedFields.push(`Modell: "${previousAsset.model}" → "${newAsset.model}"`);
+    changedFields.push(`Modell: "${previousAsset.model || '(leer)'}" → "${newAsset.model || '(leer)'}""`);
   }
   
   if (previousAsset.serial_number !== newAsset.serial_number) {
@@ -147,19 +143,15 @@ export const generateFieldChangeNotes = (
   }
   
   if (previousAsset.name !== newAsset.name) {
-    changedFields.push(`Name: "${previousAsset.name}" → "${newAsset.name}"`);
+    changedFields.push(`Name: "${previousAsset.name || '(leer)'}" → "${newAsset.name || '(leer)'}""`);
   }
   
   if (previousAsset.type !== newAsset.type) {
-    changedFields.push(`Typ: "${previousAsset.type}" → "${newAsset.type}"`);
+    changedFields.push(`Typ: "${previousAsset.type || '(leer)'}" → "${newAsset.type || '(leer)'}""`);
   }
   
   if (previousAsset.category !== newAsset.category) {
-    changedFields.push(`Kategorie: "${previousAsset.category}" → "${newAsset.category}"`);
-  }
-  
-  if (previousAsset.status !== newAsset.status) {
-    changedFields.push(`Status: "${getStatusLabel(previousAsset.status)}" → "${getStatusLabel(newAsset.status)}"`);
+    changedFields.push(`Kategorie: "${previousAsset.category || '(leer)'}" → "${newAsset.category || '(leer)'}""`);
   }
   
   if (previousAsset.employee_id !== newAsset.employee_id) {
@@ -177,7 +169,7 @@ export const generateFieldChangeNotes = (
   return 'Allgemeine Aktualisierung';
 };
 
-// Function to get username from user ID
+// Function to get username from user ID - Simplified to work directly with Supabase
 export const getUserNameFromId = async (userId: string | null | undefined): Promise<string> => {
   if (!userId) return "System";
   
@@ -191,27 +183,18 @@ export const getUserNameFromId = async (userId: string | null | undefined): Prom
     
     if (error) {
       console.error("Error fetching user profile:", error);
-      return "Benutzer";
+      return "Unbekannter Benutzer";
     }
     
-    // Return the name if found, otherwise a generic name or email
-    if (data && (data.name || data.email)) {
-      return data.name || data.email || "Benutzer";
+    // Return the name if found, otherwise the email or a default
+    if (data) {
+      return data.name || data.email || "Unbekannter Benutzer";
     } else {
-      // Try to get the username directly from auth.users via the safe function
-      const { data: userData, error: userError } = await supabase
-        .rpc('get_safe_user_email', { user_id: userId });
-      
-      if (userError || !userData) {
-        console.error("Error fetching user email:", userError);
-        return "Benutzer";
-      }
-      
-      return userData || "Benutzer";
+      return "Unbekannter Benutzer";
     }
   } catch (error) {
     console.error("Error in getUserNameFromId:", error);
-    return "Benutzer";
+    return "Unbekannter Benutzer";
   }
 };
 
@@ -220,7 +203,7 @@ export const getEmployeeNameFromId = async (employeeId: string | null | undefine
   if (!employeeId) return "";
   
   try {
-    // Try to get the employee from employees table
+    // Get the employee from employees table
     const { data, error } = await supabase
       .from('employees')
       .select('first_name, last_name')
@@ -232,7 +215,7 @@ export const getEmployeeNameFromId = async (employeeId: string | null | undefine
       return "Unbekannter Mitarbeiter";
     }
     
-    // Return the name if found, otherwise return the ID
+    // Return the name if found, otherwise a default
     return data ? `${data.first_name} ${data.last_name}` : "Unbekannter Mitarbeiter";
   } catch (error) {
     console.error("Error in getEmployeeNameFromId:", error);

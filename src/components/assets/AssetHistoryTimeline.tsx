@@ -32,10 +32,6 @@ const AssetHistoryTimeline = ({ history }: AssetHistoryTimelineProps) => {
     );
   }
 
-  console.log("Rendering timeline with entries:", sortedHistory.length);
-  console.log("User names loaded:", Object.keys(userNames).length);
-  console.log("Employee names loaded:", Object.keys(employeeNames).length);
-
   return (
     <div className="relative pb-4">
       {/* Timeline line */}
@@ -45,7 +41,7 @@ const AssetHistoryTimeline = ({ history }: AssetHistoryTimelineProps) => {
       <div className="space-y-3">
         {sortedHistory.map((entry, index) => (
           <TimelineEntry 
-            key={entry.id}
+            key={entry.id || index}
             entry={entry}
             index={index}
             userNames={userNames}

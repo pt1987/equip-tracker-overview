@@ -8,7 +8,6 @@ import {
   getActionTypeForStatusChange,
   generateFieldChangeNotes
 } from "./history";
-import { getUserId } from "@/hooks/use-auth";
 
 // Function to update an asset in the database
 export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<Asset> => {
@@ -65,18 +64,12 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
     console.log("Asset updated successfully in database:", data.id);
     
     try {
-      // Get current user ID for tracking who made the change
-      const userId = await getUserId();
-      console.log("Current user making the change:", userId);
-      
       if (!originalAsset) {
         console.warn("No original asset data available for history comparison");
         return mapDbAssetToAsset(data);
       }
       
-      // First, check for important individual changes that need their own entries
-      
-      // Check if status has changed and add history entry if it has
+      // First, check if status has changed and add history entry if needed
       if (originalAsset.status !== asset.status) {
         console.log(`Status changed: ${originalAsset.status} -> ${asset.status}`);
         const actionType = getActionTypeForStatusChange(
@@ -93,8 +86,7 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
           asset.id,
           actionType,
           null, // Status changes don't need employee association
-          notes,
-          userId
+          notes
         );
         
         console.log(`Added status change history entry: ${originalAsset.status} -> ${asset.status}`);
@@ -109,8 +101,7 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
             asset.id,
             "assign",
             asset.employeeId,
-            `Asset einem Mitarbeiter zugewiesen`,
-            userId
+            `Asset einem Mitarbeiter zugewiesen`
           );
           console.log(`Added assignment history entry: Employee ${asset.employeeId}`);
         } else if (originalAsset.employeeId) {
@@ -119,32 +110,28 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
             asset.id,
             "return",
             null,
-            `Asset in den Pool zurückgegeben`,
-            userId
+            `Asset in den Pool zurückgegeben`
           );
           console.log("Added return to pool history entry");
         }
       }
       
       // Record general field changes
-      const changeNotes = generateFieldChangeNotes(originalAsset, asset);
+      const changeNotes = generateFieldChangeNotes(dbAsset, mapAssetToDbAsset(originalAsset));
       
       if (changeNotes !== 'Allgemeine Aktualisierung') {
-        console.log("Field changes detected, adding history entry");
+        console.log("Field changes detected, adding history entry with details");
         await addAssetHistoryEntry(
           asset.id,
           "edit",
           asset.employeeId, // Include the employee if this asset is assigned
-          changeNotes,
-          userId
+          changeNotes
         );
         console.log("Added field changes history entry with notes:", changeNotes);
-      } else {
-        console.log("No significant field changes detected");
       }
     } catch (historyError) {
       console.error("Error updating asset history entries:", historyError);
-      // Continue with asset update even if history entries fail
+      // Continue returning the asset even if history entries fail
     }
     
     return mapDbAssetToAsset(data);

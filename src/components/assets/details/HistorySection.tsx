@@ -18,17 +18,15 @@ export default function HistorySection({
 }: HistorySectionProps) {
   const [history, setHistory] = useState<AssetHistoryEntry[]>([]);
 
-  // Log history entries for debugging
+  // Process history entries when they change
   useEffect(() => {
-    if (!isHistoryLoading && assetHistory) {
-      console.log("Asset history entries received:", assetHistory.length);
-      if (assetHistory.length > 0) {
+    if (!isHistoryLoading) {
+      console.log("Asset history entries received:", assetHistory?.length);
+      if (assetHistory?.length > 0) {
         console.log("Sample entry:", assetHistory[0]);
       }
+      // Ensure we always have an array
       setHistory(Array.isArray(assetHistory) ? assetHistory : []);
-    } else if (!isHistoryLoading) {
-      console.log("No history entries to process");
-      setHistory([]);
     }
   }, [assetHistory, isHistoryLoading]);
 
