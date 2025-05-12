@@ -289,7 +289,7 @@ export function DamageIncidentForm({ incidentId, onSubmit }: DamageIncidentFormP
 
           <Separator />
 
-          <Alert variant="outline" className="bg-blue-50 border-blue-200">
+          <Alert className="bg-blue-50 border-blue-200">
             <Info className="h-4 w-4 text-blue-500" />
             <AlertTitle>ISO 27001 Anforderungen</AlertTitle>
             <AlertDescription>
