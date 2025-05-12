@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -9,6 +8,7 @@ import { getAssets } from "@/data/mockData";
 import { createAsset, updateAsset } from "@/data/assets";
 import { assetFormSchema } from "@/components/assets/create-edit/AssetFormSchema";
 import type { AssetFormValues } from "@/components/assets/create-edit/AssetFormSchema";
+import type { Asset, AssetType, AssetStatus, AssetClassification } from "@/lib/types";
 
 export function useAssetForm() {
   const { id } = useParams();
@@ -98,16 +98,16 @@ export function useAssetForm() {
       const formattedPurchaseDate = data.purchaseDate ? data.purchaseDate : null;
       const formattedWarrantyDate = data.hasWarranty && data.warrantyExpiryDate ? data.warrantyExpiryDate : null;
       
-      const assetData = {
+      const assetData: Asset = {
         id: isEditing && id ? id : crypto.randomUUID(),
         name: `${data.manufacturer} ${data.model}`,
-        type: data.category,
+        type: data.category as AssetType,  // Explicitly cast to AssetType
         manufacturer: data.manufacturer,
         model: data.model,
         purchaseDate: formattedPurchaseDate,
         vendor: data.vendor || "",
         price: data.price,
-        status: data.status,
+        status: data.status as AssetStatus,  // Explicitly cast to AssetStatus
         employeeId: data.assignedTo && data.assignedTo !== "pool" ? data.assignedTo : null,
         category: data.category,
         serialNumber: data.serialNumber || "",
@@ -124,7 +124,7 @@ export function useAssetForm() {
         connectedAssetId: data.relatedAssetId && data.relatedAssetId !== "none" ? data.relatedAssetId : null,
         relatedAssetId: data.relatedAssetId && data.relatedAssetId !== "none" ? data.relatedAssetId : null,
         // ISO 27001 fields
-        classification: data.classification,
+        classification: data.classification as AssetClassification,
         assetOwnerId: data.assetOwnerId || null,
         lastReviewDate: data.lastReviewDate || null,
         nextReviewDate: data.nextReviewDate || null,
