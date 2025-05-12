@@ -1,0 +1,180 @@
+
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useToast } from "@/hooks/use-toast";
+import { getAssets } from "@/data/mockData";
+import { createAsset, updateAsset } from "@/data/assets";
+import { assetFormSchema } from "@/components/assets/create-edit/AssetFormSchema";
+import type { AssetFormValues } from "@/components/assets/create-edit/AssetFormSchema";
+
+export function useAssetForm() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const isEditing = !!id;
+  const [activeTab, setActiveTab] = useState("basic");
+  const { toast } = useToast();
+
+  const { data: assets = [] } = useQuery({
+    queryKey: ["assets"],
+    queryFn: getAssets
+  });
+
+  const asset = isEditing ? assets.find(a => a.id === id) : null;
+
+  const form = useForm<AssetFormValues>({
+    resolver: zodResolver(assetFormSchema),
+    defaultValues: isEditing && asset ? {
+      category: asset.category || "",
+      manufacturer: asset.manufacturer || "",
+      model: asset.model || "",
+      status: asset.status || "ordered",
+      assignedTo: asset.employeeId || "",
+      purchaseDate: new Date(asset.purchaseDate).toISOString().split('T')[0],
+      price: asset.price || 0,
+      vendor: asset.vendor || "",
+      serialNumber: asset.serialNumber || "",
+      inventoryNumber: asset.inventoryNumber || "",
+      hasWarranty: asset.hasWarranty || false,
+      additionalWarranty: asset.additionalWarranty || false,
+      warrantyExpiryDate: asset.warrantyExpiryDate || "",
+      warrantyInfo: asset.warrantyInfo || "",
+      imei: asset.imei || "",
+      phoneNumber: asset.phoneNumber || "",
+      provider: asset.provider || "",
+      contractDuration: asset.contractEndDate || "",
+      contractName: asset.contractName || "",
+      relatedAssetId: asset.connectedAssetId || "",
+      // ISO 27001 fields
+      classification: asset.classification || "internal",
+      assetOwnerId: asset.assetOwnerId || "",
+      lastReviewDate: asset.lastReviewDate || "",
+      nextReviewDate: asset.nextReviewDate || "",
+      riskLevel: asset.riskLevel || "low",
+      isPersonalData: asset.isPersonalData || false,
+      disposalMethod: asset.disposalMethod || "",
+      lifecycleStage: asset.lifecycleStage || "operation",
+      notes: asset.notes || "",
+    } : {
+      category: "",
+      manufacturer: "",
+      model: "",
+      status: "ordered",
+      assignedTo: "",
+      purchaseDate: new Date().toISOString().split('T')[0],
+      price: 0,
+      vendor: "",
+      serialNumber: "",
+      inventoryNumber: "",
+      hasWarranty: false,
+      additionalWarranty: false,
+      warrantyExpiryDate: "",
+      warrantyInfo: "",
+      imei: "",
+      phoneNumber: "",
+      provider: "",
+      contractDuration: "",
+      contractName: "",
+      relatedAssetId: "",
+      // ISO 27001 default fields
+      classification: "internal",
+      assetOwnerId: "",
+      lastReviewDate: "",
+      nextReviewDate: "",
+      riskLevel: "low",
+      isPersonalData: false,
+      disposalMethod: "",
+      lifecycleStage: "operation",
+      notes: "",
+    }
+  });
+
+  const mutation = useMutation({
+    mutationFn: async (data: AssetFormValues) => {
+      console.log("Submitting asset data:", data);
+      
+      const formattedPurchaseDate = data.purchaseDate ? data.purchaseDate : null;
+      const formattedWarrantyDate = data.hasWarranty && data.warrantyExpiryDate ? data.warrantyExpiryDate : null;
+      
+      const assetData = {
+        id: isEditing && id ? id : crypto.randomUUID(),
+        name: `${data.manufacturer} ${data.model}`,
+        type: data.category,
+        manufacturer: data.manufacturer,
+        model: data.model,
+        purchaseDate: formattedPurchaseDate,
+        vendor: data.vendor || "",
+        price: data.price,
+        status: data.status,
+        employeeId: data.assignedTo && data.assignedTo !== "pool" ? data.assignedTo : null,
+        category: data.category,
+        serialNumber: data.serialNumber || "",
+        inventoryNumber: data.inventoryNumber || "",
+        hasWarranty: data.hasWarranty || false,
+        additionalWarranty: data.additionalWarranty || false,
+        warrantyExpiryDate: formattedWarrantyDate,
+        warrantyInfo: data.warrantyInfo || "",
+        imei: data.imei || "",
+        phoneNumber: data.phoneNumber || "",
+        provider: data.provider || "",
+        contractEndDate: data.contractDuration || null,
+        contractName: data.contractName || "",
+        connectedAssetId: data.relatedAssetId && data.relatedAssetId !== "none" ? data.relatedAssetId : null,
+        relatedAssetId: data.relatedAssetId && data.relatedAssetId !== "none" ? data.relatedAssetId : null,
+        // ISO 27001 fields
+        classification: data.classification,
+        assetOwnerId: data.assetOwnerId || null,
+        lastReviewDate: data.lastReviewDate || null,
+        nextReviewDate: data.nextReviewDate || null,
+        riskLevel: data.riskLevel || null,
+        isPersonalData: data.isPersonalData || false,
+        disposalMethod: data.disposalMethod || null,
+        lifecycleStage: data.lifecycleStage || null,
+        notes: data.notes || null,
+      };
+
+      if (isEditing && id) {
+        return await updateAsset(assetData);
+      } else {
+        return await createAsset(assetData);
+      }
+    },
+    onSuccess: () => {
+      toast({
+        title: isEditing ? "Asset aktualisiert" : "Asset erstellt",
+        description: `${form.getValues("manufacturer")} ${form.getValues("model")} wurde erfolgreich ${isEditing ? 'aktualisiert' : 'erstellt'}.`,
+      });
+      navigate("/assets");
+    },
+    onError: (error) => {
+      console.error("Error saving asset:", error);
+      toast({
+        variant: "destructive",
+        title: isEditing ? "Fehler beim Aktualisieren" : "Fehler beim Erstellen",
+        description: `Das Asset konnte nicht gespeichert werden: ${error.message}`,
+      });
+    }
+  });
+
+  const onSubmit = (data: AssetFormValues) => {
+    console.log("Form submitted with data:", data);
+    mutation.mutate(data);
+  };
+
+  const handleCancel = () => {
+    navigate(-1);
+  };
+
+  return {
+    isEditing,
+    form,
+    activeTab,
+    setActiveTab,
+    onSubmit,
+    handleCancel,
+    mutation,
+    assets
+  };
+}
