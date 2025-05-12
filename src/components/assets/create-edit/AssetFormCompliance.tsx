@@ -1,3 +1,4 @@
+
 import { useFormContext } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import { getEmployees } from "@/data/employees";
@@ -96,8 +97,8 @@ export default function AssetFormCompliance() {
               <FormLabel>Asset Owner</FormLabel>
               <Select
                 onValueChange={field.onChange}
-                defaultValue={field.value}
-                value={field.value}
+                defaultValue={field.value || "not_assigned"}
+                value={field.value || "not_assigned"}
               >
                 <FormControl>
                   <SelectTrigger>

@@ -37,7 +37,7 @@ export default function ComplianceSection({ asset, onAssetUpdate }: ComplianceSe
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     classification: asset.classification || 'internal',
-    assetOwnerId: asset.assetOwnerId || '',
+    assetOwnerId: asset.assetOwnerId || 'not_assigned',
     riskLevel: asset.riskLevel || 'low',
     isPersonalData: asset.isPersonalData || false,
     lastReviewDate: asset.lastReviewDate || '',
@@ -61,7 +61,7 @@ export default function ComplianceSection({ asset, onAssetUpdate }: ComplianceSe
       const updatedAsset = {
         ...asset,
         classification: formData.classification as AssetClassification,
-        assetOwnerId: formData.assetOwnerId,
+        assetOwnerId: formData.assetOwnerId === 'not_assigned' ? '' : formData.assetOwnerId,
         riskLevel: formData.riskLevel as 'low' | 'medium' | 'high',
         isPersonalData: formData.isPersonalData,
         lastReviewDate: formData.lastReviewDate,
@@ -170,7 +170,7 @@ export default function ComplianceSection({ asset, onAssetUpdate }: ComplianceSe
                     <SelectValue placeholder="Asset Owner wählen" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Nicht zugewiesen</SelectItem>
+                    <SelectItem value="not_assigned">Nicht zugewiesen</SelectItem>
                     {employees.map((employee) => (
                       <SelectItem key={employee.id} value={employee.id}>
                         {employee.firstName} {employee.lastName}
