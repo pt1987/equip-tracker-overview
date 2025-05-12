@@ -29,6 +29,7 @@ export const addAssetHistoryEntry = async (
     }
     
     console.log(`Added ${action} history entry for asset ${assetId}`);
+    return;
   } catch (error) {
     console.error("Failed to add history entry:", error);
     // We don't re-throw here to prevent blocking asset operations if history fails

@@ -5,7 +5,7 @@ import { AssetBooking } from "@/lib/types";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { addAssetHistoryEntry } from '@/data/assets/history';
 import { getUserId } from "@/hooks/use-auth";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 interface BookingHistorySectionProps {
   bookings: AssetBooking[];
@@ -23,6 +23,7 @@ export default function BookingHistorySection({
   assetId
 }: BookingHistorySectionProps) {
   const isMobile = useIsMobile();
+  const [isProcessing, setIsProcessing] = useState(false);
   
   // Ensure past bookings are logged in asset history
   useEffect(() => {
@@ -31,12 +32,15 @@ export default function BookingHistorySection({
       // In a real app, you'd track this more systematically
       if (bookings.length > 0) {
         try {
+          setIsProcessing(true);
           const userId = await getUserId();
           // We don't want to perform actual writes in this effect
           // This is just a demonstration of how we could ensure history entries exist
           console.log(`Would ensure ${bookings.length} bookings are in history for asset ${assetId}`);
         } catch (error) {
           console.error("Error in booking history check:", error);
+        } finally {
+          setIsProcessing(false);
         }
       }
     };
