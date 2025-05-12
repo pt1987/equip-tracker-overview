@@ -7,6 +7,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Import component parts
 import AssetImage from "./details/AssetImage";
@@ -93,6 +100,10 @@ export default function AssetDetailView({
     setCurrentAsset(updatedAsset);
   };
 
+  const handleTabChange = (value: string) => {
+    setActiveTab(value as "details" | "compliance");
+  };
+
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -114,22 +125,54 @@ export default function AssetDetailView({
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "details" | "compliance")} className="w-full">
-        <TabsList className={`${isMobile ? 'w-full grid grid-cols-2' : ''}`}>
-          <TabsTrigger value="details" className={isMobile ? 'flex-1' : ''}>Technische Details</TabsTrigger>
-          <TabsTrigger value="compliance" className={isMobile ? 'flex-1' : ''}>ISO 27001 Compliance</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="details" className="space-y-6 pt-4">
-          <AssetTechnicalDetails asset={currentAsset} />
-          {currentAsset.connectedAssetId && <ConnectedAsset connectedAssetId={currentAsset.connectedAssetId} />}
-        </TabsContent>
-        
-        <TabsContent value="compliance" className="space-y-6 pt-4">
-          <ComplianceSection asset={currentAsset} onAssetUpdate={handleAssetUpdate} />
-          <AssetReviewHistory asset={currentAsset} onReviewAdded={handleReviewAdded} />
-        </TabsContent>
-      </Tabs>
+      {isMobile ? (
+        <div className="space-y-4">
+          <div className="mb-2">
+            <Select value={activeTab} onValueChange={handleTabChange}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Bereich auswählen">
+                  {activeTab === "details" ? "Technische Details" : "ISO 27001 Compliance"}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="details">Technische Details</SelectItem>
+                <SelectItem value="compliance">ISO 27001 Compliance</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {activeTab === "details" && (
+            <div className="space-y-6">
+              <AssetTechnicalDetails asset={currentAsset} />
+              {currentAsset.connectedAssetId && <ConnectedAsset connectedAssetId={currentAsset.connectedAssetId} />}
+            </div>
+          )}
+          
+          {activeTab === "compliance" && (
+            <div className="space-y-6">
+              <ComplianceSection asset={currentAsset} onAssetUpdate={handleAssetUpdate} />
+              <AssetReviewHistory asset={currentAsset} onReviewAdded={handleReviewAdded} />
+            </div>
+          )}
+        </div>
+      ) : (
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "details" | "compliance")} className="w-full">
+          <TabsList>
+            <TabsTrigger value="details">Technische Details</TabsTrigger>
+            <TabsTrigger value="compliance">ISO 27001 Compliance</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="details" className="space-y-6 pt-4">
+            <AssetTechnicalDetails asset={currentAsset} />
+            {currentAsset.connectedAssetId && <ConnectedAsset connectedAssetId={currentAsset.connectedAssetId} />}
+          </TabsContent>
+          
+          <TabsContent value="compliance" className="space-y-6 pt-4">
+            <ComplianceSection asset={currentAsset} onAssetUpdate={handleAssetUpdate} />
+            <AssetReviewHistory asset={currentAsset} onReviewAdded={handleReviewAdded} />
+          </TabsContent>
+        </Tabs>
+      )}
     </div>
   );
 }
