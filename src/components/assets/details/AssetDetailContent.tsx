@@ -14,7 +14,7 @@ import EmployeeSection from "@/components/assets/details/EmployeeSection";
 import DocumentSection from "@/components/assets/details/DocumentSection";
 import HistorySection from "@/components/assets/details/HistorySection";
 import DepreciationSection from "@/components/assets/details/DepreciationSection";
-import AssetBookingSection from "@/components/assets/AssetBookingSection";
+import AssetBookingSection from "@/components/bookings/AssetBookingSection";
 import { useAssetDocuments } from "@/hooks/useAssetDocuments";
 
 interface AssetDetailContentProps {
