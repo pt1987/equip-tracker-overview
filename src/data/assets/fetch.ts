@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { Asset, AssetHistoryEntry } from "@/lib/types"; 
+import { Asset, AssetHistoryAction, AssetHistoryEntry } from "@/lib/types"; 
 import { mapDbAssetToAsset } from "./mappers";
 
 // Get a single asset by ID
@@ -69,15 +69,15 @@ export const getAssetHistoryByAssetId = async (assetId: string): Promise<AssetHi
       return [];
     }
     
-    // Map database results to our types
+    // Map database results to our types, ensuring action is cast to AssetHistoryAction
     const historyEntries: AssetHistoryEntry[] = data.map(entry => ({
       id: entry.id,
       assetId: entry.asset_id,
       date: entry.date,
-      action: entry.action, 
+      action: entry.action as AssetHistoryAction,  // Cast string to enum type
       employeeId: entry.employee_id,
-      userId: entry.user_id,
-      notes: entry.notes
+      userId: entry.user_id || null,  // Handle missing user_id field
+      notes: entry.notes || ""
     }));
     
     return historyEntries;
