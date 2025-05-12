@@ -3,7 +3,7 @@ import { Asset } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShieldCheck, ShieldAlert } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobile, useBreakpoint } from "@/hooks/use-mobile";
 
 interface AssetTechnicalDetailsProps {
   asset: Asset;
@@ -11,14 +11,15 @@ interface AssetTechnicalDetailsProps {
 
 export default function AssetTechnicalDetails({ asset }: AssetTechnicalDetailsProps) {
   const isMobile = useIsMobile();
+  const isSmall = useBreakpoint('sm');
   
   return (
     <Card className="shadow-sm">
       <CardHeader className={`${isMobile ? 'pb-2 pt-3 px-3' : 'pb-3'}`}>
-        <CardTitle className="text-xl">Technische Details</CardTitle>
+        <CardTitle className={`${isMobile ? 'text-lg' : 'text-xl'}`}>Technische Details</CardTitle>
       </CardHeader>
-      <CardContent className={`${isMobile ? 'pt-0 px-3 pb-3' : 'pt-0'}`}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-3">
+      <CardContent className={`${isMobile ? 'pt-0 px-3 pb-3' : 'pt-0'} overflow-x-auto`}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-3 min-w-[300px]">
           {asset.serialNumber && (
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Seriennummer</p>
@@ -76,7 +77,7 @@ export default function AssetTechnicalDetails({ asset }: AssetTechnicalDetailsPr
         {asset.type === "smartphone" && (
           <div className="mt-5">
             <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-medium mb-2`}>Vertragsdaten</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3 min-w-[300px]">
               {asset.phoneNumber && (
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Telefonnummer</p>

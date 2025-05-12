@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobile, useBreakpoint } from "@/hooks/use-mobile";
 import {
   Select,
   SelectContent,
@@ -44,6 +44,7 @@ export default function AssetDetailView({
   const [activeTab, setActiveTab] = useState<"details" | "compliance">("details");
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const isSmallScreen = useBreakpoint('sm');
 
   useEffect(() => {
     const fetchEmployee = async () => {
@@ -105,10 +106,12 @@ export default function AssetDetailView({
   };
 
   return (
-    <div className="space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <AssetImage imageUrl={currentAsset.imageUrl} altText={currentAsset.name} />
-        <div>
+    <div className="space-y-6 md:space-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        <div className={`${isSmallScreen ? 'order-2' : ''}`}>
+          <AssetImage imageUrl={currentAsset.imageUrl} altText={currentAsset.name} />
+        </div>
+        <div className={`${isSmallScreen ? 'order-1' : ''}`}>
           <AssetHeaderInfo asset={currentAsset} onEdit={onEdit} onDelete={onDelete} />
           
           {/* Anzeigen des Pool-Status, wenn es ein Pool-Gerät ist */}
@@ -142,14 +145,16 @@ export default function AssetDetailView({
           </div>
           
           {activeTab === "details" && (
-            <div className="space-y-6">
+            <div className="space-y-5">
               <AssetTechnicalDetails asset={currentAsset} />
-              {currentAsset.connectedAssetId && <ConnectedAsset connectedAssetId={currentAsset.connectedAssetId} />}
+              {currentAsset.connectedAssetId && (
+                <ConnectedAsset connectedAssetId={currentAsset.connectedAssetId} />
+              )}
             </div>
           )}
           
           {activeTab === "compliance" && (
-            <div className="space-y-6">
+            <div className="space-y-5">
               <ComplianceSection asset={currentAsset} onAssetUpdate={handleAssetUpdate} />
               <AssetReviewHistory asset={currentAsset} onReviewAdded={handleReviewAdded} />
             </div>
@@ -157,7 +162,7 @@ export default function AssetDetailView({
         </div>
       ) : (
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "details" | "compliance")} className="w-full">
-          <TabsList>
+          <TabsList className="mb-2">
             <TabsTrigger value="details">Technische Details</TabsTrigger>
             <TabsTrigger value="compliance">ISO 27001 Compliance</TabsTrigger>
           </TabsList>

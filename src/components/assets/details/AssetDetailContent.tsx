@@ -121,7 +121,7 @@ export default function AssetDetailContent({
   };
 
   return (
-    <>
+    <div className="flex flex-col gap-4 md:gap-6">
       <Card className="shadow-sm">
         {isEditing ? (
           <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
@@ -171,6 +171,6 @@ export default function AssetDetailContent({
           />
         </>
       )}
-    </>
+    </div>
   );
 }

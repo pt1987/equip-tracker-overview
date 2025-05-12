@@ -2,13 +2,20 @@
 import { useState } from "react";
 import { Document } from "./types";
 import { Button } from "@/components/ui/button";
-import { File, Trash2, DownloadCloud } from "lucide-react";
+import { File, Trash2, DownloadCloud, MoreVertical } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger
 } from "@/components/ui/tooltip";
+import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface DocumentItemProps {
   document: Document;
@@ -17,6 +24,7 @@ interface DocumentItemProps {
 
 export function DocumentItem({ document, onDelete }: DocumentItemProps) {
   const [isDeleting, setIsDeleting] = useState(false);
+  const isMobile = useIsMobile();
   
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -44,6 +52,52 @@ export function DocumentItem({ document, onDelete }: DocumentItemProps) {
     }
   };
 
+  // Use dropdown menu for mobile view
+  if (isMobile) {
+    const filename = document.name.length > 18 
+      ? document.name.substring(0, 15) + '...' 
+      : document.name;
+    
+    return (
+      <div className="flex items-center justify-between p-2 bg-background rounded-md border border-secondary/30">
+        <div className="flex items-center gap-2 overflow-hidden">
+          <div className="p-1.5 rounded-md">
+            <File size={18} className="text-primary" />
+          </div>
+          <div className="overflow-hidden">
+            <p className="font-medium text-xs truncate">{filename}</p>
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <span>{formatFileSize(document.size)}</span>
+              <span>•</span>
+              <span className="text-primary text-xs">
+                {getCategoryLabel(document.category)}
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+              <MoreVertical size={16} />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="bg-background border z-50">
+            <DropdownMenuItem onClick={() => window.open(document.url, '_blank')}>
+              <DownloadCloud size={14} className="mr-2" />
+              <span>Herunterladen</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleDelete} disabled={isDeleting} className="text-destructive">
+              <Trash2 size={14} className="mr-2" />
+              <span>Löschen</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    );
+  }
+
+  // Desktop view
   return (
     <div className="flex items-center justify-between p-3 bg-background rounded-md border border-secondary/30">
       <div className="flex items-center gap-3">
