@@ -25,6 +25,7 @@ import Reporting from "./pages/Reporting";
 import Depreciation from "./pages/Depreciation";
 import HardwareOrder from "./pages/HardwareOrder";
 import AssetBookings from "./pages/AssetBookings";
+import DamageManagement from "./pages/DamageManagement";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -91,6 +92,7 @@ const AppContent = () => {
                     <Route path="/employee/edit/:id" element={<CreateEditEmployee />} />
                     <Route path="/reporting" element={<Reporting />} />
                     <Route path="/depreciation" element={<Depreciation />} />
+                    <Route path="/damage-management" element={<DamageManagement />} />
                     <Route path="/hardware-order" element={<HardwareOrder />} />
                     <Route path="/bookings" element={<AssetBookings />} />
                     

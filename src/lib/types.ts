@@ -334,3 +334,24 @@ export interface AssetOwnershipChange {
   reason: string;
   approvedById: string;
 }
+
+// New interface for damage incidents
+export interface DamageIncident {
+  id: string;
+  assetId: string;
+  title: string;
+  description: string;
+  priority: 'low' | 'medium' | 'high';
+  status: 'open' | 'in_progress' | 'resolved';
+  damageType: string;
+  damageDate: string;
+  reportDate: string;
+  reportedById: string;
+  location?: string;
+  isConfidential: boolean;
+  damageDescription: string;
+  measuresDescription?: string;
+  assignedTo?: string;
+  resolvedDate?: string;
+  resolutionNotes?: string;
+}

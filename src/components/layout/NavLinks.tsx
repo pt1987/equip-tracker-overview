@@ -14,6 +14,7 @@ import {
   FileLineChart,
   Shield,
   Server,
+  AlertTriangle,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -81,6 +82,11 @@ export const NavLinks = () => {
         href="/depreciation"
         icon={<FileLineChart size={16} />}
         label="Abschreibungen"
+      />
+      <NavLink
+        href="/damage-management"
+        icon={<AlertTriangle size={16} />}
+        label="Schadensmanagement"
       />
       <NavLink
         href="/hardware-order"
