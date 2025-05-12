@@ -85,13 +85,13 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
       }
       
       // Check if employee assignment has changed
-      if (currentAsset && currentAsset.employeeId !== dbAsset.employeeId) {
-        if (dbAsset.employeeId) {
+      if (currentAsset && currentAsset.employeeId !== asset.employeeId) {
+        if (asset.employeeId) {
           // Verify employee exists before adding history entry
           const { data: employeeExists } = await supabase
             .from('employees')
             .select('id')
-            .eq('id', dbAsset.employeeId)
+            .eq('id', asset.employeeId)
             .single();
 
           if (employeeExists) {
@@ -99,13 +99,13 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
             await addAssetHistoryEntry(
               asset.id,
               "assign",
-              dbAsset.employeeId,
+              asset.employeeId,
               `Asset einem Mitarbeiter zugewiesen`,
               userId
             );
             console.log("Added assignment change to asset history");
           } else {
-            console.log(`Employee with ID ${dbAsset.employeeId} not found. Skipping history entry.`);
+            console.log(`Employee with ID ${asset.employeeId} not found. Skipping history entry.`);
           }
         } else if (currentAsset.employeeId) {
           // Asset was returned to pool
@@ -121,11 +121,11 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
       }
       
       // Record general field changes if any (excluding status and employee which are handled separately)
-      if (currentAsset && JSON.stringify(currentAsset) !== JSON.stringify(data)) {
+      if (currentAsset && JSON.stringify(currentAsset) !== JSON.stringify(mapDbAssetToAsset(data))) {
         const changeNotes = generateFieldChangeNotes(currentAsset, dbAsset);
         
         if (changeNotes !== 'Allgemeine Aktualisierung' || 
-            (currentAsset.status === dbAsset.status && currentAsset.employeeId === dbAsset.employeeId)) {
+            (currentAsset.status === dbAsset.status && currentAsset.employeeId === asset.employeeId)) {
           await addAssetHistoryEntry(
             asset.id,
             "edit",

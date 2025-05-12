@@ -15,6 +15,7 @@ import {
   Edit
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { getUserNameFromId } from "@/data/assets/history";
 
 interface AssetHistoryTimelineProps {
   history: AssetHistoryEntry[];
@@ -83,12 +84,6 @@ const AssetHistoryTimeline = ({ history }: AssetHistoryTimelineProps) => {
     } catch (e) {
       return '';
     }
-  };
-
-  // Get user info from ID - in a real app, this would fetch from database
-  const getUserNameFromId = (userId: string | null | undefined): string => {
-    if (!userId) return "System";
-    return "Benutzer"; // In a real app, replace with actual user name lookup
   };
 
   if (sortedHistory.length === 0) {
