@@ -22,15 +22,15 @@ export default function HistorySection({
   // Process history entries to ensure they display correctly
   useEffect(() => {
     if (!isHistoryLoading && assetHistory) {
+      console.log("Processing asset history entries:", assetHistory.length);
+      
       // Create a copy of history to avoid modifying the original data
       const processedHistory = Array.isArray(assetHistory) ? [...assetHistory] : [];
       
       setHistory(processedHistory);
       setIsProcessingHistory(false);
-      
-      // For debugging purposes only
-      console.log("Asset history entries:", processedHistory);
     } else if (!isHistoryLoading) {
+      console.log("No history entries to process");
       setIsProcessingHistory(false);
     }
   }, [assetHistory, isHistoryLoading]);

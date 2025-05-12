@@ -12,7 +12,7 @@ import { getUserId } from "@/hooks/use-auth";
 
 // Function to update an asset in the database
 export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<Asset> => {
-  console.log("Updating asset in Supabase:", asset);
+  console.log("Updating asset in Supabase:", asset.id);
   
   try {
     // Fetch the current asset to check for changes if previous version is not provided
@@ -41,6 +41,9 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
       updated_at: new Date().toISOString()
     };
     
+    // Store a copy of the current asset before updating for comparison
+    const originalAsset = currentAsset ? {...currentAsset} : null;
+    
     const { data, error } = await supabase
       .from('assets')
       .update(dbAssetWithTimestamp)
@@ -60,17 +63,20 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
     try {
       // Get current user ID for tracking who made the change
       const userId = await getUserId();
+      console.log("Current user making the change:", userId);
+      
+      // First, check for important individual changes that need their own entries
       
       // Check if status has changed and add history entry if it has
-      if (currentAsset && currentAsset.status !== dbAsset.status) {
+      if (originalAsset && originalAsset.status !== asset.status) {
         const actionType = getActionTypeForStatusChange(
-          currentAsset.status as AssetStatus, 
-          dbAsset.status as AssetStatus
+          originalAsset.status as AssetStatus, 
+          asset.status as AssetStatus
         );
         
         const notes = generateStatusChangeNote(
-          currentAsset.status as AssetStatus, 
-          dbAsset.status as AssetStatus
+          originalAsset.status as AssetStatus, 
+          asset.status as AssetStatus
         );
         
         await addAssetHistoryEntry(
@@ -81,64 +87,48 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
           userId
         );
         
-        console.log(`Added ${actionType} to asset history with user ${userId || 'System'}`);
+        console.log(`Added status change history entry: ${originalAsset.status} -> ${asset.status}`);
       }
       
       // Check if employee assignment has changed
-      if (currentAsset && currentAsset.employeeId !== asset.employeeId) {
+      if (originalAsset && originalAsset.employeeId !== asset.employeeId) {
         if (asset.employeeId) {
-          // Verify employee exists before adding history entry
-          const { data: employeeExists } = await supabase
-            .from('employees')
-            .select('id, first_name, last_name')
-            .eq('id', asset.employeeId)
-            .single();
-
-          if (employeeExists) {
-            // Asset was assigned to someone
-            const employeeName = `${employeeExists.first_name} ${employeeExists.last_name}`;
-            const previousEmployeeInfo = currentAsset.employeeId ? 
-              "(vorher anderer Mitarbeiter zugewiesen)" : 
-              "(vorher keinem Mitarbeiter zugewiesen)";
-              
-            await addAssetHistoryEntry(
-              asset.id,
-              "assign",
-              asset.employeeId,
-              `Asset ${employeeExists ? employeeName : asset.employeeId} zugewiesen ${previousEmployeeInfo}`,
-              userId
-            );
-            console.log("Added assignment change to asset history with user", userId || 'System');
-          } else {
-            console.log(`Employee with ID ${asset.employeeId} not found. Skipping history entry.`);
-          }
-        } else if (currentAsset.employeeId) {
+          // Asset was assigned to someone
+          await addAssetHistoryEntry(
+            asset.id,
+            "assign",
+            asset.employeeId,
+            `Asset einem Mitarbeiter zugewiesen`,
+            userId
+          );
+          console.log(`Added assignment history entry: Employee ${asset.employeeId}`);
+        } else if (originalAsset.employeeId) {
           // Asset was returned to pool
           await addAssetHistoryEntry(
             asset.id,
             "return",
-            null, // Return to pool doesn't need employee association
-            `Asset in den Pool zurückgegeben (vorher einem Mitarbeiter zugewiesen)`,
+            null,
+            `Asset in den Pool zurückgegeben`,
             userId
           );
-          console.log("Added return to pool to asset history with user", userId || 'System');
+          console.log("Added return to pool history entry");
         }
       }
       
-      // Record general field changes if any (excluding status and employee which are handled separately)
-      if (currentAsset && JSON.stringify(currentAsset) !== JSON.stringify(mapDbAssetToAsset(data))) {
-        const changeNotes = generateFieldChangeNotes(currentAsset, dbAsset);
+      // Record general field changes
+      if (originalAsset && JSON.stringify(originalAsset) !== JSON.stringify(asset)) {
+        // Check if there are field changes besides status and employee
+        const changeNotes = generateFieldChangeNotes(originalAsset, dbAsset);
         
-        if (changeNotes !== 'Allgemeine Aktualisierung' || 
-            (currentAsset.status === dbAsset.status && currentAsset.employeeId === asset.employeeId)) {
+        if (changeNotes !== 'Allgemeine Aktualisierung') {
           await addAssetHistoryEntry(
             asset.id,
             "edit",
-            null,
+            asset.employeeId, // Include the employee if this asset is assigned
             changeNotes,
             userId
           );
-          console.log("Added general edit to asset history with user", userId || 'System');
+          console.log("Added field changes history entry with notes:", changeNotes);
         }
       }
     } catch (historyError) {
@@ -146,7 +136,7 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
       // Continue with asset update even if history entries fail
     }
     
-    console.log("Asset updated successfully:", data);
+    console.log("Asset updated successfully:", data.id);
     
     return mapDbAssetToAsset(data);
   } catch (error) {

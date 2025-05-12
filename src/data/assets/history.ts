@@ -12,27 +12,29 @@ export const addAssetHistoryEntry = async (
   userId?: string | null
 ): Promise<void> => {
   try {
-    console.log(`Adding history entry: asset=${assetId}, action=${action}, employee=${employeeId}, userId=${userId || 'null'}`);
+    console.log(`Adding history entry: asset=${assetId}, action=${action}, notes=${notes}`);
     
     // Make sure user ID is not undefined to prevent "System" attribution when a user is actually logged in
     const actualUserId = userId || null;
     
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('asset_history')
       .insert({
         asset_id: assetId,
         action,
         employee_id: employeeId,
         notes,
-        user_id: actualUserId
-      });
+        user_id: actualUserId,
+        date: new Date().toISOString() // Ensure we use current timestamp
+      })
+      .select();
       
     if (error) {
       console.error("Error adding asset history entry:", error);
       throw error;
     }
     
-    console.log(`Added ${action} history entry for asset ${assetId} by user ${userId || 'System'}`);
+    console.log(`Added ${action} history entry for asset ${assetId} by user ${userId || 'System'}:`, data);
     return;
   } catch (error) {
     console.error("Failed to add history entry:", error);
@@ -172,6 +174,7 @@ export const getUserNameFromId = async (userId: string | null | undefined): Prom
   if (!userId) return "System";
   
   try {
+    console.log(`Getting username for user ID: ${userId}`);
     // Try to get the username from profiles table
     const { data, error } = await supabase
       .from('profiles')
@@ -186,6 +189,7 @@ export const getUserNameFromId = async (userId: string | null | undefined): Prom
     
     // Return the name if found, otherwise a generic name or email
     if (data) {
+      console.log(`Found profile for ${userId}:`, data);
       return data.name || data.email || "Benutzer";
     } else {
       // Try to get the username directly from auth.users via the safe function
@@ -197,6 +201,7 @@ export const getUserNameFromId = async (userId: string | null | undefined): Prom
         return "Benutzer";
       }
       
+      console.log(`Found email for ${userId} via RPC:`, userData);
       return userData || "Benutzer";
     }
   } catch (error) {
@@ -205,7 +210,7 @@ export const getUserNameFromId = async (userId: string | null | undefined): Prom
   }
 };
 
-// Add a new function to get employee name from ID
+// Function to get employee name from ID
 export const getEmployeeNameFromId = async (employeeId: string | null | undefined): Promise<string> => {
   if (!employeeId) return "";
   

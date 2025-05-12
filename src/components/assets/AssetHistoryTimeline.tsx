@@ -24,7 +24,7 @@ const AssetHistoryTimeline = ({ history }: AssetHistoryTimelineProps) => {
     );
   }
 
-  if (sortedHistory.length === 0) {
+  if (!sortedHistory || sortedHistory.length === 0) {
     return (
       <div className="text-center py-8">
         <p className="text-muted-foreground">Keine Historieneinträge vorhanden.</p>

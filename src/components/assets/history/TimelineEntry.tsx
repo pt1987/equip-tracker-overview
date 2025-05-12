@@ -22,6 +22,7 @@ const TimelineEntry = ({ entry, index, userNames, employeeNames }: TimelineEntry
         minute: '2-digit'
       });
     } catch (e) {
+      console.error("Error formatting time:", e);
       return '';
     }
   };
@@ -33,13 +34,13 @@ const TimelineEntry = ({ entry, index, userNames, employeeNames }: TimelineEntry
     // Check if the notes contain multiple lines (change details)
     if (entry.notes.includes('\n')) {
       return entry.notes.split('\n').map((line, i) => (
-        <div key={i} className={i > 0 ? "mt-1" : ""}>
+        <div key={i} className={`${i > 0 ? "mt-1" : ""} text-sm`}>
           {line}
         </div>
       ));
     }
     
-    return <div>{entry.notes}</div>;
+    return <div className="text-sm">{entry.notes}</div>;
   };
   
   return (
@@ -91,7 +92,7 @@ const TimelineEntry = ({ entry, index, userNames, employeeNames }: TimelineEntry
           {entry.notes && (
             <div className="text-sm mt-2 border-t border-secondary/20 pt-2">
               <div className="text-xs text-muted-foreground mb-1">Änderungen:</div>
-              <div className="text-sm">{renderNotes()}</div>
+              {renderNotes()}
             </div>
           )}
         </div>
