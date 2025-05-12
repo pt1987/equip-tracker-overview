@@ -1,9 +1,12 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { AssetBooking, BookingReturnCondition, BookingStatus } from "@/lib/types";
 import { getEmployeeById } from "./employees";
 import { getAssetById } from "./assets";
 import { format } from "date-fns";
 import { Json } from "@/integrations/supabase/types";
+import { addAssetHistoryEntry } from "@/data/assets/history";
+import { getUserId } from "@/hooks/use-auth";
 
 // Define the raw booking type from the database
 type RawBooking = {
@@ -222,16 +225,16 @@ export const createBooking = async (
       const employee = await getEmployeeById(employeeId);
       const employeeName = employee ? `${employee.firstName} ${employee.lastName}` : employeeId;
       const formattedDates = formatDateRange(startDate, endDate);
+      const userId = await getUserId();
       
       const historyNote = `${status === 'active' ? 'Aktive' : 'Geplante'} Buchung: ${formattedDates}${purpose ? ` - ${purpose}` : ''}`;
       
-      // Import the function from assets history
-      const { addAssetHistoryEntry } = await import('./assets/history');
       await addAssetHistoryEntry(
         assetId,
         "booking",
         employeeId,
-        historyNote
+        historyNote,
+        userId
       );
       
       console.log("Added booking entry to asset history");
@@ -287,15 +290,15 @@ export const updateBookingStatus = async (
       
       // Add history entry for booking status change
       try {
-        // Import the function from assets history
-        const { addAssetHistoryEntry } = await import('./assets/history');
+        const userId = await getUserId();
         const statusLabel = status === 'completed' ? 'abgeschlossen' : 'storniert';
         
         await addAssetHistoryEntry(
           booking.assetId,
           "booking",
           booking.employeeId,
-          `Buchung ${statusLabel}: ${formatDateRange(booking.startDate, booking.endDate)}`
+          `Buchung ${statusLabel}: ${formatDateRange(booking.startDate, booking.endDate)}`,
+          userId
         );
         
         console.log("Added booking status change to asset history");
@@ -368,8 +371,7 @@ export const recordAssetReturn = async (
     
     // Add history entry for asset return
     try {
-      // Import the function from assets history
-      const { addAssetHistoryEntry } = await import('./assets/history');
+      const userId = await getUserId();
       const conditionText = {
         'good': 'in gutem Zustand',
         'damaged': 'beschädigt',
@@ -381,7 +383,8 @@ export const recordAssetReturn = async (
         booking.assetId,
         "return",
         booking.employeeId,
-        `Rückgabe nach Buchung: ${conditionText}${comments ? ` - ${comments}` : ''}`
+        `Rückgabe nach Buchung: ${conditionText}${comments ? ` - ${comments}` : ''}`,
+        userId
       );
       
       console.log("Added return entry to asset history");

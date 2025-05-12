@@ -3,6 +3,7 @@ import { Asset } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
 import { mapAssetToDbAsset, mapDbAssetToAsset } from "./mappers";
 import { addAssetHistoryEntry } from "./history";
+import { getUserId } from "@/hooks/use-auth";
 
 // Function to create a new asset in the database
 export const createAsset = async (asset: Asset): Promise<Asset> => {
@@ -35,12 +36,16 @@ export const createAsset = async (asset: Asset): Promise<Asset> => {
     }
     
     try {
+      // Get current user ID for history entries
+      const userId = await getUserId();
+      
       // Add purchase history entry 
       await addAssetHistoryEntry(
         data.id,
         "purchase",
         null, // Don't associate purchase with an employee
-        `${data.name} für ${data.price} € bei ${data.vendor} gekauft`
+        `${data.name} für ${data.price} € bei ${data.vendor} gekauft`,
+        userId
       );
       
       console.log("Added purchase entry to asset history");
@@ -59,7 +64,8 @@ export const createAsset = async (asset: Asset): Promise<Asset> => {
             data.id,
             "assign", 
             data.employee_id,
-            `Asset bei Erstellung einem Mitarbeiter zugewiesen`
+            `Asset bei Erstellung einem Mitarbeiter zugewiesen`,
+            userId
           );
           console.log("Added initial employee assignment to asset history");
         } else {
@@ -76,7 +82,8 @@ export const createAsset = async (asset: Asset): Promise<Asset> => {
           data.id,
           actionType,
           null, // Status changes don't need employee association
-          `Initialer Status: ${statusText}`
+          `Initialer Status: ${statusText}`,
+          userId
         );
         console.log("Added initial status to asset history");
       }

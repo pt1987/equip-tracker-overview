@@ -4,21 +4,45 @@ import { Badge } from "@/components/ui/badge";
 import { AssetBooking } from "@/lib/types";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { addAssetHistoryEntry } from '@/data/assets/history';
+import { getUserId } from "@/hooks/use-auth";
+import { useEffect } from "react";
 
 interface BookingHistorySectionProps {
   bookings: AssetBooking[];
   getBookingDisplayStatus: (booking: AssetBooking) => string;
   getStatusLabel: (status: string) => string;
   getStatusBadgeVariant: (status: string) => "default" | "secondary" | "destructive" | "outline";
+  assetId: string; // Add assetId prop
 }
 
 export default function BookingHistorySection({
   bookings,
   getBookingDisplayStatus,
   getStatusLabel,
-  getStatusBadgeVariant
+  getStatusBadgeVariant,
+  assetId // Use assetId
 }: BookingHistorySectionProps) {
   const isMobile = useIsMobile();
+  
+  // Ensure past bookings are logged in asset history
+  useEffect(() => {
+    const ensureBookingsAreInHistory = async () => {
+      // This is a safeguard to ensure all existing bookings are in history
+      // In a real app, you'd track this more systematically
+      if (bookings.length > 0) {
+        try {
+          const userId = await getUserId();
+          // We don't want to perform actual writes in this effect
+          // This is just a demonstration of how we could ensure history entries exist
+          console.log(`Would ensure ${bookings.length} bookings are in history for asset ${assetId}`);
+        } catch (error) {
+          console.error("Error in booking history check:", error);
+        }
+      }
+    };
+    
+    ensureBookingsAreInHistory();
+  }, [bookings, assetId]);
   
   if (bookings.length === 0) {
     return null;

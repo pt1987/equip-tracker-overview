@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import AssetHistoryTimeline from "@/components/assets/AssetHistoryTimeline";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { useEffect, useState } from "react";
 
 interface HistorySectionProps {
   assetHistory: AssetHistoryEntry[];
@@ -15,6 +16,25 @@ export default function HistorySection({
   assetHistory, 
   isHistoryLoading 
 }: HistorySectionProps) {
+  const [history, setHistory] = useState<AssetHistoryEntry[]>([]);
+
+  // Process history entries to ensure they display correctly
+  useEffect(() => {
+    if (assetHistory && assetHistory.length > 0) {
+      setHistory(assetHistory);
+      
+      // For debugging purposes only
+      console.log("Asset history entries:", assetHistory.map(entry => ({
+        id: entry.id,
+        action: entry.action,
+        date: entry.date,
+        userId: entry.userId,
+        employeeId: entry.employeeId,
+        notes: entry.notes
+      })));
+    }
+  }, [assetHistory]);
+
   return (
     <Card className="shadow-sm mt-4">
       <CardHeader className="pb-3">
@@ -27,8 +47,8 @@ export default function HistorySection({
       </CardHeader>
       <CardContent className="pt-0">
         {!isHistoryLoading ? (
-          assetHistory && assetHistory.length > 0 ? (
-            <AssetHistoryTimeline history={assetHistory} />
+          history && history.length > 0 ? (
+            <AssetHistoryTimeline history={history} />
           ) : (
             <Alert className="my-4">
               <AlertCircle className="h-4 w-4" />

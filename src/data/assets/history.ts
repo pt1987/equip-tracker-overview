@@ -11,6 +11,8 @@ export const addAssetHistoryEntry = async (
   userId?: string | null
 ): Promise<void> => {
   try {
+    console.log(`Adding history entry: asset=${assetId}, action=${action}, employee=${employeeId}, userId=${userId || 'null'}`);
+    
     const { error } = await supabase
       .from('asset_history')
       .insert({
@@ -115,11 +117,27 @@ export const generateFieldChangeNotes = (
   return 'Allgemeine Aktualisierung';
 };
 
-// Export the getUserNameFromId function properly, fixing the error
-export const getUserNameFromId = (userId: string | null | undefined): string => {
+// Function to get username from user ID
+export const getUserNameFromId = async (userId: string | null | undefined): Promise<string> => {
   if (!userId) return "System";
   
-  // In a real app, this would look up the username from the database
-  // For now, we'll just return a placeholder
-  return "Benutzer";
+  try {
+    // Try to get the username from profiles table
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('name')
+      .eq('id', userId)
+      .maybeSingle();
+    
+    if (error) {
+      console.error("Error fetching user profile:", error);
+      return "Benutzer";
+    }
+    
+    // Return the name if found, otherwise a generic name
+    return data?.name || "Benutzer";
+  } catch (error) {
+    console.error("Error in getUserNameFromId:", error);
+    return "Benutzer";
+  }
 };
