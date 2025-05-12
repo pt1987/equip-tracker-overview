@@ -10,14 +10,16 @@ export type AssetHistoryAction =
   | "status_change" // Statusänderung (z.B. defekt)
   | "repair"        // Reparatur eines Assets
   | "return"        // Rückgabe in den Pool
-  | "dispose";      // Entsorgung/Verschrottung
+  | "dispose"       // Entsorgung/Verschrottung
+  | "edit";         // Allgemeine Bearbeitung/Änderung des Assets
 
 // Fügt einen neuen Eintrag zur Asset-Historie hinzu
 export const addAssetHistoryEntry = async (
   assetId: string,
   action: AssetHistoryAction,
   employeeId: string | null = null,
-  notes: string = ""
+  notes: string = "",
+  userId: string | null = null
 ): Promise<AssetHistoryEntry | null> => {
   console.log(`Adding history entry for asset ${assetId}, action: ${action}`);
   
@@ -27,7 +29,8 @@ export const addAssetHistoryEntry = async (
       asset_id: assetId,
       action,
       notes,
-      date: new Date().toISOString()
+      date: new Date().toISOString(),
+      user_id: userId // Track the user making the change
     };
 
     // Only add employee_id if it's not null to avoid foreign key constraint violation
@@ -71,6 +74,7 @@ export const addAssetHistoryEntry = async (
       date: data.date,
       action: data.action as AssetHistoryAction,
       employeeId: data.employee_id,
+      userId: data.user_id,
       notes: data.notes || ""
     };
   } catch (error) {
@@ -109,4 +113,58 @@ export const getActionTypeForStatusChange = (oldStatus: AssetStatus, newStatus: 
   if (newStatus === 'disposed') return 'dispose';
   
   return 'status_change';
+};
+
+// Generiert eine Beschreibung für Änderungen an Asset-Feldern
+export const generateFieldChangeNotes = (oldAsset: any, newAsset: any): string => {
+  const changes: string[] = [];
+  
+  // Liste der zu überprüfenden Felder
+  const fieldsToCheck = [
+    { key: 'name', label: 'Name' },
+    { key: 'manufacturer', label: 'Hersteller' },
+    { key: 'model', label: 'Modell' },
+    { key: 'serialNumber', label: 'Seriennummer' },
+    { key: 'inventoryNumber', label: 'Inventarnummer' },
+    { key: 'price', label: 'Preis' },
+    { key: 'vendor', label: 'Verkäufer' },
+    { key: 'purchaseDate', label: 'Kaufdatum' },
+    { key: 'classification', label: 'Klassifikation' },
+    { key: 'assetOwnerId', label: 'Asset-Verantwortlicher' },
+    { key: 'riskLevel', label: 'Risikolevel' },
+    { key: 'department', label: 'Abteilung' },
+    { key: 'location', label: 'Standort' }
+  ];
+
+  fieldsToCheck.forEach(field => {
+    const oldValue = oldAsset[field.key];
+    const newValue = newAsset[field.key];
+    
+    if (oldValue !== newValue && oldValue !== undefined && newValue !== undefined) {
+      changes.push(`${field.label} von "${oldValue}" zu "${newValue}"`);
+    }
+  });
+
+  // Boolean-Felder separat prüfen
+  const booleanFields = [
+    { key: 'hasWarranty', label: 'Hat Garantie' },
+    { key: 'additionalWarranty', label: 'Zusatzgarantie' },
+    { key: 'isPoolDevice', label: 'Pool-Gerät' },
+    { key: 'isPersonalData', label: 'Enthält personenbezogene Daten' }
+  ];
+
+  booleanFields.forEach(field => {
+    const oldValue = oldAsset[field.key];
+    const newValue = newAsset[field.key];
+    
+    if (oldValue !== newValue && oldValue !== undefined && newValue !== undefined) {
+      const oldText = oldValue ? 'Ja' : 'Nein';
+      const newText = newValue ? 'Ja' : 'Nein';
+      changes.push(`${field.label} von "${oldText}" zu "${newText}"`);
+    }
+  });
+  
+  return changes.length > 0 
+    ? `Geändert: ${changes.join('; ')}` 
+    : 'Allgemeine Aktualisierung';
 };

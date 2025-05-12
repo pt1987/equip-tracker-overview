@@ -11,7 +11,8 @@ import {
   Clock,
   Truck,
   Wrench,
-  Trash2
+  Trash2,
+  Edit
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
@@ -41,6 +42,8 @@ const AssetHistoryTimeline = ({ history }: AssetHistoryTimelineProps) => {
         return <RotateCcw size={18} className="text-primary" />;
       case "dispose":
         return <Trash2 size={18} className="text-primary" />;
+      case "edit":
+        return <Edit size={18} className="text-primary" />;
       default:
         return <Clock size={18} className="text-primary" />;
     }
@@ -62,9 +65,30 @@ const AssetHistoryTimeline = ({ history }: AssetHistoryTimelineProps) => {
         return "Zurückgegeben";
       case "dispose":
         return "Entsorgt";
+      case "edit":
+        return "Bearbeitet";
       default:
         return action;
     }
+  };
+
+  // Function to format time from ISO string
+  const formatTime = (dateString: string): string => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleTimeString('de-DE', { 
+        hour: '2-digit', 
+        minute: '2-digit'
+      });
+    } catch (e) {
+      return '';
+    }
+  };
+
+  // Get user info from ID - in a real app, this would fetch from database
+  const getUserNameFromId = (userId: string | null | undefined): string => {
+    if (!userId) return "System";
+    return "Benutzer"; // In a real app, replace with actual user name lookup
   };
 
   if (sortedHistory.length === 0) {
@@ -100,7 +124,12 @@ const AssetHistoryTimeline = ({ history }: AssetHistoryTimelineProps) => {
               <div className="flex flex-wrap justify-between gap-2 mb-1">
                 <div className="flex items-center">
                   <CalendarClock size={14} className="mr-1.5 text-muted-foreground" />
-                  <span className="text-sm font-medium">{formatDate(entry.date)}</span>
+                  <span className="text-sm font-medium">
+                    {formatDate(entry.date)}
+                    <span className="ml-2 text-xs text-muted-foreground">
+                      {formatTime(entry.date)}
+                    </span>
+                  </span>
                 </div>
                 <span className="inline-flex items-center text-xs font-medium text-primary">
                   {getActionLabel(entry.action)}
@@ -114,6 +143,11 @@ const AssetHistoryTimeline = ({ history }: AssetHistoryTimelineProps) => {
                     <span className="font-medium">{entry.employeeId}</span>
                   </div>
                 )}
+                
+                <div className="text-sm mb-1">
+                  <span className="text-muted-foreground">Durch: </span>
+                  <span className="font-medium">{getUserNameFromId(entry.userId)}</span>
+                </div>
                 
                 {entry.notes && (
                   <div className="text-sm">

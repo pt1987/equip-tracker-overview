@@ -5,24 +5,32 @@ import { mapAssetToDbAsset, mapDbAssetToAsset } from "./mappers";
 import { 
   addAssetHistoryEntry, 
   generateStatusChangeNote, 
-  getActionTypeForStatusChange 
+  getActionTypeForStatusChange,
+  generateFieldChangeNotes
 } from "./history";
+import { getUserId } from "@/hooks/use-auth";
 
 // Function to update an asset in the database
-export const updateAsset = async (asset: Asset): Promise<Asset> => {
+export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<Asset> => {
   console.log("Updating asset in Supabase:", asset);
   
   try {
-    // Fetch the current asset to check for status changes
-    const { data: currentAsset, error: fetchError } = await supabase
-      .from('assets')
-      .select('*')
-      .eq('id', asset.id)
-      .single();
+    // Fetch the current asset to check for changes if previous version is not provided
+    let currentAsset = previousAsset;
     
-    if (fetchError) {
-      console.error("Error fetching current asset state:", fetchError);
-      throw fetchError;
+    if (!currentAsset) {
+      const { data: fetchedAsset, error: fetchError } = await supabase
+        .from('assets')
+        .select('*')
+        .eq('id', asset.id)
+        .single();
+      
+      if (fetchError) {
+        console.error("Error fetching current asset state:", fetchError);
+        throw fetchError;
+      }
+      
+      currentAsset = fetchedAsset;
     }
     
     const dbAsset = mapAssetToDbAsset(asset);
@@ -50,6 +58,9 @@ export const updateAsset = async (asset: Asset): Promise<Asset> => {
     }
     
     try {
+      // Get current user ID for tracking who made the change
+      const userId = await getUserId();
+      
       // Check if status has changed and add history entry if it has
       if (currentAsset && currentAsset.status !== dbAsset.status) {
         const actionType = getActionTypeForStatusChange(
@@ -66,7 +77,8 @@ export const updateAsset = async (asset: Asset): Promise<Asset> => {
           asset.id,
           actionType,
           null, // Status changes don't need employee association
-          notes
+          notes,
+          userId
         );
         
         console.log(`Added ${actionType} to asset history`);
@@ -88,7 +100,8 @@ export const updateAsset = async (asset: Asset): Promise<Asset> => {
               asset.id,
               "assign",
               dbAsset.employee_id,
-              `Asset einem Mitarbeiter zugewiesen`
+              `Asset einem Mitarbeiter zugewiesen`,
+              userId
             );
             console.log("Added assignment change to asset history");
           } else {
@@ -100,9 +113,27 @@ export const updateAsset = async (asset: Asset): Promise<Asset> => {
             asset.id,
             "return",
             null, // Return to pool doesn't need employee association
-            `Asset in den Pool zurückgegeben`
+            `Asset in den Pool zurückgegeben`,
+            userId
           );
           console.log("Added return to pool to asset history");
+        }
+      }
+      
+      // Record general field changes if any (excluding status and employee which are handled separately)
+      if (currentAsset && JSON.stringify(currentAsset) !== JSON.stringify(data)) {
+        const changeNotes = generateFieldChangeNotes(currentAsset, dbAsset);
+        
+        if (changeNotes !== 'Allgemeine Aktualisierung' || 
+            (currentAsset.status === dbAsset.status && currentAsset.employee_id === dbAsset.employee_id)) {
+          await addAssetHistoryEntry(
+            asset.id,
+            "edit",
+            null,
+            changeNotes,
+            userId
+          );
+          console.log("Added general edit to asset history");
         }
       }
     } catch (historyError) {

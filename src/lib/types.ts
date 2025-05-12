@@ -113,7 +113,8 @@ export type AssetHistoryAction =
   | 'repair'
   | 'return'
   | 'dispose'
-  | 'depreciation_change';
+  | 'depreciation_change'
+  | 'edit';  // New action type for general edits
 
 export interface AssetHistoryEntry {
   id: string;
@@ -121,6 +122,7 @@ export interface AssetHistoryEntry {
   date: string;
   action: AssetHistoryAction;
   employeeId: string | null;
+  userId?: string | null;  // User who made the change
   notes: string;
 }
 

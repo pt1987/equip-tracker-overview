@@ -369,3 +369,14 @@ export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   
   return isAuthenticated ? <>{children}</> : null;
 };
+
+// Add this function to the existing file to get the current user ID
+export const getUserId = async (): Promise<string | null> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    return user?.id || null;
+  } catch (error) {
+    console.error("Error getting user ID:", error);
+    return null;
+  }
+};

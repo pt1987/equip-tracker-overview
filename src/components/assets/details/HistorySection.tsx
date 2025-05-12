@@ -1,8 +1,10 @@
 
 import { AssetHistoryEntry } from "@/lib/types";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import AssetHistoryTimeline from "@/components/assets/AssetHistoryTimeline";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 interface HistorySectionProps {
   assetHistory: AssetHistoryEntry[];
@@ -14,18 +16,27 @@ export default function HistorySection({
   isHistoryLoading 
 }: HistorySectionProps) {
   return (
-    <Card className="shadow-sm mt-2">
+    <Card className="shadow-sm mt-4">
       <CardHeader className="pb-3">
-        <CardTitle className="text-xl">Asset Historie</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-xl">Asset Historie</CardTitle>
+        </div>
+        <CardDescription>
+          Vollständiger Änderungsverlauf dieses Assets mit Zeitstempel und Benutzer
+        </CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
         {!isHistoryLoading ? (
           assetHistory && assetHistory.length > 0 ? (
             <AssetHistoryTimeline history={assetHistory} />
           ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              Keine Historieneinträge für dieses Asset vorhanden.
-            </div>
+            <Alert variant="warning" className="my-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Keine Historieneinträge</AlertTitle>
+              <AlertDescription>
+                Für dieses Asset sind keine Historieneinträge vorhanden. Jede Änderung am Asset wird hier protokolliert.
+              </AlertDescription>
+            </Alert>
           )
         ) : (
           <div className="space-y-2 py-4">
