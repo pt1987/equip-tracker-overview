@@ -31,7 +31,7 @@ export default function AssetFormRelation({ assets }: AssetFormRelationProps) {
       render={({ field }) => (
         <FormItem>
           <FormLabel>Zugehöriges Gerät</FormLabel>
-          <Select onValueChange={field.onChange} defaultValue={field.value}>
+          <Select onValueChange={field.onChange} defaultValue={field.value || "none"} value={field.value || "none"}>
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Gerät auswählen" />

@@ -30,7 +30,7 @@ export default function HistorySection({
           assetHistory && assetHistory.length > 0 ? (
             <AssetHistoryTimeline history={assetHistory} />
           ) : (
-            <Alert variant="warning" className="my-4">
+            <Alert className="my-4">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Keine Historieneinträge</AlertTitle>
               <AlertDescription>

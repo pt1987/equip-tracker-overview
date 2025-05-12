@@ -1,4 +1,3 @@
-
 import { useFormContext } from "react-hook-form";
 import { useState, useEffect } from "react";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
@@ -35,7 +34,7 @@ export default function AssetFormFields() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const hasWarranty = form.watch("hasWarranty");
 
-  // Laden der Mitarbeiterliste beim Komponenten-Mount
+  // Load employees when component mounts
   useEffect(() => {
     const loadEmployees = async () => {
       try {
@@ -208,6 +207,7 @@ export default function AssetFormFields() {
               <Select 
                 onValueChange={field.onChange} 
                 defaultValue={field.value || 'not_assigned'}
+                value={field.value || 'not_assigned'}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -215,7 +215,6 @@ export default function AssetFormFields() {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {/* Changed empty string to 'not_assigned' */}
                   <SelectItem value="not_assigned">Nicht zugewiesen</SelectItem>
                   {employees.map((employee) => (
                     <SelectItem key={employee.id} value={employee.id}>

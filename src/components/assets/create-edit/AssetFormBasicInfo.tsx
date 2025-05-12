@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -144,7 +143,7 @@ export default function AssetFormBasicInfo({ employees }: AssetFormBasicInfoProp
         render={({ field }) => (
           <FormItem>
             <FormLabel>Zugewiesen an</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <Select onValueChange={field.onChange} defaultValue={field.value || "pool"} value={field.value || "pool"}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Mitarbeiter auswählen" />

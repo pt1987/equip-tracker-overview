@@ -1,4 +1,3 @@
-
 import { useFormContext } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import { getEmployees } from "@/data/employees";
@@ -106,7 +105,7 @@ export default function AssetFormCompliance() {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="">Nicht zugewiesen</SelectItem>
+                  <SelectItem value="not_assigned">Nicht zugewiesen</SelectItem>
                   {employees.map((employee) => (
                     <SelectItem key={employee.id} value={employee.id}>
                       {employee.firstName} {employee.lastName}

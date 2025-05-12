@@ -30,7 +30,7 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
         throw fetchError;
       }
       
-      currentAsset = fetchedAsset;
+      currentAsset = mapDbAssetToAsset(fetchedAsset);
     }
     
     const dbAsset = mapAssetToDbAsset(asset);
@@ -85,13 +85,13 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
       }
       
       // Check if employee assignment has changed
-      if (currentAsset && currentAsset.employee_id !== dbAsset.employee_id) {
-        if (dbAsset.employee_id) {
+      if (currentAsset && currentAsset.employeeId !== dbAsset.employeeId) {
+        if (dbAsset.employeeId) {
           // Verify employee exists before adding history entry
           const { data: employeeExists } = await supabase
             .from('employees')
             .select('id')
-            .eq('id', dbAsset.employee_id)
+            .eq('id', dbAsset.employeeId)
             .single();
 
           if (employeeExists) {
@@ -99,15 +99,15 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
             await addAssetHistoryEntry(
               asset.id,
               "assign",
-              dbAsset.employee_id,
+              dbAsset.employeeId,
               `Asset einem Mitarbeiter zugewiesen`,
               userId
             );
             console.log("Added assignment change to asset history");
           } else {
-            console.log(`Employee with ID ${dbAsset.employee_id} not found. Skipping history entry.`);
+            console.log(`Employee with ID ${dbAsset.employeeId} not found. Skipping history entry.`);
           }
-        } else if (currentAsset.employee_id) {
+        } else if (currentAsset.employeeId) {
           // Asset was returned to pool
           await addAssetHistoryEntry(
             asset.id,
@@ -125,7 +125,7 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
         const changeNotes = generateFieldChangeNotes(currentAsset, dbAsset);
         
         if (changeNotes !== 'Allgemeine Aktualisierung' || 
-            (currentAsset.status === dbAsset.status && currentAsset.employee_id === dbAsset.employee_id)) {
+            (currentAsset.status === dbAsset.status && currentAsset.employeeId === dbAsset.employeeId)) {
           await addAssetHistoryEntry(
             asset.id,
             "edit",
