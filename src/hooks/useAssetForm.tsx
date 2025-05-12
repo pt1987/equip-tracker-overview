@@ -128,10 +128,10 @@ export function useAssetForm() {
         assetOwnerId: data.assetOwnerId || null,
         lastReviewDate: data.lastReviewDate || null,
         nextReviewDate: data.nextReviewDate || null,
-        riskLevel: data.riskLevel || null,
+        riskLevel: data.riskLevel as 'low' | 'medium' | 'high',  // Fixed: explicit type casting
         isPersonalData: data.isPersonalData || false,
         disposalMethod: data.disposalMethod || null,
-        lifecycleStage: data.lifecycleStage || null,
+        lifecycleStage: data.lifecycleStage as 'procurement' | 'operation' | 'maintenance' | 'disposal',  // Fixed: explicit type casting
         notes: data.notes || null,
       };
 
