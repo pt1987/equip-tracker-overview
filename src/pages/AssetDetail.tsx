@@ -99,14 +99,14 @@ export default function AssetDetail() {
 
   return (
     <PageTransition>
-      <div className={`container mx-auto py-4 md:py-8 max-w-7xl ${isMobile ? 'px-3' : 'px-6'}`}>
-        <div className="flex flex-col gap-4 md:gap-6">
+      <div className="container mx-auto py-4 md:py-6 max-w-7xl">
+        <div className="flex flex-col gap-4 md:gap-6 px-3 md:px-6">
           <div>
-            <Button variant="ghost" onClick={() => navigate(-1)} className="mb-1 -ml-3 h-8 md:h-9 px-2">
+            <Button variant="ghost" onClick={() => navigate(-1)} className="mb-1 -ml-2 h-8 md:h-9 px-2">
               <ChevronLeft size={16} className="mr-1" />
               Zurück
             </Button>
-            <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold tracking-tight`}>Asset Details</h1>
+            <h1 className={`${isMobile ? 'text-xl' : 'text-3xl'} font-bold tracking-tight`}>Asset Details</h1>
           </div>
 
           <AssetDetailContent 
