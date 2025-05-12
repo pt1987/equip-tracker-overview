@@ -8,29 +8,50 @@ export const useTimelineData = (history: AssetHistoryEntry[]) => {
   const [userNames, setUserNames] = useState<Record<string, string>>({});
   const [employeeNames, setEmployeeNames] = useState<Record<string, string>>({});
   const [sortedHistory, setSortedHistory] = useState<AssetHistoryEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Sort history by date (newest first)
   useEffect(() => {
-    const sorted = [...history].sort((a, b) => 
-      new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
-    setSortedHistory(sorted);
+    if (history) {
+      const sorted = [...history].sort((a, b) => 
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+      setSortedHistory(sorted);
+    }
   }, [history]);
   
   // Fetch user names on component mount and whenever history changes
   useEffect(() => {
     const fetchUserNames = async () => {
-      const userIds = [...new Set(sortedHistory.map(entry => entry.userId).filter(Boolean))];
-      const namesMap: Record<string, string> = {};
-      
-      for (const userId of userIds) {
-        if (userId) {
-          const name = await getUserNameFromId(userId);
-          namesMap[userId] = name;
-        }
+      if (sortedHistory.length === 0) {
+        setIsLoading(false);
+        return;
       }
       
-      setUserNames(namesMap);
+      try {
+        setIsLoading(true);
+        const userIds = [...new Set(sortedHistory
+          .filter(entry => entry.userId)
+          .map(entry => entry.userId as string))];
+        
+        const namesMap: Record<string, string> = {};
+        
+        for (const userId of userIds) {
+          try {
+            const name = await getUserNameFromId(userId);
+            namesMap[userId] = name;
+          } catch (error) {
+            console.error(`Error fetching name for user ${userId}:`, error);
+            namesMap[userId] = "Unbekannt";
+          }
+        }
+        
+        setUserNames(namesMap);
+      } catch (error) {
+        console.error("Error fetching user names:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     
     fetchUserNames();
@@ -39,19 +60,33 @@ export const useTimelineData = (history: AssetHistoryEntry[]) => {
   // Fetch employee names on component mount and whenever history changes
   useEffect(() => {
     const fetchEmployeeNames = async () => {
-      const employeeIds = [...new Set(sortedHistory.map(entry => entry.employeeId).filter(Boolean))];
-      const namesMap: Record<string, string> = {};
+      if (sortedHistory.length === 0) return;
       
-      for (const employeeId of employeeIds) {
-        if (employeeId) {
-          const employee = await getEmployeeById(employeeId);
-          if (employee) {
-            namesMap[employeeId] = `${employee.firstName} ${employee.lastName}`;
+      try {
+        const employeeIds = [...new Set(sortedHistory
+          .filter(entry => entry.employeeId)
+          .map(entry => entry.employeeId as string))];
+        
+        const namesMap: Record<string, string> = {};
+        
+        for (const employeeId of employeeIds) {
+          try {
+            const employee = await getEmployeeById(employeeId);
+            if (employee) {
+              namesMap[employeeId] = `${employee.firstName} ${employee.lastName}`;
+            } else {
+              namesMap[employeeId] = "Unbekannt";
+            }
+          } catch (error) {
+            console.error(`Error fetching employee ${employeeId}:`, error);
+            namesMap[employeeId] = "Unbekannt";
           }
         }
+        
+        setEmployeeNames(namesMap);
+      } catch (error) {
+        console.error("Error fetching employee names:", error);
       }
-      
-      setEmployeeNames(namesMap);
     };
     
     fetchEmployeeNames();
@@ -61,5 +96,6 @@ export const useTimelineData = (history: AssetHistoryEntry[]) => {
     userNames,
     employeeNames,
     sortedHistory,
+    isLoading
   };
 };

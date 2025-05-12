@@ -21,25 +21,15 @@ export default function HistorySection({
 
   // Process history entries to ensure they display correctly
   useEffect(() => {
-    if (!isHistoryLoading && assetHistory && assetHistory.length > 0) {
+    if (!isHistoryLoading && assetHistory) {
       // Create a copy of history to avoid modifying the original data
-      const processedHistory = [...assetHistory];
-      
-      // Sort history entries by date (newest first)
-      processedHistory.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      const processedHistory = Array.isArray(assetHistory) ? [...assetHistory] : [];
       
       setHistory(processedHistory);
       setIsProcessingHistory(false);
       
       // For debugging purposes only
-      console.log("Asset history entries:", processedHistory.map(entry => ({
-        id: entry.id,
-        action: entry.action,
-        date: entry.date,
-        userId: entry.userId,
-        employeeId: entry.employeeId,
-        notes: entry.notes
-      })));
+      console.log("Asset history entries:", processedHistory);
     } else if (!isHistoryLoading) {
       setIsProcessingHistory(false);
     }
@@ -78,4 +68,4 @@ export default function HistorySection({
       </CardContent>
     </Card>
   );
-}
+};

@@ -32,7 +32,7 @@ export const addAssetHistoryEntry = async (
       throw error;
     }
     
-    console.log(`Added ${action} history entry for asset ${assetId}`);
+    console.log(`Added ${action} history entry for asset ${assetId} by user ${userId || 'System'}`);
     return;
   } catch (error) {
     console.error("Failed to add history entry:", error);
@@ -146,7 +146,17 @@ export const generateFieldChangeNotes = (
     changedFields.push(`Poolgerät: ${oldVal} → ${newVal}`);
   }
   
-  // Add more fields as needed
+  if (previousAsset.name !== newAsset.name) {
+    changedFields.push(`Name: "${previousAsset.name}" → "${newAsset.name}"`);
+  }
+  
+  if (previousAsset.type !== newAsset.type) {
+    changedFields.push(`Typ: "${previousAsset.type}" → "${newAsset.type}"`);
+  }
+  
+  if (previousAsset.category !== newAsset.category) {
+    changedFields.push(`Kategorie: "${previousAsset.category}" → "${newAsset.category}"`);
+  }
   
   // If fields were changed, list them in the note
   if (changedFields.length > 0) {
@@ -165,7 +175,7 @@ export const getUserNameFromId = async (userId: string | null | undefined): Prom
     // Try to get the username from profiles table
     const { data, error } = await supabase
       .from('profiles')
-      .select('name')
+      .select('name, email')
       .eq('id', userId)
       .maybeSingle();
     
@@ -174,8 +184,21 @@ export const getUserNameFromId = async (userId: string | null | undefined): Prom
       return "Benutzer";
     }
     
-    // Return the name if found, otherwise a generic name
-    return data?.name || "Benutzer";
+    // Return the name if found, otherwise a generic name or email
+    if (data) {
+      return data.name || data.email || "Benutzer";
+    } else {
+      // Try to get the username directly from auth.users via the safe function
+      const { data: userData, error: userError } = await supabase
+        .rpc('get_safe_user_email', { user_id: userId });
+      
+      if (userError || !userData) {
+        console.error("Error fetching user email:", userError);
+        return "Benutzer";
+      }
+      
+      return userData || "Benutzer";
+    }
   } catch (error) {
     console.error("Error in getUserNameFromId:", error);
     return "Benutzer";

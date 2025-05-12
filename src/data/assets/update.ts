@@ -81,7 +81,7 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
           userId
         );
         
-        console.log(`Added ${actionType} to asset history`);
+        console.log(`Added ${actionType} to asset history with user ${userId || 'System'}`);
       }
       
       // Check if employee assignment has changed
@@ -108,7 +108,7 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
               `Asset ${employeeExists ? employeeName : asset.employeeId} zugewiesen ${previousEmployeeInfo}`,
               userId
             );
-            console.log("Added assignment change to asset history");
+            console.log("Added assignment change to asset history with user", userId || 'System');
           } else {
             console.log(`Employee with ID ${asset.employeeId} not found. Skipping history entry.`);
           }
@@ -121,7 +121,7 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
             `Asset in den Pool zurückgegeben (vorher einem Mitarbeiter zugewiesen)`,
             userId
           );
-          console.log("Added return to pool to asset history");
+          console.log("Added return to pool to asset history with user", userId || 'System');
         }
       }
       
@@ -138,7 +138,7 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
             changeNotes,
             userId
           );
-          console.log("Added general edit to asset history");
+          console.log("Added general edit to asset history with user", userId || 'System');
         }
       }
     } catch (historyError) {

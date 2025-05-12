@@ -1,6 +1,6 @@
 
 import { motion } from "framer-motion";
-import { AssetHistoryEntry, AssetHistoryAction } from "@/lib/types";
+import { AssetHistoryEntry } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
 import { CalendarClock } from "lucide-react";
 import { getActionIcon, getActionLabel } from "./timelineUtils";
@@ -26,22 +26,27 @@ const TimelineEntry = ({ entry, index, userNames, employeeNames }: TimelineEntry
     }
   };
 
-  // Function to format multiline notes with proper line breaks
-  const formatNotes = (notes: string) => {
-    if (!notes) return null;
+  // Format the notes to properly display change details
+  const renderNotes = () => {
+    if (!entry.notes) return null;
     
-    return notes.split('\n').map((line, index) => (
-      <div key={index} className={index > 0 ? "mt-1" : ""}>
-        {line}
-      </div>
-    ));
+    // Check if the notes contain multiple lines (change details)
+    if (entry.notes.includes('\n')) {
+      return entry.notes.split('\n').map((line, i) => (
+        <div key={i} className={i > 0 ? "mt-1" : ""}>
+          {line}
+        </div>
+      ));
+    }
+    
+    return <div>{entry.notes}</div>;
   };
-
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1, duration: 0.3 }}
+      transition={{ delay: index * 0.05, duration: 0.2 }}
       className="relative pl-10"
     >
       {/* Timeline dot */}
@@ -71,7 +76,7 @@ const TimelineEntry = ({ entry, index, userNames, employeeNames }: TimelineEntry
             <div className="text-sm mb-1">
               <span className="text-muted-foreground">Mitarbeiter: </span>
               <span className="font-medium">
-                {employeeNames[entry.employeeId] || "Wird geladen..."}
+                {employeeNames[entry.employeeId] || "Unbekannt"}
               </span>
             </div>
           )}
@@ -79,20 +84,14 @@ const TimelineEntry = ({ entry, index, userNames, employeeNames }: TimelineEntry
           <div className="text-sm mb-1">
             <span className="text-muted-foreground">Durch: </span>
             <span className="font-medium">
-              {entry.userId ? (userNames[entry.userId] || "Wird geladen...") : "System"}
+              {entry.userId ? (userNames[entry.userId] || "Unbekannt") : "System"}
             </span>
           </div>
           
           {entry.notes && (
             <div className="text-sm mt-2 border-t border-secondary/20 pt-2">
               <div className="text-xs text-muted-foreground mb-1">Änderungen:</div>
-              <div className="text-sm">{formatNotes(entry.notes)}</div>
-            </div>
-          )}
-          
-          {!entry.notes && !entry.employeeId && (
-            <div className="text-sm text-muted-foreground italic">
-              Keine zusätzlichen Details verfügbar
+              <div className="text-sm">{renderNotes()}</div>
             </div>
           )}
         </div>
