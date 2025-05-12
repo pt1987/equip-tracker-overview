@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { format, addHours } from "date-fns";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -14,6 +13,7 @@ import { Asset, Employee } from "@/lib/types";
 import { createBooking } from "@/data/bookings";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { getUserId } from "@/hooks/use-auth";
 
 interface BookingDialogProps {
   asset: Asset;

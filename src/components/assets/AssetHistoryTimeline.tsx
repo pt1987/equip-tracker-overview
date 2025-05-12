@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { getUserNameFromId } from "@/data/assets/history";
+import { getEmployeeById } from "@/data/employees/fetch";
 
 interface AssetHistoryTimelineProps {
   history: AssetHistoryEntry[];
@@ -26,6 +27,7 @@ interface AssetHistoryTimelineProps {
 const AssetHistoryTimeline = ({ history }: AssetHistoryTimelineProps) => {
   // State to store user names after fetching them
   const [userNames, setUserNames] = useState<Record<string, string>>({});
+  const [employeeNames, setEmployeeNames] = useState<Record<string, string>>({});
 
   // Sort history by date (newest first)
   const sortedHistory = [...history].sort((a, b) => 
@@ -49,6 +51,27 @@ const AssetHistoryTimeline = ({ history }: AssetHistoryTimelineProps) => {
     };
     
     fetchUserNames();
+  }, [sortedHistory]);
+
+  // Fetch employee names on component mount and whenever history changes
+  useEffect(() => {
+    const fetchEmployeeNames = async () => {
+      const employeeIds = [...new Set(sortedHistory.map(entry => entry.employeeId).filter(Boolean))];
+      const namesMap: Record<string, string> = {};
+      
+      for (const employeeId of employeeIds) {
+        if (employeeId) {
+          const employee = await getEmployeeById(employeeId);
+          if (employee) {
+            namesMap[employeeId] = `${employee.firstName} ${employee.lastName}`;
+          }
+        }
+      }
+      
+      setEmployeeNames(namesMap);
+    };
+    
+    fetchEmployeeNames();
   }, [sortedHistory]);
 
   const getActionIcon = (action: AssetHistoryAction) => {
@@ -163,14 +186,16 @@ const AssetHistoryTimeline = ({ history }: AssetHistoryTimelineProps) => {
                 {entry.employeeId && (
                   <div className="text-sm mb-1">
                     <span className="text-muted-foreground">Mitarbeiter: </span>
-                    <span className="font-medium">{entry.employeeId}</span>
+                    <span className="font-medium">
+                      {employeeNames[entry.employeeId] || "Wird geladen..."}
+                    </span>
                   </div>
                 )}
                 
                 <div className="text-sm mb-1">
                   <span className="text-muted-foreground">Durch: </span>
                   <span className="font-medium">
-                    {entry.userId ? (userNames[entry.userId] || "Benutzer") : "System"}
+                    {entry.userId ? (userNames[entry.userId] || "Wird geladen...") : "System"}
                   </span>
                 </div>
                 

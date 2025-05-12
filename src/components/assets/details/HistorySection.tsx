@@ -17,11 +17,13 @@ export default function HistorySection({
   isHistoryLoading 
 }: HistorySectionProps) {
   const [history, setHistory] = useState<AssetHistoryEntry[]>([]);
+  const [isProcessingHistory, setIsProcessingHistory] = useState(true);
 
   // Process history entries to ensure they display correctly
   useEffect(() => {
-    if (assetHistory && assetHistory.length > 0) {
+    if (!isHistoryLoading && assetHistory && assetHistory.length > 0) {
       setHistory(assetHistory);
+      setIsProcessingHistory(false);
       
       // For debugging purposes only
       console.log("Asset history entries:", assetHistory.map(entry => ({
@@ -32,8 +34,10 @@ export default function HistorySection({
         employeeId: entry.employeeId,
         notes: entry.notes
       })));
+    } else if (!isHistoryLoading) {
+      setIsProcessingHistory(false);
     }
-  }, [assetHistory]);
+  }, [assetHistory, isHistoryLoading]);
 
   return (
     <Card className="shadow-sm mt-4">
@@ -46,7 +50,7 @@ export default function HistorySection({
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
-        {!isHistoryLoading ? (
+        {!isHistoryLoading && !isProcessingHistory ? (
           history && history.length > 0 ? (
             <AssetHistoryTimeline history={history} />
           ) : (

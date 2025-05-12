@@ -13,6 +13,9 @@ export const addAssetHistoryEntry = async (
   try {
     console.log(`Adding history entry: asset=${assetId}, action=${action}, employee=${employeeId}, userId=${userId || 'null'}`);
     
+    // Make sure user ID is not undefined to prevent "System" attribution when a user is actually logged in
+    const actualUserId = userId || null;
+    
     const { error } = await supabase
       .from('asset_history')
       .insert({
@@ -20,7 +23,7 @@ export const addAssetHistoryEntry = async (
         action,
         employee_id: employeeId,
         notes,
-        user_id: userId || null
+        user_id: actualUserId
       });
       
     if (error) {
@@ -140,5 +143,30 @@ export const getUserNameFromId = async (userId: string | null | undefined): Prom
   } catch (error) {
     console.error("Error in getUserNameFromId:", error);
     return "Benutzer";
+  }
+};
+
+// Add a new function to get employee name from ID
+export const getEmployeeNameFromId = async (employeeId: string | null | undefined): Promise<string> => {
+  if (!employeeId) return "";
+  
+  try {
+    // Try to get the employee from employees table
+    const { data, error } = await supabase
+      .from('employees')
+      .select('first_name, last_name')
+      .eq('id', employeeId)
+      .maybeSingle();
+    
+    if (error) {
+      console.error("Error fetching employee:", error);
+      return employeeId;
+    }
+    
+    // Return the name if found, otherwise return the ID
+    return data ? `${data.first_name} ${data.last_name}` : employeeId;
+  } catch (error) {
+    console.error("Error in getEmployeeNameFromId:", error);
+    return employeeId;
   }
 };
