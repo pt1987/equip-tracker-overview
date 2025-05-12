@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { 
   AlertTriangle, 
@@ -11,15 +12,16 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { DamageIncidentForm } from "@/components/damage-management/DamageIncidentForm";
 import { DamageIncidentsTable } from "@/components/damage-management/DamageIncidentsTable";
 import { DamageReportView } from "@/components/damage-management/DamageReportView";
 import { DialogDamageIncident } from "@/components/damage-management/DialogDamageIncident";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function DamageManagement() {
   const [openDialog, setOpenDialog] = useState(false);
   const [activeTab, setActiveTab] = useState("incidents");
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
   const { toast } = useToast();
 
@@ -55,20 +57,20 @@ export default function DamageManagement() {
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Schadensmanagement</h1>
+          <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold tracking-tight`}>Schadensmanagement</h1>
           <p className="text-muted-foreground mt-1">
             ISO 27001 konformes Schadensmanagement für Assets
           </p>
         </div>
         <Button onClick={handleAddNewIncident}>
           <PlusCircle className="mr-2 h-4 w-4" />
-          Neuen Schadensfall melden
+          {isMobile ? "Neu" : "Neuen Schadensfall melden"}
         </Button>
       </div>
 
       <Separator />
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className={`grid grid-cols-1 ${isMobile ? 'gap-3' : 'md:grid-cols-4 gap-4'}`}>
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Offene Fälle</CardTitle>
@@ -135,7 +137,7 @@ export default function DamageManagement() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full md:w-[400px] grid-cols-2">
+        <TabsList className={`grid w-full ${isMobile ? 'grid-cols-2' : 'md:w-[400px] grid-cols-2'}`}>
           <TabsTrigger value="incidents">Schadensfälle</TabsTrigger>
           <TabsTrigger value="reports">Berichte & Dokumentation</TabsTrigger>
         </TabsList>

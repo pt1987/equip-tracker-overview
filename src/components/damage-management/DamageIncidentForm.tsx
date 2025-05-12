@@ -23,6 +23,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { AlertTriangle, Info } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const formSchema = z.object({
   title: z.string().min(5, "Titel muss mindestens 5 Zeichen lang sein."),
@@ -47,6 +48,7 @@ interface DamageIncidentFormProps {
 
 export function DamageIncidentForm({ incidentId, onSubmit }: DamageIncidentFormProps) {
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
+  const isMobile = useIsMobile();
 
   // Fetch assets
   const { data: assets = [], isLoading: assetsLoading } = useQuery({
@@ -119,236 +121,238 @@ export function DamageIncidentForm({ incidentId, onSubmit }: DamageIncidentFormP
   ];
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
-        <div className="space-y-4">
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Titel des Schadensfalls</FormLabel>
-                <FormControl>
-                  <Input placeholder="z.B. Laptop Display gebrochen" {...field} />
-                </FormControl>
-                <FormDescription>Kurze Beschreibung des Schadens</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className={isMobile ? "pb-4" : ""}>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+          <div className="space-y-4">
             <FormField
               control={form.control}
-              name="assetId"
+              name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Betroffenes Asset</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <FormLabel>Titel des Schadensfalls</FormLabel>
+                  <FormControl>
+                    <Input placeholder="z.B. Laptop Display gebrochen" {...field} />
+                  </FormControl>
+                  <FormDescription>Kurze Beschreibung des Schadens</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className={`grid grid-cols-1 ${isMobile ? '' : 'md:grid-cols-2'} gap-4`}>
+              <FormField
+                control={form.control}
+                name="assetId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Betroffenes Asset</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Asset auswählen" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {assetsLoading ? (
+                          <SelectItem value="loading">Lädt...</SelectItem>
+                        ) : (
+                          assets.map((asset) => (
+                            <SelectItem key={asset.id} value={asset.id}>
+                              {asset.name} ({asset.serialNumber || asset.inventoryNumber})
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="damageDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Schadensdatum</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Asset auswählen" />
-                      </SelectTrigger>
+                      <Input type="date" {...field} />
                     </FormControl>
-                    <SelectContent>
-                      {assetsLoading ? (
-                        <SelectItem value="loading">Lädt...</SelectItem>
-                      ) : (
-                        assets.map((asset) => (
-                          <SelectItem key={asset.id} value={asset.id}>
-                            {asset.name} ({asset.serialNumber || asset.inventoryNumber})
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="damageType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Art des Schadens</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Schadensart auswählen" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent position={isMobile ? "popper" : "item-aligned"} className="max-h-[300px] overflow-y-auto">
+                        {damageTypes.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
                           </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="damageDate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Schadensdatum</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="damageType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Art des Schadens</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+              <FormField
+                control={form.control}
+                name="priority"
+                render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <FormLabel>Priorität</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Schadensart auswählen" />
-                      </SelectTrigger>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="flex space-x-1"
+                      >
+                        <FormItem className="flex items-center space-x-1 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value="low" />
+                          </FormControl>
+                          <FormLabel className="font-normal">Niedrig</FormLabel>
+                        </FormItem>
+                        <FormItem className="flex items-center space-x-1 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value="medium" />
+                          </FormControl>
+                          <FormLabel className="font-normal">Mittel</FormLabel>
+                        </FormItem>
+                        <FormItem className="flex items-center space-x-1 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value="high" />
+                          </FormControl>
+                          <FormLabel className="font-normal">Hoch</FormLabel>
+                        </FormItem>
+                      </RadioGroup>
                     </FormControl>
-                    <SelectContent>
-                      {damageTypes.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          {type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="priority"
-              render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel>Priorität</FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      className="flex space-x-1"
-                    >
-                      <FormItem className="flex items-center space-x-1 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="low" />
-                        </FormControl>
-                        <FormLabel className="font-normal">Niedrig</FormLabel>
-                      </FormItem>
-                      <FormItem className="flex items-center space-x-1 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="medium" />
-                        </FormControl>
-                        <FormLabel className="font-normal">Mittel</FormLabel>
-                      </FormItem>
-                      <FormItem className="flex items-center space-x-1 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="high" />
-                        </FormControl>
-                        <FormLabel className="font-normal">Hoch</FormLabel>
-                      </FormItem>
-                    </RadioGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="location"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Ort des Schadensereignisses</FormLabel>
-                  <FormControl>
-                    <Input placeholder="z.B. Büro Berlin" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="reportedBy"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Gemeldet durch</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+              <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Ort des Schadensereignisses</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Person auswählen" />
-                      </SelectTrigger>
+                      <Input placeholder="z.B. Büro Berlin" {...field} />
                     </FormControl>
-                    <SelectContent>
-                      {employeesLoading ? (
-                        <SelectItem value="loading">Lädt...</SelectItem>
-                      ) : (
-                        employees.map((employee) => (
-                          <SelectItem key={employee.id} value={employee.id}>
-                            {employee.firstName} {employee.lastName}
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="reportedBy"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Gemeldet durch</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Person auswählen" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent position={isMobile ? "popper" : "item-aligned"} className="max-h-[300px] overflow-y-auto">
+                        {employeesLoading ? (
+                          <SelectItem value="loading">Lädt...</SelectItem>
+                        ) : (
+                          employees.map((employee) => (
+                            <SelectItem key={employee.id} value={employee.id}>
+                              {employee.firstName} {employee.lastName}
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <Separator />
+
+            <Alert className="bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-900">
+              <Info className="h-4 w-4 text-blue-500" />
+              <AlertTitle>ISO 27001 Anforderungen</AlertTitle>
+              <AlertDescription>
+                Geben Sie bitte eine detaillierte Beschreibung des Schadens ein, um die Anforderungen der ISO 27001 an das Incident Management zu erfüllen.
+              </AlertDescription>
+            </Alert>
+
+            <FormField
+              control={form.control}
+              name="damageDescription"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Detaillierte Schadensbeschreibung</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Beschreiben Sie den Schaden detailliert" 
+                      className="min-h-[100px]" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Beschreiben Sie genau, was passiert ist, wie der Schaden entstanden ist und welche Auswirkungen er hat.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="measuresDescription"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Sofort eingeleitete Maßnahmen</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Welche Maßnahmen wurden bereits ergriffen?" 
+                      className="min-h-[100px]" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Beschreiben Sie, welche Sofortmaßnahmen bereits ergriffen wurden, um den Schaden zu begrenzen.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
 
-          <Separator />
-
-          <Alert className="bg-blue-50 border-blue-200">
-            <Info className="h-4 w-4 text-blue-500" />
-            <AlertTitle>ISO 27001 Anforderungen</AlertTitle>
-            <AlertDescription>
-              Geben Sie bitte eine detaillierte Beschreibung des Schadens ein, um die Anforderungen der ISO 27001 an das Incident Management zu erfüllen.
-            </AlertDescription>
-          </Alert>
-
-          <FormField
-            control={form.control}
-            name="damageDescription"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Detaillierte Schadensbeschreibung</FormLabel>
-                <FormControl>
-                  <Textarea 
-                    placeholder="Beschreiben Sie den Schaden detailliert" 
-                    className="min-h-[100px]" 
-                    {...field} 
-                  />
-                </FormControl>
-                <FormDescription>
-                  Beschreiben Sie genau, was passiert ist, wie der Schaden entstanden ist und welche Auswirkungen er hat.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="measuresDescription"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Sofort eingeleitete Maßnahmen</FormLabel>
-                <FormControl>
-                  <Textarea 
-                    placeholder="Welche Maßnahmen wurden bereits ergriffen?" 
-                    className="min-h-[100px]" 
-                    {...field} 
-                  />
-                </FormControl>
-                <FormDescription>
-                  Beschreiben Sie, welche Sofortmaßnahmen bereits ergriffen wurden, um den Schaden zu begrenzen.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="pt-4 space-x-2 flex justify-end">
-          <Button variant="outline" type="button" onClick={() => form.reset()}>
-            Zurücksetzen
-          </Button>
-          <Button type="submit" disabled={isLoadingSubmit}>
-            {isLoadingSubmit ? "Wird gespeichert..." : incidentId ? "Aktualisieren" : "Speichern"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+          <div className={`${isMobile ? 'pt-2' : 'pt-4'} space-x-2 flex justify-end`}>
+            <Button variant="outline" type="button" onClick={() => form.reset()}>
+              Zurücksetzen
+            </Button>
+            <Button type="submit" disabled={isLoadingSubmit}>
+              {isLoadingSubmit ? "Wird gespeichert..." : incidentId ? "Aktualisieren" : "Speichern"}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </div>
   );
 }
