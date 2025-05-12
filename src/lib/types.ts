@@ -114,7 +114,8 @@ export type AssetHistoryAction =
   | 'return'
   | 'dispose'
   | 'depreciation_change'
-  | 'edit';  // New action type for general edits
+  | 'edit'  // New action type for general edits
+  | 'booking'; // New action type for bookings
 
 export interface AssetHistoryEntry {
   id: string;

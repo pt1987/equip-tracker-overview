@@ -12,7 +12,8 @@ import {
   Truck,
   Wrench,
   Trash2,
-  Edit
+  Edit,
+  Calendar
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { getUserNameFromId } from "@/data/assets/history";
@@ -45,6 +46,8 @@ const AssetHistoryTimeline = ({ history }: AssetHistoryTimelineProps) => {
         return <Trash2 size={18} className="text-primary" />;
       case "edit":
         return <Edit size={18} className="text-primary" />;
+      case "booking":
+        return <Calendar size={18} className="text-primary" />;
       default:
         return <Clock size={18} className="text-primary" />;
     }
@@ -68,6 +71,8 @@ const AssetHistoryTimeline = ({ history }: AssetHistoryTimelineProps) => {
         return "Entsorgt";
       case "edit":
         return "Bearbeitet";
+      case "booking":
+        return "Buchung";
       default:
         return action;
     }

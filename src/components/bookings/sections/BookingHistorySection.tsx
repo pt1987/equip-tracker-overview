@@ -3,6 +3,7 @@ import { format, parseISO } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { AssetBooking } from "@/lib/types";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { addAssetHistoryEntry } from '@/data/assets/history';
 
 interface BookingHistorySectionProps {
   bookings: AssetBooking[];

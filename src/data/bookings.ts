@@ -216,6 +216,29 @@ export const createBooking = async (
           .eq('id', assetId);
       }
     }
+    
+    // Add entry to asset history for ISO 27001 compliance
+    try {
+      const employee = await getEmployeeById(employeeId);
+      const employeeName = employee ? `${employee.firstName} ${employee.lastName}` : employeeId;
+      const formattedDates = formatDateRange(startDate, endDate);
+      
+      const historyNote = `${status === 'active' ? 'Aktive' : 'Geplante'} Buchung: ${formattedDates}${purpose ? ` - ${purpose}` : ''}`;
+      
+      // Import the function from assets history
+      const { addAssetHistoryEntry } = await import('./assets/history');
+      await addAssetHistoryEntry(
+        assetId,
+        "booking",
+        employeeId,
+        historyNote
+      );
+      
+      console.log("Added booking entry to asset history");
+    } catch (historyError) {
+      console.error("Error adding booking to history:", historyError);
+      // Continue despite history error
+    }
 
     return mapDbBookingToBooking(data);
   } catch (error) {
@@ -242,9 +265,14 @@ export const updateBookingStatus = async (
       throw error;
     }
 
+    if (!data) {
+      return null;
+    }
+    
+    const booking = mapDbBookingToBooking(data);
+    
     // If changing to completed, we might need to update the asset status
-    if ((status === 'completed' || status === 'canceled') && data) {
-      const booking = mapDbBookingToBooking(data);
+    if (status === 'completed' || status === 'canceled') {
       const asset = await getAssetById(booking.assetId);
       
       if (asset && asset.isPoolDevice) {
@@ -256,9 +284,27 @@ export const updateBookingStatus = async (
           })
           .eq('id', booking.assetId);
       }
+      
+      // Add history entry for booking status change
+      try {
+        // Import the function from assets history
+        const { addAssetHistoryEntry } = await import('./assets/history');
+        const statusLabel = status === 'completed' ? 'abgeschlossen' : 'storniert';
+        
+        await addAssetHistoryEntry(
+          booking.assetId,
+          "booking",
+          booking.employeeId,
+          `Buchung ${statusLabel}: ${formatDateRange(booking.startDate, booking.endDate)}`
+        );
+        
+        console.log("Added booking status change to asset history");
+      } catch (historyError) {
+        console.error("Error adding booking status change to history:", historyError);
+      }
     }
 
-    return data ? mapDbBookingToBooking(data) : null;
+    return booking;
   } catch (error) {
     console.error(`Error in updateBookingStatus for ${bookingId}:`, error);
     return null;
@@ -301,8 +347,9 @@ export const recordAssetReturn = async (
       throw new Error(`No booking found with ID ${bookingId}`);
     }
 
-    // Reset the asset status to pool
     const booking = mapDbBookingToBooking(data);
+    
+    // Reset the asset status to pool
     await supabase
       .from('assets')
       .update({ 
@@ -317,6 +364,29 @@ export const recordAssetReturn = async (
         .from('assets')
         .update({ status: 'defective' })
         .eq('id', booking.assetId);
+    }
+    
+    // Add history entry for asset return
+    try {
+      // Import the function from assets history
+      const { addAssetHistoryEntry } = await import('./assets/history');
+      const conditionText = {
+        'good': 'in gutem Zustand',
+        'damaged': 'beschädigt',
+        'incomplete': 'unvollständig',
+        'lost': 'verloren'
+      }[condition];
+      
+      await addAssetHistoryEntry(
+        booking.assetId,
+        "return",
+        booking.employeeId,
+        `Rückgabe nach Buchung: ${conditionText}${comments ? ` - ${comments}` : ''}`
+      );
+      
+      console.log("Added return entry to asset history");
+    } catch (historyError) {
+      console.error("Error adding return to history:", historyError);
     }
 
     return booking;
