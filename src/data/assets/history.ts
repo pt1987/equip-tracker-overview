@@ -160,6 +160,12 @@ export const generateFieldChangeNotes = (
     changedFields.push(`Kategorie: "${previousAsset.category}" → "${newAsset.category}"`);
   }
   
+  if (previousAsset.status !== newAsset.status) {
+    changedFields.push(`Status: "${getStatusLabel(previousAsset.status)}" → "${getStatusLabel(newAsset.status)}"`);
+  }
+  
+  // Add more field checks as needed
+  
   // If fields were changed, list them in the note
   if (changedFields.length > 0) {
     return changedFields.join('\n');
