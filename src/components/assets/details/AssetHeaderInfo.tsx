@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { QrCode, Pencil, Trash } from "lucide-react";
 import StatusBadge from "../StatusBadge";
 import QRCode from "@/components/shared/QRCode";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface AssetHeaderInfoProps {
   asset: Asset;
@@ -21,6 +22,7 @@ export default function AssetHeaderInfo({ asset, onEdit, onDelete }: AssetHeader
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const isMobile = useIsMobile();
 
   const getAssetTypeLabel = (type: Asset["type"]) => {
     switch (type) {
@@ -45,17 +47,17 @@ export default function AssetHeaderInfo({ asset, onEdit, onDelete }: AssetHeader
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <div className="relative">
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center gap-2">
+        <div className="flex justify-between items-center mb-3 md:mb-4">
+          <div className="flex items-center gap-2 flex-wrap">
             <Badge variant="secondary" className="font-medium">
               {getAssetTypeLabel(asset.type)}
             </Badge>
-            <StatusBadge status={asset.status} size="md" />
+            <StatusBadge status={asset.status} size={isMobile ? "sm" : "md"} />
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 md:gap-2">
             <Dialog open={qrDialogOpen} onOpenChange={setQrDialogOpen}>
               <DialogTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -116,30 +118,30 @@ export default function AssetHeaderInfo({ asset, onEdit, onDelete }: AssetHeader
           </div>
         </div>
 
-        <h1 className="text-3xl font-semibold mb-1">{asset.name}</h1>
-        <p className="text-muted-foreground mb-6">
+        <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-semibold mb-1`}>{asset.name}</h1>
+        <p className="text-muted-foreground mb-4 md:mb-6">
           {asset.manufacturer} {asset.model}
         </p>
 
-        <div className="grid grid-cols-2 gap-y-4 gap-x-8">
+        <div className="grid grid-cols-2 gap-y-3 md:gap-y-4 gap-x-4 md:gap-x-8">
           <div className="space-y-1">
             <p className="text-sm text-muted-foreground">Kaufdatum</p>
-            <p className="text-base font-medium">{formatDate(asset.purchaseDate)}</p>
+            <p className={`${isMobile ? 'text-sm' : 'text-base'} font-medium`}>{formatDate(asset.purchaseDate)}</p>
           </div>
           
           <div className="space-y-1">
             <p className="text-sm text-muted-foreground">Preis</p>
-            <p className="text-base font-medium">{formatCurrency(asset.price)}</p>
+            <p className={`${isMobile ? 'text-sm' : 'text-base'} font-medium`}>{formatCurrency(asset.price)}</p>
           </div>
           
           <div className="space-y-1">
             <p className="text-sm text-muted-foreground">Alter</p>
-            <p className="text-base font-medium">{calculateAgeInMonths(asset.purchaseDate)} Monate</p>
+            <p className={`${isMobile ? 'text-sm' : 'text-base'} font-medium`}>{calculateAgeInMonths(asset.purchaseDate)} Monate</p>
           </div>
           
           <div className="space-y-1">
             <p className="text-sm text-muted-foreground">Lieferant</p>
-            <p className="text-base font-medium">{asset.vendor || "-"}</p>
+            <p className={`${isMobile ? 'text-sm' : 'text-base'} font-medium`}>{asset.vendor || "-"}</p>
           </div>
         </div>
       </div>

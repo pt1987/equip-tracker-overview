@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Import component parts
 import AssetImage from "./details/AssetImage";
@@ -35,6 +36,7 @@ export default function AssetDetailView({
   const [currentAsset, setCurrentAsset] = useState<Asset>(asset);
   const [activeTab, setActiveTab] = useState<"details" | "compliance">("details");
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const fetchEmployee = async () => {
@@ -93,7 +95,7 @@ export default function AssetDetailView({
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <AssetImage imageUrl={currentAsset.imageUrl} altText={currentAsset.name} />
         <div>
           <AssetHeaderInfo asset={currentAsset} onEdit={onEdit} onDelete={onDelete} />
@@ -112,18 +114,18 @@ export default function AssetDetailView({
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "details" | "compliance")}>
-        <TabsList>
-          <TabsTrigger value="details">Technische Details</TabsTrigger>
-          <TabsTrigger value="compliance">ISO 27001 Compliance</TabsTrigger>
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "details" | "compliance")} className="w-full">
+        <TabsList className={`${isMobile ? 'w-full grid grid-cols-2' : ''}`}>
+          <TabsTrigger value="details" className={isMobile ? 'flex-1' : ''}>Technische Details</TabsTrigger>
+          <TabsTrigger value="compliance" className={isMobile ? 'flex-1' : ''}>ISO 27001 Compliance</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="details" className="space-y-6">
+        <TabsContent value="details" className="space-y-6 pt-4">
           <AssetTechnicalDetails asset={currentAsset} />
           {currentAsset.connectedAssetId && <ConnectedAsset connectedAssetId={currentAsset.connectedAssetId} />}
         </TabsContent>
         
-        <TabsContent value="compliance" className="space-y-6">
+        <TabsContent value="compliance" className="space-y-6 pt-4">
           <ComplianceSection asset={currentAsset} onAssetUpdate={handleAssetUpdate} />
           <AssetReviewHistory asset={currentAsset} onReviewAdded={handleReviewAdded} />
         </TabsContent>

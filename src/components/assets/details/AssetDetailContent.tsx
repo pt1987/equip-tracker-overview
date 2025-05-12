@@ -6,6 +6,7 @@ import { Asset, AssetHistoryEntry } from "@/lib/types";
 import { updateAsset } from "@/data/assets";
 import { Card, CardContent } from "@/components/ui/card";
 import { getEmployees } from "@/data/employees";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 import AssetDetailView from "@/components/assets/AssetDetailView";
 import AssetDetailEdit from "@/components/assets/AssetDetailEdit";
@@ -35,6 +36,7 @@ export default function AssetDetailContent({
 }: AssetDetailContentProps) {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
+  const isMobile = useIsMobile();
   
   const { 
     documents, 
@@ -122,7 +124,7 @@ export default function AssetDetailContent({
     <>
       <Card className="shadow-sm">
         {isEditing ? (
-          <CardContent className="p-6">
+          <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
             <AssetDetailEdit 
               asset={asset} 
               onSave={handleSave} 
@@ -130,7 +132,7 @@ export default function AssetDetailContent({
             />
           </CardContent>
         ) : (
-          <CardContent className="p-6">
+          <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
             <AssetDetailView 
               asset={asset} 
               onEdit={handleEdit} 
@@ -153,7 +155,7 @@ export default function AssetDetailContent({
 
           <DepreciationSection asset={asset} />
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
             <EmployeeSection employeeId={asset.employeeId} />
             <DocumentSection 
               assetId={asset.id}

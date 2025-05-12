@@ -3,43 +3,46 @@ import { Asset } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShieldCheck, ShieldAlert } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface AssetTechnicalDetailsProps {
   asset: Asset;
 }
 
 export default function AssetTechnicalDetails({ asset }: AssetTechnicalDetailsProps) {
+  const isMobile = useIsMobile();
+  
   return (
     <Card className="shadow-sm">
-      <CardHeader className="pb-3">
+      <CardHeader className={`${isMobile ? 'pb-2 pt-3 px-3' : 'pb-3'}`}>
         <CardTitle className="text-xl">Technische Details</CardTitle>
       </CardHeader>
-      <CardContent className="pt-0">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <CardContent className={`${isMobile ? 'pt-0 px-3 pb-3' : 'pt-0'}`}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {asset.serialNumber && (
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Seriennummer</p>
-              <p className="font-medium tracking-wide">{asset.serialNumber}</p>
+              <p className="font-medium tracking-wide break-all">{asset.serialNumber}</p>
             </div>
           )}
           
           {asset.inventoryNumber && (
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Inventar-Nr.</p>
-              <p className="font-medium">{asset.inventoryNumber}</p>
+              <p className="font-medium break-all">{asset.inventoryNumber}</p>
             </div>
           )}
           
           {asset.imei && (
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">IMEI</p>
-              <p className="font-medium">{asset.imei}</p>
+              <p className="font-medium break-all">{asset.imei}</p>
             </div>
           )}
           
           <div className="space-y-1">
             <p className="text-sm text-muted-foreground">Garantie</p>
-            <p className="font-medium flex items-center">
+            <p className="font-medium flex items-center flex-wrap">
               {asset.hasWarranty ? (
                 <>
                   <ShieldCheck className="h-4 w-4 mr-1 text-green-500" />

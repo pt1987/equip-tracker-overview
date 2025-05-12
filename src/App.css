@@ -55,6 +55,12 @@
   width: 100%;
 }
 
+@media (max-width: 640px) {
+  .page-container {
+    padding: 1rem;
+  }
+}
+
 /* Standard grid layout */
 .responsive-grid {
   display: grid;
@@ -68,6 +74,12 @@
   width: 100%;
   margin: 0;
   padding: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .content-container {
+    padding: 1rem;
+  }
 }
 
 @media (min-width: 1024px) {
@@ -94,6 +106,36 @@
   
   .tabs-content {
     padding: 0.5rem !important;
+  }
+  
+  /* Kleinere Schriftgröße für mobile Ansichten */
+  h1 {
+    font-size: 1.5rem !important;
+  }
+  
+  h2 {
+    font-size: 1.25rem !important;
+  }
+  
+  /* Anpassen von Abständen für mobile Ansichten */
+  .p-6 {
+    padding: 1rem !important;
+  }
+  
+  .gap-6 {
+    gap: 1rem !important;
+  }
+  
+  /* Verbesserte Lesbarkeit für Tabs auf mobilen Geräten */
+  .tabs-list {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
+  .tab-trigger {
+    flex: 1 !important;
+    width: 100% !important;
   }
 }
 
@@ -204,4 +246,11 @@
 .dark .glass-card {
   background-color: rgba(30, 41, 59, 0.7);
   border: 1px solid rgba(51, 65, 85, 0.5);
+}
+
+/* Verbesserte Tab-Darstellung für mobile Ansichten */
+@media (max-width: 640px) {
+  .tabs-content {
+    margin-top: 0.5rem;
+  }
 }

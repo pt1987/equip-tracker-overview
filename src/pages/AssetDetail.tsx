@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 import AssetDetailContent from "@/components/assets/details/AssetDetailContent";
 import AssetLoading from "@/components/assets/details/AssetLoading";
@@ -18,6 +19,7 @@ export default function AssetDetail() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   // Scroll to top when navigating to this page
   useEffect(() => {
@@ -97,14 +99,14 @@ export default function AssetDetail() {
 
   return (
     <PageTransition>
-      <div className="container mx-auto py-8 max-w-7xl px-6">
-        <div className="flex flex-col gap-6">
+      <div className={`container mx-auto py-4 md:py-8 max-w-7xl ${isMobile ? 'px-3' : 'px-6'}`}>
+        <div className="flex flex-col gap-4 md:gap-6">
           <div>
-            <Button variant="ghost" onClick={() => navigate(-1)} className="mb-1 -ml-3 h-9 px-2">
+            <Button variant="ghost" onClick={() => navigate(-1)} className="mb-1 -ml-3 h-8 md:h-9 px-2">
               <ChevronLeft size={16} className="mr-1" />
               Zurück
             </Button>
-            <h1 className="text-3xl font-bold tracking-tight">Asset Details</h1>
+            <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold tracking-tight`}>Asset Details</h1>
           </div>
 
           <AssetDetailContent 
