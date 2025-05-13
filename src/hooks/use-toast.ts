@@ -1,16 +1,11 @@
 import * as React from "react";
 import {
   Toast,
-  ToastActionElement,
   ToastProps,
 } from "@/components/ui/toast";
 
-import {
-  useToast as useToastPrimitive,
-  toastVariants as toastVariantsPrimitive,
-} from "@radix-ui/react-toast";
-
-type ToastActionProps = React.ComponentPropsWithoutRef<typeof ToastActionElement>;
+// Define the ToastActionElement type properly
+type ToastActionElement = React.ReactElement<any>;
 
 const TOAST_LIMIT = 5;
 const TOAST_REMOVE_DELAY = 1000000;
@@ -19,7 +14,7 @@ type ToasterToast = ToastProps & {
   id: string;
   title?: React.ReactNode;
   description?: React.ReactNode;
-  action?: ToastActionProps;
+  action?: ToastActionElement;
 }
 
 const actionTypes = {
