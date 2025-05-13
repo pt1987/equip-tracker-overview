@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import { Euro } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import { Progress } from "@/components/ui/progress";
 
 interface BudgetSectionProps {
   budget: number;

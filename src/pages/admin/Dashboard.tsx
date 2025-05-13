@@ -114,7 +114,11 @@ export default function AdminDashboard() {
                       <span className="text-muted-foreground">Zuwachs</span>
                       <span className="text-green-500">+{Math.round((stats.newUsers / stats.totalUsers) * 100)}%</span>
                     </div>
-                    <Progress value={(stats.newUsers / stats.totalUsers) * 100} className="h-1 mt-1" />
+                    <Progress 
+                      value={(stats.newUsers / stats.totalUsers) * 100} 
+                      className="h-1 mt-1" 
+                      label="Benutzer-Zuwachs Prozentsatz"
+                    />
                   </div>
                 )}
               </CardContent>
@@ -143,7 +147,11 @@ export default function AdminDashboard() {
                       <span className="text-muted-foreground">Aktivitätsrate</span>
                       <span className="text-amber-500">{Math.round((stats.activeUsers / stats.totalUsers) * 100)}%</span>
                     </div>
-                    <Progress value={(stats.activeUsers / stats.totalUsers) * 100} className="h-1 mt-1" />
+                    <Progress 
+                      value={(stats.activeUsers / stats.totalUsers) * 100} 
+                      className="h-1 mt-1" 
+                      label="Benutzer-Aktivitätsrate Prozentsatz"
+                    />
                   </div>
                 )}
               </CardContent>

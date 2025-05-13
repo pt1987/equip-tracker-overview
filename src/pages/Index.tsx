@@ -14,6 +14,7 @@ import { Progress } from "@/components/ui/progress";
 import StatusBadge from "@/components/assets/StatusBadge";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
+
 const getAssetTypeDistribution = async () => {
   const assets = await getAssets();
   const typeCount: Record<string, number> = {};
@@ -120,15 +121,7 @@ const IndexPage = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <motion.div initial={{
-          opacity: 0,
-          y: 20
-        }} animate={{
-          opacity: 1,
-          y: 0
-        }} transition={{
-          delay: 0.1
-        }} className="col-span-1">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="col-span-1">
             <Card className="h-full">
               <CardHeader>
                 <CardTitle className="text-lg font-medium">Budget-Nutzung</CardTitle>
@@ -148,41 +141,42 @@ const IndexPage = () => {
                   
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span>Auslastungsrate
-                    </span>
+                      <span>Auslastungsrate</span>
                       <span className={cn(budgetUsagePercentage > 90 ? "text-red-500" : budgetUsagePercentage > 75 ? "text-amber-500" : "text-green-500")}>
                         {budgetUsagePercentage}%
                       </span>
                     </div>
-                    <Progress value={budgetUsagePercentage} className={cn("h-2", budgetUsagePercentage > 90 ? "text-red-500" : budgetUsagePercentage > 75 ? "text-amber-500" : "text-green-500")} />
+                    <Progress 
+                      value={budgetUsagePercentage} 
+                      className={cn("h-2", budgetUsagePercentage > 90 ? "text-red-500" : budgetUsagePercentage > 75 ? "text-amber-500" : "text-green-500")}
+                      label="Budget Auslastungsrate"
+                    />
                   </div>
                 </div>
               </CardContent>
             </Card>
           </motion.div>
 
-          <motion.div initial={{
-          opacity: 0,
-          y: 20
-        }} animate={{
-          opacity: 1,
-          y: 0
-        }} transition={{
-          delay: 0.2
-        }} className="col-span-1">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="col-span-1">
             <Card className="h-full">
               <CardHeader>
                 <CardTitle className="text-lg font-medium">Asset-Verteilung</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {assetTypeDistribution.map((item, index) => <div key={item.type} className="space-y-2">
+                  {assetTypeDistribution.map((item, index) => (
+                    <div key={item.type} className="space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium">{item.type}</span>
                         <span className="text-sm text-muted-foreground">{item.count} Assets</span>
                       </div>
-                      <Progress value={item.count / assetTypeDistribution.reduce((acc, curr) => acc + curr.count, 0) * 100} className={cn("h-2", index % 5 === 0 ? "bg-blue-100" : index % 5 === 1 ? "bg-green-100" : index % 5 === 2 ? "bg-amber-100" : index % 5 === 3 ? "bg-purple-100" : "bg-red-100")} />
-                    </div>)}
+                      <Progress 
+                        value={item.count / assetTypeDistribution.reduce((acc, curr) => acc + curr.count, 0) * 100} 
+                        className={cn("h-2", index % 5 === 0 ? "bg-blue-100" : index % 5 === 1 ? "bg-green-100" : index % 5 === 2 ? "bg-amber-100" : index % 5 === 3 ? "bg-purple-100" : "bg-red-100")}
+                        label={`${item.type} Asset-Verteilung`}
+                      />
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -190,15 +184,7 @@ const IndexPage = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <motion.div initial={{
-          opacity: 0,
-          y: 20
-        }} animate={{
-          opacity: 1,
-          y: 0
-        }} transition={{
-          delay: 0.3
-        }} className="col-span-1">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="col-span-1">
             <Card className="h-full">
               <CardHeader>
                 <CardTitle className="text-lg font-medium">Asset-Status</CardTitle>
@@ -214,15 +200,7 @@ const IndexPage = () => {
             </Card>
           </motion.div>
 
-          <motion.div initial={{
-          opacity: 0,
-          y: 20
-        }} animate={{
-          opacity: 1,
-          y: 0
-        }} transition={{
-          delay: 0.4
-        }} className="col-span-1">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="col-span-1">
             <Card className="h-full">
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg font-medium">Zuletzt hinzugefügte Assets</CardTitle>
@@ -254,15 +232,7 @@ const IndexPage = () => {
             </Card>
           </motion.div>
 
-          <motion.div initial={{
-          opacity: 0,
-          y: 20
-        }} animate={{
-          opacity: 1,
-          y: 0
-        }} transition={{
-          delay: 0.5
-        }} className="col-span-1">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="col-span-1">
             <Card className="h-full">
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg font-medium">Zuletzt hinzugefügte Mitarbeiter</CardTitle>
