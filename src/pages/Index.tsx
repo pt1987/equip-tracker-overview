@@ -55,6 +55,7 @@ const getRecentEmployees = async (limit = 5) => {
 };
 const IndexPage = () => {
   const [loading, setLoading] = useState(true);
+  
   const {
     data: dashboardStats = {
       totalAssets: 0,
@@ -102,13 +103,15 @@ const IndexPage = () => {
   } = useQuery({
     queryKey: ["assetStatusPercentages"],
     queryFn: getAssetStatusPercentages,
-    onError: (error) => {
-      console.error("Failed to fetch asset percentages:", error);
-      toast({
-        title: "Fehler",
-        description: "Prozentdaten konnten nicht geladen werden.",
-        variant: "destructive"
-      });
+    meta: {
+      onError: (error: Error) => {
+        console.error("Failed to fetch asset percentages:", error);
+        toast({
+          title: "Fehler",
+          description: "Prozentdaten konnten nicht geladen werden.",
+          variant: "destructive"
+        });
+      }
     }
   });
   
