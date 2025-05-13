@@ -35,6 +35,14 @@
   transform: translateY(-5px);
 }
 
+/* Fix for Safari compatibility with user-select */
+@media (hover:hover) and (pointer:fine) {
+  [data-vaul-drawer] {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
 /* Media query for responsive design */
 @media (max-width: 768px) {
   .bg-dashboard-preview {
