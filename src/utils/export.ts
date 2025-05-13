@@ -389,7 +389,15 @@ export function exportVendorPurchaseReport(data: VendorPurchaseReport[], format:
     });
     
     // For each vendor, add manufacturer distribution
-    let yPos = doc.lastAutoTable ? doc.lastAutoTable.finalY + 20 : 120;
+    // Use a variable to track Y position instead of accessing doc.lastAutoTable
+    let yPos = 120; // Default position if autoTable doesn't provide final position
+    
+    // Try to update the Y position based on the autoTable result
+    // The plugin adds this property but TypeScript doesn't know about it
+    const tableDetails = (doc as any).lastAutoTable;
+    if (tableDetails && typeof tableDetails.finalY !== 'undefined') {
+      yPos = tableDetails.finalY + 20;
+    }
     
     data.forEach((vendor, index) => {
       if (index > 0 && yPos > 240) {
@@ -411,7 +419,11 @@ export function exportVendorPurchaseReport(data: VendorPurchaseReport[], format:
         headStyles: { fillColor: [41, 128, 185] }
       });
       
-      yPos = doc.lastAutoTable ? doc.lastAutoTable.finalY + 20 : yPos + 60;
+      // Update the Y position for the next table
+      const currentTableDetails = (doc as any).lastAutoTable;
+      yPos = currentTableDetails && typeof currentTableDetails.finalY !== 'undefined' 
+        ? currentTableDetails.finalY + 20 
+        : yPos + 60;
     });
     
     doc.save('VendorPurchaseReport.pdf');
