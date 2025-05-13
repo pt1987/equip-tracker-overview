@@ -5,6 +5,7 @@ import {
   AssetUsageDurationReport, 
   WarrantyDefectReport,
   FixedAssetsReport,
+  VendorPurchaseReport,
   AssetType,
   Asset,
   Employee
@@ -324,5 +325,51 @@ export const getFixedAssetsReport = async (): Promise<FixedAssetsReport> => {
       },
       categoryDistribution: []
     };
+  }
+};
+
+// Vendor Purchase Report
+export const getVendorPurchaseReport = async (): Promise<VendorPurchaseReport[]> => {
+  try {
+    const assets = await getAssets();
+    
+    if (!Array.isArray(assets)) {
+      console.error("getVendorPurchaseReport: assets is not an array");
+      return [];
+    }
+    
+    // Group assets by vendor
+    const assetsByVendor = groupBy(assets, (asset: Asset) => asset.vendor);
+
+    // Create report data
+    const vendorReports: VendorPurchaseReport[] = Object.entries(assetsByVendor).map(([vendor, vendorAssets]) => {
+      // Calculate revenue for this vendor
+      const revenue = vendorAssets.reduce((sum, asset) => sum + asset.price, 0);
+      
+      // Group vendor's assets by manufacturer
+      const assetsByManufacturer = groupBy(vendorAssets, (asset: Asset) => asset.manufacturer);
+      
+      // Create manufacturer distribution data
+      const manufacturerDistribution = Object.entries(assetsByManufacturer).map(([manufacturer, mfrAssets]) => ({
+        manufacturer,
+        count: mfrAssets.length
+      }));
+      
+      // Sort by count (highest first)
+      manufacturerDistribution.sort((a, b) => b.count - a.count);
+      
+      return {
+        vendor,
+        assetCount: vendorAssets.length,
+        revenue,
+        manufacturerDistribution
+      };
+    });
+    
+    // Sort by asset count (highest first)
+    return vendorReports.sort((a, b) => b.assetCount - a.assetCount);
+  } catch (error) {
+    console.error("Error in getVendorPurchaseReport:", error);
+    return [];
   }
 };

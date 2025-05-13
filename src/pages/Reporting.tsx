@@ -13,6 +13,7 @@ import AssetUsageDurationReport from "@/components/reports/AssetUsageDurationRep
 import WarrantyDefectsReport from "@/components/reports/WarrantyDefectsReport";
 import FixedAssetsReport from "@/components/reports/FixedAssetsReport";
 import EmployeeBudgetReport from "@/components/reports/EmployeeBudgetReport";
+import VendorPurchaseReport from "@/components/reports/VendorPurchaseReport";
 import { DownloadIcon, FileBarChart, ChevronDown } from "lucide-react";
 import { 
   exportOrderTimeline, 
@@ -21,7 +22,8 @@ import {
   exportUsageDuration, 
   exportWarrantyDefects, 
   exportFixedAssetsReport,
-  exportEmployeeBudgetReport
+  exportEmployeeBudgetReport,
+  exportVendorPurchaseReport
 } from "@/utils/export";
 import { 
   getOrderTimelineByEmployee, 
@@ -29,7 +31,8 @@ import {
   getYearlyAssetPurchasesReport, 
   getAssetUsageDurationReport, 
   getWarrantyDefectReport, 
-  getFixedAssetsReport 
+  getFixedAssetsReport,
+  getVendorPurchaseReport 
 } from "@/data/reports";
 import { getEmployees } from "@/data/employees";
 
@@ -82,6 +85,12 @@ export default function Reporting() {
             exportEmployeeBudgetReport(data, format);
             break;
           }
+        case 'vendorPurchase':
+          {
+            const data = await getVendorPurchaseReport();
+            exportVendorPurchaseReport(data, format);
+            break;
+          }
       }
       toast({
         title: "Report exported",
@@ -119,6 +128,7 @@ export default function Reporting() {
             <TabsTrigger value="warrantyDefects">Warranty Defects</TabsTrigger>
             <TabsTrigger value="fixedAssets">Anlagevermögen & GWG</TabsTrigger>
             <TabsTrigger value="employeeBudget">Mitarbeiter Budget</TabsTrigger>
+            <TabsTrigger value="vendorPurchase">Anbieter Analyse</TabsTrigger>
           </TabsList>
           
           <DropdownMenu>
@@ -150,6 +160,7 @@ export default function Reporting() {
               {activeReport === "warrantyDefects" && "Defective Hardware Warranty Analysis"}
               {activeReport === "fixedAssets" && "Anlagevermögen & GWG Übersicht"}
               {activeReport === "employeeBudget" && "Mitarbeiter Budget Übersicht"}
+              {activeReport === "vendorPurchase" && "Anbieter Einkaufs Analyse"}
             </CardTitle>
             <CardDescription>
               {activeReport === "orderTimeline" && "Timeline of asset purchases per employee"}
@@ -159,6 +170,7 @@ export default function Reporting() {
               {activeReport === "warrantyDefects" && "Analysis of defective hardware with and without warranty"}
               {activeReport === "fixedAssets" && "Übersicht über Anlagevermögen und geringwertige Wirtschaftsgüter"}
               {activeReport === "employeeBudget" && "Übersicht über verfügbares Budget pro Mitarbeiter"}
+              {activeReport === "vendorPurchase" && "Analyse der Verteilung und Umsätze nach Anbietern und Herstellern"}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -188,6 +200,10 @@ export default function Reporting() {
 
             <TabsContent value="employeeBudget" className="mt-0">
               <EmployeeBudgetReport />
+            </TabsContent>
+
+            <TabsContent value="vendorPurchase" className="mt-0">
+              <VendorPurchaseReport />
             </TabsContent>
           </CardContent>
         </Card>

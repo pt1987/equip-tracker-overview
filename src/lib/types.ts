@@ -194,7 +194,8 @@ export type ReportType =
   | 'usageDuration'
   | 'warrantyDefects'
   | 'fixedAssets'
-  | 'employeeBudget';
+  | 'employeeBudget'
+  | 'vendorPurchase';
 
 export interface FixedAssetsReport {
   fixedAssets: Asset[];
@@ -356,4 +357,14 @@ export interface DamageIncident {
   assignedTo?: string;
   resolvedDate?: string;
   resolutionNotes?: string;
+}
+
+export interface VendorPurchaseReport {
+  vendor: string;
+  assetCount: number;
+  revenue: number;
+  manufacturerDistribution: Array<{
+    manufacturer: string;
+    count: number;
+  }>;
 }

@@ -8,6 +8,7 @@ import {
   AssetUsageDurationReport, 
   WarrantyDefectReport,
   FixedAssetsReport,
+  VendorPurchaseReport,
   Employee
 } from "@/lib/types";
 import { formatCurrency, formatDate, localizeCategory } from "@/lib/utils";
@@ -335,6 +336,85 @@ export function exportFixedAssetsReport(data: FixedAssetsReport, format: 'excel'
     });
     
     doc.save('FixedAssetsReport.pdf');
+  }
+}
+
+export function exportVendorPurchaseReport(data: VendorPurchaseReport[], format: 'excel' | 'pdf' = 'excel') {
+  if (format === 'excel') {
+    const workbook = XLSX.utils.book_new();
+    
+    // Main vendor data
+    const vendorData = data.map(vendor => ({
+      Vendor: vendor.vendor,
+      AssetCount: vendor.assetCount,
+      Revenue: vendor.revenue
+    }));
+    
+    const vendorSheet = XLSX.utils.json_to_sheet(vendorData);
+    XLSX.utils.book_append_sheet(workbook, vendorSheet, 'Vendors');
+    
+    // Create sheets for each vendor's manufacturer distribution
+    data.forEach(vendor => {
+      if (vendor.manufacturerDistribution.length > 0) {
+        const mfrData = vendor.manufacturerDistribution.map(mfr => ({
+          Manufacturer: mfr.manufacturer,
+          Count: mfr.count,
+          Percentage: ((mfr.count / vendor.assetCount) * 100).toFixed(1) + '%'
+        }));
+        
+        const mfrSheet = XLSX.utils.json_to_sheet(mfrData);
+        XLSX.utils.book_append_sheet(workbook, mfrSheet, vendor.vendor.substring(0, 30));
+      }
+    });
+    
+    XLSX.writeFile(workbook, 'VendorPurchaseReport.xlsx');
+  } else {
+    const doc = new jsPDF();
+    
+    doc.setFontSize(16);
+    doc.text('Vendor Purchase Report', 14, 20);
+    doc.setFontSize(10);
+    doc.text(`Generated: ${formatDate(new Date().toISOString())}`, 14, 30);
+    
+    // Main vendor data
+    autoTable(doc, {
+      head: [['Vendor', 'Asset Count', 'Revenue']],
+      body: data.map(vendor => [
+        vendor.vendor,
+        vendor.assetCount.toString(),
+        formatCurrency(vendor.revenue)
+      ]),
+      startY: 40,
+      headStyles: { fillColor: [41, 128, 185] }
+    });
+    
+    // For each vendor, add manufacturer distribution
+    let yPos = doc.lastAutoTable ? doc.lastAutoTable.finalY + 20 : 120;
+    
+    data.forEach((vendor, index) => {
+      if (index > 0 && yPos > 240) {
+        doc.addPage();
+        yPos = 20;
+      }
+      
+      doc.setFontSize(12);
+      doc.text(`${vendor.vendor} - Manufacturer Distribution`, 14, yPos);
+      
+      autoTable(doc, {
+        head: [['Manufacturer', 'Count', 'Percentage']],
+        body: vendor.manufacturerDistribution.map(mfr => [
+          mfr.manufacturer,
+          mfr.count.toString(),
+          ((mfr.count / vendor.assetCount) * 100).toFixed(1) + '%'
+        ]),
+        startY: yPos + 10,
+        headStyles: { fillColor: [41, 128, 185] }
+      });
+      
+      yPos = doc.lastAutoTable ? doc.lastAutoTable.finalY + 20 : yPos + 60;
+    });
+    
+    doc.save('VendorPurchaseReport.pdf');
   }
 }
 
