@@ -1,12 +1,27 @@
 
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { getAssets } from "@/data/assets";
 import { isFixedAsset, isGWG, calculateAssetBookValue } from "@/lib/depreciation-utils";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, PieChart, Pie, Cell } from "recharts";
 import { Asset } from "@/lib/types";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 export default function FixedAssetsReport() {
+  // Add state for pagination
+  const [fixedAssetsPage, setFixedAssetsPage] = useState(1);
+  const [gwgAssetsPage, setGwgAssetsPage] = useState(1);
+  const itemsPerPage = 10;
+
   const { data: assets = [], isLoading, error } = useQuery({
     queryKey: ["assets"],
     queryFn: getAssets
@@ -67,6 +82,87 @@ export default function FixedAssetsReport() {
   // Helper function to format numbers with German thousands separator
   const formatNumber = (num: number) => {
     return new Intl.NumberFormat('de-DE').format(num);
+  };
+
+  // Calculate total pages for pagination
+  const totalFixedAssetPages = Math.ceil(fixedAssets.length / itemsPerPage);
+  const totalGwgAssetPages = Math.ceil(gwgAssets.length / itemsPerPage);
+
+  // Get paginated assets
+  const paginatedFixedAssets = fixedAssets.slice(
+    (fixedAssetsPage - 1) * itemsPerPage, 
+    fixedAssetsPage * itemsPerPage
+  );
+  
+  const paginatedGwgAssets = gwgAssets.slice(
+    (gwgAssetsPage - 1) * itemsPerPage, 
+    gwgAssetsPage * itemsPerPage
+  );
+  
+  // Helper function to generate pagination items
+  const generatePaginationItems = (currentPage: number, totalPages: number, setPage: (page: number) => void) => {
+    const items = [];
+    
+    // Always show first page
+    items.push(
+      <PaginationItem key="first">
+        <PaginationLink 
+          isActive={currentPage === 1} 
+          onClick={() => setPage(1)}
+        >
+          1
+        </PaginationLink>
+      </PaginationItem>
+    );
+    
+    // Show ellipsis if needed
+    if (currentPage > 3) {
+      items.push(
+        <PaginationItem key="ellipsis-start">
+          <PaginationEllipsis />
+        </PaginationItem>
+      );
+    }
+    
+    // Show pages around current page
+    for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+      if (i <= 1 || i >= totalPages) continue;
+      items.push(
+        <PaginationItem key={i}>
+          <PaginationLink 
+            isActive={currentPage === i} 
+            onClick={() => setPage(i)}
+          >
+            {i}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+    
+    // Show ellipsis if needed
+    if (currentPage < totalPages - 2) {
+      items.push(
+        <PaginationItem key="ellipsis-end">
+          <PaginationEllipsis />
+        </PaginationItem>
+      );
+    }
+    
+    // Always show last page if there are more than 1 page
+    if (totalPages > 1) {
+      items.push(
+        <PaginationItem key="last">
+          <PaginationLink 
+            isActive={currentPage === totalPages} 
+            onClick={() => setPage(totalPages)}
+          >
+            {totalPages}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+    
+    return items;
   };
   
   if (isLoading) {
@@ -170,7 +266,7 @@ export default function FixedAssetsReport() {
                 </tr>
               </thead>
               <tbody>
-                {fixedAssets.slice(0, 5).map(asset => {
+                {paginatedFixedAssets.map(asset => {
                   const bookValue = calculateAssetBookValue(asset);
                   const netPrice = asset.netPurchasePrice || asset.price / 1.19;
                   return (
@@ -197,13 +293,7 @@ export default function FixedAssetsReport() {
                     </tr>
                   );
                 })}
-                {fixedAssets.length > 5 && (
-                  <tr className="border-t">
-                    <td colSpan={6} className="p-3 text-center text-sm">
-                      <span className="text-muted-foreground">und {fixedAssets.length - 5} weitere Assets...</span>
-                    </td>
-                  </tr>
-                )}
+                
                 {fixedAssets.length === 0 && (
                   <tr>
                     <td colSpan={6} className="p-6 text-center">
@@ -214,6 +304,31 @@ export default function FixedAssetsReport() {
               </tbody>
             </table>
           </div>
+          
+          {/* Add pagination for fixed assets */}
+          {fixedAssets.length > 0 && (
+            <div className="py-4 border-t">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => setFixedAssetsPage(p => Math.max(1, p - 1))}
+                      className={fixedAssetsPage === 1 ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+                  
+                  {generatePaginationItems(fixedAssetsPage, totalFixedAssetPages, setFixedAssetsPage)}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => setFixedAssetsPage(p => Math.min(totalFixedAssetPages, p + 1))}
+                      className={fixedAssetsPage === totalFixedAssetPages ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </div>
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border overflow-hidden">
@@ -229,7 +344,7 @@ export default function FixedAssetsReport() {
                 </tr>
               </thead>
               <tbody>
-                {gwgAssets.slice(0, 5).map(asset => {
+                {paginatedGwgAssets.map(asset => {
                   const netPrice = asset.netPurchasePrice || asset.price / 1.19;
                   return (
                     <tr key={asset.id} className="border-t hover:bg-muted/20">
@@ -243,13 +358,7 @@ export default function FixedAssetsReport() {
                     </tr>
                   );
                 })}
-                {gwgAssets.length > 5 && (
-                  <tr className="border-t">
-                    <td colSpan={4} className="p-3 text-center text-sm">
-                      <span className="text-muted-foreground">und {gwgAssets.length - 5} weitere GWG...</span>
-                    </td>
-                  </tr>
-                )}
+                
                 {gwgAssets.length === 0 && (
                   <tr>
                     <td colSpan={4} className="p-6 text-center">
@@ -260,6 +369,31 @@ export default function FixedAssetsReport() {
               </tbody>
             </table>
           </div>
+          
+          {/* Add pagination for GWG assets */}
+          {gwgAssets.length > 0 && (
+            <div className="py-4 border-t">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => setGwgAssetsPage(p => Math.max(1, p - 1))}
+                      className={gwgAssetsPage === 1 ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+                  
+                  {generatePaginationItems(gwgAssetsPage, totalGwgAssetPages, setGwgAssetsPage)}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => setGwgAssetsPage(p => Math.min(totalGwgAssetPages, p + 1))}
+                      className={gwgAssetsPage === totalGwgAssetPages ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </div>
       </div>
     </div>

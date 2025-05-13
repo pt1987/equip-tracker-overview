@@ -1,11 +1,13 @@
 
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import { Asset } from "@/lib/types";
 import { ArrowRight, PackageIcon } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import AssetCard from "@/components/assets/AssetCard";
 import ViewToggle from "@/components/shared/ViewToggle";
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface AssetSectionProps {
   assets: Asset[];
@@ -47,6 +49,10 @@ import {
 
 export default function AssetSection({ assets }: AssetSectionProps) {
   const [assetView, setAssetView] = useState<"grid" | "list">("grid");
+  const [expandedTypes, setExpandedTypes] = useState<Record<string, boolean>>({});
+  
+  // The number of items to show initially
+  const initialItemCount = 3;
   
   // Group assets by type
   const assetsByType: Record<string, Asset[]> = {};
@@ -56,6 +62,14 @@ export default function AssetSection({ assets }: AssetSectionProps) {
     }
     assetsByType[asset.type].push(asset);
   });
+  
+  // Toggle expand state for a specific type
+  const toggleExpand = (type: string) => {
+    setExpandedTypes(prev => ({
+      ...prev,
+      [type]: !prev[type]
+    }));
+  };
 
   return (
     <div className="glass-card p-6">
@@ -84,57 +98,78 @@ export default function AssetSection({ assets }: AssetSectionProps) {
                 </span>
               </div>
               
-              {assetView === "grid" ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {typeAssets.map((asset, index) => (
-                    <AssetCard 
-                      key={asset.id} 
-                      asset={asset} 
-                      index={index} 
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {typeAssets.map((asset) => (
-                    <Link
-                      key={asset.id}
-                      to={`/asset/${asset.id}`}
-                      className="block w-full p-3 rounded-lg border border-border hover:bg-secondary/10 transition-colors"
+              <Collapsible
+                open={expandedTypes[type] || typeAssets.length <= initialItemCount}
+                onOpenChange={() => toggleExpand(type)}
+              >
+                {assetView === "grid" ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {/* Always show the first few items */}
+                    {typeAssets.slice(0, expandedTypes[type] ? typeAssets.length : initialItemCount).map((asset, index) => (
+                      <AssetCard 
+                        key={asset.id} 
+                        asset={asset} 
+                        index={index} 
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {typeAssets.slice(0, expandedTypes[type] ? typeAssets.length : initialItemCount).map((asset) => (
+                      <Link
+                        key={asset.id}
+                        to={`/asset/${asset.id}`}
+                        className="block w-full p-3 rounded-lg border border-border hover:bg-secondary/10 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-md overflow-hidden bg-muted flex-shrink-0">
+                            {asset.imageUrl ? (
+                              <img
+                                src={asset.imageUrl}
+                                alt={asset.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = '/placeholder.svg';
+                                }}
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <AssetTypeIcon type={asset.type} />
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium truncate">{asset.name}</h4>
+                            <p className="text-sm text-muted-foreground truncate">
+                              {asset.manufacturer} {asset.model}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-medium">{formatCurrency(asset.price)}</p>
+                            <p className="text-xs text-muted-foreground">{new Date(asset.purchaseDate).toLocaleDateString()}</p>
+                          </div>
+                          <ArrowRight size={16} className="text-muted-foreground ml-2" />
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Show button to expand/collapse if there are more items than initialItemCount */}
+                {typeAssets.length > initialItemCount && (
+                  <CollapsibleTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      className="w-full mt-2 text-muted-foreground hover:text-foreground"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-md overflow-hidden bg-muted flex-shrink-0">
-                          {asset.imageUrl ? (
-                            <img
-                              src={asset.imageUrl}
-                              alt={asset.name}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = '/placeholder.svg';
-                              }}
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <AssetTypeIcon type={asset.type} />
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium truncate">{asset.name}</h4>
-                          <p className="text-sm text-muted-foreground truncate">
-                            {asset.manufacturer} {asset.model}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-medium">{formatCurrency(asset.price)}</p>
-                          <p className="text-xs text-muted-foreground">{new Date(asset.purchaseDate).toLocaleDateString()}</p>
-                        </div>
-                        <ArrowRight size={16} className="text-muted-foreground ml-2" />
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              )}
+                      {expandedTypes[type] ? 
+                        "Weniger anzeigen" : 
+                        `${typeAssets.length - initialItemCount} weitere anzeigen...`
+                      }
+                    </Button>
+                  </CollapsibleTrigger>
+                )}
+              </Collapsible>
             </div>
           ))}
         </div>

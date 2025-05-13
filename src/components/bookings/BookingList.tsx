@@ -11,6 +11,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { Trash2, Check, X, Eye } from "lucide-react";
 import { Asset, AssetBooking, BookingStatus, Employee } from "@/lib/types";
 import { updateBookingStatus, recordAssetReturn } from "@/data/bookings";
@@ -36,6 +45,10 @@ export default function BookingList({
   const [bookingToCancel, setBookingToCancel] = useState<AssetBooking | null>(null);
   const [showReturnDialog, setShowReturnDialog] = useState(false);
   const { toast } = useToast();
+  
+  // Add pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const bookingsPerPage = 10;
 
   // Get asset details by ID
   const getAsset = (assetId: string): Asset | undefined => {
@@ -124,32 +137,107 @@ export default function BookingList({
     }
   };
 
+  // Filtered and sorted bookings
+  const filteredBookings = bookings
+    .filter(booking => assets.some(asset => asset.id === booking.assetId))
+    .sort((a, b) => {
+      // Sort by status and then by date
+      if (a.status === 'active' && b.status !== 'active') return -1;
+      if (a.status !== 'active' && b.status === 'active') return 1;
+      if (a.status === 'reserved' && b.status !== 'reserved') return -1;
+      if (a.status !== 'reserved' && b.status === 'reserved') return 1;
+      
+      return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
+    });
+    
+  // Calculate pagination values
+  const totalBookings = filteredBookings.length;
+  const totalPages = Math.ceil(totalBookings / bookingsPerPage);
+  const startIndex = (currentPage - 1) * bookingsPerPage;
+  const paginatedBookings = filteredBookings.slice(startIndex, startIndex + bookingsPerPage);
+
+  // Generate pagination items
+  const generatePaginationItems = () => {
+    const items = [];
+    
+    // Always show first page
+    items.push(
+      <PaginationItem key="first">
+        <PaginationLink 
+          isActive={currentPage === 1} 
+          onClick={() => setCurrentPage(1)}
+        >
+          1
+        </PaginationLink>
+      </PaginationItem>
+    );
+    
+    // Show ellipsis if needed
+    if (currentPage > 3) {
+      items.push(
+        <PaginationItem key="ellipsis-start">
+          <PaginationEllipsis />
+        </PaginationItem>
+      );
+    }
+    
+    // Show pages around current page
+    for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+      if (i <= 1 || i >= totalPages) continue;
+      items.push(
+        <PaginationItem key={i}>
+          <PaginationLink 
+            isActive={currentPage === i} 
+            onClick={() => setCurrentPage(i)}
+          >
+            {i}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+    
+    // Show ellipsis if needed
+    if (currentPage < totalPages - 2) {
+      items.push(
+        <PaginationItem key="ellipsis-end">
+          <PaginationEllipsis />
+        </PaginationItem>
+      );
+    }
+    
+    // Always show last page if there are more than 1 page
+    if (totalPages > 1) {
+      items.push(
+        <PaginationItem key="last">
+          <PaginationLink 
+            isActive={currentPage === totalPages} 
+            onClick={() => setCurrentPage(totalPages)}
+          >
+            {totalPages}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+    
+    return items;
+  };
+
   return (
     <div>
       {assets.length > 0 && bookings.length > 0 ? (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Gerät</TableHead>
-              <TableHead>Mitarbeiter</TableHead>
-              <TableHead>Zeitraum</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Aktionen</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {bookings
-              .filter(booking => assets.some(asset => asset.id === booking.assetId))
-              .sort((a, b) => {
-                // Sort by status and then by date
-                if (a.status === 'active' && b.status !== 'active') return -1;
-                if (a.status !== 'active' && b.status === 'active') return 1;
-                if (a.status === 'reserved' && b.status !== 'reserved') return -1;
-                if (a.status !== 'reserved' && b.status === 'reserved') return 1;
-                
-                return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
-              })
-              .map(booking => {
+        <>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Gerät</TableHead>
+                <TableHead>Mitarbeiter</TableHead>
+                <TableHead>Zeitraum</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Aktionen</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paginatedBookings.map(booking => {
                 const asset = getAsset(booking.assetId);
                 const employee = getEmployee(booking.employeeId);
                 
@@ -232,8 +320,41 @@ export default function BookingList({
                   </TableRow>
                 );
               })}
-          </TableBody>
-        </Table>
+            </TableBody>
+          </Table>
+          
+          {/* Add pagination */}
+          {totalPages > 1 && (
+            <div className="mt-4 flex justify-center">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+                  
+                  {generatePaginationItems()}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
+          
+          {/* Display information about showing X of Y bookings */}
+          {totalBookings > bookingsPerPage && (
+            <div className="text-center text-sm text-muted-foreground mt-2">
+              Zeige {Math.min(startIndex + 1, totalBookings)}-{Math.min(startIndex + bookingsPerPage, totalBookings)} von {totalBookings} Buchungen
+            </div>
+          )}
+        </>
       ) : (
         <div className="text-center py-8 text-muted-foreground">
           {assets.length === 0 
