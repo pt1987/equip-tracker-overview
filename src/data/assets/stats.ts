@@ -37,3 +37,31 @@ export const getAssetStatusDistribution = async (): Promise<AssetStatusDistribut
     count
   }));
 };
+
+// Function to calculate percentages of assets by status
+export const getAssetStatusPercentages = async (): Promise<Record<AssetStatus, number>> => {
+  const assets = await getAssets();
+  const totalAssets = assets.length;
+  const statusCount: Record<string, number> = {};
+  
+  assets.forEach(asset => {
+    if (!statusCount[asset.status]) {
+      statusCount[asset.status] = 0;
+    }
+    statusCount[asset.status]++;
+  });
+  
+  const percentages: Record<AssetStatus, number> = {} as Record<AssetStatus, number>;
+  
+  Object.entries(statusCount).forEach(([status, count]) => {
+    percentages[status as AssetStatus] = Math.round((count / totalAssets) * 100);
+  });
+  
+  return percentages;
+};
+
+// Function to get total asset count
+export const getTotalAssetCount = async (): Promise<number> => {
+  const assets = await getAssets();
+  return assets.length;
+};

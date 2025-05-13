@@ -12,6 +12,8 @@ interface StatCardProps {
   trend?: "up" | "down" | "neutral";
   trendValue?: string;
   isLoading?: boolean;
+  percentage?: number;
+  showPercentage?: boolean;
 }
 
 export default function StatCard({
@@ -23,6 +25,8 @@ export default function StatCard({
   trend,
   trendValue,
   isLoading = false,
+  percentage,
+  showPercentage = false,
 }: StatCardProps) {
   return (
     <motion.div 
@@ -45,24 +49,26 @@ export default function StatCard({
         </div>
       </div>
       
-      {(description || trend) && (
-        <div className="flex justify-between items-center">
-          {description && (
-            <p className="text-sm text-muted-foreground">{description}</p>
-          )}
-          
-          {trend && trendValue && (
-            <div className={cn(
-              "flex items-center gap-1 text-xs font-medium rounded-full px-2 py-1",
-              trend === "up" ? "bg-green-100 text-green-700" :
-              trend === "down" ? "bg-red-100 text-red-700" :
-              "bg-gray-100 text-gray-700"
-            )}>
-              {trend === "up" ? "↑" : trend === "down" ? "↓" : "•"} {trendValue}
-            </div>
-          )}
-        </div>
-      )}
+      <div className="flex justify-between items-center">
+        {showPercentage && percentage !== undefined ? (
+          <p className="text-sm text-muted-foreground">{percentage}% aller Assets</p>
+        ) : description ? (
+          <p className="text-sm text-muted-foreground">{description}</p>
+        ) : (
+          <div></div>
+        )}
+        
+        {trend && trendValue && (
+          <div className={cn(
+            "flex items-center gap-1 text-xs font-medium rounded-full px-2 py-1",
+            trend === "up" ? "bg-green-100 text-green-700" :
+            trend === "down" ? "bg-red-100 text-red-700" :
+            "bg-gray-100 text-gray-700"
+          )}>
+            {trend === "up" ? "↑" : trend === "down" ? "↓" : "•"} {trendValue}
+          </div>
+        )}
+      </div>
     </motion.div>
   );
 }

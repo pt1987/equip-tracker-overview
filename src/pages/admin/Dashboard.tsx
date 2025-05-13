@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import PageTransition from "@/components/layout/PageTransition";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -62,6 +63,11 @@ export default function AdminDashboard() {
     }
   };
 
+  // Berechne die Prozentsätze für die Admin-Statistiken
+  const newUserPercentage = stats.totalUsers > 0 ? Math.round((stats.newUsers / stats.totalUsers) * 100) : 0;
+  const activeUserPercentage = stats.totalUsers > 0 ? Math.round((stats.activeUsers / stats.totalUsers) * 100) : 0;
+  const securityAlertPercentage = stats.securityAlerts > 0 ? Math.round((stats.securityAlerts / 10) * 100) : 0; // Basierend auf einer Maximalzahl von 10
+
   return (
     <PageTransition>
       <div className="flex flex-col gap-8 p-6">
@@ -112,10 +118,10 @@ export default function AdminDashboard() {
                   <div className="mt-3">
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-muted-foreground">Zuwachs</span>
-                      <span className="text-green-500">+{Math.round((stats.newUsers / stats.totalUsers) * 100)}%</span>
+                      <span className="text-green-500">+{newUserPercentage}%</span>
                     </div>
                     <Progress 
-                      value={(stats.newUsers / stats.totalUsers) * 100} 
+                      value={newUserPercentage} 
                       className="h-1 mt-1" 
                       label="Benutzer-Zuwachs Prozentsatz"
                     />
@@ -145,10 +151,10 @@ export default function AdminDashboard() {
                   <div className="mt-3">
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-muted-foreground">Aktivitätsrate</span>
-                      <span className="text-amber-500">{Math.round((stats.activeUsers / stats.totalUsers) * 100)}%</span>
+                      <span className="text-amber-500">{activeUserPercentage}%</span>
                     </div>
                     <Progress 
-                      value={(stats.activeUsers / stats.totalUsers) * 100} 
+                      value={activeUserPercentage} 
                       className="h-1 mt-1" 
                       label="Benutzer-Aktivitätsrate Prozentsatz"
                     />

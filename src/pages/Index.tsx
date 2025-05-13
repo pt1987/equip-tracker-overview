@@ -4,6 +4,7 @@ import { DashboardStats, AssetTypeDistribution, AssetStatusDistribution, Asset, 
 import { getDashboardStats } from "@/data/helpers";
 import { getAssets } from "@/data/assets";
 import { getEmployees } from "@/data/employees";
+import { getAssetStatusPercentages, getTotalAssetCount } from "@/data/assets/stats";
 import StatCard from "@/components/dashboard/StatCard";
 import { BarChart, Package, Users, AlertTriangle, Coins, Calendar, UserPlus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -14,6 +15,7 @@ import { Progress } from "@/components/ui/progress";
 import StatusBadge from "@/components/assets/StatusBadge";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "@/components/ui/use-toast";
 
 const getAssetTypeDistribution = async () => {
   const assets = await getAssets();
@@ -66,36 +68,65 @@ const IndexPage = () => {
     queryKey: ["dashboardStats"],
     queryFn: getDashboardStats
   });
+  
   const {
     data: assetTypeDistribution = []
   } = useQuery({
     queryKey: ["assetTypeDistribution"],
     queryFn: getAssetTypeDistribution
   });
+  
   const {
     data: assetStatusDistribution = []
   } = useQuery({
     queryKey: ["assetStatusDistribution"],
     queryFn: getAssetStatusDistribution
   });
+  
   const {
     data: recentAssets = []
   } = useQuery({
     queryKey: ["recentAssets"],
     queryFn: () => getRecentAssets(5)
   });
+  
   const {
     data: recentEmployees = []
   } = useQuery({
     queryKey: ["recentEmployees"],
     queryFn: () => getRecentEmployees(5)
   });
+  
+  const {
+    data: statusPercentages = {}
+  } = useQuery({
+    queryKey: ["assetStatusPercentages"],
+    queryFn: getAssetStatusPercentages,
+    onError: (error) => {
+      console.error("Failed to fetch asset percentages:", error);
+      toast({
+        title: "Fehler",
+        description: "Prozentdaten konnten nicht geladen werden.",
+        variant: "destructive"
+      });
+    }
+  });
+  
+  const {
+    data: totalAssetCount = 0
+  } = useQuery({
+    queryKey: ["totalAssetCount"],
+    queryFn: getTotalAssetCount
+  });
+  
   useEffect(() => {
     if (dashboardStats && assetTypeDistribution && assetStatusDistribution) {
       setLoading(false);
     }
   }, [dashboardStats, assetTypeDistribution, assetStatusDistribution]);
+  
   const budgetUsagePercentage = dashboardStats.totalBudget > 0 ? Math.round(dashboardStats.totalBudgetUsed / dashboardStats.totalBudget * 100) : 0;
+  
   if (loading) {
     return <PageTransition>
         <div className="flex flex-col gap-4 p-6">
@@ -104,6 +135,12 @@ const IndexPage = () => {
         </div>
       </PageTransition>;
   }
+  
+  // Berechne die Prozentsätze
+  const assignedPercentage = Math.round((dashboardStats.assignedAssets / dashboardStats.totalAssets) * 100) || 0;
+  const poolPercentage = Math.round((dashboardStats.poolAssets / dashboardStats.totalAssets) * 100) || 0;
+  const defectivePercentage = Math.round((dashboardStats.defectiveAssets / dashboardStats.totalAssets) * 100) || 0;
+  
   return <PageTransition>
       <div className="flex flex-col gap-6 p-6">
         <div>
@@ -114,10 +151,36 @@ const IndexPage = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard title="Gesamt Assets" value={dashboardStats.totalAssets} icon={Package} colorClass="text-blue-500" />
-          <StatCard title="Zugewiesene Assets" value={dashboardStats.assignedAssets} icon={Users} colorClass="text-green-500" description={dashboardStats.totalAssets > 0 ? `${Math.round(dashboardStats.assignedAssets / dashboardStats.totalAssets * 100)}% aller Assets` : "Keine Assets vorhanden"} />
-          <StatCard title="Pool Assets" value={dashboardStats.poolAssets} icon={Coins} colorClass="text-amber-500" />
-          <StatCard title="Defekte Assets" value={dashboardStats.defectiveAssets} icon={AlertTriangle} colorClass="text-red-500" />
+          <StatCard 
+            title="Gesamt Assets" 
+            value={dashboardStats.totalAssets} 
+            icon={Package} 
+            colorClass="text-blue-500" 
+          />
+          <StatCard 
+            title="Zugewiesene Assets" 
+            value={dashboardStats.assignedAssets} 
+            icon={Users} 
+            colorClass="text-green-500" 
+            showPercentage={true}
+            percentage={assignedPercentage}
+          />
+          <StatCard 
+            title="Pool Assets" 
+            value={dashboardStats.poolAssets} 
+            icon={Coins} 
+            colorClass="text-amber-500" 
+            showPercentage={true}
+            percentage={poolPercentage}
+          />
+          <StatCard 
+            title="Defekte Assets" 
+            value={dashboardStats.defectiveAssets} 
+            icon={AlertTriangle} 
+            colorClass="text-red-500" 
+            showPercentage={true}
+            percentage={defectivePercentage}
+          />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
