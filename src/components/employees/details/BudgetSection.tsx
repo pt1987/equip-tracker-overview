@@ -25,7 +25,7 @@ export default function BudgetSection({ budget, usedBudget }: BudgetSectionProps
         <span>{budgetPercentage}%</span>
       </div>
       
-      <div className="budget-progress-track" aria-hidden="true">
+      <div className="budget-progress-track" aria-hidden="true" id="budget-progress-track">
         <motion.div 
           className="budget-progress-bar"
           initial={{ width: 0 }}
@@ -38,6 +38,7 @@ export default function BudgetSection({ budget, usedBudget }: BudgetSectionProps
         value={budgetPercentage} 
         className="mt-2" 
         aria-label={budgetLabel}
+        id="budget-progress"
       />
       
       <div className="flex justify-between text-sm text-muted-foreground mt-2">

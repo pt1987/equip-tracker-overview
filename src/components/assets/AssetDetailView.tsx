@@ -134,6 +134,7 @@ export default function AssetDetailView({
               value={activeTab} 
               onValueChange={handleTabChange}
               aria-label="Mobile asset tab selector"
+              id="mobile-asset-tab-selector"
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Bereich auswählen">

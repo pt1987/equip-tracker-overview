@@ -11,11 +11,11 @@ export function configureHeaders() {
     // Security headers
     'X-Content-Type-Options': 'nosniff',
     'Content-Security-Policy': "frame-ancestors 'self'",
-    'X-XSS-Protection': '1; mode=block',
+    // Removed X-XSS-Protection as it's not recommended in modern browsers
     'Referrer-Policy': 'strict-origin-when-cross-origin',
     'Permissions-Policy': 'geolocation=(), camera=(), microphone=()',
     
-    // Cache control for static assets
+    // Cache control for static assets - using recommended directives
     'Cache-Control': 'public, max-age=31536000, immutable',
     'Content-Type': 'text/html; charset=UTF-8',
   };

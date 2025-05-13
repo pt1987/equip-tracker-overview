@@ -1,5 +1,4 @@
 
-
 /* Safari compatibility fixes */
 
 /* Fix for user-select not supported in Safari */
@@ -28,4 +27,3 @@ textarea:not([id]):not([name]) {
   /* This is for accessibility purposes, but proper IDs should be added to all form fields */
   outline: 1px dotted rgba(255, 0, 0, 0.2); /* Subtle visual indicator for development */
 }
-
