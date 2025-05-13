@@ -3,8 +3,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "@/components/ui/use-toast";
 import { 
-  getDashboardStats, 
-  getYearlyBudgetReport 
+  getDashboardStats
 } from "@/data/helpers";
 import { 
   getAssetStatusPercentages,
