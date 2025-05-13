@@ -7,7 +7,8 @@ import {
   YearlyAssetPurchaseReport, 
   AssetUsageDurationReport, 
   WarrantyDefectReport,
-  FixedAssetsReport
+  FixedAssetsReport,
+  Employee
 } from "@/lib/types";
 import { formatCurrency, formatDate, localizeCategory } from "@/lib/utils";
 
@@ -334,5 +335,43 @@ export function exportFixedAssetsReport(data: FixedAssetsReport, format: 'excel'
     });
     
     doc.save('FixedAssetsReport.pdf');
+  }
+}
+
+export function exportEmployeeBudgetReport(data: Employee[], format: 'excel' | 'pdf' = 'excel') {
+  const exportData = data.map(employee => {
+    const remainingBudget = employee.budget - employee.usedBudget;
+    const budgetPercentage = employee.budget > 0 
+      ? Math.min(100, Math.round((employee.usedBudget / employee.budget) * 100)) 
+      : 0;
+      
+    return {
+      Name: `${employee.firstName} ${employee.lastName}`,
+      Position: employee.position,
+      Cluster: employee.cluster,
+      TotalBudget: employee.budget,
+      UsedBudget: employee.usedBudget,
+      RemainingBudget: remainingBudget,
+      UsagePercentage: `${budgetPercentage}%`
+    };
+  }).sort((a, b) => a.Name.localeCompare(b.Name));
+  
+  if (format === 'excel') {
+    exportToExcel(exportData, 'EmployeeBudgetReport', 'Mitarbeiter Budget');
+  } else {
+    exportToPDF(
+      'Mitarbeiter Budget Übersicht', 
+      exportData,
+      [
+        { header: 'Name', dataKey: 'Name' },
+        { header: 'Position', dataKey: 'Position' },
+        { header: 'Cluster', dataKey: 'Cluster' },
+        { header: 'Gesamtbudget', dataKey: 'TotalBudget', formatter: (value) => formatCurrency(value) },
+        { header: 'Genutzt', dataKey: 'UsedBudget', formatter: (value) => formatCurrency(value) },
+        { header: 'Verfügbar', dataKey: 'RemainingBudget', formatter: (value) => formatCurrency(value) },
+        { header: 'Nutzung', dataKey: 'UsagePercentage' }
+      ],
+      'EmployeeBudgetReport'
+    );
   }
 }

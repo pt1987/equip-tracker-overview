@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,14 +12,31 @@ import AssetPurchasesReport from "@/components/reports/AssetPurchasesReport";
 import AssetUsageDurationReport from "@/components/reports/AssetUsageDurationReport";
 import WarrantyDefectsReport from "@/components/reports/WarrantyDefectsReport";
 import FixedAssetsReport from "@/components/reports/FixedAssetsReport";
+import EmployeeBudgetReport from "@/components/reports/EmployeeBudgetReport";
 import { DownloadIcon, FileBarChart, ChevronDown } from "lucide-react";
-import { exportOrderTimeline, exportYearlyBudget, exportYearlyPurchases, exportUsageDuration, exportWarrantyDefects, exportFixedAssetsReport } from "@/utils/export";
-import { getOrderTimelineByEmployee, getYearlyBudgetReport, getYearlyAssetPurchasesReport, getAssetUsageDurationReport, getWarrantyDefectReport, getFixedAssetsReport } from "@/data/reports";
+import { 
+  exportOrderTimeline, 
+  exportYearlyBudget, 
+  exportYearlyPurchases, 
+  exportUsageDuration, 
+  exportWarrantyDefects, 
+  exportFixedAssetsReport,
+  exportEmployeeBudgetReport
+} from "@/utils/export";
+import { 
+  getOrderTimelineByEmployee, 
+  getYearlyBudgetReport, 
+  getYearlyAssetPurchasesReport, 
+  getAssetUsageDurationReport, 
+  getWarrantyDefectReport, 
+  getFixedAssetsReport 
+} from "@/data/reports";
+import { getEmployees } from "@/data/employees";
+
 export default function Reporting() {
   const [activeReport, setActiveReport] = useState<ReportType>("orderTimeline");
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+  
   const exportReport = async (format: 'excel' | 'pdf') => {
     try {
       switch (activeReport) {
@@ -58,6 +76,12 @@ export default function Reporting() {
             exportFixedAssetsReport(data, format);
             break;
           }
+        case 'employeeBudget':
+          {
+            const data = await getEmployees();
+            exportEmployeeBudgetReport(data, format);
+            break;
+          }
       }
       toast({
         title: "Report exported",
@@ -72,11 +96,11 @@ export default function Reporting() {
       console.error("Export error:", error);
     }
   };
+  
   return <div className="container mx-auto p-4 md:p-6 space-y-6 max-w-7xl">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
-            
             Reporting
           </h1>
           <p className="text-muted-foreground">
@@ -94,6 +118,7 @@ export default function Reporting() {
             <TabsTrigger value="usageDuration">Usage Duration</TabsTrigger>
             <TabsTrigger value="warrantyDefects">Warranty Defects</TabsTrigger>
             <TabsTrigger value="fixedAssets">Anlagevermögen & GWG</TabsTrigger>
+            <TabsTrigger value="employeeBudget">Mitarbeiter Budget</TabsTrigger>
           </TabsList>
           
           <DropdownMenu>
@@ -124,6 +149,7 @@ export default function Reporting() {
               {activeReport === "usageDuration" && "Average Asset Usage Duration"}
               {activeReport === "warrantyDefects" && "Defective Hardware Warranty Analysis"}
               {activeReport === "fixedAssets" && "Anlagevermögen & GWG Übersicht"}
+              {activeReport === "employeeBudget" && "Mitarbeiter Budget Übersicht"}
             </CardTitle>
             <CardDescription>
               {activeReport === "orderTimeline" && "Timeline of asset purchases per employee"}
@@ -132,6 +158,7 @@ export default function Reporting() {
               {activeReport === "usageDuration" && "Average usage duration by asset category"}
               {activeReport === "warrantyDefects" && "Analysis of defective hardware with and without warranty"}
               {activeReport === "fixedAssets" && "Übersicht über Anlagevermögen und geringwertige Wirtschaftsgüter"}
+              {activeReport === "employeeBudget" && "Übersicht über verfügbares Budget pro Mitarbeiter"}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -157,6 +184,10 @@ export default function Reporting() {
             
             <TabsContent value="fixedAssets" className="mt-0">
               <FixedAssetsReport />
+            </TabsContent>
+
+            <TabsContent value="employeeBudget" className="mt-0">
+              <EmployeeBudgetReport />
             </TabsContent>
           </CardContent>
         </Card>

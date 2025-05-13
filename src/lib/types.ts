@@ -193,7 +193,8 @@ export type ReportType =
   | 'yearlyPurchases'
   | 'usageDuration'
   | 'warrantyDefects'
-  | 'fixedAssets';
+  | 'fixedAssets'
+  | 'employeeBudget';
 
 export interface FixedAssetsReport {
   fixedAssets: Asset[];
