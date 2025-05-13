@@ -33,6 +33,12 @@ export default function BudgetSection({ budget, usedBudget }: BudgetSectionProps
         />
       </div>
       
+      <Progress 
+        value={budgetPercentage} 
+        className="mt-2" 
+        label={`Employee budget usage: ${budgetPercentage}% of ${formatCurrency(budget)}`}
+      />
+      
       <div className="flex justify-between text-sm text-muted-foreground mt-2">
         <span>{formatCurrency(usedBudget)}</span>
         <span>{formatCurrency(budget)}</span>

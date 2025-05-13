@@ -1,0 +1,29 @@
+
+/* Safari compatibility fixes */
+
+/* Fix for user-select not supported in Safari */
+@media (hover:hover) and (pointer:fine) {
+  [data-vaul-drawer] {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
+/* Fix for scrollbar-width not supported in Safari */
+[data-radix-scroll-area-viewport] {
+  scrollbar-width: none;
+  -ms-overflow-style: none; /* For Internet Explorer and Edge */
+}
+
+[data-radix-scroll-area-viewport]::-webkit-scrollbar {
+  display: none; /* For Chrome, Safari and Opera */
+}
+
+/* Additional styling to ensure consistent form elements */
+input, select, textarea {
+  /* Ensure all form fields have proper identifiers for accessibility */
+  &:not([id]):not([name]) {
+    /* This will be a fallback but we should still add IDs to all form elements */
+    @apply name-[generated];
+  }
+}

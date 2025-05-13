@@ -131,7 +131,11 @@ export default function AssetDetailView({
       {isMobile ? (
         <div className="space-y-4">
           <div className="mb-2">
-            <Select value={activeTab} onValueChange={handleTabChange}>
+            <Select 
+              id="mobile-asset-tab-selector" 
+              value={activeTab} 
+              onValueChange={handleTabChange}
+            >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Bereich auswählen">
                   {activeTab === "details" ? "Technische Details" : "ISO 27001 Compliance"}
@@ -161,7 +165,7 @@ export default function AssetDetailView({
           )}
         </div>
       ) : (
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "details" | "compliance")} className="w-full">
+        <Tabs id="asset-details-tabs" value={activeTab} onValueChange={(value) => setActiveTab(value as "details" | "compliance")} className="w-full">
           <TabsList className="mb-2">
             <TabsTrigger value="details">Technische Details</TabsTrigger>
             <TabsTrigger value="compliance">ISO 27001 Compliance</TabsTrigger>

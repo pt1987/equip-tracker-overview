@@ -33,6 +33,7 @@ import Roles from "./pages/admin/Roles";
 import Logs from "./pages/admin/Logs";
 import Intune from "./pages/admin/Intune";
 import "./styles/landing.css";
+import "./styles/compatibility.css";
 
 const queryClient = new QueryClient();
 
