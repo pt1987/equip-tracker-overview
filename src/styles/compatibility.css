@@ -20,10 +20,11 @@
 }
 
 /* Additional styling to ensure consistent form elements */
-input, select, textarea {
-  /* Ensure all form fields have proper identifiers for accessibility */
-  &:not([id]):not([name]) {
-    /* This will be a fallback but we should still add IDs to all form elements */
-    @apply name-[generated];
-  }
+input:not([id]):not([name]),
+select:not([id]):not([name]),
+textarea:not([id]):not([name]) {
+  /* Instead of applying a non-existent class, we'll add a data attribute for easier identification */
+  /* This is for accessibility purposes, but proper IDs should be added to all form fields */
+  outline: 1px dotted rgba(255, 0, 0, 0.2); /* Subtle visual indicator for development */
 }
+

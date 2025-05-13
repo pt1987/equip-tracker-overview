@@ -11,6 +11,7 @@ interface BudgetSectionProps {
 
 export default function BudgetSection({ budget, usedBudget }: BudgetSectionProps) {
   const budgetPercentage = Math.min(100, Math.round((usedBudget / budget) * 100));
+  const budgetLabel = `Employee budget usage: ${budgetPercentage}% of ${formatCurrency(budget)}`;
   
   return (
     <div className="glass-card p-6 mb-6">
@@ -24,7 +25,7 @@ export default function BudgetSection({ budget, usedBudget }: BudgetSectionProps
         <span>{budgetPercentage}%</span>
       </div>
       
-      <div className="budget-progress-track">
+      <div className="budget-progress-track" aria-hidden="true">
         <motion.div 
           className="budget-progress-bar"
           initial={{ width: 0 }}
@@ -36,7 +37,7 @@ export default function BudgetSection({ budget, usedBudget }: BudgetSectionProps
       <Progress 
         value={budgetPercentage} 
         className="mt-2" 
-        label={`Employee budget usage: ${budgetPercentage}% of ${formatCurrency(budget)}`}
+        aria-label={budgetLabel}
       />
       
       <div className="flex justify-between text-sm text-muted-foreground mt-2">
