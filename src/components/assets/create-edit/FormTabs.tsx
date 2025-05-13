@@ -1,61 +1,47 @@
-
-import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import AssetFormBasicInfo from "@/components/assets/create-edit/AssetFormBasicInfo";
-import AssetFormDetails from "@/components/assets/create-edit/AssetFormDetails";
-import AssetFormWarranty from "@/components/assets/create-edit/AssetFormWarranty";
-import AssetFormRelation from "@/components/assets/create-edit/AssetFormRelation";
-import AssetFormCompliance from "@/components/assets/create-edit/AssetFormCompliance";
-import { Asset, Employee } from "@/lib/types";
-import { useIsMobile } from "@/hooks/use-mobile";
+import AssetFormBasicInfo from "./AssetFormBasicInfo";
+import AssetFormDetails from "./AssetFormDetails";
+import AssetFormWarranty from "./AssetFormWarranty";
+import AssetFormCompliance from "./compliance/AssetFormCompliance";
+import { Employee } from "@/lib/types";
+import ExternalAssetSection from "./ExternalAssetSection";
 
 interface FormTabsProps {
   activeTab: string;
-  setActiveTab: (value: string) => void;
-  assets: Asset[];
+  setActiveTab: (tab: string) => void;
+  assets: any[];
   employees: Employee[];
 }
 
-export default function FormTabs({ activeTab, setActiveTab, assets, employees }: FormTabsProps) {
-  const isMobile = useIsMobile();
-  
+export default function FormTabs({ 
+  activeTab, 
+  setActiveTab, 
+  assets, 
+  employees 
+}: FormTabsProps) {
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab}>
-      <TabsList className={`mb-4 w-full ${isMobile ? 'grid grid-cols-3 gap-1' : 'flex flex-wrap justify-start md:justify-start'}`}>
-        <TabsTrigger value="basic" className={isMobile ? 'text-xs py-1.5 px-2' : ''}>
-          {isMobile ? 'Grundinfo' : 'Grundinformationen'}
-        </TabsTrigger>
-        <TabsTrigger value="details" className={isMobile ? 'text-xs py-1.5 px-2' : ''}>
-          Details
-        </TabsTrigger>
-        <TabsTrigger value="relation" className={isMobile ? 'text-xs py-1.5 px-2' : ''}>
-          Zuordnung
-        </TabsTrigger>
-        <TabsTrigger value="warranty" className={isMobile ? 'text-xs py-1.5 px-1.5' : ''}>
-          Garantie
-        </TabsTrigger>
-        <TabsTrigger value="compliance" className={isMobile ? 'text-xs py-1.5 px-1.5' : ''}>
-          ISO 27001
-        </TabsTrigger>
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <TabsList className="grid grid-cols-4 mb-6">
+        <TabsTrigger value="basic">Basisinfo</TabsTrigger>
+        <TabsTrigger value="details">Details</TabsTrigger>
+        <TabsTrigger value="external">Eigentum</TabsTrigger>
+        <TabsTrigger value="compliance">ISO 27001</TabsTrigger>
       </TabsList>
       
-      <TabsContent value="basic">
+      <TabsContent value="basic" className="space-y-6">
         <AssetFormBasicInfo employees={employees} />
       </TabsContent>
       
-      <TabsContent value="details">
+      <TabsContent value="details" className="space-y-6">
         <AssetFormDetails />
-      </TabsContent>
-      
-      <TabsContent value="relation">
-        <AssetFormRelation assets={assets} />
-      </TabsContent>
-      
-      <TabsContent value="warranty">
         <AssetFormWarranty />
       </TabsContent>
       
-      <TabsContent value="compliance">
+      <TabsContent value="external" className="space-y-6">
+        <ExternalAssetSection />
+      </TabsContent>
+      
+      <TabsContent value="compliance" className="space-y-6">
         <AssetFormCompliance />
       </TabsContent>
     </Tabs>

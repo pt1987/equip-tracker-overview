@@ -1,64 +1,53 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { AssetSummary } from "@/components/employees/card/AssetSummaryDisplay";
+import { Asset } from "@/lib/types";
 
-/**
- * Get a summary of assets assigned to an employee
- * @param employeeId The employee ID to get assets for
- * @returns A summary of the assets by type and their total value
- */
-export const getEmployeeAssetsSummary = async (employeeId: string): Promise<AssetSummary | null> => {
+// Fetch assets assigned to a specific employee
+export async function getAssetsByEmployeeId(employeeId: string): Promise<Asset[]> {
+  if (!employeeId) return [];
+  
   try {
     const { data, error } = await supabase
       .from('assets')
-      .select('type, price')
+      .select('*')
       .eq('employee_id', employeeId);
       
     if (error) {
       console.error("Error fetching employee assets:", error);
-      return null;
+      throw error;
     }
     
-    if (!data || data.length === 0) {
-      // Return empty summary if no assets found
-      return {
-        laptop: 0,
-        smartphone: 0,
-        tablet: 0,
-        mouse: 0,
-        keyboard: 0,
-        accessory: 0,
-        totalCount: 0,
-        totalValue: 0
-      };
-    }
-    
-    // Initialize summary object
-    const summary: AssetSummary = {
-      laptop: 0,
-      smartphone: 0,
-      tablet: 0,
-      mouse: 0,
-      keyboard: 0,
-      accessory: 0,
-      totalCount: 0,
-      totalValue: 0
-    };
-    
-    // Count assets by type and sum up their value
-    data.forEach(asset => {
-      const assetType = asset.type as keyof Omit<AssetSummary, 'totalCount' | 'totalValue'>;
-      
-      if (assetType in summary) {
-        summary[assetType]++;
-        summary.totalCount++;
-        summary.totalValue += asset.price || 0;
-      }
-    });
-    
-    return summary;
+    return data.map(asset => ({
+      id: asset.id,
+      name: asset.name,
+      type: asset.type,
+      manufacturer: asset.manufacturer,
+      model: asset.model,
+      purchaseDate: asset.purchase_date,
+      price: asset.price,
+      status: asset.status,
+      employeeId: asset.employee_id,
+      vendor: asset.vendor || "",
+      category: asset.category || "",
+      serialNumber: asset.serial_number || "",
+      inventoryNumber: asset.inventory_number || "",
+      hasWarranty: asset.has_warranty || false,
+      additionalWarranty: asset.additional_warranty || false,
+      warrantyExpiryDate: asset.warranty_expiry_date || "",
+      warrantyInfo: asset.warranty_info || "",
+      imageUrl: asset.image_url || "",
+      // External asset properties
+      isExternal: asset.is_external || false,
+      assetOwnerId: asset.asset_owner_id || "",
+      ownerCompany: asset.owner_company || "",
+      projectId: asset.project_id || "",
+      responsibleEmployeeId: asset.responsible_employee_id || "",
+      handoverToEmployeeDate: asset.handover_to_employee_date || "",
+      plannedReturnDate: asset.planned_return_date || "",
+      actualReturnDate: asset.actual_return_date || "",
+    }));
   } catch (error) {
-    console.error("Error in getEmployeeAssetsSummary:", error);
-    return null;
+    console.error("Error in getAssetsByEmployeeId:", error);
+    throw error;
   }
-};
+}

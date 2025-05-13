@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -6,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import { getAssets } from "@/data/mockData";
 import { createAsset, updateAsset } from "@/data/assets";
-import { assetFormSchema } from "@/components/assets/create-edit/AssetFormSchema";
+import { assetFormSchema, validateExternalAsset } from "@/components/assets/create-edit/AssetFormSchema";
 import type { AssetFormValues } from "@/components/assets/create-edit/AssetFormSchema";
 import type { Asset, AssetType, AssetStatus, AssetClassification } from "@/lib/types";
 
@@ -57,6 +58,14 @@ export function useAssetForm() {
       disposalMethod: asset.disposalMethod || "",
       lifecycleStage: asset.lifecycleStage || "operation",
       notes: asset.notes || "",
+      // External asset fields
+      isExternal: asset.isExternal || false,
+      ownerCompany: asset.ownerCompany || "PHAT Consulting GmbH",
+      projectId: asset.projectId || "",
+      responsibleEmployeeId: asset.responsibleEmployeeId || "",
+      handoverToEmployeeDate: asset.handoverToEmployeeDate || "",
+      plannedReturnDate: asset.plannedReturnDate || "",
+      actualReturnDate: asset.actualReturnDate || "",
     } : {
       category: "",
       manufacturer: "",
@@ -88,6 +97,14 @@ export function useAssetForm() {
       disposalMethod: "",
       lifecycleStage: "operation",
       notes: "",
+      // External asset default fields
+      isExternal: false,
+      ownerCompany: "PHAT Consulting GmbH",
+      projectId: "",
+      responsibleEmployeeId: "",
+      handoverToEmployeeDate: "",
+      plannedReturnDate: "",
+      actualReturnDate: "",
     }
   });
 
@@ -95,19 +112,28 @@ export function useAssetForm() {
     mutationFn: async (data: AssetFormValues) => {
       console.log("Submitting asset data:", data);
       
+      // Validate external assets
+      const externalErrors = validateExternalAsset(data);
+      if (externalErrors) {
+        for (const [field, message] of Object.entries(externalErrors)) {
+          form.setError(field as keyof AssetFormValues, { message });
+        }
+        throw new Error("Validation failed for external asset");
+      }
+      
       const formattedPurchaseDate = data.purchaseDate ? data.purchaseDate : null;
       const formattedWarrantyDate = data.hasWarranty && data.warrantyExpiryDate ? data.warrantyExpiryDate : null;
       
       const assetData: Asset = {
         id: isEditing && id ? id : crypto.randomUUID(),
         name: `${data.manufacturer} ${data.model}`,
-        type: data.category as AssetType,  // Explicitly cast to AssetType
+        type: data.category as AssetType,
         manufacturer: data.manufacturer,
         model: data.model,
         purchaseDate: formattedPurchaseDate,
         vendor: data.vendor || "",
         price: data.price,
-        status: data.status as AssetStatus,  // Explicitly cast to AssetStatus
+        status: data.status as AssetStatus,
         employeeId: data.assignedTo && data.assignedTo !== "pool" ? data.assignedTo : null,
         category: data.category,
         serialNumber: data.serialNumber || "",
@@ -128,11 +154,19 @@ export function useAssetForm() {
         assetOwnerId: data.assetOwnerId || null,
         lastReviewDate: data.lastReviewDate || null,
         nextReviewDate: data.nextReviewDate || null,
-        riskLevel: data.riskLevel as 'low' | 'medium' | 'high',  // Fixed: explicit type casting
+        riskLevel: data.riskLevel as 'low' | 'medium' | 'high',
         isPersonalData: data.isPersonalData || false,
         disposalMethod: data.disposalMethod || null,
-        lifecycleStage: data.lifecycleStage as 'procurement' | 'operation' | 'maintenance' | 'disposal',  // Fixed: explicit type casting
+        lifecycleStage: data.lifecycleStage as 'procurement' | 'operation' | 'maintenance' | 'disposal',
         notes: data.notes || null,
+        // External asset fields
+        isExternal: data.isExternal || false,
+        ownerCompany: data.ownerCompany || "PHAT Consulting GmbH",
+        projectId: data.projectId || null,
+        responsibleEmployeeId: data.responsibleEmployeeId || null,
+        handoverToEmployeeDate: data.handoverToEmployeeDate || null,
+        plannedReturnDate: data.plannedReturnDate || null,
+        actualReturnDate: data.actualReturnDate || null,
       };
 
       if (isEditing && id) {
@@ -150,6 +184,18 @@ export function useAssetForm() {
     },
     onError: (error) => {
       console.error("Error saving asset:", error);
+      
+      // Set focus to the external tab if there are errors there
+      const formState = form.getState();
+      const externalFields = ['ownerCompany', 'projectId', 'responsibleEmployeeId', 'handoverToEmployeeDate', 'plannedReturnDate'];
+      
+      for (const field of externalFields) {
+        if (formState.errors[field as keyof AssetFormValues]) {
+          setActiveTab('external');
+          break;
+        }
+      }
+      
       toast({
         variant: "destructive",
         title: isEditing ? "Fehler beim Aktualisieren" : "Fehler beim Erstellen",

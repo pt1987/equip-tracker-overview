@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Asset, AssetReview } from "@/lib/types";
 import { getEmployeeById } from "@/data/employees";
@@ -24,6 +23,7 @@ import ComplianceSection from "./details/ComplianceSection";
 import AssetReviewHistory from "./details/AssetReviewHistory";
 import AssetStatusIndicator from "@/components/bookings/AssetStatusIndicator";
 import { getCurrentOrUpcomingBooking } from "@/data/bookings";
+import ExternalAssetSection from "./details/ExternalAssetSection";
 
 interface AssetDetailViewProps {
   asset: Asset;
@@ -114,8 +114,21 @@ export default function AssetDetailView({
         <div className={`${isSmallScreen ? 'order-1' : ''}`}>
           <AssetHeaderInfo asset={currentAsset} onEdit={onEdit} onDelete={onDelete} />
           
+          {/* Display external asset badge if it's an external asset */}
+          {currentAsset.isExternal && (
+            <div className="mt-3">
+              <Badge 
+                variant="outline" 
+                className="bg-amber-100 text-amber-800 border-amber-300 hover:bg-amber-200"
+              >
+                <AlertTriangle className="mr-1 h-3 w-3" />
+                Externes Kundeneigentum
+              </Badge>
+            </div>
+          )}
+          
           {/* Anzeigen des Pool-Status, wenn es ein Pool-Gerät ist */}
-          {(currentAsset.isPoolDevice || currentAsset.status === 'pool') && (
+          {(currentAsset.isPoolDevice || currentAsset.status === 'pool') && !currentAsset.isExternal && (
             <div className="mt-4 flex items-center gap-2">
               <span className="font-medium">Buchungsstatus:</span> 
               {loadingBookingStatus ? (
@@ -127,6 +140,11 @@ export default function AssetDetailView({
           )}
         </div>
       </div>
+      
+      {/* Show external asset section before other tabs if it's an external asset */}
+      {currentAsset.isExternal && (
+        <ExternalAssetSection asset={currentAsset} onAssetUpdate={handleAssetUpdate} />
+      )}
 
       {isMobile ? (
         <div className="space-y-4">

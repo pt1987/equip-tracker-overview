@@ -29,6 +29,15 @@ export interface DbAsset {
   connected_asset_id: string | null;
   related_asset_id: string | null;
   image_url: string | null;
+  
+  // External asset fields
+  is_external: boolean | null;
+  owner_company: string | null;
+  project_id: string | null;
+  responsible_employee_id: string | null;
+  handover_to_employee_date: string | null;
+  planned_return_date: string | null;
+  actual_return_date: string | null;
 }
 
 // Map database asset to application asset
@@ -59,7 +68,16 @@ export const mapDbAssetToAsset = (dbAsset: DbAsset): Asset => {
     contractDuration: dbAsset.contract_duration || undefined,
     connectedAssetId: dbAsset.connected_asset_id || undefined,
     relatedAssetId: dbAsset.related_asset_id || undefined,
-    imageUrl: dbAsset.image_url || undefined
+    imageUrl: dbAsset.image_url || undefined,
+    
+    // External asset fields
+    isExternal: dbAsset.is_external || false,
+    ownerCompany: dbAsset.owner_company || "PHAT Consulting GmbH",
+    projectId: dbAsset.project_id || undefined,
+    responsibleEmployeeId: dbAsset.responsible_employee_id || undefined,
+    handoverToEmployeeDate: dbAsset.handover_to_employee_date || undefined,
+    plannedReturnDate: dbAsset.planned_return_date || undefined,
+    actualReturnDate: dbAsset.actual_return_date || undefined,
   };
 };
 
@@ -91,6 +109,15 @@ export const mapAssetToDbAsset = (asset: Asset): DbAsset => {
     contract_duration: asset.contractDuration || null,
     connected_asset_id: asset.connectedAssetId || null,
     related_asset_id: asset.relatedAssetId || null,
-    image_url: asset.imageUrl || null
+    image_url: asset.imageUrl || null,
+    
+    // External asset fields
+    is_external: asset.isExternal || false,
+    owner_company: asset.ownerCompany || "PHAT Consulting GmbH",
+    project_id: asset.projectId || null,
+    responsible_employee_id: asset.responsibleEmployeeId || null,
+    handover_to_employee_date: asset.handoverToEmployeeDate || null,
+    planned_return_date: asset.plannedReturnDate || null,
+    actual_return_date: asset.actualReturnDate || null,
   };
 };

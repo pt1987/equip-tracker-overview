@@ -45,6 +45,45 @@ export const assetFormSchema = z.object({
   isPersonalData: z.boolean().optional(),
   disposalMethod: z.string().optional(),
   lifecycleStage: z.string().optional(),
+  
+  // External asset fields
+  isExternal: z.boolean().optional(),
+  ownerCompany: z.string().min(1, "Bitte geben Sie eine Eigentümerfirma an").optional(),
+  projectId: z.string().min(1, "Bitte geben Sie eine Projekt-ID an").optional(),
+  responsibleEmployeeId: z.string().min(1, "Bitte wählen Sie einen verantwortlichen Mitarbeiter").optional(),
+  handoverToEmployeeDate: z.string().min(1, "Bitte geben Sie ein Übergabedatum an").optional(),
+  plannedReturnDate: z.string().min(1, "Bitte geben Sie ein geplantes Rückgabedatum an").optional(),
+  actualReturnDate: z.string().optional(),
 });
 
 export type AssetFormValues = z.infer<typeof assetFormSchema>;
+
+// Custom validation function for external assets
+export function validateExternalAsset(values: AssetFormValues): Record<string, string> | null {
+  const errors: Record<string, string> = {};
+  
+  // Only validate if asset is marked as external
+  if (values.isExternal) {
+    if (!values.ownerCompany || values.ownerCompany === 'PHAT Consulting GmbH') {
+      errors.ownerCompany = "Externe Assets benötigen eine andere Eigentümerfirma als PHAT Consulting";
+    }
+    
+    if (!values.projectId) {
+      errors.projectId = "Für externe Assets ist eine Projekt-ID erforderlich";
+    }
+    
+    if (!values.responsibleEmployeeId) {
+      errors.responsibleEmployeeId = "Für externe Assets ist ein verantwortlicher Mitarbeiter erforderlich";
+    }
+    
+    if (!values.handoverToEmployeeDate) {
+      errors.handoverToEmployeeDate = "Für externe Assets ist ein Übergabedatum erforderlich";
+    }
+    
+    if (!values.plannedReturnDate) {
+      errors.plannedReturnDate = "Für externe Assets ist ein geplantes Rückgabedatum erforderlich";
+    }
+  }
+  
+  return Object.keys(errors).length > 0 ? errors : null;
+}

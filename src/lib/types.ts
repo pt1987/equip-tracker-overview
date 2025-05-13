@@ -38,6 +38,9 @@ export type AssetClassification =
   | 'confidential' // Sensitive information requiring protection
   | 'restricted';  // Highly sensitive information with strict access control
 
+// Owner company type for assets
+export type AssetOwner = 'PHAT Consulting GmbH' | string;
+
 export interface Asset {
   id: string;
   name: string;
@@ -87,6 +90,15 @@ export interface Asset {
   isPersonalData?: boolean;            // Whether asset contains personal data (GDPR relevance)
   disposalMethod?: string;             // Method used for secure disposal
   lifecycleStage?: 'procurement' | 'operation' | 'maintenance' | 'disposal'; // Current lifecycle stage
+  
+  // New fields for external asset management
+  isExternal?: boolean;
+  ownerCompany?: AssetOwner;
+  projectId?: string;
+  responsibleEmployeeId?: string;
+  handoverToEmployeeDate?: string;
+  plannedReturnDate?: string;
+  actualReturnDate?: string;
 }
 
 export interface Employee {
