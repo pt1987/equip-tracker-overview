@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Asset, AssetReview } from "@/lib/types";
 import { getEmployeeById } from "@/data/employees";
@@ -129,12 +130,11 @@ export default function AssetDetailView({
 
       {isMobile ? (
         <div className="space-y-4">
-          <div className="mb-2">
+          <div className="mb-2" id="mobile-asset-tab-selector">
             <Select 
               value={activeTab} 
               onValueChange={handleTabChange}
               aria-label="Mobile asset tab selector"
-              id="mobile-asset-tab-selector"
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Bereich auswählen">
