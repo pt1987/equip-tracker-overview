@@ -23,24 +23,25 @@ export default function Depreciation() {
               </p>
             </div>
             
+            {/* Moved tabs button group inside a proper Tabs component */}
             <div className="flex items-center gap-2">
-              <TabsList>
-                <TabsTrigger 
-                  value="dashboard" 
-                  onClick={() => setActiveTab("dashboard")}
-                  className={activeTab === "dashboard" ? "bg-primary text-primary-foreground" : ""}
-                >
-                  <BarChart3 className="h-4 w-4 mr-2" />
-                  Dashboard
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="settings"
-                  onClick={() => setActiveTab("settings")}
-                  className={activeTab === "settings" ? "bg-primary text-primary-foreground" : ""}
-                >
-                  Einstellungen
-                </TabsTrigger>
-              </TabsList>
+              <Tabs value={activeTab} onValueChange={setActiveTab as any}>
+                <TabsList>
+                  <TabsTrigger 
+                    value="dashboard" 
+                    className={activeTab === "dashboard" ? "bg-primary text-primary-foreground" : ""}
+                  >
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Dashboard
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="settings"
+                    className={activeTab === "settings" ? "bg-primary text-primary-foreground" : ""}
+                  >
+                    Einstellungen
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
           </div>
           
