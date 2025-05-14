@@ -6,7 +6,7 @@ import { PurchaseItem, PurchaseListFilter } from "@/lib/purchase-list-types";
 import PurchaseListTable from "@/components/purchase-list/PurchaseListTable";
 import PurchaseUploader from "@/components/purchase-list/PurchaseUploader";
 import PurchaseFilters from "@/components/purchase-list/PurchaseFilters";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast"; // Updated import path
 import { Button } from "@/components/ui/button";
 import { FileBarChart, FileSpreadsheet, FileUp } from "lucide-react";
 import { exportPurchaseList } from "@/utils/purchase-export";
