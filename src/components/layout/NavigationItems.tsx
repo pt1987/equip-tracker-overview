@@ -96,7 +96,9 @@ export const NavigationItems = {
       Server: Server
     };
 
-    return iconMap[name] ? <iconMap[name] size={20} /> : <span>Icon not found</span>;
+    // Use JSX Element Factory pattern to dynamically render the icon component
+    const IconComponent = iconMap[name];
+    return IconComponent ? React.createElement(IconComponent, { size: 20 }) : <span>Icon not found</span>;
   },
   renderItems: (location: any) => {
     return navItems.map((item) => (
