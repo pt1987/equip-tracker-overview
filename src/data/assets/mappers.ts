@@ -1,5 +1,5 @@
 
-import { Asset, AssetType, AssetStatus } from "@/lib/types";
+import { Asset, AssetType, AssetStatus, AssetClassification } from "@/lib/types";
 
 // Type for the database asset structure
 export interface DbAsset {
@@ -39,6 +39,16 @@ export interface DbAsset {
   handover_to_employee_date: string | null;
   planned_return_date: string | null;
   actual_return_date: string | null;
+  
+  // ISO 27001 fields
+  classification: string | null;
+  last_review_date: string | null;
+  next_review_date: string | null;
+  risk_level: string | null;
+  is_personal_data: boolean | null;
+  disposal_method: string | null;
+  lifecycle_stage: string | null;
+  notes: string | null;
 }
 
 // Map database asset to application asset
@@ -80,6 +90,16 @@ export const mapDbAssetToAsset = (dbAsset: DbAsset): Asset => {
     handoverToEmployeeDate: dbAsset.handover_to_employee_date || undefined,
     plannedReturnDate: dbAsset.planned_return_date || undefined,
     actualReturnDate: dbAsset.actual_return_date || undefined,
+    
+    // ISO 27001 fields
+    classification: dbAsset.classification as AssetClassification || undefined,
+    lastReviewDate: dbAsset.last_review_date || undefined,
+    nextReviewDate: dbAsset.next_review_date || undefined,
+    riskLevel: dbAsset.risk_level as 'low' | 'medium' | 'high' || undefined,
+    isPersonalData: dbAsset.is_personal_data || false,
+    disposalMethod: dbAsset.disposal_method || undefined,
+    lifecycleStage: dbAsset.lifecycle_stage as 'procurement' | 'operation' | 'maintenance' | 'disposal' || undefined,
+    notes: dbAsset.notes || undefined,
   };
 };
 
@@ -122,5 +142,15 @@ export const mapAssetToDbAsset = (asset: Asset): DbAsset => {
     handover_to_employee_date: asset.handoverToEmployeeDate || null,
     planned_return_date: asset.plannedReturnDate || null,
     actual_return_date: asset.actualReturnDate || null,
+    
+    // ISO 27001 fields
+    classification: asset.classification || null,
+    last_review_date: asset.lastReviewDate || null,
+    next_review_date: asset.nextReviewDate || null,
+    risk_level: asset.riskLevel || null,
+    is_personal_data: asset.isPersonalData || null,
+    disposal_method: asset.disposalMethod || null,
+    lifecycle_stage: asset.lifecycleStage || null,
+    notes: asset.notes || null,
   };
 };

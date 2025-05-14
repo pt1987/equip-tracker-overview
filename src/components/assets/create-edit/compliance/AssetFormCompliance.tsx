@@ -1,14 +1,10 @@
 
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useFormContext } from "react-hook-form";
-import AssetOwnerSection from "./AssetOwnerSection";
-import ClassificationSection from "./ClassificationSection";
-import DisposalSection from "./DisposalSection";
-import LifecycleSection from "./LifecycleSection";
-import NotesSection from "./NotesSection";
-import PersonalDataSection from "./PersonalDataSection";
-import ReviewDatesSection from "./ReviewDatesSection";
-import RiskLevelSection from "./RiskLevelSection";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { FormDescription } from "@/components/ui/form";
 
 export default function AssetFormCompliance() {
   const form = useFormContext();
@@ -22,14 +18,193 @@ export default function AssetFormCompliance() {
         </p>
       </div>
       
-      <ClassificationSection />
-      <AssetOwnerSection />
-      <ReviewDatesSection />
-      <RiskLevelSection />
-      <PersonalDataSection />
-      <LifecycleSection />
-      <DisposalSection />
-      <NotesSection />
+      {/* Classification Section */}
+      <FormField
+        control={form.control}
+        name="classification"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Information Classification Level</FormLabel>
+            <Select 
+              onValueChange={field.onChange} 
+              defaultValue={field.value || "internal"}
+              value={field.value}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select classification" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="public">Public</SelectItem>
+                <SelectItem value="internal">Internal</SelectItem>
+                <SelectItem value="confidential">Confidential</SelectItem>
+                <SelectItem value="restricted">Restricted</SelectItem>
+              </SelectContent>
+            </Select>
+            <FormDescription>
+              The classification level determines handling requirements
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      {/* Asset Owner Section */}
+      <FormField
+        control={form.control}
+        name="assetOwnerId"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>ISO 27001 Asset Owner</FormLabel>
+            <FormControl>
+              <Input {...field} placeholder="Asset owner ID" />
+            </FormControl>
+            <FormDescription>
+              Person responsible for the asset according to ISO 27001
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      {/* Review Dates Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="lastReviewDate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Last Security Review Date</FormLabel>
+              <FormControl>
+                <Input type="date" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="nextReviewDate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Next Required Review Date</FormLabel>
+              <FormControl>
+                <Input type="date" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+      
+      {/* Risk Level Section */}
+      <FormField
+        control={form.control}
+        name="riskLevel"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Risk Level</FormLabel>
+            <Select 
+              onValueChange={field.onChange} 
+              defaultValue={field.value || "low"}
+              value={field.value}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select risk level" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="low">Low</SelectItem>
+                <SelectItem value="medium">Medium</SelectItem>
+                <SelectItem value="high">High</SelectItem>
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      {/* Personal Data Section */}
+      <FormField
+        control={form.control}
+        name="isPersonalData"
+        render={({ field }) => (
+          <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+            <FormControl>
+              <Checkbox
+                checked={field.value}
+                onCheckedChange={field.onChange}
+              />
+            </FormControl>
+            <div className="space-y-1 leading-none">
+              <FormLabel>Contains Personal Data</FormLabel>
+              <FormDescription>
+                Check this if the asset contains personal data relevant for GDPR
+              </FormDescription>
+            </div>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      {/* Lifecycle Section */}
+      <FormField
+        control={form.control}
+        name="lifecycleStage"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Lifecycle Stage</FormLabel>
+            <Select 
+              onValueChange={field.onChange} 
+              defaultValue={field.value || "operation"}
+              value={field.value}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select lifecycle stage" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="procurement">Procurement</SelectItem>
+                <SelectItem value="operation">Operation</SelectItem>
+                <SelectItem value="maintenance">Maintenance</SelectItem>
+                <SelectItem value="disposal">Disposal</SelectItem>
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      {/* Disposal Section */}
+      <FormField
+        control={form.control}
+        name="disposalMethod"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Disposal Method</FormLabel>
+            <FormControl>
+              <Input {...field} placeholder="e.g., Data wiping procedure XYZ" />
+            </FormControl>
+            <FormDescription>
+              Method used for secure disposal when needed
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      {/* Notes Section */}
+      <FormField
+        control={form.control}
+        name="notes"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Notes</FormLabel>
+            <FormControl>
+              <Input {...field} placeholder="Additional compliance notes" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
     </div>
   );
 }
