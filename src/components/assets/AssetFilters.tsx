@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { 
@@ -6,7 +7,8 @@ import {
   Check,
   UserRound,
   Factory,
-  Globe
+  Globe,
+  Building
 } from "lucide-react";
 import { AssetStatus, AssetType } from "@/lib/types";
 import AssetTypeIcon from "./AssetTypeIcon";
@@ -43,9 +45,12 @@ interface AssetFiltersProps {
   setSelectedManufacturers: (manufacturers: string[]) => void;
   selectedEmployees: string[];
   setSelectedEmployees: (employees: string[]) => void;
+  selectedOwnerCompanies: string[];
+  setSelectedOwnerCompanies: (companies: string[]) => void;
   isExternalFilter: boolean | null;
   setIsExternalFilter: (isExternal: boolean | null) => void;
   manufacturers: string[];
+  ownerCompanies: string[];
   employees: Array<{id: string; firstName: string; lastName: string}>;
   clearFilters: () => void;
 }
@@ -59,9 +64,12 @@ const AssetFilters = ({
   setSelectedManufacturers,
   selectedEmployees,
   setSelectedEmployees,
+  selectedOwnerCompanies,
+  setSelectedOwnerCompanies,
   isExternalFilter,
   setIsExternalFilter,
   manufacturers,
+  ownerCompanies,
   employees,
   clearFilters
 }: AssetFiltersProps) => {
@@ -95,6 +103,14 @@ const AssetFilters = ({
       setSelectedEmployees(selectedEmployees.filter(e => e !== employeeId));
     } else {
       setSelectedEmployees([...selectedEmployees, employeeId]);
+    }
+  };
+
+  const toggleOwnerCompanyFilter = (company: string) => {
+    if (selectedOwnerCompanies.includes(company)) {
+      setSelectedOwnerCompanies(selectedOwnerCompanies.filter(c => c !== company));
+    } else {
+      setSelectedOwnerCompanies([...selectedOwnerCompanies, company]);
     }
   };
 
@@ -179,6 +195,32 @@ const AssetFilters = ({
             </button>
           </div>
         </div>
+        
+        {/* Owner Company Filter - Only visible when External is selected */}
+        {isExternalFilter === true && ownerCompanies.length > 0 && (
+          <div>
+            <h4 className="text-sm font-medium mb-2">Eigentümerfirma</h4>
+            <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto pr-2">
+              {ownerCompanies.map(company => (
+                <button
+                  key={company}
+                  onClick={() => toggleOwnerCompanyFilter(company)}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                    selectedOwnerCompanies.includes(company)
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary text-foreground hover:bg-secondary/80"
+                  }`}
+                >
+                  <Building size={14} />
+                  {company}
+                  {selectedOwnerCompanies.includes(company) && (
+                    <Check size={14} />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         
         {/* Status Filter */}
         <div>

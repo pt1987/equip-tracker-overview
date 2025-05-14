@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import PageTransition from "@/components/layout/PageTransition";
 import { Asset, AssetStatus, AssetType } from "@/lib/types";
@@ -20,6 +21,7 @@ const AssetsPage = () => {
   const [selectedTypes, setSelectedTypes] = useState<AssetType[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<AssetStatus[]>([]);
   const [selectedManufacturers, setSelectedManufacturers] = useState<string[]>([]);
+  const [selectedOwnerCompanies, setSelectedOwnerCompanies] = useState<string[]>([]);
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
   const [isExternalFilter, setIsExternalFilter] = useState<boolean | null>(null);
   const [showFilters, setShowFilters] = useState(false);
@@ -66,13 +68,22 @@ const AssetsPage = () => {
     new Set(allAssets.map(asset => asset.manufacturer))
   ).filter(Boolean).sort();
 
+  // Extract unique owner companies from external assets for filter
+  const ownerCompanies = Array.from(
+    new Set(
+      allAssets
+        .filter(asset => asset.isExternal && asset.ownerCompany)
+        .map(asset => asset.ownerCompany)
+    )
+  ).filter(Boolean).sort() as string[];
+
   useEffect(() => {
     if (allAssets && allAssets.length) {
       console.log("Assets loaded in component:", allAssets.length);
     }
   }, [allAssets]);
 
-  // Filter assets based on search term, types, statuses, manufacturers, employees, and external status
+  // Filter assets based on search term, types, statuses, manufacturers, employees, owner companies, and external status
   const filteredAssets = allAssets.filter((asset) => {
     // Check if asset matches search term
     const matchesSearch = searchTerm === "" || 
@@ -99,8 +110,18 @@ const AssetsPage = () => {
     // Check if asset matches isExternal filter
     const matchesExternal = isExternalFilter === null || 
       asset.isExternal === isExternalFilter;
+    
+    // Check if asset matches owner company filter
+    const matchesOwnerCompany = selectedOwnerCompanies.length === 0 ||
+      (asset.ownerCompany && selectedOwnerCompanies.includes(asset.ownerCompany));
 
-    return matchesSearch && matchesType && matchesStatus && matchesManufacturer && matchesEmployee && matchesExternal;
+    return matchesSearch && 
+           matchesType && 
+           matchesStatus && 
+           matchesManufacturer && 
+           matchesEmployee && 
+           matchesExternal && 
+           matchesOwnerCompany;
   });
   
   const clearFilters = () => {
@@ -108,12 +129,18 @@ const AssetsPage = () => {
     setSelectedStatuses([]);
     setSelectedManufacturers([]);
     setSelectedEmployees([]);
+    setSelectedOwnerCompanies([]);
     setIsExternalFilter(null);
     setSearchTerm("");
   };
 
-  const totalFiltersActive = selectedTypes.length + selectedStatuses.length + 
-    selectedManufacturers.length + selectedEmployees.length + (isExternalFilter !== null ? 1 : 0);
+  const totalFiltersActive = 
+    selectedTypes.length + 
+    selectedStatuses.length + 
+    selectedManufacturers.length + 
+    selectedEmployees.length + 
+    selectedOwnerCompanies.length + 
+    (isExternalFilter !== null ? 1 : 0);
 
   // Show more detailed error if one occurs
   if (error) {
@@ -159,9 +186,12 @@ const AssetsPage = () => {
             setSelectedManufacturers={setSelectedManufacturers}
             selectedEmployees={selectedEmployees}
             setSelectedEmployees={setSelectedEmployees}
+            selectedOwnerCompanies={selectedOwnerCompanies}
+            setSelectedOwnerCompanies={setSelectedOwnerCompanies}
             isExternalFilter={isExternalFilter}
             setIsExternalFilter={setIsExternalFilter}
             manufacturers={manufacturers}
+            ownerCompanies={ownerCompanies}
             employees={employees}
             clearFilters={clearFilters}
           />
