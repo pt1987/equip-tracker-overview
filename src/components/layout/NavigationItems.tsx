@@ -1,4 +1,5 @@
 
+import React from "react";
 import {
   LayoutDashboard,
   Laptop,
@@ -11,7 +12,11 @@ import {
   CalendarRange,
   AlertOctagon,
   ShoppingCart,
-  ReceiptText
+  ReceiptText,
+  PlusCircle,
+  UserPlus,
+  Shield,
+  Server
 } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 
@@ -82,47 +87,16 @@ export const navItems: NavItem[] = [
 // Add helper for icon rendering
 export const NavigationItems = {
   Icon: ({ name }: { name: string }) => {
-    // Map icon names to actual icon components
+    // Map icon names to imported Lucide components
     const iconMap: Record<string, LucideIcon> = {
-      PlusCircle: () => (
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10" />
-          <path d="M12 8v8" />
-          <path d="M8 12h8" />
-        </svg>
-      ),
-      UserPlus: () => (
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-          <circle cx="9" cy="7" r="4" />
-          <path d="M19 8v6" />
-          <path d="M22 11h-6" />
-        </svg>
-      ),
-      Shield: () => (
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
-        </svg>
-      ),
-      Users: () => (
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-          <circle cx="9" cy="7" r="4" />
-          <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-        </svg>
-      ),
-      Server: () => (
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="2" y="2" width="20" height="8" rx="2" ry="2" />
-          <rect x="2" y="14" width="20" height="8" rx="2" ry="2" />
-          <line x1="6" y1="6" x2="6.01" y2="6" />
-          <line x1="6" y1="18" x2="6.01" y2="18" />
-        </svg>
-      )
+      PlusCircle: PlusCircle,
+      UserPlus: UserPlus,
+      Shield: Shield,
+      Users: Users,
+      Server: Server
     };
 
-    return iconMap[name] ? React.createElement(iconMap[name]) : <span>Icon not found</span>;
+    return iconMap[name] ? <iconMap[name] size={20} /> : <span>Icon not found</span>;
   },
   renderItems: (location: any) => {
     return navItems.map((item) => (
