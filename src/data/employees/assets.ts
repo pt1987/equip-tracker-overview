@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { Asset } from "@/lib/types";
+import { Asset, AssetType, AssetStatus } from "@/lib/types";
 
 // Fetch assets assigned to a specific employee
 export async function getAssetsByEmployeeId(employeeId: string): Promise<Asset[]> {
@@ -20,12 +20,12 @@ export async function getAssetsByEmployeeId(employeeId: string): Promise<Asset[]
     return data.map(asset => ({
       id: asset.id,
       name: asset.name,
-      type: asset.type,
+      type: asset.type as AssetType,
       manufacturer: asset.manufacturer,
       model: asset.model,
       purchaseDate: asset.purchase_date,
       price: asset.price,
-      status: asset.status,
+      status: asset.status as AssetStatus,
       employeeId: asset.employee_id,
       vendor: asset.vendor || "",
       category: asset.category || "",

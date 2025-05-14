@@ -32,6 +32,7 @@ export interface DbAsset {
   
   // External asset fields
   is_external: boolean | null;
+  asset_owner_id: string | null;
   owner_company: string | null;
   project_id: string | null;
   responsible_employee_id: string | null;
@@ -72,6 +73,7 @@ export const mapDbAssetToAsset = (dbAsset: DbAsset): Asset => {
     
     // External asset fields
     isExternal: dbAsset.is_external || false,
+    assetOwnerId: dbAsset.asset_owner_id || undefined,
     ownerCompany: dbAsset.owner_company || "PHAT Consulting GmbH",
     projectId: dbAsset.project_id || undefined,
     responsibleEmployeeId: dbAsset.responsible_employee_id || undefined,
@@ -113,6 +115,7 @@ export const mapAssetToDbAsset = (asset: Asset): DbAsset => {
     
     // External asset fields
     is_external: asset.isExternal || false,
+    asset_owner_id: asset.assetOwnerId || null,
     owner_company: asset.ownerCompany || "PHAT Consulting GmbH",
     project_id: asset.projectId || null,
     responsible_employee_id: asset.responsibleEmployeeId || null,

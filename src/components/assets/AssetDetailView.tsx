@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Asset, AssetReview } from "@/lib/types";
 import { getEmployeeById } from "@/data/employees";
@@ -13,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { AlertTriangle } from "lucide-react"; // Add this import
 
 // Import component parts
 import AssetImage from "./details/AssetImage";

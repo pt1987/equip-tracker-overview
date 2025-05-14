@@ -1,9 +1,5 @@
 
 import * as React from "react";
-import {
-  Toast,
-  ToastProps,
-} from "@/components/ui/toast";
 
 // Define the ToastActionElement type properly
 type ToastActionElement = React.ReactElement<any>;
@@ -16,6 +12,9 @@ export type ToastType = {
   title?: React.ReactNode;
   description?: React.ReactNode;
   action?: ToastActionElement;
+  variant?: "default" | "destructive"; // Add variant property
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 const actionTypes = {
@@ -138,7 +137,9 @@ function dispatch(action: Action) {
   });
 }
 
-type Toast = Omit<ToastType, "id">;
+type Toast = Omit<ToastType, "id"> & {
+  variant?: "default" | "destructive";
+};
 
 function toast({ ...props }: Toast) {
   const id = genId();
