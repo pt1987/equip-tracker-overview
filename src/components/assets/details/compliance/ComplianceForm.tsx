@@ -54,7 +54,7 @@ export default function ComplianceForm({ formData, employees, handleChange }: Co
         <div className="space-y-2">
           <Label>Asset Owner</Label>
           <Select
-            value={formData.assetOwnerId}
+            value={formData.assetOwnerId || "not_assigned"}
             onValueChange={(value) => handleChange('assetOwnerId', value)}
           >
             <SelectTrigger>

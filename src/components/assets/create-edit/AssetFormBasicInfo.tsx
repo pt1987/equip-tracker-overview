@@ -187,8 +187,8 @@ export default function AssetFormBasicInfo({ employees, isExternal }: AssetFormB
               <FormLabel>Zugewiesen an</FormLabel>
               <Select 
                 onValueChange={field.onChange} 
-                defaultValue={field.value || ""}
-                value={field.value || ""}
+                defaultValue={field.value || "not_assigned"}
+                value={field.value || "not_assigned"}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -196,7 +196,7 @@ export default function AssetFormBasicInfo({ employees, isExternal }: AssetFormB
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="">Nicht zugewiesen</SelectItem>
+                  <SelectItem value="not_assigned">Nicht zugewiesen</SelectItem>
                   <SelectItem value="pool">Asset-Pool</SelectItem>
                   {employees.map((employee) => (
                     <SelectItem key={employee.id} value={employee.id}>

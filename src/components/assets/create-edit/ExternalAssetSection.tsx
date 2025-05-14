@@ -90,8 +90,8 @@ export default function ExternalAssetSection() {
             <FormControl>
               <Select
                 onValueChange={field.onChange}
-                defaultValue={field.value || ""}
-                value={field.value || ""}
+                defaultValue={field.value || "PHAT Consulting GmbH"}
+                value={field.value || "PHAT Consulting GmbH"}
                 disabled={!isExternal}
               >
                 <SelectTrigger>
@@ -169,13 +169,14 @@ export default function ExternalAssetSection() {
                 <FormLabel>Verantwortlicher Mitarbeiter</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  value={field.value}
+                  defaultValue={field.value || "not_assigned"}
+                  value={field.value || "not_assigned"}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Mitarbeiter wählen" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="not_assigned">Nicht zugewiesen</SelectItem>
                     {employees.map((employee) => (
                       <SelectItem key={employee.id} value={employee.id}>
                         {employee.firstName} {employee.lastName}
