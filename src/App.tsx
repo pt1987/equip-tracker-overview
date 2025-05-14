@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -25,6 +26,7 @@ import Depreciation from "./pages/Depreciation";
 import HardwareOrder from "./pages/HardwareOrder";
 import AssetBookings from "./pages/AssetBookings";
 import DamageManagement from "./pages/DamageManagement";
+import PurchaseList from "./pages/PurchaseList";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -96,6 +98,7 @@ const AppContent = () => {
                     <Route path="/damage-management" element={<DamageManagement />} />
                     <Route path="/hardware-order" element={<HardwareOrder />} />
                     <Route path="/bookings" element={<AssetBookings />} />
+                    <Route path="/purchase-list" element={<PurchaseList />} />
                     
                     {/* Catch-all route */}
                     <Route path="*" element={<NotFound />} />

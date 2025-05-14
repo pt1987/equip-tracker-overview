@@ -1,87 +1,74 @@
 
-import { Link } from "react-router-dom";
-import { cn } from "@/lib/utils";
 import {
-  BarChart3,
-  MonitorSmartphone,
+  LayoutDashboard,
+  Laptop,
   Users,
-  Clock,
-  CircleDot,
-  PlusCircle,
-  UserPlus,
-  Menu,
-  X,
-  FileBarChart,
+  History as HistoryIcon,
   Package,
-  Shield,
-  LogIn,
-  LogOut,
-  Calendar,
-  Server,
-  AlertTriangle,
-  Home
+  FileBarChart2,
+  Calculator,
+  ClipboardList,
+  CalendarRange,
+  AlertOctagon,
+  ShoppingCart,
+  ReceiptText
 } from "lucide-react";
+import { NavItem } from "@/components/ui/sidebar";
 
-interface NavigationItemsProps {
-  location: {
-    pathname: string;
-  };
-}
-
-export const NavigationItems = ({ location }: NavigationItemsProps) => {
-  const menuItems = [
-    { to: "/", label: "Home", icon: "Home" },
-    { to: "/dashboard", label: "Dashboard", icon: "BarChart3" },
-    { to: "/assets", label: "Assets", icon: "MonitorSmartphone" },
-    { to: "/employees", label: "Mitarbeiter", icon: "Users" },
-    { to: "/history", label: "Historie", icon: "Clock" },
-    { to: "/pool-assets", label: "Pool-Assets", icon: "CircleDot" },
-    { to: "/bookings", label: "Buchungen", icon: "Calendar" },
-    { to: "/reporting", label: "Reporting", icon: "FileBarChart" },
-    { to: "/hardware-order", label: "Hardware-Bestellung", icon: "Package" },
-    { to: "/damage-management", label: "Schadensmanagement", icon: "AlertTriangle" },
-  ];
-
-  return (
-    <>
-      {menuItems.map((item) => (
-        <li key={item.to}>
-          <Link
-            to={item.to}
-            className={cn(
-              "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
-              location.pathname === item.to ? "font-medium bg-secondary" : ""
-            )}
-          >
-            <NavigationItems.Icon name={item.icon} />
-            <span>{item.label}</span>
-          </Link>
-        </li>
-      ))}
-    </>
-  );
-};
-
-// Helper component for rendering icons
-NavigationItems.Icon = function NavigationIcon({ name }: { name: string }) {
-  const iconMap: Record<string, React.ReactNode> = {
-    Home: <Home size={20} />,
-    BarChart3: <BarChart3 size={20} />,
-    MonitorSmartphone: <MonitorSmartphone size={20} />,
-    Users: <Users size={20} />,
-    Clock: <Clock size={20} />,
-    CircleDot: <CircleDot size={20} />,
-    Calendar: <Calendar size={20} />,
-    FileBarChart: <FileBarChart size={20} />,
-    Package: <Package size={20} />,
-    PlusCircle: <PlusCircle size={20} />,
-    UserPlus: <UserPlus size={20} />,
-    Shield: <Shield size={20} />,
-    Server: <Server size={20} />,
-    LogIn: <LogIn size={20} />,
-    LogOut: <LogOut size={20} />,
-    AlertTriangle: <AlertTriangle size={20} />,
-  };
-
-  return iconMap[name] || null;
-};
+export const navItems: NavItem[] = [
+  {
+    title: "Dashboard",
+    href: "/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    title: "Assets",
+    href: "/assets",
+    icon: Laptop,
+  },
+  {
+    title: "Mitarbeiter",
+    href: "/employees",
+    icon: Users,
+  },
+  {
+    title: "Historie",
+    href: "/history",
+    icon: HistoryIcon,
+  },
+  {
+    title: "Pool-Geräte",
+    href: "/pool-assets",
+    icon: Package,
+  },
+  {
+    title: "Reporting",
+    href: "/reporting",
+    icon: FileBarChart2,
+  },
+  {
+    title: "Abschreibungen",
+    href: "/depreciation",
+    icon: Calculator,
+  },
+  {
+    title: "Hardware-Bestellung",
+    href: "/hardware-order",
+    icon: ShoppingCart,
+  },
+  {
+    title: "Gerätebuchungen",
+    href: "/bookings",
+    icon: CalendarRange,
+  },
+  {
+    title: "Einkaufsliste",
+    href: "/purchase-list",
+    icon: ReceiptText,
+  },
+  {
+    title: "Schadensmeldungen",
+    href: "/damage-management",
+    icon: AlertOctagon,
+  },
+];
