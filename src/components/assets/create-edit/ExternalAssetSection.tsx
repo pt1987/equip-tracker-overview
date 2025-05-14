@@ -25,7 +25,27 @@ export default function ExternalAssetSection() {
     if (!ownerCompany) {
       form.setValue("ownerCompany", "PHAT Consulting GmbH");
     }
-  }, [ownerCompany, form]);
+    
+    // Wenn isExternal auf true gesetzt wird, setze die Pflichtfelder so, dass sie zumindest
+    // initialisiert sind, um TypeScript-Fehler zu vermeiden
+    if (isExternal) {
+      if (!form.getValues("projectId")) {
+        form.setValue("projectId", "");
+      }
+      if (!form.getValues("responsibleEmployeeId")) {
+        form.setValue("responsibleEmployeeId", "not_assigned");
+      }
+      if (!form.getValues("handoverToEmployeeDate")) {
+        form.setValue("handoverToEmployeeDate", "");
+      }
+      if (!form.getValues("plannedReturnDate")) {
+        form.setValue("plannedReturnDate", "");
+      }
+      if (!form.getValues("actualReturnDate")) {
+        form.setValue("actualReturnDate", "");
+      }
+    }
+  }, [isExternal, ownerCompany, form]);
   
   return (
     <div className="space-y-4">

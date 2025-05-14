@@ -51,19 +51,26 @@ const baseAssetSchema = z.object({
   
   // Gemeinsames Feld für beide Asset-Typen
   ownerCompany: z.string().optional(),
-  isExternal: z.boolean().default(false),
 });
 
 // Schema für interne Assets (mit Kaufdatum und Preis)
 const internalAssetSchema = baseAssetSchema.extend({
   purchaseDate: z.string().min(1, "Bitte geben Sie ein Kaufdatum an"),
   price: z.coerce.number().min(0, "Der Preis darf nicht negativ sein"),
+  isExternal: z.literal(false),
+  // Diese Felder sind für interne Assets nicht erforderlich
+  projectId: z.string().optional(),
+  responsibleEmployeeId: z.string().optional(),
+  handoverToEmployeeDate: z.string().optional(),
+  plannedReturnDate: z.string().optional(),
+  actualReturnDate: z.string().optional(),
 });
 
 // Schema für externe Assets (mit Pflichtfeldern für externe Assets)
 const externalAssetSchema = baseAssetSchema.extend({
   purchaseDate: z.string().optional(),
   price: z.coerce.number().optional(),
+  isExternal: z.literal(true),
   projectId: z.string().min(1, "Bitte geben Sie eine Projekt-ID an"),
   responsibleEmployeeId: z.string().min(1, "Bitte wählen Sie einen verantwortlichen Mitarbeiter"),
   handoverToEmployeeDate: z.string().min(1, "Bitte geben Sie ein Übergabedatum an"),
@@ -73,8 +80,8 @@ const externalAssetSchema = baseAssetSchema.extend({
 
 // Kombiniertes Schema, das basierend auf isExternal das richtige Schema verwendet
 export const assetFormSchema = z.discriminatedUnion("isExternal", [
-  internalAssetSchema.extend({ isExternal: z.literal(false) }),
-  externalAssetSchema.extend({ isExternal: z.literal(true) }),
+  internalAssetSchema,
+  externalAssetSchema,
 ]);
 
 export type AssetFormValues = z.infer<typeof assetFormSchema>;
@@ -102,7 +109,7 @@ export function validateExternalAsset(values: AssetFormValues): Record<string, s
       errors.projectId = "Für externe Assets ist eine Projekt-ID erforderlich";
     }
     
-    if (!externalValues.responsibleEmployeeId) {
+    if (!externalValues.responsibleEmployeeId || externalValues.responsibleEmployeeId === "not_assigned") {
       errors.responsibleEmployeeId = "Für externe Assets ist ein verantwortlicher Mitarbeiter erforderlich";
     }
     

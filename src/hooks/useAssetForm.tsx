@@ -102,13 +102,11 @@ export function useAssetForm() {
       // External asset default fields
       isExternal: false,
       ownerCompany: "PHAT Consulting GmbH",
-      ...(false ? { // Default is not external
-        projectId: "",
-        responsibleEmployeeId: "",
-        handoverToEmployeeDate: "",
-        plannedReturnDate: "",
-        actualReturnDate: "",
-      } : {})
+      projectId: "",
+      responsibleEmployeeId: "",
+      handoverToEmployeeDate: "",
+      plannedReturnDate: "",
+      actualReturnDate: "",
     }
   });
 
@@ -125,8 +123,15 @@ export function useAssetForm() {
         throw new Error("Validation failed for external asset");
       }
       
-      // Nur für interne Assets das Kaufdatum und den Preis verwenden
-      const formattedPurchaseDate = data.isExternal ? null : (data.purchaseDate || null);
+      // Für externe Assets behandeln wir die Daten entsprechend anders
+      let formattedPurchaseDate;
+      if (data.isExternal) {
+        // Für externe Assets verwenden wir ein Dummy-Datum, da die Datenbank ein Datum erfordert
+        formattedPurchaseDate = data.handoverToEmployeeDate || new Date().toISOString().split('T')[0];
+      } else {
+        formattedPurchaseDate = data.purchaseDate || null;
+      }
+      
       const formattedWarrantyDate = data.hasWarranty && data.warrantyExpiryDate ? data.warrantyExpiryDate : null;
       
       const assetData: Asset = {
@@ -136,10 +141,10 @@ export function useAssetForm() {
         manufacturer: data.manufacturer,
         model: data.model,
         purchaseDate: formattedPurchaseDate,
-        vendor: data.isExternal ? null : (data.vendor || ""),
-        price: data.isExternal ? null : data.price,
+        vendor: data.isExternal ? "Externe Firma" : (data.vendor || ""),
+        price: data.isExternal ? 0 : data.price,
         status: data.status as AssetStatus,
-        employeeId: data.assignedTo && data.assignedTo !== "pool" ? data.assignedTo : null,
+        employeeId: data.assignedTo && data.assignedTo !== "pool" && data.assignedTo !== "not_assigned" ? data.assignedTo : null,
         category: data.category,
         serialNumber: data.serialNumber || "",
         inventoryNumber: data.inventoryNumber || "",
@@ -167,11 +172,11 @@ export function useAssetForm() {
         // External asset fields
         isExternal: data.isExternal || false,
         ownerCompany: data.ownerCompany || "PHAT Consulting GmbH",
-        projectId: data.isExternal ? (data as any).projectId || null : null,
-        responsibleEmployeeId: data.isExternal ? (data as any).responsibleEmployeeId || null : null,
-        handoverToEmployeeDate: data.isExternal ? (data as any).handoverToEmployeeDate || null : null,
-        plannedReturnDate: data.isExternal ? (data as any).plannedReturnDate || null : null,
-        actualReturnDate: data.isExternal ? (data as any).actualReturnDate || null : null,
+        projectId: data.isExternal ? data.projectId || null : null,
+        responsibleEmployeeId: data.isExternal ? data.responsibleEmployeeId || null : null,
+        handoverToEmployeeDate: data.isExternal ? data.handoverToEmployeeDate || null : null,
+        plannedReturnDate: data.isExternal ? data.plannedReturnDate || null : null,
+        actualReturnDate: data.isExternal ? data.actualReturnDate || null : null,
       };
 
       if (isEditing && id) {
@@ -181,10 +186,6 @@ export function useAssetForm() {
       }
     },
     onSuccess: () => {
-      toast({
-        title: isEditing ? "Asset aktualisiert" : "Asset erstellt",
-        description: `${form.getValues("manufacturer")} ${form.getValues("model")} wurde erfolgreich ${isEditing ? 'aktualisiert' : 'erstellt'}.`,
-      });
       navigate("/assets");
     },
     onError: (error) => {

@@ -13,6 +13,12 @@ export const createAsset = async (asset: Asset): Promise<Asset> => {
     const now = new Date().toISOString();
     const dbAsset = mapAssetToDbAsset(asset);
     
+    // Für externe Assets müssen wir einen Standardwert für das Kaufdatum setzen,
+    // da die Datenbank ein Nicht-Null-Feld erfordert
+    if (asset.isExternal && !dbAsset.purchase_date) {
+      dbAsset.purchase_date = now.split('T')[0]; // Verwende das heutige Datum als Fallback
+    }
+    
     // Add timestamps
     const dbAssetWithTimestamps = {
       ...dbAsset,
