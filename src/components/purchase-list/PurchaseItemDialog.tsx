@@ -323,7 +323,7 @@ export default function PurchaseItemDialog({ item, open, onOpenChange, onUpdate 
           
           <TabsContent value="history">
             <div className="py-4">
-              <PurchaseHistoryList itemId={item.id} />
+              <PurchaseHistoryList purchaseId={item.id} />
             </div>
           </TabsContent>
         </Tabs>
