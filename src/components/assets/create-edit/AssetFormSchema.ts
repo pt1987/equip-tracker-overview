@@ -49,9 +49,9 @@ const baseAssetSchema = z.object({
   disposalMethod: z.string().optional(),
   lifecycleStage: z.string().optional(),
   
-  // Externes Asset Basisfelder
-  isExternal: z.boolean().default(false),
+  // Gemeinsames Feld für beide Asset-Typen
   ownerCompany: z.string().optional(),
+  isExternal: z.boolean().default(false),
 });
 
 // Schema für interne Assets (mit Kaufdatum und Preis)
@@ -64,7 +64,6 @@ const internalAssetSchema = baseAssetSchema.extend({
 const externalAssetSchema = baseAssetSchema.extend({
   purchaseDate: z.string().optional(),
   price: z.coerce.number().optional(),
-  ownerCompany: z.string().min(1, "Bitte geben Sie eine Eigentümerfirma an"),
   projectId: z.string().min(1, "Bitte geben Sie eine Projekt-ID an"),
   responsibleEmployeeId: z.string().min(1, "Bitte wählen Sie einen verantwortlichen Mitarbeiter"),
   handoverToEmployeeDate: z.string().min(1, "Bitte geben Sie ein Übergabedatum an"),
@@ -74,15 +73,17 @@ const externalAssetSchema = baseAssetSchema.extend({
 
 // Kombiniertes Schema, das basierend auf isExternal das richtige Schema verwendet
 export const assetFormSchema = z.discriminatedUnion("isExternal", [
-  z.object({
-    isExternal: z.literal(false)
-  }).merge(internalAssetSchema),
-  z.object({
-    isExternal: z.literal(true)
-  }).merge(externalAssetSchema),
+  internalAssetSchema.extend({ isExternal: z.literal(false) }),
+  externalAssetSchema.extend({ isExternal: z.literal(true) }),
 ]);
 
 export type AssetFormValues = z.infer<typeof assetFormSchema>;
+
+// Helper type to extract the fields that are only present in external assets
+export type ExternalAssetFields = Pick<
+  AssetFormValues & { isExternal: true },
+  'projectId' | 'responsibleEmployeeId' | 'handoverToEmployeeDate' | 'plannedReturnDate' | 'actualReturnDate'
+>;
 
 // Hilfsfunktion zur Validierung externer Assets
 export function validateExternalAsset(values: AssetFormValues): Record<string, string> | null {
@@ -90,23 +91,26 @@ export function validateExternalAsset(values: AssetFormValues): Record<string, s
   
   // Nur validieren, wenn das Asset als extern markiert ist
   if (values.isExternal) {
-    if (!values.ownerCompany || values.ownerCompany === 'PHAT Consulting GmbH') {
+    // Wir können hier jetzt type assertion verwenden, da wir wissen, dass es sich um ein externes Asset handelt
+    const externalValues = values as (AssetFormValues & { isExternal: true });
+    
+    if (!externalValues.ownerCompany || externalValues.ownerCompany === 'PHAT Consulting GmbH') {
       errors.ownerCompany = "Externe Assets benötigen eine andere Eigentümerfirma als PHAT Consulting";
     }
     
-    if (!values.projectId) {
+    if (!externalValues.projectId) {
       errors.projectId = "Für externe Assets ist eine Projekt-ID erforderlich";
     }
     
-    if (!values.responsibleEmployeeId) {
+    if (!externalValues.responsibleEmployeeId) {
       errors.responsibleEmployeeId = "Für externe Assets ist ein verantwortlicher Mitarbeiter erforderlich";
     }
     
-    if (!values.handoverToEmployeeDate) {
+    if (!externalValues.handoverToEmployeeDate) {
       errors.handoverToEmployeeDate = "Für externe Assets ist ein Übergabedatum erforderlich";
     }
     
-    if (!values.plannedReturnDate) {
+    if (!externalValues.plannedReturnDate) {
       errors.plannedReturnDate = "Für externe Assets ist ein geplantes Rückgabedatum erforderlich";
     }
   }

@@ -61,11 +61,13 @@ export function useAssetForm() {
       // External asset fields
       isExternal: asset.isExternal || false,
       ownerCompany: asset.ownerCompany || "PHAT Consulting GmbH",
-      projectId: asset.projectId || "",
-      responsibleEmployeeId: asset.responsibleEmployeeId || "",
-      handoverToEmployeeDate: asset.handoverToEmployeeDate || "",
-      plannedReturnDate: asset.plannedReturnDate || "",
-      actualReturnDate: asset.actualReturnDate || "",
+      ...(asset.isExternal ? {
+        projectId: asset.projectId || "",
+        responsibleEmployeeId: asset.responsibleEmployeeId || "",
+        handoverToEmployeeDate: asset.handoverToEmployeeDate || "",
+        plannedReturnDate: asset.plannedReturnDate || "",
+        actualReturnDate: asset.actualReturnDate || "",
+      } : {})
     } : {
       category: "",
       manufacturer: "",
@@ -100,11 +102,13 @@ export function useAssetForm() {
       // External asset default fields
       isExternal: false,
       ownerCompany: "PHAT Consulting GmbH",
-      projectId: "",
-      responsibleEmployeeId: "",
-      handoverToEmployeeDate: "",
-      plannedReturnDate: "",
-      actualReturnDate: "",
+      ...(false ? { // Default is not external
+        projectId: "",
+        responsibleEmployeeId: "",
+        handoverToEmployeeDate: "",
+        plannedReturnDate: "",
+        actualReturnDate: "",
+      } : {})
     }
   });
 
@@ -116,7 +120,7 @@ export function useAssetForm() {
       const externalErrors = validateExternalAsset(data);
       if (externalErrors) {
         for (const [field, message] of Object.entries(externalErrors)) {
-          form.setError(field as keyof AssetFormValues, { message });
+          form.setError(field as any, { message });
         }
         throw new Error("Validation failed for external asset");
       }
@@ -163,11 +167,11 @@ export function useAssetForm() {
         // External asset fields
         isExternal: data.isExternal || false,
         ownerCompany: data.ownerCompany || "PHAT Consulting GmbH",
-        projectId: data.projectId || null,
-        responsibleEmployeeId: data.responsibleEmployeeId || null,
-        handoverToEmployeeDate: data.handoverToEmployeeDate || null,
-        plannedReturnDate: data.plannedReturnDate || null,
-        actualReturnDate: data.actualReturnDate || null,
+        projectId: data.isExternal ? (data as any).projectId || null : null,
+        responsibleEmployeeId: data.isExternal ? (data as any).responsibleEmployeeId || null : null,
+        handoverToEmployeeDate: data.isExternal ? (data as any).handoverToEmployeeDate || null : null,
+        plannedReturnDate: data.isExternal ? (data as any).plannedReturnDate || null : null,
+        actualReturnDate: data.isExternal ? (data as any).actualReturnDate || null : null,
       };
 
       if (isEditing && id) {
