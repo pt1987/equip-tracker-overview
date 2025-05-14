@@ -33,7 +33,7 @@ export function useAssetForm() {
       model: asset.model || "",
       status: asset.status || "ordered",
       assignedTo: asset.employeeId || "",
-      purchaseDate: new Date(asset.purchaseDate).toISOString().split('T')[0],
+      purchaseDate: asset.purchaseDate ? asset.purchaseDate.split('T')[0] : new Date().toISOString().split('T')[0],
       price: asset.price || 0,
       vendor: asset.vendor || "",
       serialNumber: asset.serialNumber || "",
@@ -186,11 +186,11 @@ export function useAssetForm() {
       console.error("Error saving asset:", error);
       
       // Set focus to the external tab if there are errors there
-      const formState = form.getState();
+      const formErrors = form.formState.errors;
       const externalFields = ['ownerCompany', 'projectId', 'responsibleEmployeeId', 'handoverToEmployeeDate', 'plannedReturnDate'];
       
       for (const field of externalFields) {
-        if (formState.errors[field as keyof AssetFormValues]) {
+        if (formErrors[field as keyof AssetFormValues]) {
           setActiveTab('external');
           break;
         }
