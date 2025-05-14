@@ -119,12 +119,12 @@ export function useDocumentStorage({
     
     const filePath = `${assetId}/${fileNameWithInfo}`;
     
-    // Prepare metadata to store
+    // Prepare metadata to store - FIX: Change from string to object
     const fileMetadata = {
-      metadata: JSON.stringify({
+      metadata: {
         description: metadata.description || "",
         tags: metadata.tags || []
-      })
+      }
     };
     
     const {
