@@ -86,7 +86,7 @@ export default function DepreciationDashboard() {
   
   return (
     <div className="space-y-6">
-      <Tabs value={activeTab} onValueChange={value => setActiveTab(value as any)}>
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)}>
         <TabsList className="mb-4">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="list">Anlagevermögensliste</TabsTrigger>

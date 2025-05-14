@@ -25,7 +25,7 @@ export default function Depreciation() {
             
             {/* Moved tabs button group inside a proper Tabs component */}
             <div className="flex items-center gap-2">
-              <Tabs value={activeTab} onValueChange={setActiveTab as any}>
+              <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)}>
                 <TabsList>
                   <TabsTrigger 
                     value="dashboard" 
@@ -45,7 +45,7 @@ export default function Depreciation() {
             </div>
           </div>
           
-          <Tabs value={activeTab} onValueChange={setActiveTab as any} className="space-y-6">
+          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="space-y-6">
             <TabsContent value="dashboard">
               <DepreciationDashboard />
             </TabsContent>
