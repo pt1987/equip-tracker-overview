@@ -1,30 +1,20 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import PageTransition from "@/components/layout/PageTransition";
-import { Asset, AssetStatus, AssetType } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { getAssets } from "@/data/assets";
 import { getEmployees } from "@/data/employees";
+import { useAssetFilters } from "@/hooks/useAssetFilters";
 
-// Import our new components
+// Import our components
 import AssetHeader from "@/components/assets/AssetHeader";
 import AssetSearch from "@/components/assets/AssetSearch";
 import AssetFilters from "@/components/assets/AssetFilters";
-import AssetGridView from "@/components/assets/AssetGridView";
-import AssetListView from "@/components/assets/AssetListView";
-import AssetEmptyState from "@/components/assets/AssetEmptyState";
-import AssetLoadingState from "@/components/assets/AssetLoadingState";
+import AssetContent from "@/components/assets/AssetContent";
+import AssetErrorState from "@/components/assets/AssetErrorState";
 
 const AssetsPage = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedTypes, setSelectedTypes] = useState<AssetType[]>([]);
-  const [selectedStatuses, setSelectedStatuses] = useState<AssetStatus[]>([]);
-  const [selectedManufacturers, setSelectedManufacturers] = useState<string[]>([]);
-  const [selectedOwnerCompanies, setSelectedOwnerCompanies] = useState<string[]>([]);
-  const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
-  const [isExternalFilter, setIsExternalFilter] = useState<boolean | null>(null);
-  const [showFilters, setShowFilters] = useState(false);
   const [view, setView] = useState<"grid" | "list">("grid");
   const { toast } = useToast();
   
@@ -63,84 +53,30 @@ const AssetsPage = () => {
     }
   });
   
-  // Extract unique manufacturers from assets for filter
-  const manufacturers = Array.from(
-    new Set(allAssets.map(asset => asset.manufacturer))
-  ).filter(Boolean).sort();
-
-  // Extract unique owner companies from external assets for filter
-  const ownerCompanies = Array.from(
-    new Set(
-      allAssets
-        .filter(asset => asset.isExternal && asset.ownerCompany)
-        .map(asset => asset.ownerCompany)
-    )
-  ).filter(Boolean).sort() as string[];
-
-  useEffect(() => {
-    if (allAssets && allAssets.length) {
-      console.log("Assets loaded in component:", allAssets.length);
-    }
-  }, [allAssets]);
-
-  // Filter assets based on search term, types, statuses, manufacturers, employees, owner companies, and external status
-  const filteredAssets = allAssets.filter((asset) => {
-    // Check if asset matches search term
-    const matchesSearch = searchTerm === "" || 
-      asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      asset.manufacturer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      asset.model.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    // Check if asset matches selected types
-    const matchesType = selectedTypes.length === 0 || 
-      selectedTypes.includes(asset.type);
-    
-    // Check if asset matches selected statuses
-    const matchesStatus = selectedStatuses.length === 0 || 
-      selectedStatuses.includes(asset.status);
-    
-    // Check if asset matches selected manufacturers
-    const matchesManufacturer = selectedManufacturers.length === 0 ||
-      selectedManufacturers.includes(asset.manufacturer);
-
-    // Check if asset matches selected employees
-    const matchesEmployee = selectedEmployees.length === 0 ||
-      (asset.employeeId && selectedEmployees.includes(asset.employeeId));
-    
-    // Check if asset matches isExternal filter
-    const matchesExternal = isExternalFilter === null || 
-      asset.isExternal === isExternalFilter;
-    
-    // Check if asset matches owner company filter
-    const matchesOwnerCompany = selectedOwnerCompanies.length === 0 ||
-      (asset.ownerCompany && selectedOwnerCompanies.includes(asset.ownerCompany));
-
-    return matchesSearch && 
-           matchesType && 
-           matchesStatus && 
-           matchesManufacturer && 
-           matchesEmployee && 
-           matchesExternal && 
-           matchesOwnerCompany;
-  });
-  
-  const clearFilters = () => {
-    setSelectedTypes([]);
-    setSelectedStatuses([]);
-    setSelectedManufacturers([]);
-    setSelectedEmployees([]);
-    setSelectedOwnerCompanies([]);
-    setIsExternalFilter(null);
-    setSearchTerm("");
-  };
-
-  const totalFiltersActive = 
-    selectedTypes.length + 
-    selectedStatuses.length + 
-    selectedManufacturers.length + 
-    selectedEmployees.length + 
-    selectedOwnerCompanies.length + 
-    (isExternalFilter !== null ? 1 : 0);
+  // Use our custom hook to handle filtering logic
+  const {
+    searchTerm,
+    setSearchTerm,
+    selectedTypes,
+    setSelectedTypes,
+    selectedStatuses,
+    setSelectedStatuses,
+    selectedManufacturers,
+    setSelectedManufacturers,
+    selectedOwnerCompanies,
+    setSelectedOwnerCompanies,
+    selectedEmployees,
+    setSelectedEmployees,
+    isExternalFilter,
+    setIsExternalFilter,
+    showFilters,
+    setShowFilters,
+    manufacturers,
+    ownerCompanies,
+    filteredAssets,
+    clearFilters,
+    totalFiltersActive
+  } = useAssetFilters(allAssets);
 
   // Show more detailed error if one occurs
   if (error) {
@@ -148,11 +84,7 @@ const AssetsPage = () => {
       <PageTransition>
         <div className="p-3 md:p-4 xl:p-6 space-y-6 max-w-full">
           <h1 className="text-2xl md:text-3xl font-bold">Assets</h1>
-          <div className="p-4 rounded-lg bg-destructive/10 border border-destructive text-destructive">
-            <h3 className="font-semibold mb-2">Fehler beim Laden der Assets</h3>
-            <p>{error instanceof Error ? error.message : "Ein unbekannter Fehler ist aufgetreten"}</p>
-            <p className="mt-2 text-sm">Bitte stellen Sie sicher, dass Sie angemeldet sind und über die entsprechenden Berechtigungen verfügen.</p>
-          </div>
+          <AssetErrorState error={error} />
         </div>
       </PageTransition>
     );
@@ -198,18 +130,13 @@ const AssetsPage = () => {
         )}
         
         {/* Content display based on loading state and results */}
-        {isLoading ? (
-          <AssetLoadingState />
-        ) : filteredAssets.length === 0 ? (
-          <AssetEmptyState 
-            hasAssets={allAssets.length > 0} 
-            clearFilters={clearFilters} 
-          />
-        ) : view === "grid" ? (
-          <AssetGridView assets={filteredAssets} />
-        ) : (
-          <AssetListView assets={filteredAssets} />
-        )}
+        <AssetContent 
+          isLoading={isLoading}
+          filteredAssets={filteredAssets}
+          allAssetsLength={allAssets.length}
+          view={view}
+          clearFilters={clearFilters}
+        />
       </div>
     </PageTransition>
   );
