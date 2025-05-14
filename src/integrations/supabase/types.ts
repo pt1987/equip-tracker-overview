@@ -107,28 +107,44 @@ export type Database = {
       }
       assets: {
         Row: {
+          actual_return_date: string | null
           additional_warranty: boolean | null
+          asset_owner_id: string | null
           category: string
+          classification: string | null
           connected_asset_id: string | null
           contract_duration: string | null
           contract_end_date: string | null
           contract_name: string | null
           created_at: string | null
+          disposal_method: string | null
           employee_id: string | null
+          handover_to_employee_date: string | null
           has_warranty: boolean | null
           id: string
           image_url: string | null
           imei: string | null
           inventory_number: string | null
+          is_external: boolean | null
+          is_personal_data: boolean | null
           is_pool_device: boolean | null
+          last_review_date: string | null
+          lifecycle_stage: string | null
           manufacturer: string
           model: string
           name: string
+          next_review_date: string | null
+          notes: string | null
+          owner_company: string | null
           phone_number: string | null
+          planned_return_date: string | null
           price: number
+          project_id: string | null
           provider: string | null
           purchase_date: string
           related_asset_id: string | null
+          responsible_employee_id: string | null
+          risk_level: string | null
           serial_number: string | null
           status: string
           type: string
@@ -138,28 +154,44 @@ export type Database = {
           warranty_info: string | null
         }
         Insert: {
+          actual_return_date?: string | null
           additional_warranty?: boolean | null
+          asset_owner_id?: string | null
           category: string
+          classification?: string | null
           connected_asset_id?: string | null
           contract_duration?: string | null
           contract_end_date?: string | null
           contract_name?: string | null
           created_at?: string | null
+          disposal_method?: string | null
           employee_id?: string | null
+          handover_to_employee_date?: string | null
           has_warranty?: boolean | null
           id?: string
           image_url?: string | null
           imei?: string | null
           inventory_number?: string | null
+          is_external?: boolean | null
+          is_personal_data?: boolean | null
           is_pool_device?: boolean | null
+          last_review_date?: string | null
+          lifecycle_stage?: string | null
           manufacturer: string
           model: string
           name: string
+          next_review_date?: string | null
+          notes?: string | null
+          owner_company?: string | null
           phone_number?: string | null
+          planned_return_date?: string | null
           price: number
+          project_id?: string | null
           provider?: string | null
           purchase_date: string
           related_asset_id?: string | null
+          responsible_employee_id?: string | null
+          risk_level?: string | null
           serial_number?: string | null
           status: string
           type: string
@@ -169,28 +201,44 @@ export type Database = {
           warranty_info?: string | null
         }
         Update: {
+          actual_return_date?: string | null
           additional_warranty?: boolean | null
+          asset_owner_id?: string | null
           category?: string
+          classification?: string | null
           connected_asset_id?: string | null
           contract_duration?: string | null
           contract_end_date?: string | null
           contract_name?: string | null
           created_at?: string | null
+          disposal_method?: string | null
           employee_id?: string | null
+          handover_to_employee_date?: string | null
           has_warranty?: boolean | null
           id?: string
           image_url?: string | null
           imei?: string | null
           inventory_number?: string | null
+          is_external?: boolean | null
+          is_personal_data?: boolean | null
           is_pool_device?: boolean | null
+          last_review_date?: string | null
+          lifecycle_stage?: string | null
           manufacturer?: string
           model?: string
           name?: string
+          next_review_date?: string | null
+          notes?: string | null
+          owner_company?: string | null
           phone_number?: string | null
+          planned_return_date?: string | null
           price?: number
+          project_id?: string | null
           provider?: string | null
           purchase_date?: string
           related_asset_id?: string | null
+          responsible_employee_id?: string | null
+          risk_level?: string | null
           serial_number?: string | null
           status?: string
           type?: string

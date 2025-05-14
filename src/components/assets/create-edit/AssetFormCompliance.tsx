@@ -4,10 +4,9 @@ import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessa
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { AssetFormValues } from "./AssetFormSchema";
 
 export default function AssetFormCompliance() {
-  const form = useFormContext<AssetFormValues>();
+  const form = useFormContext();
   
   return (
     <div className="space-y-4">

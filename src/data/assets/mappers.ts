@@ -40,7 +40,7 @@ export interface DbAsset {
   planned_return_date: string | null;
   actual_return_date: string | null;
   
-  // ISO 27001 fields
+  // ISO 27001 compliance fields
   classification: string | null;
   last_review_date: string | null;
   next_review_date: string | null;

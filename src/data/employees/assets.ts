@@ -2,7 +2,7 @@
 import type { Asset } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
 import { mapDbAssetToAsset } from "@/data/assets/mappers";
-import { getAssetsByEmployeeId as fetchAssetsByEmployeeIdFromFetch } from "../assets/fetch";
+import { getAssets } from "@/data/assets";
 
 // Get a summary of an employee's assets
 export const getEmployeeAssetsSummary = async (employeeId: string): Promise<{
@@ -12,7 +12,7 @@ export const getEmployeeAssetsSummary = async (employeeId: string): Promise<{
   otherCount: number;
   totalValue: number;
 }> => {
-  const assets = await fetchAssetsByEmployeeIdFromFetch(employeeId);
+  const assets = await fetchAssetsByEmployeeId(employeeId);
   
   return {
     totalAssets: assets.length,
@@ -41,7 +41,7 @@ export async function getEmployeeAssetsDetailed(employeeId: string): Promise<Ass
       return [];
     }
 
-    // Map database results to application types
+    // Map database results to application types using the mapper function
     return data.map(mapDbAssetToAsset);
   } catch (error) {
     console.error("Error in getEmployeeAssetsDetailed:", error);
@@ -49,5 +49,28 @@ export async function getEmployeeAssetsDetailed(employeeId: string): Promise<Ass
   }
 }
 
-// For backward compatibility
-export const getAssetsByEmployeeId = fetchAssetsByEmployeeIdFromFetch;
+// Fetch assets assigned to a specific employee
+// Renamed to avoid conflict with imported function
+export async function fetchAssetsByEmployeeId(employeeId: string): Promise<Asset[]> {
+  if (!employeeId) return [];
+  
+  try {
+    const { data, error } = await supabase
+      .from('assets')
+      .select('*')
+      .eq('employee_id', employeeId);
+      
+    if (error) {
+      console.error("Error fetching employee assets:", error);
+      throw error;
+    }
+    
+    return data.map(mapDbAssetToAsset);
+  } catch (error) {
+    console.error("Error in fetchAssetsByEmployeeId:", error);
+    throw error;
+  }
+}
+
+// Export the original function name for backward compatibility
+export { fetchAssetsByEmployeeId as getAssetsByEmployeeId };

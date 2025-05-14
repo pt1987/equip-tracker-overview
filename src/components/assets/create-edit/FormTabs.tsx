@@ -1,9 +1,10 @@
 
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AssetFormBasicInfo from "./AssetFormBasicInfo";
 import AssetFormDetails from "./AssetFormDetails";
 import AssetFormWarranty from "./AssetFormWarranty";
-import AssetFormCompliance from "./AssetFormCompliance"; // Changed the import path
+import AssetFormCompliance from "./AssetFormCompliance"; // Fixed import path
 import { Employee } from "@/lib/types";
 import ExternalAssetSection from "./ExternalAssetSection";
 

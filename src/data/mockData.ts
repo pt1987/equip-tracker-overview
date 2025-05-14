@@ -6,6 +6,7 @@ export {
   createAsset,
 } from './assets';
 
+// Import and export the employee asset summary function
 import { getEmployeeAssetsSummary } from "./employees/assets";
 export { getEmployeeAssetsSummary };
 
