@@ -6,7 +6,8 @@ import {
   X, 
   Check,
   UserRound,
-  Factory
+  Factory,
+  Globe
 } from "lucide-react";
 import { AssetStatus, AssetType } from "@/lib/types";
 import AssetTypeIcon from "./AssetTypeIcon";
@@ -43,6 +44,8 @@ interface AssetFiltersProps {
   setSelectedManufacturers: (manufacturers: string[]) => void;
   selectedEmployees: string[];
   setSelectedEmployees: (employees: string[]) => void;
+  isExternalFilter: boolean | null;
+  setIsExternalFilter: (isExternal: boolean | null) => void;
   manufacturers: string[];
   employees: Array<{id: string; firstName: string; lastName: string}>;
   clearFilters: () => void;
@@ -57,6 +60,8 @@ const AssetFilters = ({
   setSelectedManufacturers,
   selectedEmployees,
   setSelectedEmployees,
+  isExternalFilter,
+  setIsExternalFilter,
   manufacturers,
   employees,
   clearFilters
@@ -93,6 +98,14 @@ const AssetFilters = ({
     }
   };
 
+  const toggleExternalFilter = (isExternal: boolean) => {
+    if (isExternalFilter === isExternal) {
+      setIsExternalFilter(null);
+    } else {
+      setIsExternalFilter(isExternal);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: -10 }}
@@ -112,6 +125,7 @@ const AssetFilters = ({
       </div>
       
       <div className="space-y-4">
+        {/* Device Type Filter */}
         <div>
           <h4 className="text-sm font-medium mb-2">Asset Type</h4>
           <div className="flex flex-wrap gap-2">
@@ -135,6 +149,38 @@ const AssetFilters = ({
           </div>
         </div>
         
+        {/* External/Internal Filter */}
+        <div>
+          <h4 className="text-sm font-medium mb-2">Asset Source</h4>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => toggleExternalFilter(false)}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                isExternalFilter === false
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-secondary text-foreground hover:bg-secondary/80"
+              }`}
+            >
+              <Factory size={16} />
+              Internal
+              {isExternalFilter === false && <Check size={14} />}
+            </button>
+            <button
+              onClick={() => toggleExternalFilter(true)}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                isExternalFilter === true
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-secondary text-foreground hover:bg-secondary/80"
+              }`}
+            >
+              <Globe size={16} />
+              External
+              {isExternalFilter === true && <Check size={14} />}
+            </button>
+          </div>
+        </div>
+        
+        {/* Status Filter */}
         <div>
           <h4 className="text-sm font-medium mb-2">Status</h4>
           <div className="flex flex-wrap gap-2">

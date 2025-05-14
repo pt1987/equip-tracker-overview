@@ -22,6 +22,7 @@ const AssetsPage = () => {
   const [selectedStatuses, setSelectedStatuses] = useState<AssetStatus[]>([]);
   const [selectedManufacturers, setSelectedManufacturers] = useState<string[]>([]);
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
+  const [isExternalFilter, setIsExternalFilter] = useState<boolean | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [view, setView] = useState<"grid" | "list">("grid");
   const { toast } = useToast();
@@ -72,7 +73,7 @@ const AssetsPage = () => {
     }
   }, [allAssets]);
 
-  // Filter assets based on search term, types, statuses, manufacturers, and employees
+  // Filter assets based on search term, types, statuses, manufacturers, employees, and external status
   const filteredAssets = allAssets.filter((asset) => {
     // Check if asset matches search term
     const matchesSearch = searchTerm === "" || 
@@ -95,8 +96,12 @@ const AssetsPage = () => {
     // Check if asset matches selected employees
     const matchesEmployee = selectedEmployees.length === 0 ||
       (asset.employeeId && selectedEmployees.includes(asset.employeeId));
+    
+    // Check if asset matches isExternal filter
+    const matchesExternal = isExternalFilter === null || 
+      asset.isExternal === isExternalFilter;
 
-    return matchesSearch && matchesType && matchesStatus && matchesManufacturer && matchesEmployee;
+    return matchesSearch && matchesType && matchesStatus && matchesManufacturer && matchesEmployee && matchesExternal;
   });
   
   const clearFilters = () => {
@@ -104,11 +109,12 @@ const AssetsPage = () => {
     setSelectedStatuses([]);
     setSelectedManufacturers([]);
     setSelectedEmployees([]);
+    setIsExternalFilter(null);
     setSearchTerm("");
   };
 
   const totalFiltersActive = selectedTypes.length + selectedStatuses.length + 
-    selectedManufacturers.length + selectedEmployees.length;
+    selectedManufacturers.length + selectedEmployees.length + (isExternalFilter !== null ? 1 : 0);
 
   // Show more detailed error if one occurs
   if (error) {
@@ -154,6 +160,8 @@ const AssetsPage = () => {
             setSelectedManufacturers={setSelectedManufacturers}
             selectedEmployees={selectedEmployees}
             setSelectedEmployees={setSelectedEmployees}
+            isExternalFilter={isExternalFilter}
+            setIsExternalFilter={setIsExternalFilter}
             manufacturers={manufacturers}
             employees={employees}
             clearFilters={clearFilters}
