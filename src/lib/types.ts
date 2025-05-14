@@ -380,3 +380,8 @@ export interface VendorPurchaseReport {
     count: number;
   }>;
 }
+
+export interface OwnerCompanyDistribution {
+  company: string;
+  count: number;
+}

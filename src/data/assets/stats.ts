@@ -1,5 +1,4 @@
-
-import { AssetType, AssetStatus, AssetTypeDistribution, AssetStatusDistribution } from "@/lib/types";
+import { AssetType, AssetStatus, AssetTypeDistribution, AssetStatusDistribution, OwnerCompanyDistribution } from "@/lib/types";
 import { getAssets } from "./fetch";
 
 // Function to get asset type distribution data
@@ -64,4 +63,29 @@ export const getAssetStatusPercentages = async (): Promise<Record<AssetStatus, n
 export const getTotalAssetCount = async (): Promise<number> => {
   const assets = await getAssets();
   return assets.length;
+};
+
+// Function to get external assets distribution by owner company
+export const getOwnerCompanyDistribution = async (): Promise<OwnerCompanyDistribution[]> => {
+  const assets = await getAssets();
+  const companyCount: Record<string, number> = {};
+  
+  // Filter for external assets only and group by owner company
+  assets
+    .filter(asset => asset.isExternal)
+    .forEach(asset => {
+      const company = asset.ownerCompany || 'Unbekannt';
+      if (!companyCount[company]) {
+        companyCount[company] = 0;
+      }
+      companyCount[company]++;
+    });
+  
+  // Sort by count (descending)
+  return Object.entries(companyCount)
+    .map(([company, count]) => ({
+      company,
+      count
+    }))
+    .sort((a, b) => b.count - a.count);
 };

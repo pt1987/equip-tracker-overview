@@ -8,6 +8,7 @@ import AssetDistributionChart from "@/components/dashboard/AssetDistributionChar
 import AssetStatusCard from "@/components/dashboard/AssetStatusCard";
 import RecentAssetsList from "@/components/dashboard/RecentAssetsList";
 import RecentEmployeesList from "@/components/dashboard/RecentEmployeesList";
+import ExternalAssetsCard from "@/components/dashboard/ExternalAssetsCard";
 
 const IndexPage = () => {
   const {
@@ -16,7 +17,8 @@ const IndexPage = () => {
     assetTypeDistribution,
     assetStatusDistribution,
     recentAssets,
-    recentEmployees
+    recentEmployees,
+    ownerCompanyDistribution
   } = useDashboardData();
   
   if (loading) {
@@ -44,6 +46,10 @@ const IndexPage = () => {
           <AssetStatusCard assetStatusDistribution={assetStatusDistribution} />
           <RecentAssetsList recentAssets={recentAssets} />
           <RecentEmployeesList recentEmployees={recentEmployees} />
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ExternalAssetsCard ownerCompanyDistribution={ownerCompanyDistribution} />
         </div>
       </div>
     </PageTransition>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "@/components/ui/use-toast";
@@ -9,11 +8,12 @@ import {
   getAssetStatusPercentages,
   getAssetTypeDistribution,
   getAssetStatusDistribution,
-  getTotalAssetCount 
+  getTotalAssetCount,
+  getOwnerCompanyDistribution
 } from "@/data/assets/stats";
 import { getAssets } from "@/data/assets";
 import { getEmployees } from "@/data/employees";
-import { Asset, AssetType, AssetStatus } from "@/lib/types";
+import { Asset, AssetType, AssetStatus, OwnerCompanyDistribution } from "@/lib/types";
 
 // Helper functions moved from Index.tsx
 const getRecentAssets = async (limit = 5) => {
@@ -106,6 +106,14 @@ export const useDashboardData = () => {
     queryFn: getTotalAssetCount
   });
   
+  // Get owner company distribution
+  const {
+    data: ownerCompanyDistribution = []
+  } = useQuery({
+    queryKey: ["ownerCompanyDistribution"],
+    queryFn: getOwnerCompanyDistribution
+  });
+  
   useEffect(() => {
     if (dashboardStats && assetTypeDistribution && assetStatusDistribution) {
       setLoading(false);
@@ -120,6 +128,7 @@ export const useDashboardData = () => {
     recentAssets,
     recentEmployees,
     statusPercentages,
-    totalAssetCount
+    totalAssetCount,
+    ownerCompanyDistribution
   };
 };
