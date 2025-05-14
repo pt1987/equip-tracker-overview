@@ -1,9 +1,8 @@
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getEmployees } from "@/data/employees";
@@ -21,20 +20,12 @@ export default function ExternalAssetSection() {
     queryFn: getEmployees
   });
   
-  // Set default owner company to PHAT if not already set
+  // Set default owner company to PHAT if not already set and not external
   useEffect(() => {
     if (!ownerCompany) {
       form.setValue("ownerCompany", "PHAT Consulting GmbH");
     }
   }, [ownerCompany, form]);
-  
-  // Update isExternal flag automatically based on owner company
-  useEffect(() => {
-    const isExternalOwner = ownerCompany && ownerCompany !== "PHAT Consulting GmbH";
-    if (isExternalOwner !== isExternal) {
-      form.setValue("isExternal", isExternalOwner);
-    }
-  }, [ownerCompany, isExternal, form]);
   
   return (
     <div className="space-y-4">
@@ -53,6 +44,45 @@ export default function ExternalAssetSection() {
       
       <FormField
         control={form.control}
+        name="isExternal"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Asset-Typ</FormLabel>
+            <FormControl>
+              <Select
+                onValueChange={(value) => {
+                  // Boolean-Wert aus dem String konvertieren
+                  const isExt = value === "true";
+                  field.onChange(isExt);
+                  
+                  // Wenn sich der Wert ändert, entsprechende Felder zurücksetzen
+                  if (isExt && ownerCompany === "PHAT Consulting GmbH") {
+                    form.setValue("ownerCompany", ""); // Leeren wenn extern
+                  } else if (!isExt) {
+                    form.setValue("ownerCompany", "PHAT Consulting GmbH");
+                  }
+                }}
+                value={field.value.toString()}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Asset-Typ wählen" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="false">PHAT-eigenes Asset</SelectItem>
+                  <SelectItem value="true">Kunden-Asset (extern)</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormControl>
+            <FormDescription>
+              Wählen Sie, ob dieses Asset PHAT gehört oder einem Kunden
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      <FormField
+        control={form.control}
         name="ownerCompany"
         render={({ field }) => (
           <FormItem>
@@ -60,30 +90,39 @@ export default function ExternalAssetSection() {
             <FormControl>
               <Select
                 onValueChange={field.onChange}
-                defaultValue={field.value || "PHAT Consulting GmbH"}
-                value={field.value || "PHAT Consulting GmbH"}
+                defaultValue={field.value || ""}
+                value={field.value || ""}
+                disabled={!isExternal}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Eigentümerfirma wählen" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="PHAT Consulting GmbH">PHAT Consulting GmbH</SelectItem>
-                  <SelectItem value="Kunde A GmbH">Kunde A GmbH</SelectItem>
-                  <SelectItem value="Kunde B AG">Kunde B AG</SelectItem>
-                  <SelectItem value="Kunde C SE">Kunde C SE</SelectItem>
-                  <SelectItem value="other">Andere...</SelectItem>
+                  {!isExternal && (
+                    <SelectItem value="PHAT Consulting GmbH">PHAT Consulting GmbH</SelectItem>
+                  )}
+                  {isExternal && (
+                    <>
+                      <SelectItem value="Kunde A GmbH">Kunde A GmbH</SelectItem>
+                      <SelectItem value="Kunde B AG">Kunde B AG</SelectItem>
+                      <SelectItem value="Kunde C SE">Kunde C SE</SelectItem>
+                      <SelectItem value="other">Andere...</SelectItem>
+                    </>
+                  )}
                 </SelectContent>
               </Select>
             </FormControl>
             <FormDescription>
-              Die Eigentümerfirma bestimmt, ob es sich um ein internes oder externes Asset handelt
+              {isExternal 
+                ? "Wählen Sie den Kunden, dem dieses Asset gehört" 
+                : "PHAT-Assets gehören der PHAT Consulting GmbH"}
             </FormDescription>
             <FormMessage />
           </FormItem>
         )}
       />
       
-      {ownerCompany === "other" && (
+      {isExternal && ownerCompany === "other" && (
         <FormField
           control={form.control}
           name="ownerCompany"

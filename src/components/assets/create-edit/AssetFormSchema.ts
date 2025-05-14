@@ -2,21 +2,24 @@
 import { z } from "zod";
 import { AssetType, AssetStatus, AssetClassification } from "@/lib/types";
 
-export const assetFormSchema = z.object({
+// Grundlegendes Schema für alle Assets
+const baseAssetSchema = z.object({
   category: z.string().min(1, "Bitte wählen Sie eine Kategorie"),
   manufacturer: z.string().min(1, "Bitte geben Sie einen Hersteller an"),
   model: z.string().min(1, "Bitte geben Sie ein Modell an"),
   status: z.string().min(1, "Bitte wählen Sie einen Status"),
   assignedTo: z.string().optional(),
-  purchaseDate: z.string().min(1, "Bitte geben Sie ein Kaufdatum an"),
-  price: z.coerce.number().min(0, "Der Preis darf nicht negativ sein"),
   vendor: z.string().optional(),
   serialNumber: z.string().optional(),
   inventoryNumber: z.string().optional(),
+  
+  // Garantiefelder
   hasWarranty: z.boolean().optional(),
   additionalWarranty: z.boolean().optional(),
   warrantyExpiryDate: z.string().optional(),
   warrantyInfo: z.string().optional(),
+  
+  // Asset-spezifische Felder
   imei: z.string().optional(),
   phoneNumber: z.string().optional(),
   provider: z.string().optional(),
@@ -24,7 +27,7 @@ export const assetFormSchema = z.object({
   contractName: z.string().optional(),
   relatedAssetId: z.string().optional(),
   
-  // New fields for the depreciation module
+  // Abschreibungsfelder
   isFixedAsset: z.boolean().optional(),
   isGWG: z.boolean().optional(),
   netPurchasePrice: z.coerce.number().optional(),
@@ -36,7 +39,7 @@ export const assetFormSchema = z.object({
   department: z.string().optional(),
   location: z.string().optional(),
   
-  // ISO 27001 fields
+  // ISO 27001 Felder
   classification: z.string().optional(),
   assetOwnerId: z.string().optional(),
   lastReviewDate: z.string().optional(),
@@ -46,23 +49,46 @@ export const assetFormSchema = z.object({
   disposalMethod: z.string().optional(),
   lifecycleStage: z.string().optional(),
   
-  // External asset fields
-  isExternal: z.boolean().optional(),
-  ownerCompany: z.string().min(1, "Bitte geben Sie eine Eigentümerfirma an").optional(),
-  projectId: z.string().min(1, "Bitte geben Sie eine Projekt-ID an").optional(),
-  responsibleEmployeeId: z.string().min(1, "Bitte wählen Sie einen verantwortlichen Mitarbeiter").optional(),
-  handoverToEmployeeDate: z.string().min(1, "Bitte geben Sie ein Übergabedatum an").optional(),
-  plannedReturnDate: z.string().min(1, "Bitte geben Sie ein geplantes Rückgabedatum an").optional(),
+  // Externes Asset Basisfelder
+  isExternal: z.boolean().default(false),
+  ownerCompany: z.string().optional(),
+});
+
+// Schema für interne Assets (mit Kaufdatum und Preis)
+const internalAssetSchema = baseAssetSchema.extend({
+  purchaseDate: z.string().min(1, "Bitte geben Sie ein Kaufdatum an"),
+  price: z.coerce.number().min(0, "Der Preis darf nicht negativ sein"),
+});
+
+// Schema für externe Assets (mit Pflichtfeldern für externe Assets)
+const externalAssetSchema = baseAssetSchema.extend({
+  purchaseDate: z.string().optional(),
+  price: z.coerce.number().optional(),
+  ownerCompany: z.string().min(1, "Bitte geben Sie eine Eigentümerfirma an"),
+  projectId: z.string().min(1, "Bitte geben Sie eine Projekt-ID an"),
+  responsibleEmployeeId: z.string().min(1, "Bitte wählen Sie einen verantwortlichen Mitarbeiter"),
+  handoverToEmployeeDate: z.string().min(1, "Bitte geben Sie ein Übergabedatum an"),
+  plannedReturnDate: z.string().min(1, "Bitte geben Sie ein geplantes Rückgabedatum an"),
   actualReturnDate: z.string().optional(),
 });
 
+// Kombiniertes Schema, das basierend auf isExternal das richtige Schema verwendet
+export const assetFormSchema = z.discriminatedUnion("isExternal", [
+  z.object({
+    isExternal: z.literal(false)
+  }).merge(internalAssetSchema),
+  z.object({
+    isExternal: z.literal(true)
+  }).merge(externalAssetSchema),
+]);
+
 export type AssetFormValues = z.infer<typeof assetFormSchema>;
 
-// Custom validation function for external assets
+// Hilfsfunktion zur Validierung externer Assets
 export function validateExternalAsset(values: AssetFormValues): Record<string, string> | null {
   const errors: Record<string, string> = {};
   
-  // Only validate if asset is marked as external
+  // Nur validieren, wenn das Asset als extern markiert ist
   if (values.isExternal) {
     if (!values.ownerCompany || values.ownerCompany === 'PHAT Consulting GmbH') {
       errors.ownerCompany = "Externe Assets benötigen eine andere Eigentümerfirma als PHAT Consulting";

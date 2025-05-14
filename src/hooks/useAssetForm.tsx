@@ -121,7 +121,8 @@ export function useAssetForm() {
         throw new Error("Validation failed for external asset");
       }
       
-      const formattedPurchaseDate = data.purchaseDate ? data.purchaseDate : null;
+      // Nur für interne Assets das Kaufdatum und den Preis verwenden
+      const formattedPurchaseDate = data.isExternal ? null : (data.purchaseDate || null);
       const formattedWarrantyDate = data.hasWarranty && data.warrantyExpiryDate ? data.warrantyExpiryDate : null;
       
       const assetData: Asset = {
@@ -131,8 +132,8 @@ export function useAssetForm() {
         manufacturer: data.manufacturer,
         model: data.model,
         purchaseDate: formattedPurchaseDate,
-        vendor: data.vendor || "",
-        price: data.price,
+        vendor: data.isExternal ? null : (data.vendor || ""),
+        price: data.isExternal ? null : data.price,
         status: data.status as AssetStatus,
         employeeId: data.assignedTo && data.assignedTo !== "pool" ? data.assignedTo : null,
         category: data.category,
@@ -189,10 +190,12 @@ export function useAssetForm() {
       const formErrors = form.formState.errors;
       const externalFields = ['ownerCompany', 'projectId', 'responsibleEmployeeId', 'handoverToEmployeeDate', 'plannedReturnDate'];
       
-      for (const field of externalFields) {
-        if (formErrors[field as keyof AssetFormValues]) {
-          setActiveTab('external');
-          break;
+      if (form.getValues("isExternal")) {
+        for (const field of externalFields) {
+          if (formErrors[field as keyof AssetFormValues]) {
+            setActiveTab('basic'); // Setzen wir auf 'basic' da external jetzt Teil der ersten Seite ist
+            break;
+          }
         }
       }
       
