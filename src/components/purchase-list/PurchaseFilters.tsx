@@ -61,7 +61,7 @@ export default function PurchaseFilters({ filters, setFilters }: PurchaseFilters
   };
 
   const handleVatRateChange = (value: string) => {
-    if (value) {
+    if (value && value !== "none") {
       setFilters({ ...filters, vatRate: parseInt(value) as TaxRate });
     } else {
       const { vatRate, ...rest } = filters;
@@ -70,7 +70,7 @@ export default function PurchaseFilters({ filters, setFilters }: PurchaseFilters
   };
 
   const handleStatusChange = (value: string) => {
-    if (value) {
+    if (value && value !== "none") {
       setFilters({ ...filters, status: value as PurchaseStatus });
     } else {
       const { status, ...rest } = filters;
@@ -79,7 +79,7 @@ export default function PurchaseFilters({ filters, setFilters }: PurchaseFilters
   };
 
   const handleGoBDStatusChange = (value: string) => {
-    if (value) {
+    if (value && value !== "none") {
       setFilters({ ...filters, gobdStatus: value as GoBDStatus });
     } else {
       const { gobdStatus, ...rest } = filters;
