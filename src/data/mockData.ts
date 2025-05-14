@@ -1,4 +1,3 @@
-
 // This file re-exports helper functions from the appropriate files
 export { 
   getAssetById, 
@@ -78,3 +77,6 @@ export const getRoleById = (roleId: string) => {
   const roles = getRoles();
   return roles.find(role => role.id === roleId);
 };
+
+import { getEmployeeAssetsSummary } from "./employees/assets";
+import { Asset, AssetStatus, AssetType, Employee } from "@/lib/types";
