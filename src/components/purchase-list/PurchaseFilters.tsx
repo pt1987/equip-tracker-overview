@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -128,14 +129,14 @@ export default function PurchaseFilters({ filters, setFilters }: PurchaseFilters
         <div className="space-y-2">
           <Label htmlFor="vat-rate">MwSt-Satz</Label>
           <Select
-            value={filters.vatRate?.toString() || ""}
+            value={filters.vatRate?.toString() || "none"}
             onValueChange={handleVatRateChange}
           >
             <SelectTrigger id="vat-rate">
               <SelectValue placeholder="MwSt-Satz auswählen" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Alle</SelectItem>
+              <SelectItem value="none">Alle</SelectItem>
               <SelectItem value="0">0%</SelectItem>
               <SelectItem value="7">7%</SelectItem>
               <SelectItem value="19">19%</SelectItem>
@@ -146,14 +147,14 @@ export default function PurchaseFilters({ filters, setFilters }: PurchaseFilters
         <div className="space-y-2">
           <Label htmlFor="status">Status</Label>
           <Select
-            value={filters.status || ""}
+            value={filters.status || "none"}
             onValueChange={handleStatusChange}
           >
             <SelectTrigger id="status">
               <SelectValue placeholder="Status auswählen" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Alle</SelectItem>
+              <SelectItem value="none">Alle</SelectItem>
               <SelectItem value="draft">Entwurf</SelectItem>
               <SelectItem value="pending">Prüfung ausstehend</SelectItem>
               <SelectItem value="approved">Genehmigt</SelectItem>
@@ -167,14 +168,14 @@ export default function PurchaseFilters({ filters, setFilters }: PurchaseFilters
         <div className="space-y-2">
           <Label htmlFor="gobd-status">GoBD-Status</Label>
           <Select
-            value={filters.gobdStatus || ""}
+            value={filters.gobdStatus || "none"}
             onValueChange={handleGoBDStatusChange}
           >
             <SelectTrigger id="gobd-status">
               <SelectValue placeholder="GoBD-Status auswählen" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Alle</SelectItem>
+              <SelectItem value="none">Alle</SelectItem>
               <SelectItem value="red">Nicht konform</SelectItem>
               <SelectItem value="yellow">Prüfen</SelectItem>
               <SelectItem value="green">GoBD-konform</SelectItem>
