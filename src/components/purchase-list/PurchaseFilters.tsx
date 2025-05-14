@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +19,13 @@ export default function PurchaseFilters({ filters, setFilters }: PurchaseFilters
   });
 
   const handleDateRangeChange = (range: { from?: Date; to?: Date }) => {
-    setDateRange(range);
+    // Update local state with the new range, allowing undefined values
+    setDateRange({
+      from: range.from,
+      to: range.to
+    });
+    
+    // Only update filters if at least one date is provided
     if (range.from || range.to) {
       setFilters({
         ...filters,

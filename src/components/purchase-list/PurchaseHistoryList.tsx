@@ -156,7 +156,7 @@ export default function PurchaseHistoryList({ purchaseId }: PurchaseHistoryListP
           <div className="flex flex-col sm:flex-row sm:justify-between mb-2">
             <span className="font-medium">{getFieldLabel(entry.fieldName)}</span>
             <span className="text-muted-foreground text-sm">
-              {formatDate(entry.timestamp, true)}
+              {formatDate(entry.timestamp)}
             </span>
           </div>
           

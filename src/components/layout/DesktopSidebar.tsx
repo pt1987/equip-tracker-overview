@@ -5,7 +5,7 @@ import { ThemeSwitcher } from "./ThemeSwitcher";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { LogIn, LogOut } from "lucide-react";
-import { NavigationItems } from "./NavigationItems";
+import { NavigationItems, navItems } from "./NavigationItems";
 
 export function DesktopSidebar() {
   const location = useLocation();
@@ -36,7 +36,20 @@ export function DesktopSidebar() {
       </div>
       <div className="flex-1 overflow-y-auto">
         <ul className="pt-4 space-y-1 px-2">
-          <NavigationItems location={location} />
+          {navItems.map((item) => (
+            <li key={item.href}>
+              <Link
+                to={item.href}
+                className={cn(
+                  "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
+                  location.pathname === item.href ? "font-medium bg-secondary" : ""
+                )}
+              >
+                <item.icon size={20} />
+                <span>{item.title}</span>
+              </Link>
+            </li>
+          ))}
           
           {adminLinks.length > 0 && (
             <>
