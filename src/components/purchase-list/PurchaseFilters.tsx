@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { PurchaseListFilter, PurchaseStatus, GoBDStatus, TaxRate } from "@/lib/purchase-list-types";
 import { X } from "lucide-react";
+import { DateRange } from "react-day-picker";
+import { de } from "date-fns/locale";
 
 interface PurchaseFiltersProps {
   filters: PurchaseListFilter;
@@ -14,20 +16,21 @@ interface PurchaseFiltersProps {
 }
 
 export default function PurchaseFilters({ filters, setFilters }: PurchaseFiltersProps) {
-  const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
-    from: filters.dateRange?.from ? new Date(filters.dateRange.from) : undefined,
-    to: filters.dateRange?.to ? new Date(filters.dateRange.to) : undefined,
-  });
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(
+    filters.dateRange?.from || filters.dateRange?.to
+      ? {
+          from: filters.dateRange.from ? new Date(filters.dateRange.from) : undefined,
+          to: filters.dateRange.to ? new Date(filters.dateRange.to) : undefined,
+        }
+      : undefined
+  );
 
-  const handleDateRangeChange = (range: { from?: Date; to?: Date }) => {
-    // Update local state with the new range, allowing undefined values
-    setDateRange({
-      from: range.from,
-      to: range.to
-    });
+  const handleDateRangeChange = (range: DateRange | undefined) => {
+    // Update local state with the new range
+    setDateRange(range);
     
-    // Only update filters if at least one date is provided
-    if (range.from || range.to) {
+    // Only update filters if date range has values
+    if (range?.from || range?.to) {
       setFilters({
         ...filters,
         dateRange: {
@@ -89,7 +92,7 @@ export default function PurchaseFilters({ filters, setFilters }: PurchaseFilters
 
   const clearAllFilters = () => {
     setFilters({});
-    setDateRange({ from: undefined, to: undefined });
+    setDateRange(undefined);
   };
 
   return (
@@ -102,7 +105,7 @@ export default function PurchaseFilters({ filters, setFilters }: PurchaseFilters
             onChange={handleDateRangeChange}
             placeholder="Datumsbereich auswählen"
             align="start"
-            locale="de"
+            locale={de}
           />
         </div>
 

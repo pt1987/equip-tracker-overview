@@ -15,12 +15,12 @@ import {
 } from "@/components/ui/popover"
 
 interface DateRangePickerProps {
-  value: DateRange;
-  onChange: (date: DateRange) => void;
+  value: DateRange | undefined;
+  onChange: (date: DateRange | undefined) => void;
   placeholder?: string;
   className?: string;
   align?: "start" | "center" | "end";
-  locale?: any;
+  locale?: Locale;
 }
 
 export function DateRangePicker({
@@ -40,7 +40,7 @@ export function DateRangePicker({
             variant="outline"
             className={cn(
               "w-full justify-start text-left font-normal",
-              !value && "text-muted-foreground"
+              !value?.from && "text-muted-foreground"
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
