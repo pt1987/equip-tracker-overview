@@ -6,11 +6,13 @@ import { useIsMobile } from "@/hooks/use-mobile";
 interface DocumentListProps {
   documents: Document[];
   onDeleteDocument: (documentId: string, docName: string) => Promise<void>;
+  onPreviewDocument?: (document: Document) => void;
 }
 
 export function DocumentList({
   documents,
-  onDeleteDocument
+  onDeleteDocument,
+  onPreviewDocument
 }: DocumentListProps) {
   const isMobile = useIsMobile();
   

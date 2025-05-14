@@ -7,4 +7,6 @@ export interface Document {
   url: string;
   uploadDate: string;
   category: "invoice" | "warranty" | "repair" | "manual" | "other";
+  thumbnail?: string;
+  previewAvailable?: boolean;
 }

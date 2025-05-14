@@ -5,6 +5,8 @@ import { DocumentList } from "@/components/documents/DocumentList";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { FileText } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useState } from "react";
+import { DocumentPreviewDialog } from "@/components/documents/DocumentPreviewDialog";
 
 interface DocumentSectionProps {
   assetId: string;
@@ -20,11 +22,21 @@ export default function DocumentSection({
   onDeleteDocument
 }: DocumentSectionProps) {
   const isMobile = useIsMobile();
+  const [previewDocument, setPreviewDocument] = useState<Document | null>(null);
   
   // Create a wrapper function that adapts the onDeleteDocument to match the expected signature
   const handleDeleteDocument = async (documentId: string, docName: string): Promise<void> => {
     onDeleteDocument(documentId);
     return Promise.resolve();
+  };
+
+  // Handle document preview
+  const handlePreviewDocument = (document: Document) => {
+    setPreviewDocument(document);
+  };
+
+  const handleClosePreview = () => {
+    setPreviewDocument(null);
   };
 
   // Entferne Duplikate für die DocumentList
@@ -47,8 +59,18 @@ export default function DocumentSection({
         </CardHeader>
       </div>
       <CardContent className={isMobile ? 'p-3' : 'p-6'}>
-        <DocumentList documents={uniqueDocuments} onDeleteDocument={handleDeleteDocument} />
+        <DocumentList 
+          documents={uniqueDocuments} 
+          onDeleteDocument={handleDeleteDocument}
+          onPreviewDocument={handlePreviewDocument}
+        />
       </CardContent>
+      
+      <DocumentPreviewDialog
+        document={previewDocument}
+        isOpen={!!previewDocument}
+        onClose={handleClosePreview}
+      />
     </Card>
   );
 }
