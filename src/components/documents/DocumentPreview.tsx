@@ -4,6 +4,7 @@ import { Document } from "./types";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Skeleton } from "@/components/ui/skeleton";
 import { File, FileImage, FileText, FileVideo, FileAudio } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface DocumentPreviewProps {
   document: Document;
@@ -35,7 +36,7 @@ export function DocumentPreview({ document }: DocumentPreviewProps) {
   // Handle PDF viewing
   if (isPDF) {
     return (
-      <div className="h-full w-full bg-background">
+      <div className="h-full w-full bg-background relative">
         <iframe
           src={`${document.url}#view=FitH`}
           className="w-full h-full min-h-[500px]"
@@ -62,6 +63,21 @@ export function DocumentPreview({ document }: DocumentPreviewProps) {
                 Dokument in neuem Tab öffnen
               </a>
             </div>
+          </div>
+        )}
+
+        {document.description && !loading && !error && (
+          <div className="absolute top-2 left-2 right-2 bg-background/80 p-2 rounded-md border text-sm">
+            <p>{document.description}</p>
+            {document.tags && document.tags.length > 0 && (
+              <div className="flex gap-1 mt-1 flex-wrap">
+                {document.tags.map((tag, index) => (
+                  <Badge key={index} variant="outline" className="bg-primary/10">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -92,6 +108,21 @@ export function DocumentPreview({ document }: DocumentPreviewProps) {
             </div>
           </div>
         )}
+
+        {document.description && !loading && !error && (
+          <div className="absolute bottom-2 left-2 right-2 bg-background/80 p-2 rounded-md border">
+            <p className="text-sm">{document.description}</p>
+            {document.tags && document.tags.length > 0 && (
+              <div className="flex gap-1 mt-1 flex-wrap">
+                {document.tags.map((tag, index) => (
+                  <Badge key={index} variant="outline" className="bg-primary/10 text-xs">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     );
   }
@@ -120,6 +151,21 @@ export function DocumentPreview({ document }: DocumentPreviewProps) {
             </div>
           </div>
         )}
+
+        {document.description && !loading && !error && (
+          <div className="p-3 bg-muted/20 border-t text-sm">
+            <p>{document.description}</p>
+            {document.tags && document.tags.length > 0 && (
+              <div className="flex gap-1 mt-2 flex-wrap">
+                {document.tags.map((tag, index) => (
+                  <Badge key={index} variant="outline" className="bg-primary/10">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     );
   }
@@ -146,6 +192,21 @@ export function DocumentPreview({ document }: DocumentPreviewProps) {
             <p className="text-sm text-muted-foreground">{error}</p>
           </div>
         )}
+
+        {document.description && !loading && !error && (
+          <div className="mt-3 p-3 bg-muted/20 rounded-md border text-sm">
+            <p>{document.description}</p>
+            {document.tags && document.tags.length > 0 && (
+              <div className="flex gap-1 mt-2 flex-wrap">
+                {document.tags.map((tag, index) => (
+                  <Badge key={index} variant="outline" className="bg-primary/10">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     );
   }
@@ -165,6 +226,21 @@ export function DocumentPreview({ document }: DocumentPreviewProps) {
       >
         In neuem Tab öffnen
       </a>
+      
+      {document.description && (
+        <div className="mt-4 p-3 bg-muted/20 rounded-md border text-sm max-w-md w-full">
+          <p>{document.description}</p>
+          {document.tags && document.tags.length > 0 && (
+            <div className="flex gap-1 mt-2 flex-wrap">
+              {document.tags.map((tag, index) => (
+                <Badge key={index} variant="outline" className="bg-primary/10">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

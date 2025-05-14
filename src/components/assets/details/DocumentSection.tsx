@@ -39,7 +39,7 @@ export default function DocumentSection({
     setPreviewDocument(null);
   };
 
-  // Entferne Duplikate für die DocumentList
+  // Ensure we have unique documents by ID
   const uniqueDocuments = documents.reduce((acc: Document[], current) => {
     const existingDocIndex = acc.findIndex(doc => doc.id === current.id);
     if (existingDocIndex === -1) {
@@ -48,6 +48,11 @@ export default function DocumentSection({
     return acc;
   }, []);
   
+  // Sort documents by uploadDate (newest first)
+  const sortedDocuments = [...uniqueDocuments].sort((a, b) => 
+    new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime()
+  );
+  
   return (
     <Card className="shadow-sm">
       <div className="border-b">
@@ -55,12 +60,12 @@ export default function DocumentSection({
           <div className="flex items-center gap-2">
             <CardTitle className={`${isMobile ? 'text-base' : 'text-lg'}`}>Dokumente</CardTitle>
           </div>
-          <DocumentUpload assetId={assetId} documents={uniqueDocuments} onAddDocument={onAddDocument} onDeleteDocument={onDeleteDocument} />
+          <DocumentUpload assetId={assetId} documents={sortedDocuments} onAddDocument={onAddDocument} onDeleteDocument={onDeleteDocument} />
         </CardHeader>
       </div>
       <CardContent className={isMobile ? 'p-3' : 'p-6'}>
         <DocumentList 
-          documents={uniqueDocuments} 
+          documents={sortedDocuments} 
           onDeleteDocument={handleDeleteDocument}
           onPreviewDocument={handlePreviewDocument}
         />

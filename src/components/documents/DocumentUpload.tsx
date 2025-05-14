@@ -7,6 +7,12 @@ import { DocumentUploadDialog } from "./DocumentUploadDialog";
 import { useDocumentStorage } from "./hooks/useDocumentStorage";
 import { useToast } from "@/hooks/use-toast";
 
+interface DocumentMetadata {
+  description?: string;
+  version?: number;
+  tags?: string[];
+}
+
 interface DocumentUploadProps {
   assetId: string;
   documents: Document[];
@@ -30,7 +36,11 @@ export default function DocumentUpload({
     toast
   });
 
-  const handleUpload = async (selectedFiles: FileList, documentCategory: Document["category"]) => {
+  const handleUpload = async (
+    selectedFiles: FileList,
+    documentCategory: Document["category"],
+    metadata: DocumentMetadata
+  ) => {
     if (!selectedFiles || selectedFiles.length === 0) {
       return;
     }
@@ -38,9 +48,14 @@ export default function DocumentUpload({
     setIsUploading(true);
     try {
       for (const file of Array.from(selectedFiles)) {
-        const newDocument = await uploadDocument(file, documentCategory);
+        const newDocument = await uploadDocument(file, documentCategory, metadata);
         onAddDocument(newDocument);
       }
+      
+      toast({
+        title: "Dokument hochgeladen",
+        description: `${selectedFiles.length} Dokument(e) erfolgreich hochgeladen.`
+      });
     } catch (error: any) {
       console.error('Error uploading document:', error);
       toast({
@@ -69,7 +84,8 @@ export default function DocumentUpload({
         isOpen={isDialogOpen} 
         onClose={() => setIsDialogOpen(false)} 
         onUpload={handleUpload} 
-        isUploading={isUploading} 
+        isUploading={isUploading}
+        existingDocuments={documents}
       />
     </div>
   );

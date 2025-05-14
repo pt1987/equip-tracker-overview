@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Document } from "./types";
 import { Button } from "@/components/ui/button";
-import { File, Trash2, DownloadCloud, MoreVertical, Eye } from "lucide-react";
+import { File, Trash2, DownloadCloud, MoreVertical, Eye, Info } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -17,6 +17,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DocumentPreviewDialog } from "./DocumentPreviewDialog";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 
 interface DocumentItemProps {
   document: Document;
@@ -54,8 +59,27 @@ export function DocumentItem({ document, onDelete }: DocumentItemProps) {
     }
   };
 
+  const getCategoryColor = (category: Document["category"]): string => {
+    switch (category) {
+      case "invoice": return "bg-blue-100 text-blue-800";
+      case "warranty": return "bg-green-100 text-green-800";
+      case "repair": return "bg-amber-100 text-amber-800";
+      case "manual": return "bg-purple-100 text-purple-800";
+      case "other": return "bg-gray-100 text-gray-800";
+      default: return "bg-gray-100 text-gray-800";
+    }
+  };
+
   const openPreview = () => setIsPreviewOpen(true);
   const closePreview = () => setIsPreviewOpen(false);
+
+  // Get file extension
+  const getFileExtension = (filename: string): string => {
+    const parts = filename.split('.');
+    return parts.length > 1 ? parts[parts.length - 1].toUpperCase() : '';
+  };
+
+  const fileExt = getFileExtension(document.name);
 
   // Use dropdown menu for mobile view
   if (isMobile) {
@@ -65,10 +89,14 @@ export function DocumentItem({ document, onDelete }: DocumentItemProps) {
     
     return (
       <>
-        <div className="flex items-center justify-between p-2 bg-background rounded-md border border-secondary/30">
+        <div className="flex items-center justify-between p-2 bg-background rounded-md border border-secondary/30 hover:border-secondary/50 transition-colors">
           <div className="flex items-center gap-2 overflow-hidden">
-            <div className="p-1.5 rounded-md">
-              <File size={18} className="text-primary" />
+            <div className={`p-1.5 rounded-md flex items-center justify-center w-8 h-8 ${getCategoryColor(document.category)}`}>
+              {fileExt ? (
+                <span className="text-xs font-medium">{fileExt}</span>
+              ) : (
+                <File size={16} />
+              )}
             </div>
             <div className="overflow-hidden">
               <p className="font-medium text-xs truncate">{filename}</p>
@@ -78,6 +106,12 @@ export function DocumentItem({ document, onDelete }: DocumentItemProps) {
                 <span className="text-primary text-xs">
                   {getCategoryLabel(document.category)}
                 </span>
+                {document.version && (
+                  <>
+                    <span>•</span>
+                    <span>v{document.version}</span>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -116,23 +150,48 @@ export function DocumentItem({ document, onDelete }: DocumentItemProps) {
   // Desktop view
   return (
     <>
-      <div className="flex items-center justify-between p-3 bg-background rounded-md border border-secondary/30">
+      <div className="flex items-center justify-between p-3 bg-background rounded-md border border-secondary/30 hover:border-secondary/50 transition-colors">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-md">
-            <File size={20} className="text-primary" />
+          <div className={`p-2 rounded-md flex items-center justify-center w-10 h-10 ${getCategoryColor(document.category)}`}>
+            {fileExt ? (
+              <span className="text-xs font-semibold">{fileExt}</span>
+            ) : (
+              <File size={20} />
+            )}
           </div>
-          <div>
-            <p className="font-medium text-sm">{document.name}</p>
+          <div className="overflow-hidden">
+            <p className="font-medium text-sm truncate max-w-xs">{document.name}</p>
             <div className="flex items-center gap-3 text-xs text-muted-foreground">
               <span>{formatFileSize(document.size)}</span>
               <span>•</span>
-              <span className="text-primary">
+              <span className={`px-1.5 py-0.5 rounded-full text-xs ${getCategoryColor(document.category)}`}>
                 {getCategoryLabel(document.category)}
               </span>
+              {document.version && (
+                <span className="px-1.5 py-0.5 rounded-full bg-secondary text-xs">
+                  v{document.version}
+                </span>
+              )}
             </div>
           </div>
         </div>
         <div className="flex gap-2">
+          {document.description && (
+            <HoverCard>
+              <HoverCardTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <Info size={16} />
+                </Button>
+              </HoverCardTrigger>
+              <HoverCardContent className="w-80">
+                <div>
+                  <h4 className="font-medium mb-1">Beschreibung</h4>
+                  <p className="text-sm text-muted-foreground">{document.description}</p>
+                </div>
+              </HoverCardContent>
+            </HoverCard>
+          )}
+          
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>

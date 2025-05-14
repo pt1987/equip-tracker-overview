@@ -8,5 +8,9 @@ export interface Document {
   uploadDate: string;
   category: "invoice" | "warranty" | "repair" | "manual" | "other";
   thumbnail?: string;
+  version?: number;
+  createdBy?: string;
+  description?: string;
+  tags?: string[];
   previewAvailable?: boolean;
 }
