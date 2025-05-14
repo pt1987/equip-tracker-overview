@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { 
@@ -66,6 +65,7 @@ const AssetFilters = ({
   employees,
   clearFilters
 }: AssetFiltersProps) => {
+  
   const toggleTypeFilter = (type: AssetType) => {
     if (selectedTypes.includes(type)) {
       setSelectedTypes(selectedTypes.filter(t => t !== type));
