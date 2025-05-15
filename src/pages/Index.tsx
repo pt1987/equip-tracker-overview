@@ -3,12 +3,15 @@ import { useEffect, useState } from "react";
 import PageTransition from "@/components/layout/PageTransition";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import BudgetUsageCard from "@/components/dashboard/BudgetUsageCard";
 import AssetDistributionChart from "@/components/dashboard/AssetDistributionChart";
 import AssetStatusCard from "@/components/dashboard/AssetStatusCard";
 import RecentAssetsList from "@/components/dashboard/RecentAssetsList";
 import RecentEmployeesList from "@/components/dashboard/RecentEmployeesList";
 import ExternalAssetsCard from "@/components/dashboard/ExternalAssetsCard";
+import WarrantyExpiryCard from "@/components/dashboard/WarrantyExpiryCard";
+import ExternalReturnsCard from "@/components/dashboard/ExternalReturnsCard";
+import StatusChangesCard from "@/components/dashboard/StatusChangesCard";
+import EmployeeChangesCard from "@/components/dashboard/EmployeeChangesCard";
 
 const IndexPage = () => {
   const {
@@ -38,10 +41,21 @@ const IndexPage = () => {
         <DashboardHeader dashboardStats={dashboardStats} />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <BudgetUsageCard dashboardStats={dashboardStats} />
-          <AssetDistributionChart assetTypeDistribution={assetTypeDistribution} />
+          <div className="col-span-1 lg:col-span-2">
+            <AssetDistributionChart assetTypeDistribution={assetTypeDistribution} />
+          </div>
         </div>
 
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <WarrantyExpiryCard />
+          <ExternalReturnsCard />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <StatusChangesCard />
+          <EmployeeChangesCard />
+        </div>
+        
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <AssetStatusCard assetStatusDistribution={assetStatusDistribution} />
           <RecentAssetsList recentAssets={recentAssets} />
