@@ -22,7 +22,7 @@ export const getAssetHistoryEntries = async (): Promise<AssetHistoryEntry[]> => 
       date: entry.date,
       action: entry.action as AssetHistoryAction,
       employeeId: entry.employee_id,
-      userId: entry.user_id || null, // Use user_id if it exists, otherwise null
+      userId: entry.user_id || null, // Handle potential missing user_id
       notes: entry.notes || ""
     }));
     
@@ -72,7 +72,7 @@ export const addAssetHistoryEntry = async (
       date: data.date,
       action: data.action as AssetHistoryAction,
       employeeId: data.employee_id,
-      userId: data.user_id || null, // Use user_id if it exists, otherwise null
+      userId: data.user_id || null, // Handle potential missing user_id
       notes: data.notes || ""
     };
   } catch (error) {
