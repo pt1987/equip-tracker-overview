@@ -4,14 +4,13 @@ import { Card } from "@/components/ui/card";
 
 interface DashboardWidgetProps {
   id: string;
-  title?: string;
   children: ReactNode;
   className?: string;
 }
 
-export default function DashboardWidget({ children, className = "" }: DashboardWidgetProps) {
+export default function DashboardWidget({ id, children, className = "" }: DashboardWidgetProps) {
   return (
-    <Card className={`h-full ${className}`}>
+    <Card key={id} className={`h-full overflow-hidden ${className}`}>
       {children}
     </Card>
   );

@@ -8,6 +8,11 @@
 .react-grid-item {
   transition: all 200ms ease;
   transition-property: left, top, width, height;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
 }
 
 .react-grid-item.cssTransforms {
@@ -46,6 +51,9 @@
   padding: 0 3px 3px 0;
   cursor: se-resize;
   opacity: 0;
+  background-image: url('data:image/svg+xml;utf8,<svg width="10" height="10" viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg"><path d="M10 0v10H0L10 0z" fill="rgba(0,0,0,0.2)"/></svg>');
+  background-position: bottom right;
+  background-repeat: no-repeat;
 }
 
 .react-grid-item:hover .react-resizable-handle {
