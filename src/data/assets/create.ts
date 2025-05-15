@@ -1,4 +1,5 @@
 
+
 import { Asset } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
 import { mapAssetToDbAsset, mapDbAssetToAsset } from "./mappers";
@@ -107,3 +108,4 @@ export const createAsset = async (asset: Asset): Promise<Asset> => {
     throw error;
   }
 };
+

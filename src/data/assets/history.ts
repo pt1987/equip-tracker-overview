@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Asset, AssetStatus, AssetHistoryAction, AssetHistoryEntry } from "@/lib/types";
 
@@ -21,7 +22,7 @@ export const getAssetHistoryEntries = async (): Promise<AssetHistoryEntry[]> => 
       date: entry.date,
       action: entry.action as AssetHistoryAction,
       employeeId: entry.employee_id,
-      userId: null, // Set to null by default since user_id doesn't exist in the response
+      userId: entry.user_id, // Include user_id in the mapped result
       notes: entry.notes || ""
     }));
     
@@ -36,7 +37,8 @@ export const addAssetHistoryEntry = async (
   assetId: string,
   action: AssetHistoryAction,
   employeeId: string | null,
-  notes: string
+  notes: string,
+  userId: string | null = null // Make userId optional with a default of null
 ): Promise<AssetHistoryEntry> => {
   try {
     const { data, error } = await supabase
@@ -47,6 +49,7 @@ export const addAssetHistoryEntry = async (
           date: new Date().toISOString(),
           action: action,
           employee_id: employeeId,
+          user_id: userId, // Add user_id to the insert
           notes: notes,
         },
       ])
@@ -64,7 +67,7 @@ export const addAssetHistoryEntry = async (
       date: data.date,
       action: data.action as AssetHistoryAction,
       employeeId: data.employee_id,
-      userId: null,
+      userId: data.user_id, // Include user_id in the return object
       notes: data.notes || ""
     };
   } catch (error) {

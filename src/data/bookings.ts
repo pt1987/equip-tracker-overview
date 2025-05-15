@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { AssetBooking, BookingReturnCondition, BookingStatus } from "@/lib/types";
 import { getEmployeeById } from "./employees";
