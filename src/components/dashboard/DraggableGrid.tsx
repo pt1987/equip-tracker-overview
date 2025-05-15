@@ -1,11 +1,12 @@
 
 import { useState, useEffect, ReactNode } from "react";
+import React from "react"; // Added React import for React.Children methods
 import { Responsive, WidthProvider, Layout } from "react-grid-layout";
 import { Button } from "@/components/ui/button";
 import { Save, RotateCcw, Move } from "lucide-react";
 import { useDashboardLayout, DashboardLayoutItem } from "@/hooks/useDashboardLayout";
 import "react-grid-layout/css/styles.css";
-import "react-resizable/css/styles.css";
+// Remove the problematic import: "react-resizable/css/styles.css"
 
 // Wrappen von Responsive mit dem WidthProvider für automatische Breitenberechnung
 const ResponsiveGridLayout = WidthProvider(Responsive);
