@@ -22,7 +22,7 @@ export const getAssetHistoryEntries = async (): Promise<AssetHistoryEntry[]> => 
       date: entry.date,
       action: entry.action as AssetHistoryAction,
       employeeId: entry.employee_id,
-      userId: entry.user_id, // Include user_id in the mapped result
+      userId: null, // Set to null since user_id doesn't exist in the response
       notes: entry.notes || ""
     }));
     
@@ -41,18 +41,23 @@ export const addAssetHistoryEntry = async (
   userId: string | null = null // Make userId optional with a default of null
 ): Promise<AssetHistoryEntry> => {
   try {
+    // Create the insert object and conditionally add user_id if it's provided
+    const insertData: any = {
+      asset_id: assetId,
+      date: new Date().toISOString(),
+      action: action,
+      employee_id: employeeId,
+      notes: notes,
+    };
+    
+    // Only add user_id to the insert if it's provided
+    if (userId !== null) {
+      insertData.user_id = userId;
+    }
+    
     const { data, error } = await supabase
       .from("asset_history")
-      .insert([
-        {
-          asset_id: assetId,
-          date: new Date().toISOString(),
-          action: action,
-          employee_id: employeeId,
-          user_id: userId, // Add user_id to the insert
-          notes: notes,
-        },
-      ])
+      .insert([insertData])
       .select()
       .single();
     
@@ -67,7 +72,7 @@ export const addAssetHistoryEntry = async (
       date: data.date,
       action: data.action as AssetHistoryAction,
       employeeId: data.employee_id,
-      userId: data.user_id, // Include user_id in the return object
+      userId: null, // Set to null since user_id doesn't exist in the response
       notes: data.notes || ""
     };
   } catch (error) {
