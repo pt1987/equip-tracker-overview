@@ -59,6 +59,10 @@ export const DashboardLayoutProvider = ({ children }: { children: ReactNode }) =
     try {
       localStorage.setItem(localStorageKey, JSON.stringify(newLayouts));
       setLayouts(newLayouts);
+      toast({
+        title: "Layout gespeichert",
+        description: "Das Dashboard-Layout wurde erfolgreich gespeichert.",
+      });
     } catch (error) {
       console.error("Fehler beim Speichern der Dashboard-Layouts:", error);
       toast({

@@ -1,6 +1,6 @@
 
 import { useState, useEffect, ReactNode } from "react";
-import React from "react"; // Added React import for React.Children methods
+import React from "react"; // Import für React.Children Methoden
 import { Responsive, WidthProvider, Layout } from "react-grid-layout";
 import { Button } from "@/components/ui/button";
 import { Save, RotateCcw, Move } from "lucide-react";
