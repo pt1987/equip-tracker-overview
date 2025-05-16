@@ -18,8 +18,6 @@ interface DashboardLayoutContextType {
   layouts: DashboardLayoutItem[];
   saveLayouts: (newLayouts: DashboardLayoutItem[]) => void;
   resetToDefaultLayout: () => void;
-  isEditMode: boolean;
-  toggleEditMode: () => void;
 }
 
 // Standard-Layout für die Dashboard-Kacheln
@@ -41,7 +39,6 @@ const DashboardLayoutContext = createContext<DashboardLayoutContextType | undefi
 
 export const DashboardLayoutProvider = ({ children }: { children: ReactNode }) => {
   const [layouts, setLayouts] = useState<DashboardLayoutItem[]>(defaultLayouts);
-  const [isEditMode, setIsEditMode] = useState(false);
 
   // Lade gespeicherte Layouts beim Initialisieren
   useEffect(() => {
@@ -61,7 +58,8 @@ export const DashboardLayoutProvider = ({ children }: { children: ReactNode }) =
       setLayouts(newLayouts);
       toast({
         title: "Layout gespeichert",
-        description: "Das Dashboard-Layout wurde erfolgreich gespeichert.",
+        description: "Das Dashboard-Layout wurde automatisch gespeichert.",
+        duration: 2000,
       });
     } catch (error) {
       console.error("Fehler beim Speichern der Dashboard-Layouts:", error);
@@ -82,28 +80,11 @@ export const DashboardLayoutProvider = ({ children }: { children: ReactNode }) =
     });
   };
 
-  const toggleEditMode = () => {
-    setIsEditMode(prev => !prev);
-    if (isEditMode) {
-      toast({
-        title: "Bearbeitungsmodus deaktiviert",
-        description: "Ihre Änderungen wurden gespeichert.",
-      });
-    } else {
-      toast({
-        title: "Bearbeitungsmodus aktiviert",
-        description: "Sie können jetzt die Dashboard-Kacheln verschieben und größen anpassen.",
-      });
-    }
-  };
-
   return (
     <DashboardLayoutContext.Provider value={{
       layouts,
       saveLayouts,
-      resetToDefaultLayout,
-      isEditMode,
-      toggleEditMode
+      resetToDefaultLayout
     }}>
       {children}
     </DashboardLayoutContext.Provider>

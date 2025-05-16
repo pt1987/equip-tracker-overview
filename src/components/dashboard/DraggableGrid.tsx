@@ -17,22 +17,29 @@ interface DraggableGridProps {
 }
 
 export default function DraggableGrid({ children, renderWidgetHeader }: DraggableGridProps) {
-  const { layouts: savedLayouts, saveLayouts, resetToDefaultLayout, isEditMode, toggleEditMode } = useDashboardLayout();
-  const [currentLayouts, setCurrentLayouts] = useState<{[key: string]: Layout[]}>(
-    { lg: savedLayouts } // "lg" ist der breakpoint name für große Displays
-  );
+  const { layouts: savedLayouts, saveLayouts, resetToDefaultLayout } = useDashboardLayout();
+  const [currentLayouts, setCurrentLayouts] = useState<{[key: string]: Layout[]}>({
+    lg: savedLayouts // "lg" ist der breakpoint name für große Displays
+  });
+  
+  // Automatisches Speichern nach einer kurzen Verzögerung
+  const [saveTimeout, setSaveTimeout] = useState<number | null>(null);
 
-  // Layout-Änderungen behandeln
+  // Layout-Änderungen behandeln mit automatischem Speichern
   const handleLayoutChange = (_layout: Layout[], allLayouts: {[key: string]: Layout[]}) => {
-    // Wir speichern hier nicht direkt, da das bei jedem kleinen Drag zu viel wäre
     setCurrentLayouts(allLayouts);
-  };
-
-  // Layout speichern
-  const handleSaveLayout = () => {
-    // Wir nehmen nur das "lg" Layout für die Einfachheit
-    const layoutToSave = currentLayouts.lg as DashboardLayoutItem[];
-    saveLayouts(layoutToSave);
+    
+    // Verzögertes Speichern implementieren
+    if (saveTimeout) {
+      window.clearTimeout(saveTimeout);
+    }
+    
+    const timeoutId = window.setTimeout(() => {
+      const layoutToSave = allLayouts.lg as DashboardLayoutItem[];
+      saveLayouts(layoutToSave);
+    }, 1000); // 1 Sekunde nach der letzten Änderung speichern
+    
+    setSaveTimeout(timeoutId);
   };
 
   // Child-Elemente mit Wrapper für Drag-Handles versehen
@@ -44,13 +51,11 @@ export default function DraggableGrid({ children, renderWidgetHeader }: Draggabl
     
     return (
       <div key={widgetId} className="widget-container h-full">
-        <div className={`widget-header flex justify-between items-center p-2 ${isEditMode ? 'bg-primary/10 cursor-move' : ''}`}>
+        <div className="widget-header flex justify-between items-center p-2 bg-primary/10 cursor-move">
           {renderWidgetHeader(widgetId)}
-          {isEditMode && (
-            <div className="text-xs text-muted-foreground">
-              <Move className="h-4 w-4 inline-block mr-1" /> Ziehen zum Verschieben
-            </div>
-          )}
+          <div className="text-xs text-muted-foreground">
+            <Move className="h-4 w-4 inline-block mr-1" /> Ziehen zum Verschieben
+          </div>
         </div>
         <div className="widget-content h-[calc(100%-40px)] overflow-auto">
           {child}
@@ -61,35 +66,16 @@ export default function DraggableGrid({ children, renderWidgetHeader }: Draggabl
 
   return (
     <div className="relative">
-      {/* Layout-Steuerungselemente */}
-      <div className="flex gap-2 mb-4 justify-end">
+      {/* Nur den Reset-Button anzeigen */}
+      <div className="flex mb-4 justify-end">
         <Button
           size="sm"
-          variant={isEditMode ? "default" : "outline"}
-          onClick={toggleEditMode}
+          variant="outline"
+          onClick={resetToDefaultLayout}
         >
-          {isEditMode ? "Bearbeitung beenden" : "Dashboard anpassen"}
+          <RotateCcw className="h-4 w-4 mr-2" />
+          Standard-Layout
         </Button>
-        
-        {isEditMode && (
-          <>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={resetToDefaultLayout}
-            >
-              <RotateCcw className="h-4 w-4 mr-2" />
-              Standard
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleSaveLayout}
-            >
-              <Save className="h-4 w-4 mr-2" />
-              Speichern
-            </Button>
-          </>
-        )}
       </div>
       
       {/* Draggable Grid */}
@@ -100,8 +86,8 @@ export default function DraggableGrid({ children, renderWidgetHeader }: Draggabl
         rowHeight={50}
         layouts={currentLayouts}
         onLayoutChange={handleLayoutChange}
-        isDraggable={isEditMode}
-        isResizable={isEditMode}
+        isDraggable={true}
+        isResizable={true}
         margin={[16, 16]}
         containerPadding={[0, 0]}
       >
