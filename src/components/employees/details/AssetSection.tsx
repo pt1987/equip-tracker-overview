@@ -47,6 +47,16 @@ import {
   KeyboardIcon,
 } from "lucide-react";
 
+// Define German translations for asset types
+const assetTypeTranslations: Record<string, string> = {
+  laptop: "Laptop",
+  smartphone: "Smartphone",
+  tablet: "Tablet",
+  mouse: "Maus",
+  keyboard: "Tastatur",
+  accessory: "Zubehör"
+};
+
 export default function AssetSection({ assets }: AssetSectionProps) {
   const [assetView, setAssetView] = useState<"grid" | "list">("grid");
   const [expandedTypes, setExpandedTypes] = useState<Record<string, boolean>>({});
@@ -80,7 +90,7 @@ export default function AssetSection({ assets }: AssetSectionProps) {
         </div>
         <div className="flex items-center gap-4">
           <div className="text-sm font-medium hidden md:block">
-            Total value: <span className="text-primary">{formatCurrency(assets.reduce((sum, asset) => sum + asset.price, 0))}</span>
+            Gesamtwert: <span className="text-primary">{formatCurrency(assets.reduce((sum, asset) => sum + asset.price, 0))}</span>
           </div>
           <ViewToggle view={assetView} onViewChange={setAssetView} />
         </div>
@@ -92,7 +102,7 @@ export default function AssetSection({ assets }: AssetSectionProps) {
             <div key={type}>
               <div className="flex items-center gap-2 mb-4 pb-2 border-b border-border">
                 <AssetTypeIcon type={type as Asset["type"]} />
-                <h3 className="font-medium">{type.charAt(0).toUpperCase() + type.slice(1)}s</h3>
+                <h3 className="font-medium">{assetTypeTranslations[type] || type}s</h3>
                 <span className="ml-2 text-sm text-muted-foreground">
                   ({typeAssets.length})
                 </span>
@@ -178,9 +188,9 @@ export default function AssetSection({ assets }: AssetSectionProps) {
           <div className="mx-auto w-16 h-16 mb-4 rounded-full bg-muted flex items-center justify-center">
             <PackageIcon size={24} className="text-muted-foreground" />
           </div>
-          <h3 className="text-lg font-medium mb-2">No assets assigned</h3>
+          <h3 className="text-lg font-medium mb-2">Keine Assets zugewiesen</h3>
           <p className="text-muted-foreground">
-            This employee doesn't have any assets assigned yet.
+            Diesem Mitarbeiter sind noch keine Assets zugewiesen.
           </p>
         </div>
       )}
