@@ -1,0 +1,51 @@
+
+import { useState } from "react";
+import { QrCode } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import QRCode from "@/components/shared/QRCode";
+
+interface QRCodeDialogProps {
+  currentUrl: string;
+}
+
+export default function QRCodeDialog({ currentUrl }: QRCodeDialogProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button 
+          variant="ghost" 
+          size="icon"
+          className="h-8 w-8 rounded-full bg-primary/5 hover:bg-primary/10"
+        >
+          <QrCode className="h-4 w-4" />
+          <span className="sr-only">QR-Code anzeigen</span>
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Mitarbeiter QR-Code</DialogTitle>
+          <DialogDescription>
+            Scannen Sie diesen Code, um schnell auf die Mitarbeiterdetails zuzugreifen
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex items-center justify-center p-6">
+          <QRCode 
+            value={currentUrl}
+            size={200}
+            title="Mitarbeiter QR-Code"
+          />
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
