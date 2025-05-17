@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -45,18 +44,20 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const { login, signup, isAuthenticated, loading: authLoading } = useAuth();
 
   // Log authentication state for debugging
-  console.log("Login page - Auth state:", { isAuthenticated, authLoading });
+  console.log("Login page - Auth state:", { isAuthenticated, authLoading, currentPath: location.pathname });
 
   // Weiterleitung zum Dashboard, falls bereits authentifiziert
   useEffect(() => {
     console.log("Login page - Checking auth state for redirect:", { isAuthenticated, authLoading });
+    // Only redirect if auth is initialized and user is authenticated
     if (!authLoading && isAuthenticated) {
       console.log("Login page - User is authenticated, redirecting to dashboard");
-      navigate("/dashboard");
+      navigate("/dashboard", { replace: true });
     }
   }, [isAuthenticated, authLoading, navigate]);
 
@@ -93,9 +94,6 @@ export default function Login() {
           title: "Erfolgreich angemeldet",
           description: "Willkommen im Asset-Tracker.",
         });
-        
-        // Explizite Weiterleitung zum Dashboard
-        navigate("/dashboard");
       } else {
         toast({
           variant: "destructive",

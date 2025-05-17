@@ -1,6 +1,6 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Session, User } from "@supabase/supabase-js";
@@ -36,7 +36,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+  const [authInitialized, setAuthInitialized] = useState(false);
 
   const fetchUserProfileData = async (userId: string, userEmail: string | null, userName: string | null = null) => {
     try {
@@ -137,15 +139,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               );
               setUser(userData);
               setLoading(false);
+              setAuthInitialized(true);
             } catch (err) {
               console.error("Error in auth state change handler:", err);
               setLoading(false);
+              setAuthInitialized(true);
             }
           }, 0);
         } else {
           console.log("No authenticated user.");
           setUser(null);
           setLoading(false);
+          setAuthInitialized(true);
         }
       }
     );
@@ -173,14 +178,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             console.error("Error in session check:", err);
           } finally {
             setLoading(false);
+            setAuthInitialized(true);
           }
         }, 0);
       } else {
         setLoading(false);
+        setAuthInitialized(true);
       }
     }).catch(error => {
       console.error("Error checking session:", error);
       setLoading(false);
+      setAuthInitialized(true);
     });
 
     const cleanup = setupInactivityTimeout();
@@ -253,7 +261,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       console.log("Login successful, session:", data.session ? "exists" : "null");
       
-      // The state will be updated by the onAuthStateChange listener
+      // Manual navigation to dashboard after successful login
+      if (data.session) {
+        console.log("Login successful - redirecting to dashboard");
+        navigate("/dashboard");
+      }
+      
       return true;
     } catch (error: any) {
       console.error("Login error:", error);
@@ -341,7 +354,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       role: user.role, 
       permissions: user.permissions,
       hasEmployeeData: !!user.employeeData 
-    } : null
+    } : null,
+    authInitialized,
+    currentPath: location.pathname
   });
 
   return (
@@ -362,19 +377,21 @@ export const useAuth = () => {
 export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const { isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   
   useEffect(() => {
-    if (!loading && !isAuthenticated) {
+    // Prevent redirect loops by checking current path
+    if (!loading && !isAuthenticated && location.pathname !== "/login") {
       console.log("User not authenticated, redirecting to login");
       navigate("/login");
     }
-  }, [isAuthenticated, loading, navigate]);
+  }, [isAuthenticated, loading, navigate, location]);
   
   if (loading) {
     return <div className="flex justify-center items-center h-screen">Laden...</div>;
   }
   
-  return isAuthenticated ? <>{children}</> : null;
+  return isAuthenticated || location.pathname === "/login" ? <>{children}</> : null;
 };
 
 // Add this function to the existing file to get the current user ID

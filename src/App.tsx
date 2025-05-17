@@ -69,6 +69,8 @@ const queryClient = new QueryClient({
 const AppContent = () => {
   const isMobile = useIsMobile();
   
+  console.log("Rendering AppContent component");
+  
   return (
     <div className="relative min-h-screen">
       <Toaster />
@@ -77,6 +79,10 @@ const AppContent = () => {
         <Routes>
           {/* Landing Page Route */}
           <Route path="/" element={<LandingPage />} />
+          
+          {/* Auth Routes - Not protected */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           
           {/* Admin Routes with Admin Layout */}
           <Route 
@@ -97,10 +103,6 @@ const AppContent = () => {
             } 
           />
 
-          {/* Auth Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-
           {/* Main App Routes with Navbar */}
           <Route
             path="/*"
@@ -114,6 +116,8 @@ const AppContent = () => {
                         <Dashboard />
                       </ProtectedRoute>
                     } />
+                    
+                    {/* Keep other protected routes */}
                     <Route path="/assets" element={
                       <ProtectedRoute>
                         <Assets />
@@ -298,18 +302,22 @@ const AppContent = () => {
   );
 };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <ThemeProvider>
-        <BrowserRouter>
-          <AuthProvider>
-            <AppContent />
-          </AuthProvider>
-        </BrowserRouter>
-      </ThemeProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  console.log("Rendering App component - initializing providers");
+  
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <ThemeProvider>
+          <BrowserRouter>
+            <AuthProvider>
+              <AppContent />
+            </AuthProvider>
+          </BrowserRouter>
+        </ThemeProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

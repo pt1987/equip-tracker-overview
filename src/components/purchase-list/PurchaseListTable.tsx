@@ -25,7 +25,11 @@ const PurchaseListTable = memo(({ items, isLoading, error, onRefresh }: Purchase
   // Ensure refresh callback is properly wrapped and logs debug info
   const handleRefresh = useCallback(() => {
     console.log("Refreshing purchase list data");
-    onRefresh();
+    if (onRefresh && typeof onRefresh === 'function') {
+      onRefresh();
+    } else {
+      console.error("onRefresh is not a function or not provided");
+    }
   }, [onRefresh]);
 
   return (
