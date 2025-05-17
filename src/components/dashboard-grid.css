@@ -1,0 +1,58 @@
+
+.dashboard-grid-item {
+  transition: background 0.2s ease;
+}
+
+.react-grid-item.react-grid-placeholder {
+  background: var(--primary);
+  opacity: 0.2;
+  border-radius: 0.5rem;
+  transition-duration: 100ms;
+  z-index: 2;
+  user-select: none;
+}
+
+.dashboard-item-content {
+  height: 100%;
+  position: relative;
+  border-radius: 0.5rem;
+}
+
+.dashboard-item-content > div {
+  height: 100%;
+}
+
+.dashboard-item-drag-handle {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 26px;
+  height: 26px;
+  background-color: var(--muted);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  z-index: 10;
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+.dashboard-item-drag-handle:hover {
+  opacity: 1;
+}
+
+.react-grid-item > .react-resizable-handle {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  bottom: 0;
+  right: 0;
+  background-position: bottom right;
+  padding: 0 3px 3px 0;
+  background-repeat: no-repeat;
+  background-origin: content-box;
+  box-sizing: border-box;
+  cursor: se-resize;
+}
