@@ -45,6 +45,15 @@ import WarrantyDefects from "./pages/reports/WarrantyDefects";
 import FixedAssets from "./pages/reports/FixedAssets";
 import EmployeeBudget from "./pages/reports/EmployeeBudget";
 import VendorAnalysis from "./pages/reports/VendorAnalysis";
+import AssetLifecycle from "./pages/reports/AssetLifecycle";
+import MaintenanceCost from "./pages/reports/MaintenanceCost";
+import SoftwareLicense from "./pages/reports/SoftwareLicense";
+import DepartmentAssets from "./pages/reports/DepartmentAssets";
+import AssetUtilization from "./pages/reports/AssetUtilization";
+import ReplacementPlanning from "./pages/reports/ReplacementPlanning";
+import CarbonFootprint from "./pages/reports/CarbonFootprint";
+import ROII from "./pages/reports/ROII";
+import VendorComparison from "./pages/reports/VendorComparison";
 
 import "./styles/landing.css";
 import "./styles/compatibility.css";
@@ -116,6 +125,17 @@ const AppContent = () => {
                     <Route path="/reporting/fixed-assets" element={<FixedAssets />} />
                     <Route path="/reporting/employee-budget" element={<EmployeeBudget />} />
                     <Route path="/reporting/vendor-analysis" element={<VendorAnalysis />} />
+                    
+                    {/* Add missing report routes */}
+                    <Route path="/reporting/asset-lifecycle" element={<AssetLifecycle />} />
+                    <Route path="/reporting/maintenance-cost" element={<MaintenanceCost />} />
+                    <Route path="/reporting/software-license" element={<SoftwareLicense />} />
+                    <Route path="/reporting/department-assets" element={<DepartmentAssets />} />
+                    <Route path="/reporting/asset-utilization" element={<AssetUtilization />} />
+                    <Route path="/reporting/replacement-planning" element={<ReplacementPlanning />} />
+                    <Route path="/reporting/carbon-footprint" element={<CarbonFootprint />} />
+                    <Route path="/reporting/roii" element={<ROII />} />
+                    <Route path="/reporting/vendor-comparison" element={<VendorComparison />} />
                     
                     <Route path="/depreciation" element={<Depreciation />} />
                     <Route path="/damage-management" element={<DamageManagement />} />

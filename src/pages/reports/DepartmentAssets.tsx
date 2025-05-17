@@ -45,7 +45,7 @@ export default function DepartmentAssets() {
                 <span>Abteilungsübersicht</span>
               </h1>
               <p className="text-muted-foreground">
-                Analyse der Asset-Verteilung nach Abteilungen und Teams
+                Analyse der Asset-Verteilung und -Nutzung nach Abteilungen
               </p>
             </div>
             
@@ -71,8 +71,8 @@ export default function DepartmentAssets() {
           
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">
-              <CardTitle>Asset-Verteilung nach Abteilungen</CardTitle>
-              <CardDescription>Übersicht über die Verteilung und Nutzung von Assets in verschiedenen Abteilungen</CardDescription>
+              <CardTitle>Abteilungsübersicht</CardTitle>
+              <CardDescription>Verteilung und Nutzung von Assets nach Abteilungen und Mitarbeitern</CardDescription>
               <div className="pt-4">
                 <DateRangeFilter value={dateRange} onChange={setDateRange} />
               </div>

@@ -45,7 +45,7 @@ export default function ReplacementPlanning() {
                 <span>Ersatzplanung</span>
               </h1>
               <p className="text-muted-foreground">
-                Prognose und Planung für den Ersatz von Assets
+                Planung und Analyse für den Austausch und die Erneuerung von Assets
               </p>
             </div>
             
@@ -71,8 +71,8 @@ export default function ReplacementPlanning() {
           
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">
-              <CardTitle>Ersatzplanungsanalyse</CardTitle>
-              <CardDescription>Prognose und Planung für den Ersatz alternder und veralteter Assets</CardDescription>
+              <CardTitle>Ersatzplanung</CardTitle>
+              <CardDescription>Analyse und Planung für den Austausch von Assets nach Alter und Zustand</CardDescription>
               <div className="pt-4">
                 <DateRangeFilter value={dateRange} onChange={setDateRange} />
               </div>

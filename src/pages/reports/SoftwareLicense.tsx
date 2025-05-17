@@ -45,7 +45,7 @@ export default function SoftwareLicense() {
                 <span>Software-Lizenzen</span>
               </h1>
               <p className="text-muted-foreground">
-                Übersicht und Compliance-Analyse der Software-Lizenzen
+                Übersicht und Analyse von Software-Lizenzen und Abonnements
               </p>
             </div>
             
@@ -71,8 +71,8 @@ export default function SoftwareLicense() {
           
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">
-              <CardTitle>Software-Lizenz Management</CardTitle>
-              <CardDescription>Übersicht über Software-Lizenzen, Zuweisungen und Compliance</CardDescription>
+              <CardTitle>Software-Lizenz Übersicht</CardTitle>
+              <CardDescription>Analyse der Software-Lizenzen und Abonnements nach Typ und Kosten</CardDescription>
               <div className="pt-4">
                 <DateRangeFilter value={dateRange} onChange={setDateRange} />
               </div>

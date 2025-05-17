@@ -45,7 +45,7 @@ export default function VendorComparison() {
                 <span>Anbietervergleich</span>
               </h1>
               <p className="text-muted-foreground">
-                Vergleichende Analyse der Zuverlässigkeit, Kosten und Service verschiedener Anbieter
+                Vergleichende Analyse von Anbietern und Herstellern nach verschiedenen Kriterien
               </p>
             </div>
             
@@ -72,7 +72,7 @@ export default function VendorComparison() {
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">
               <CardTitle>Anbietervergleich</CardTitle>
-              <CardDescription>Vergleichende Analyse der Zuverlässigkeit, Kosten und Service verschiedener Anbieter</CardDescription>
+              <CardDescription>Vergleichende Analyse von Anbietern und Herstellern nach Preis, Qualität und Service</CardDescription>
               <div className="pt-4">
                 <DateRangeFilter value={dateRange} onChange={setDateRange} />
               </div>

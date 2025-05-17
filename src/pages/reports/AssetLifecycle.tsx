@@ -45,7 +45,7 @@ export default function AssetLifecycle() {
                 <span>Asset-Lebenszyklus</span>
               </h1>
               <p className="text-muted-foreground">
-                Analyse des vollständigen Lebenszyklus von Assets
+                Analyse des Lebenszyklus von Assets von der Anschaffung bis zur Ausmusterung
               </p>
             </div>
             
@@ -72,7 +72,7 @@ export default function AssetLifecycle() {
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">
               <CardTitle>Asset-Lebenszyklus Analyse</CardTitle>
-              <CardDescription>Durchschnittliche Lebensdauer und Lebensphasen nach Asset-Kategorie</CardDescription>
+              <CardDescription>Detaillierte Analyse des Asset-Lebenszyklus nach Kategorien</CardDescription>
               <div className="pt-4">
                 <DateRangeFilter value={dateRange} onChange={setDateRange} />
               </div>

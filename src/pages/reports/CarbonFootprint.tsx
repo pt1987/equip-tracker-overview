@@ -45,7 +45,7 @@ export default function CarbonFootprint() {
                 <span>CO2-Fußabdruck</span>
               </h1>
               <p className="text-muted-foreground">
-                Umweltauswirkungsanalyse der IT-Infrastruktur
+                Analyse des Umwelteinflusses und CO2-Fußabdrucks der IT-Assets
               </p>
             </div>
             
@@ -72,7 +72,7 @@ export default function CarbonFootprint() {
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">
               <CardTitle>CO2-Fußabdruck Analyse</CardTitle>
-              <CardDescription>Umweltauswirkungen und Nachhaltigkeitsbewertung der IT-Infrastruktur</CardDescription>
+              <CardDescription>Umweltauswirkungen und Nachhaltigkeitsanalyse der IT-Assets</CardDescription>
               <div className="pt-4">
                 <DateRangeFilter value={dateRange} onChange={setDateRange} />
               </div>

@@ -45,7 +45,7 @@ export default function ROII() {
                 <span>IT-Investitionsrendite</span>
               </h1>
               <p className="text-muted-foreground">
-                Analyse des geschäftlichen Werts und der Rendite von IT-Investitionen
+                Analyse der Rendite von IT-Investitionen und deren geschäftlicher Wert
               </p>
             </div>
             
@@ -71,8 +71,8 @@ export default function ROII() {
           
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">
-              <CardTitle>IT-Investitionsrendite (ROII)</CardTitle>
-              <CardDescription>Analyse des geschäftlichen Werts und Return on Investment der IT-Infrastruktur</CardDescription>
+              <CardTitle>IT-Investitionsrendite</CardTitle>
+              <CardDescription>Detaillierte Analyse der Rendite von IT-Investitionen und deren geschäftlicher Wert</CardDescription>
               <div className="pt-4">
                 <DateRangeFilter value={dateRange} onChange={setDateRange} />
               </div>

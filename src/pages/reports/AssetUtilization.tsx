@@ -45,7 +45,7 @@ export default function AssetUtilization() {
                 <span>Asset-Auslastung</span>
               </h1>
               <p className="text-muted-foreground">
-                Analyse der Nutzungsraten und Effizienz von Pool-Geräten
+                Analyse der Auslastung von Assets nach Kategorie und Zeitraum
               </p>
             </div>
             
@@ -71,8 +71,8 @@ export default function AssetUtilization() {
           
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">
-              <CardTitle>Asset-Auslastungsanalyse</CardTitle>
-              <CardDescription>Nutzungsraten und Effizienzanalyse von Pool-Geräten</CardDescription>
+              <CardTitle>Asset-Auslastung Analyse</CardTitle>
+              <CardDescription>Detaillierte Analyse der Nutzungszeit und Verfügbarkeit von Assets</CardDescription>
               <div className="pt-4">
                 <DateRangeFilter value={dateRange} onChange={setDateRange} />
               </div>
