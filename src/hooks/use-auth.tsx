@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -116,14 +117,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     console.log("Setting up auth state listener");
     
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
         console.log(`Auth state changed. Event: ${event}. Session: ${currentSession ? 'exists' : 'null'}`);
+        
         setSession(currentSession);
         
         if (currentSession?.user) {
           console.log("User is authenticated. Fetching profile data.");
           
+          // Defer Supabase calls with setTimeout to avoid deadlock
           setTimeout(async () => {
             try {
               const userData = await fetchUserProfileData(
@@ -148,6 +152,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     console.log("Checking for existing session");
     
+    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       console.log("Initial session check:", currentSession ? 'Session exists' : 'No session');
       setSession(currentSession);
@@ -155,6 +160,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (currentSession?.user) {
         console.log("User is logged in, fetching profile data");
         
+        // Defer Supabase calls with setTimeout to avoid deadlock
         setTimeout(async () => {
           try {
             const userData = await fetchUserProfileData(
@@ -247,6 +253,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       console.log("Login successful, session:", data.session ? "exists" : "null");
       
+      // The state will be updated by the onAuthStateChange listener
       return true;
     } catch (error: any) {
       console.error("Login error:", error);

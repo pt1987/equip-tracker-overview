@@ -56,7 +56,7 @@ export default function Login() {
     console.log("Login page - Checking auth state for redirect:", { isAuthenticated, authLoading });
     if (!authLoading && isAuthenticated) {
       console.log("Login page - User is authenticated, redirecting to dashboard");
-      navigate("/");
+      navigate("/dashboard");
     }
   }, [isAuthenticated, authLoading, navigate]);
 
@@ -94,7 +94,8 @@ export default function Login() {
           description: "Willkommen im Asset-Tracker.",
         });
         
-        // The redirect will happen in the useEffect when isAuthenticated updates
+        // Explizite Weiterleitung zum Dashboard
+        navigate("/dashboard");
       } else {
         toast({
           variant: "destructive",

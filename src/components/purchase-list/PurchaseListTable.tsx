@@ -22,7 +22,7 @@ const PurchaseListTable = memo(({ items, isLoading, error, onRefresh }: Purchase
     setSelectedItem(null);
   }, []);
 
-  // Ensure refresh callback is properly wrapped
+  // Ensure refresh callback is properly wrapped and logs debug info
   const handleRefresh = useCallback(() => {
     console.log("Refreshing purchase list data");
     onRefresh();
