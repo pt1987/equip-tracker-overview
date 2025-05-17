@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
-import { toast } from '@/components/ui/use-toast';
 import { GripVertical } from 'lucide-react';
 import 'react-grid-layout/css/styles.css';
 import '../dashboard-grid.css';
@@ -21,8 +20,6 @@ interface DraggableGridProps {
 const DraggableGrid = ({ items }: DraggableGridProps) => {
   const [layout, setLayout] = useState<Record<string, any>>({});
   const [mounted, setMounted] = useState(false);
-  // Add debounce timer ref to prevent multiple toasts
-  const saveTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
   // Load saved layout from localStorage
   useEffect(() => {
@@ -72,24 +69,8 @@ const DraggableGrid = ({ items }: DraggableGridProps) => {
   };
 
   const handleLayoutChange = (currentLayout: any, allLayouts: any) => {
-    // Save the layout to localStorage
+    // Save the layout to localStorage without showing any toast
     localStorage.setItem('dashboardLayout', JSON.stringify(allLayouts));
-    
-    // Clear previous timeout to prevent multiple toasts
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-    
-    // Only show toast once after 500ms of inactivity
-    saveTimeoutRef.current = setTimeout(() => {
-      toast({
-        title: "Layout gespeichert",
-        description: "Das Dashboard-Layout wurde automatisch gespeichert.",
-        duration: 2000
-      });
-      // Clear the timeout reference
-      saveTimeoutRef.current = null;
-    }, 2000);
   };
 
   return (
