@@ -1,17 +1,25 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getEmployees } from '@/data/employees';
+import { getAssets } from '@/data/assets';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { formatCurrency } from '@/lib/utils';
-import { Employee } from '@/lib/types';
+import { Employee, Asset } from '@/lib/types';
 import { Search } from 'lucide-react';
+import { DateRange } from 'react-day-picker';
 
-const EmployeeBudgetReport = () => {
+interface EmployeeBudgetReportProps {
+  dateRange?: DateRange;
+}
+
+const EmployeeBudgetReport = ({ dateRange }: EmployeeBudgetReportProps) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
   
-  const { data: employees = [], isLoading } = useQuery({
+  // Fetch both employees and assets
+  const { data: employees = [], isLoading: isLoadingEmployees } = useQuery({
     queryKey: ['employees'],
     queryFn: getEmployees,
     meta: {
@@ -21,18 +29,60 @@ const EmployeeBudgetReport = () => {
     }
   });
   
-  // Filter employees by search query
-  const filteredEmployees = employees.filter((employee: Employee) => {
-    const fullName = `${employee.firstName} ${employee.lastName}`.toLowerCase();
-    return fullName.includes(searchQuery.toLowerCase()) || 
-           employee.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
-           employee.cluster.toLowerCase().includes(searchQuery.toLowerCase());
+  const { data: assets = [], isLoading: isLoadingAssets } = useQuery({
+    queryKey: ['assets'],
+    queryFn: getAssets,
+    meta: {
+      onError: () => {
+        console.error('Failed to fetch asset data');
+      }
+    }
   });
   
-  // Sort employees by last name
-  const sortedEmployees = [...filteredEmployees].sort((a, b) => 
-    a.lastName.localeCompare(b.lastName)
-  );
+  useEffect(() => {
+    if (!isLoadingEmployees && !isLoadingAssets && employees.length > 0) {
+      // Filter assets by date range if provided
+      const filteredAssets = dateRange && (dateRange.from || dateRange.to)
+        ? assets.filter(asset => {
+            const purchaseDate = new Date(asset.purchaseDate);
+            if (dateRange.from && dateRange.to) {
+              return purchaseDate >= dateRange.from && purchaseDate <= dateRange.to;
+            } else if (dateRange.from) {
+              return purchaseDate >= dateRange.from;
+            } else if (dateRange.to) {
+              return purchaseDate <= dateRange.to;
+            }
+            return true;
+          })
+        : assets;
+      
+      // Calculate used budget based on filtered assets
+      const employeesWithFilteredBudget = employees.map(employee => {
+        const employeeAssets = filteredAssets.filter(asset => asset.employeeId === employee.id);
+        const usedBudget = employeeAssets.reduce((sum, asset) => sum + asset.price, 0);
+        
+        return {
+          ...employee,
+          usedBudget: usedBudget
+        };
+      });
+      
+      // Filter employees by search query
+      const filtered = employeesWithFilteredBudget.filter((employee: Employee) => {
+        const fullName = `${employee.firstName} ${employee.lastName}`.toLowerCase();
+        return fullName.includes(searchQuery.toLowerCase()) || 
+              employee.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              employee.cluster.toLowerCase().includes(searchQuery.toLowerCase());
+      });
+      
+      // Sort employees by last name
+      const sorted = [...filtered].sort((a, b) => 
+        a.lastName.localeCompare(b.lastName)
+      );
+      
+      setFilteredEmployees(sorted);
+    }
+  }, [employees, assets, searchQuery, dateRange, isLoadingEmployees, isLoadingAssets]);
 
   // Calculate remaining budget for each employee
   const calculateRemainingBudget = (budget: number, usedBudget: number) => {
@@ -45,7 +95,7 @@ const EmployeeBudgetReport = () => {
     return Math.min(100, Math.round((usedBudget / budget) * 100));
   };
 
-  if (isLoading) {
+  if (isLoadingEmployees || isLoadingAssets) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-muted-foreground">Lade Mitarbeiterdaten...</div>
@@ -79,8 +129,8 @@ const EmployeeBudgetReport = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sortedEmployees.length > 0 ? (
-              sortedEmployees.map((employee) => {
+            {filteredEmployees.length > 0 ? (
+              filteredEmployees.map((employee) => {
                 const remainingBudget = calculateRemainingBudget(employee.budget, employee.usedBudget);
                 const budgetPercentage = calculateBudgetPercentage(employee.budget, employee.usedBudget);
                 
@@ -120,7 +170,7 @@ const EmployeeBudgetReport = () => {
       </div>
       
       <div className="text-xs text-muted-foreground">
-        Insgesamt {sortedEmployees.length} Mitarbeiter angezeigt
+        Insgesamt {filteredEmployees.length} Mitarbeiter angezeigt
       </div>
     </div>
   );

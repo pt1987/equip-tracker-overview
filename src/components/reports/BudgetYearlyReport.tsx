@@ -1,123 +1,38 @@
+
 import { useEffect, useState } from "react";
-import ReactECharts from "echarts-for-react";
 import { getYearlyBudgetReport } from "@/data/reports";
-import { formatCurrency } from "@/lib/utils";
-import { getCommonOptions, getAxisOptions, getColorOptions, gradients, formatters } from "@/lib/echarts-theme";
 import { YearlyBudgetReport } from "@/lib/types";
+import ReactECharts from "echarts-for-react";
+import { formatCurrency } from "@/lib/utils";
+import { DateRange } from "react-day-picker";
+import { getCommonOptions } from "@/lib/echarts-theme";
 import * as echarts from 'echarts';
 
-export default function BudgetYearlyReport() {
-  const [budgetData, setBudgetData] = useState<YearlyBudgetReport[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+interface BudgetYearlyReportProps {
+  dateRange?: DateRange;
+}
 
+export default function BudgetYearlyReport({ dateRange }: BudgetYearlyReportProps) {
+  const [data, setData] = useState<YearlyBudgetReport[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const data = await getYearlyBudgetReport();
-        setBudgetData(Array.isArray(data) ? data : []);
+        const budgetData = await getYearlyBudgetReport(dateRange);
+        setData(budgetData);
       } catch (error) {
         console.error("Error fetching budget data:", error);
-        setBudgetData([]);
+        setData([]);
       } finally {
         setIsLoading(false);
       }
     };
     
     fetchData();
-  }, []);
-
-  // Calculate average spend for reference line
-  const averageSpend = budgetData.length > 0
-    ? budgetData.reduce((sum, item) => sum + item.totalSpent, 0) / budgetData.length
-    : 0;
-
-  // ECharts option
-  const getOption = (): echarts.EChartsOption => {
-    const options: echarts.EChartsOption = {
-      ...getCommonOptions(),
-      ...getColorOptions(['primary']),
-      ...getAxisOptions(),
-      tooltip: {
-        trigger: 'axis',
-        formatter: (params: any) => {
-          const data = params[0].data;
-          return `
-            <div class="font-medium mb-1">Jahr: ${params[0].name}</div>
-            <div>Gesamtausgaben: ${formatters.currency(data)}</div>
-            ${averageSpend > 0 ? 
-              `<div class="mt-1">
-                ${data > averageSpend 
-                  ? `<span class="text-green-500">+${((data / averageSpend - 1) * 100).toFixed(1)}%</span> über dem Durchschnitt` 
-                  : `<span class="text-red-500">-${((1 - data / averageSpend) * 100).toFixed(1)}%</span> unter dem Durchschnitt`}
-              </div>` 
-              : ''
-            }
-          `;
-        },
-      },
-      xAxis: {
-        type: 'category',
-        data: budgetData.map(item => item.year),
-        axisLabel: {
-          fontSize: 11,
-          interval: 0,
-        },
-      },
-      yAxis: {
-        type: 'value',
-        axisLabel: {
-          formatter: (value: number) => formatters.currency(value),
-        },
-      },
-      series: [
-        {
-          name: 'Budget Ausgaben',
-          type: 'bar',
-          data: budgetData.map(item => item.totalSpent),
-          itemStyle: {
-            borderRadius: [6, 6, 0, 0],
-            color: {
-              type: 'linear',
-              x: 0,
-              y: 0,
-              x2: 0,
-              y2: 1,
-              colorStops: gradients.blue,
-            },
-          },
-          emphasis: {
-            itemStyle: {
-              shadowBlur: 10,
-              shadowColor: 'rgba(0, 0, 0, 0.2)',
-            }
-          },
-          barWidth: '60%',
-          animationDelay: (idx: number) => idx * 100,
-        }
-      ],
-      markLine: {
-        symbol: ['none', 'none'],
-        label: {
-          formatter: 'Durchschnitt',
-          position: 'start'
-        },
-        lineStyle: {
-          type: 'dashed',
-          color: '#888',
-        },
-        data: [
-          { 
-            type: 'value', 
-            yAxis: averageSpend,
-          }
-        ]
-      },
-    };
-    
-    return options;
-  };
-
+  }, [dateRange]);
+  
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -125,61 +40,121 @@ export default function BudgetYearlyReport() {
       </div>
     );
   }
-
-  if (budgetData.length === 0) {
+  
+  if (data.length === 0) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">No budget data available.</div>
+        <div className="text-muted-foreground">No budget data available for the selected period.</div>
       </div>
     );
   }
+  
+  const chartOption: echarts.EChartsOption = {
+    ...getCommonOptions(),
+    tooltip: {
+      trigger: 'axis',
+      formatter: function(params: any) {
+        const year = params[0].name;
+        const value = params[0].value;
+        return `<div class="font-medium">${year}</div>
+                <div>${formatCurrency(value)}</div>`;
+      }
+    },
+    xAxis: {
+      type: 'category',
+      data: data.map(item => item.year.toString()),
+      axisLabel: {
+        rotate: data.length > 5 ? 45 : 0
+      }
+    },
+    yAxis: {
+      type: 'value',
+      axisLabel: {
+        formatter: (value: number) => formatCurrency(value).replace('EUR', '€')
+      }
+    },
+    series: [
+      {
+        name: 'Budget',
+        type: 'bar',
+        data: data.map(item => item.totalSpent),
+        itemStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: '#4ade80' },
+            { offset: 1, color: '#22c55e' }
+          ]),
+          borderRadius: [4, 4, 0, 0]
+        },
+        emphasis: {
+          itemStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: '#86efac' },
+              { offset: 1, color: '#4ade80' }
+            ])
+          }
+        },
+        barWidth: '40%'
+      }
+    ],
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '10%',
+      top: '8%',
+      containLabel: true
+    }
+  };
 
+  // Get total budget
+  const totalBudget = data.reduce((sum, item) => sum + item.totalSpent, 0);
+  
   return (
-    <div className="space-y-4 md:space-y-6">
-      <div className="h-[300px] sm:h-[350px] md:h-[400px] w-full border rounded-lg p-2 sm:p-4">
+    <div className="space-y-6">
+      <div className="text-center">
+        <h3 className="text-xl font-semibold">Gesamtbudget: {formatCurrency(totalBudget)}</h3>
+        <p className="text-muted-foreground text-sm">
+          Verteilung über {data.length} Jahre
+        </p>
+      </div>
+      
+      <div className="h-[350px]">
         <ReactECharts
-          option={getOption()}
+          option={chartOption}
           style={{ height: '100%', width: '100%' }}
           opts={{ renderer: 'canvas' }}
-          className="echarts-for-react"
         />
       </div>
       
-      <div className="overflow-x-auto border rounded-lg">
-        <div className="min-w-full">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="border-b bg-muted/50">
-                <th className="text-left py-2 px-3 sm:py-3 sm:px-4 font-medium">Jahr</th>
-                <th className="text-right py-2 px-3 sm:py-3 sm:px-4 font-medium">Gesamtausgaben</th>
-                <th className="text-right py-2 px-3 sm:py-3 sm:px-4 font-medium">% vom Durchschnitt</th>
-              </tr>
-            </thead>
-            <tbody>
-              {budgetData.map((item, index) => (
-                <tr key={index} className="border-b hover:bg-muted/30">
-                  <td className="py-2 px-3 sm:py-3 sm:px-4">{item.year}</td>
-                  <td className="py-2 px-3 sm:py-3 sm:px-4 text-right font-medium">{formatCurrency(item.totalSpent)}</td>
-                  <td className="py-2 px-3 sm:py-3 sm:px-4 text-right">
-                    {averageSpend > 0 ? `${((item.totalSpent / averageSpend) * 100).toFixed(1)}%` : '0%'}
-                  </td>
+      <div className="overflow-x-auto rounded-lg border">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b bg-muted/50">
+              <th className="text-left px-4 py-2">Jahr</th>
+              <th className="text-right px-4 py-2">Budget</th>
+              <th className="text-right px-4 py-2">Prozent vom Gesamtbudget</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((item) => {
+              const percentage = totalBudget > 0 
+                ? ((item.totalSpent / totalBudget) * 100).toFixed(1) 
+                : '0.0';
+              
+              return (
+                <tr key={item.year} className="border-b hover:bg-muted/20">
+                  <td className="px-4 py-2">{item.year}</td>
+                  <td className="text-right px-4 py-2">{formatCurrency(item.totalSpent)}</td>
+                  <td className="text-right px-4 py-2">{percentage}%</td>
                 </tr>
-              ))}
-              <tr className="font-medium bg-muted/20">
-                <td className="py-2 px-3 sm:py-3 sm:px-4">Durchschnitt</td>
-                <td className="py-2 px-3 sm:py-3 sm:px-4 text-right">{formatCurrency(averageSpend)}</td>
-                <td className="py-2 px-3 sm:py-3 sm:px-4 text-right">100%</td>
-              </tr>
-              <tr className="font-medium bg-muted/20">
-                <td className="py-2 px-3 sm:py-3 sm:px-4">Gesamt</td>
-                <td className="py-2 px-3 sm:py-3 sm:px-4 text-right">
-                  {formatCurrency(budgetData.reduce((sum, item) => sum + item.totalSpent, 0))}
-                </td>
-                <td className="py-2 px-3 sm:py-3 sm:px-4 text-right">-</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+              );
+            })}
+            <tr className="font-medium bg-muted/20">
+              <td className="px-4 py-2">Gesamt</td>
+              <td className="text-right px-4 py-2">{formatCurrency(totalBudget)}</td>
+              <td className="text-right px-4 py-2">100%</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   );

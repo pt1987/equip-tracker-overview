@@ -1,6 +1,6 @@
 
 import React from "react";
-import { FileBarChart, FileLineChart } from "lucide-react";
+import { FileBarChart, FileLineChart, Calendar } from "lucide-react";
 import PageTransition from "@/components/layout/PageTransition";
 import ReportsNavigation from "@/components/layout/ReportsNavigation";
 import { reportRoutes } from "@/components/layout/ReportsNavigation";
@@ -26,6 +26,18 @@ export default function ReportingOverview() {
           </div>
           
           <ReportsNavigation />
+          
+          <div className="bg-muted/30 border rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Calendar className="h-5 w-5 text-primary" />
+              <h2 className="font-medium">Zeitraumfilter verfügbar</h2>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Alle Berichte unterstützen jetzt Zeitraumfilter. Sie können zwischen vordefinierten Zeiträumen wählen oder
+              einen benutzerdefinierten Zeitraum über den Datumsauswähler eingeben. Damit können Sie gezielt Daten für bestimmte
+              Quartale, Jahre oder benutzerdefinierte Zeiträume analysieren.
+            </p>
+          </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {reportLinks.map((report) => (

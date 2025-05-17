@@ -10,13 +10,16 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useToast } from "@/hooks/use-toast";
 import { exportUsageDuration } from "@/utils/export";
 import { getAssetUsageDurationReport } from "@/data/reports";
+import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
+import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
 
 export default function UsageDuration() {
   const { toast } = useToast();
+  const { dateRange, setDateRange } = useDateRangeFilter();
   
   const exportReport = async (format: 'excel' | 'pdf') => {
     try {
-      const data = await getAssetUsageDurationReport();
+      const data = await getAssetUsageDurationReport(dateRange);
       exportUsageDuration(data, format);
       
       toast({
@@ -72,9 +75,12 @@ export default function UsageDuration() {
             <CardHeader className="pb-3">
               <CardTitle>Average Asset Usage Duration</CardTitle>
               <CardDescription>Average usage duration by asset category</CardDescription>
+              <div className="pt-4">
+                <DateRangeFilter value={dateRange} onChange={setDateRange} />
+              </div>
             </CardHeader>
             <CardContent>
-              <AssetUsageDurationReport />
+              <AssetUsageDurationReport dateRange={dateRange} />
             </CardContent>
           </Card>
         </div>

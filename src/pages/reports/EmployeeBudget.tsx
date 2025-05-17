@@ -10,9 +10,12 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useToast } from "@/hooks/use-toast";
 import { exportEmployeeBudgetReport } from "@/utils/export";
 import { getEmployees } from "@/data/employees";
+import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
+import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
 
 export default function EmployeeBudget() {
   const { toast } = useToast();
+  const { dateRange, setDateRange } = useDateRangeFilter();
   
   const exportReport = async (format: 'excel' | 'pdf') => {
     try {
@@ -72,9 +75,12 @@ export default function EmployeeBudget() {
             <CardHeader className="pb-3">
               <CardTitle>Mitarbeiter Budget Übersicht</CardTitle>
               <CardDescription>Übersicht über verfügbares Budget pro Mitarbeiter</CardDescription>
+              <div className="pt-4">
+                <DateRangeFilter value={dateRange} onChange={setDateRange} />
+              </div>
             </CardHeader>
             <CardContent>
-              <EmployeeBudgetReport />
+              <EmployeeBudgetReport dateRange={dateRange} />
             </CardContent>
           </Card>
         </div>

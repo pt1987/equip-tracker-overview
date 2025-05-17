@@ -10,13 +10,16 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useToast } from "@/hooks/use-toast";
 import { exportFixedAssetsReport } from "@/utils/export";
 import { getFixedAssetsReport } from "@/data/reports";
+import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
+import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
 
 export default function FixedAssets() {
   const { toast } = useToast();
+  const { dateRange, setDateRange } = useDateRangeFilter();
   
   const exportReport = async (format: 'excel' | 'pdf') => {
     try {
-      const data = await getFixedAssetsReport();
+      const data = await getFixedAssetsReport(dateRange);
       exportFixedAssetsReport(data, format);
       
       toast({
@@ -72,9 +75,12 @@ export default function FixedAssets() {
             <CardHeader className="pb-3">
               <CardTitle>Anlagevermögen & GWG Übersicht</CardTitle>
               <CardDescription>Übersicht über Anlagevermögen und geringwertige Wirtschaftsgüter</CardDescription>
+              <div className="pt-4">
+                <DateRangeFilter value={dateRange} onChange={setDateRange} />
+              </div>
             </CardHeader>
             <CardContent>
-              <FixedAssetsReport />
+              <FixedAssetsReport dateRange={dateRange} />
             </CardContent>
           </Card>
         </div>

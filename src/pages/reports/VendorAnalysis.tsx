@@ -10,13 +10,16 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useToast } from "@/hooks/use-toast";
 import { exportVendorPurchaseReport } from "@/utils/export";
 import { getVendorPurchaseReport } from "@/data/reports";
+import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
+import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
 
 export default function VendorAnalysis() {
   const { toast } = useToast();
+  const { dateRange, setDateRange } = useDateRangeFilter();
   
   const exportReport = async (format: 'excel' | 'pdf') => {
     try {
-      const data = await getVendorPurchaseReport();
+      const data = await getVendorPurchaseReport(dateRange);
       exportVendorPurchaseReport(data, format);
       
       toast({
@@ -72,9 +75,12 @@ export default function VendorAnalysis() {
             <CardHeader className="pb-3">
               <CardTitle>Anbieter Einkaufs Analyse</CardTitle>
               <CardDescription>Analyse der Verteilung und Umsätze nach Anbietern und Herstellern</CardDescription>
+              <div className="pt-4">
+                <DateRangeFilter value={dateRange} onChange={setDateRange} />
+              </div>
             </CardHeader>
             <CardContent>
-              <VendorPurchaseReport />
+              <VendorPurchaseReport dateRange={dateRange} />
             </CardContent>
           </Card>
         </div>

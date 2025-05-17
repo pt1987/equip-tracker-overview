@@ -1,12 +1,16 @@
-
 import { useEffect, useState } from "react";
 import ReactECharts from "echarts-for-react";
 import { getWarrantyDefectReport } from "@/data/reports";
 import { WarrantyDefectReport } from "@/lib/types";
 import { getCommonOptions, getColorOptions } from "@/lib/echarts-theme";
 import * as echarts from 'echarts';
+import { DateRange } from "react-day-picker";
 
-export default function WarrantyDefectsReport() {
+interface WarrantyDefectsReportProps {
+  dateRange?: DateRange;
+}
+
+export default function WarrantyDefectsReport({ dateRange }: WarrantyDefectsReportProps) {
   const [warrantyData, setWarrantyData] = useState<WarrantyDefectReport | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   
@@ -14,7 +18,7 @@ export default function WarrantyDefectsReport() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const data = await getWarrantyDefectReport();
+        const data = await getWarrantyDefectReport(dateRange);
         setWarrantyData(data);
       } catch (error) {
         console.error("Error fetching warranty data:", error);
@@ -25,7 +29,7 @@ export default function WarrantyDefectsReport() {
     };
     
     fetchData();
-  }, []);
+  }, [dateRange]);
 
   if (isLoading) {
     return (

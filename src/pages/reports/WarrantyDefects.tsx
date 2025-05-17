@@ -10,13 +10,16 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useToast } from "@/hooks/use-toast";
 import { exportWarrantyDefects } from "@/utils/export";
 import { getWarrantyDefectReport } from "@/data/reports";
+import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
+import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
 
 export default function WarrantyDefects() {
   const { toast } = useToast();
+  const { dateRange, setDateRange } = useDateRangeFilter();
   
   const exportReport = async (format: 'excel' | 'pdf') => {
     try {
-      const data = await getWarrantyDefectReport();
+      const data = await getWarrantyDefectReport(dateRange);
       exportWarrantyDefects(data, format);
       
       toast({
@@ -72,9 +75,12 @@ export default function WarrantyDefects() {
             <CardHeader className="pb-3">
               <CardTitle>Defective Hardware Warranty Analysis</CardTitle>
               <CardDescription>Analysis of defective hardware with and without warranty</CardDescription>
+              <div className="pt-4">
+                <DateRangeFilter value={dateRange} onChange={setDateRange} />
+              </div>
             </CardHeader>
             <CardContent>
-              <WarrantyDefectsReport />
+              <WarrantyDefectsReport dateRange={dateRange} />
             </CardContent>
           </Card>
         </div>

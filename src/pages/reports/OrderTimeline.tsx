@@ -10,13 +10,16 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useToast } from "@/hooks/use-toast";
 import { exportOrderTimeline } from "@/utils/export";
 import { getOrderTimelineByEmployee } from "@/data/reports";
+import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
+import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
 
 export default function OrderTimeline() {
   const { toast } = useToast();
+  const { dateRange, setDateRange } = useDateRangeFilter();
   
   const exportReport = async (format: 'excel' | 'pdf') => {
     try {
-      const data = await getOrderTimelineByEmployee();
+      const data = await getOrderTimelineByEmployee(undefined, dateRange);
       exportOrderTimeline(data, format);
       
       toast({
@@ -72,9 +75,12 @@ export default function OrderTimeline() {
             <CardHeader className="pb-3">
               <CardTitle>Employee Order Timeline</CardTitle>
               <CardDescription>Timeline of asset purchases per employee</CardDescription>
+              <div className="pt-4">
+                <DateRangeFilter value={dateRange} onChange={setDateRange} />
+              </div>
             </CardHeader>
             <CardContent>
-              <OrderTimelineReport />
+              <OrderTimelineReport dateRange={dateRange} />
             </CardContent>
           </Card>
         </div>

@@ -14,6 +14,32 @@ import { getAssets, getAssetHistoryByAssetId } from "./assets";
 import { getEmployees } from "./employees";
 import { calculateAgeInMonths, groupBy } from "@/lib/utils";
 import { isFixedAsset, isGWG, calculateAssetBookValue } from "@/lib/depreciation-utils";
+import { DateRange } from "react-day-picker";
+
+// Helper function to filter assets by date range
+const filterAssetsByDateRange = (assets: Asset[], dateRange?: DateRange): Asset[] => {
+  if (!dateRange || (!dateRange.from && !dateRange.to)) {
+    return assets;
+  }
+  
+  return assets.filter(asset => {
+    const purchaseDate = new Date(asset.purchaseDate);
+    
+    if (dateRange.from && dateRange.to) {
+      return purchaseDate >= dateRange.from && purchaseDate <= dateRange.to;
+    }
+    
+    if (dateRange.from) {
+      return purchaseDate >= dateRange.from;
+    }
+    
+    if (dateRange.to) {
+      return purchaseDate <= dateRange.to;
+    }
+    
+    return true;
+  });
+};
 
 // Helper function to get employee name
 const getEmployeeName = async (id: string): Promise<string> => {
@@ -23,10 +49,16 @@ const getEmployeeName = async (id: string): Promise<string> => {
 };
 
 // Order Timeline per employee
-export const getOrderTimelineByEmployee = async (employeeId?: string): Promise<OrderTimeline[]> => {
+export const getOrderTimelineByEmployee = async (employeeId?: string, dateRange?: DateRange): Promise<OrderTimeline[]> => {
   try {
     const employees = await getEmployees();
-    const assets = await getAssets();
+    let assets = await getAssets();
+    
+    // Apply date filter if provided
+    if (dateRange) {
+      assets = filterAssetsByDateRange(assets, dateRange);
+    }
+    
     const allAssetHistory: any[] = [];
     
     if (!Array.isArray(assets)) {
@@ -89,9 +121,14 @@ export const getOrderTimelineByEmployee = async (employeeId?: string): Promise<O
 };
 
 // Yearly budget report
-export const getYearlyBudgetReport = async (): Promise<YearlyBudgetReport[]> => {
+export const getYearlyBudgetReport = async (dateRange?: DateRange): Promise<YearlyBudgetReport[]> => {
   try {
-    const assets = await getAssets();
+    let assets = await getAssets();
+    
+    // Apply date filter if provided
+    if (dateRange) {
+      assets = filterAssetsByDateRange(assets, dateRange);
+    }
     
     if (!Array.isArray(assets)) {
       console.error("getYearlyBudgetReport: assets is not an array");
@@ -118,9 +155,14 @@ export const getYearlyBudgetReport = async (): Promise<YearlyBudgetReport[]> => 
 };
 
 // Yearly asset purchases report
-export const getYearlyAssetPurchasesReport = async (): Promise<YearlyAssetPurchaseReport[]> => {
+export const getYearlyAssetPurchasesReport = async (dateRange?: DateRange): Promise<YearlyAssetPurchaseReport[]> => {
   try {
-    const assets = await getAssets();
+    let assets = await getAssets();
+    
+    // Apply date filter if provided
+    if (dateRange) {
+      assets = filterAssetsByDateRange(assets, dateRange);
+    }
     
     if (!Array.isArray(assets)) {
       console.error("getYearlyAssetPurchasesReport: assets is not an array");
@@ -157,9 +199,14 @@ export const getYearlyAssetPurchasesReport = async (): Promise<YearlyAssetPurcha
 };
 
 // Average usage duration by asset category
-export const getAssetUsageDurationReport = async (): Promise<AssetUsageDurationReport[]> => {
+export const getAssetUsageDurationReport = async (dateRange?: DateRange): Promise<AssetUsageDurationReport[]> => {
   try {
-    const assets = await getAssets();
+    let assets = await getAssets();
+    
+    // Apply date filter if provided
+    if (dateRange) {
+      assets = filterAssetsByDateRange(assets, dateRange);
+    }
     
     if (!Array.isArray(assets)) {
       console.error("getAssetUsageDurationReport: assets is not an array");
@@ -187,9 +234,14 @@ export const getAssetUsageDurationReport = async (): Promise<AssetUsageDurationR
 };
 
 // Warranty defect report
-export const getWarrantyDefectReport = async (): Promise<WarrantyDefectReport> => {
+export const getWarrantyDefectReport = async (dateRange?: DateRange): Promise<WarrantyDefectReport> => {
   try {
-    const assets = await getAssets();
+    let assets = await getAssets();
+    
+    // Apply date filter if provided
+    if (dateRange) {
+      assets = filterAssetsByDateRange(assets, dateRange);
+    }
     
     if (!Array.isArray(assets)) {
       console.error("getWarrantyDefectReport: assets is not an array");
@@ -232,9 +284,14 @@ export const getWarrantyDefectReport = async (): Promise<WarrantyDefectReport> =
 };
 
 // Fixed assets and GWG report
-export const getFixedAssetsReport = async (): Promise<FixedAssetsReport> => {
+export const getFixedAssetsReport = async (dateRange?: DateRange): Promise<FixedAssetsReport> => {
   try {
-    const assets = await getAssets();
+    let assets = await getAssets();
+    
+    // Apply date filter if provided
+    if (dateRange) {
+      assets = filterAssetsByDateRange(assets, dateRange);
+    }
     
     if (!Array.isArray(assets)) {
       console.error("getFixedAssetsReport: assets is not an array");
@@ -329,9 +386,14 @@ export const getFixedAssetsReport = async (): Promise<FixedAssetsReport> => {
 };
 
 // Vendor Purchase Report
-export const getVendorPurchaseReport = async (): Promise<VendorPurchaseReport[]> => {
+export const getVendorPurchaseReport = async (dateRange?: DateRange): Promise<VendorPurchaseReport[]> => {
   try {
-    const assets = await getAssets();
+    let assets = await getAssets();
+    
+    // Apply date filter if provided
+    if (dateRange) {
+      assets = filterAssetsByDateRange(assets, dateRange);
+    }
     
     if (!Array.isArray(assets)) {
       console.error("getVendorPurchaseReport: assets is not an array");

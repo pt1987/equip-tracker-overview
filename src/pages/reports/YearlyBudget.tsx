@@ -10,13 +10,16 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useToast } from "@/hooks/use-toast";
 import { exportYearlyBudget } from "@/utils/export";
 import { getYearlyBudgetReport } from "@/data/reports";
+import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
+import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
 
 export default function YearlyBudget() {
   const { toast } = useToast();
+  const { dateRange, setDateRange } = useDateRangeFilter();
   
   const exportReport = async (format: 'excel' | 'pdf') => {
     try {
-      const data = await getYearlyBudgetReport();
+      const data = await getYearlyBudgetReport(dateRange);
       exportYearlyBudget(data, format);
       
       toast({
@@ -72,9 +75,12 @@ export default function YearlyBudget() {
             <CardHeader className="pb-3">
               <CardTitle>Yearly Budget Usage</CardTitle>
               <CardDescription>Budget spent on assets per year</CardDescription>
+              <div className="pt-4">
+                <DateRangeFilter value={dateRange} onChange={setDateRange} />
+              </div>
             </CardHeader>
             <CardContent>
-              <BudgetYearlyReport />
+              <BudgetYearlyReport dateRange={dateRange} />
             </CardContent>
           </Card>
         </div>
