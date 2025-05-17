@@ -207,7 +207,16 @@ export type ReportType =
   | 'warrantyDefects'
   | 'fixedAssets'
   | 'employeeBudget'
-  | 'vendorPurchase';
+  | 'vendorPurchase'
+  | 'assetLifecycle'
+  | 'maintenanceCost'
+  | 'softwareLicense'
+  | 'departmentAssets'
+  | 'assetUtilization'
+  | 'replacementPlanning'
+  | 'carbonFootprint'
+  | 'roii'
+  | 'vendorComparison';
 
 export interface FixedAssetsReport {
   fixedAssets: Asset[];
@@ -384,4 +393,97 @@ export interface VendorPurchaseReport {
 export interface OwnerCompanyDistribution {
   company: string;
   count: number;
+}
+
+// Neue Report Interfaces
+export interface AssetLifecycleReport {
+  category: string;
+  averageLifespanMonths: number;
+  count: number;
+  purchaseToDeploymentDays: number;
+  deploymentToRetirementMonths: number;
+}
+
+export interface MaintenanceCostReport {
+  assetId: string;
+  assetName: string;
+  category: string;
+  purchaseValue: number;
+  totalMaintenanceCost: number;
+  maintenanceRatio: number; // Maintenance cost as percentage of purchase value
+  maintenanceCount: number; // Number of maintenance events
+}
+
+export interface SoftwareLicenseReport {
+  name: string;
+  licenseType: string;
+  expiryDate: string;
+  assignedCount: number;
+  totalLicenses: number;
+  costPerLicense: number;
+  totalCost: number;
+  complianceStatus: 'compliant' | 'overused' | 'underused';
+}
+
+export interface DepartmentAssetsReport {
+  department: string;
+  assetCount: number;
+  totalValue: number;
+  assetsByType: {
+    [key in AssetType]?: number;
+  };
+  employeeCount: number;
+  assetsPerEmployee: number;
+}
+
+export interface AssetUtilizationReport {
+  assetId: string;
+  assetName: string;
+  category: string;
+  utilizationRatio: number; // Percentage of time the asset is in use
+  totalBookings: number;
+  totalBookingDays: number;
+  idleDays: number;
+  availabilityRate: number; // Percentage of time the asset is available
+}
+
+export interface ReplacementPlanningReport {
+  assetId: string;
+  assetName: string;
+  category: string;
+  purchaseDate: string;
+  recommendedReplaceDate: string;
+  ageInMonths: number;
+  conditionScore: number; // 1-10 scale
+  replacementPriority: 'high' | 'medium' | 'low';
+  estimatedReplacementCost: number;
+}
+
+export interface CarbonFootprintReport {
+  category: string;
+  assetCount: number;
+  estimatedEnergyUse: number; // kWh
+  estimatedCO2: number; // kg
+  sustainabilityScore: number; // 0-100
+  recommendations: string[];
+}
+
+export interface ROIIReport {
+  category: string;
+  initialInvestment: number;
+  operationalCost: number;
+  businessValue: number;
+  roi: number; // Return on investment percentage
+  paybackPeriodMonths: number;
+}
+
+export interface VendorComparisonReport {
+  vendor: string;
+  assetCount: number;
+  totalSpent: number;
+  reliabilityScore: number; // 0-100
+  defectRate: number; // Percentage
+  avgResponseTimeDays: number;
+  satisfactionScore: number; // 0-5
+  onTimeDeliveryRate: number; // Percentage
 }

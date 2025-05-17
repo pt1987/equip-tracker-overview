@@ -24,7 +24,15 @@ import {
   FileLineChart,
   ShoppingBag,
   UserCheck,
-  BarChartHorizontal
+  BarChartHorizontal,
+  Activity,
+  CircleDollarSign,
+  KeyRound,
+  Building2,
+  RefreshCcw,
+  Leaf,
+  TrendingUp,
+  Building
 } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 
@@ -117,6 +125,51 @@ export const navItems: NavItem[] = [
         title: "Anbieteranalyse",
         href: "/reporting/vendor-analysis",
         icon: BarChartHorizontal,
+      },
+      {
+        title: "Asset-Lebenszyklus",
+        href: "/reporting/asset-lifecycle",
+        icon: Activity,
+      },
+      {
+        title: "Wartungskosten",
+        href: "/reporting/maintenance-cost",
+        icon: CircleDollarSign,
+      },
+      {
+        title: "Software-Lizenzen",
+        href: "/reporting/software-license",
+        icon: KeyRound,
+      },
+      {
+        title: "Abteilungsübersicht",
+        href: "/reporting/department-assets",
+        icon: Building2,
+      },
+      {
+        title: "Asset-Auslastung",
+        href: "/reporting/asset-utilization",
+        icon: Activity,
+      },
+      {
+        title: "Ersatzplanung",
+        href: "/reporting/replacement-planning",
+        icon: RefreshCcw,
+      },
+      {
+        title: "CO2-Fußabdruck",
+        href: "/reporting/carbon-footprint",
+        icon: Leaf,
+      },
+      {
+        title: "IT-Investitionsrendite",
+        href: "/reporting/roii",
+        icon: TrendingUp,
+      },
+      {
+        title: "Anbietervergleich",
+        href: "/reporting/vendor-comparison",
+        icon: Building,
       }
     ],
   },
@@ -164,7 +217,15 @@ export const NavigationItems = {
       FileLineChart: FileLineChart,
       ShoppingBag: ShoppingBag,
       UserCheck: UserCheck,
-      BarChartHorizontal: BarChartHorizontal
+      BarChartHorizontal: BarChartHorizontal,
+      Activity: Activity,
+      CircleDollarSign: CircleDollarSign,
+      KeyRound: KeyRound,
+      Building2: Building2,
+      RefreshCcw: RefreshCcw,
+      Leaf: Leaf,
+      TrendingUp: TrendingUp,
+      Building: Building
     };
 
     // Get the component from the map

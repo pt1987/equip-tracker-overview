@@ -11,7 +11,15 @@ import {
   FileBarChart,
   FileLineChart,
   ShoppingBag,
-  UserCheck
+  UserCheck,
+  Activity,
+  CircleDollarSign,
+  KeyRound,
+  Building2,
+  RefreshCcw,
+  Leaf,
+  TrendingUp,
+  Building
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
@@ -61,6 +69,51 @@ export const reportRoutes = [
     title: "Anbieteranalyse",
     path: "/reporting/vendor-analysis",
     icon: BarChartHorizontal
+  },
+  {
+    title: "Asset-Lebenszyklus",
+    path: "/reporting/asset-lifecycle",
+    icon: Activity
+  },
+  {
+    title: "Wartungskosten",
+    path: "/reporting/maintenance-cost",
+    icon: CircleDollarSign
+  },
+  {
+    title: "Software-Lizenzen",
+    path: "/reporting/software-license",
+    icon: KeyRound
+  },
+  {
+    title: "Abteilungsübersicht",
+    path: "/reporting/department-assets",
+    icon: Building2
+  },
+  {
+    title: "Asset-Auslastung",
+    path: "/reporting/asset-utilization",
+    icon: Activity
+  },
+  {
+    title: "Ersatzplanung",
+    path: "/reporting/replacement-planning",
+    icon: RefreshCcw
+  },
+  {
+    title: "CO2-Fußabdruck",
+    path: "/reporting/carbon-footprint",
+    icon: Leaf
+  },
+  {
+    title: "IT-Investitionsrendite",
+    path: "/reporting/roii",
+    icon: TrendingUp
+  },
+  {
+    title: "Anbietervergleich",
+    path: "/reporting/vendor-comparison",
+    icon: Building
   }
 ];
 
@@ -68,14 +121,14 @@ const ReportsNavigation = () => {
   const location = useLocation();
   
   return (
-    <div className="mb-6 bg-card rounded-md shadow-sm border p-1">
+    <div className="mb-6 bg-card rounded-md shadow-sm border p-1 overflow-x-auto">
       <nav className="flex flex-wrap gap-1">
         {reportRoutes.map((route) => (
           <Link
             key={route.path}
             to={route.path}
             className={cn(
-              "flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors",
+              "flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors whitespace-nowrap",
               (route.exact 
                 ? location.pathname === route.path 
                 : location.pathname === route.path)

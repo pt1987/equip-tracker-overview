@@ -39,7 +39,7 @@ export default function ReportingOverview() {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {reportLinks.map((report) => (
               <Link key={report.path} to={report.path}>
                 <Card className="h-full transition-all hover:shadow-md hover:border-primary/50">
