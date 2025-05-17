@@ -9,6 +9,7 @@ import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
 import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
 import { ReportExportButton } from "@/components/reports/ReportExportButton";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { ReportInfoTooltip } from "@/components/reports/ReportInfoTooltip";
 
 export default function SoftwareLicense() {
   const { dateRange, setDateRange } = useDateRangeFilter();
@@ -51,8 +52,26 @@ export default function SoftwareLicense() {
           
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">
-              <CardTitle>Software-Lizenz Übersicht</CardTitle>
-              <CardDescription>Analyse der Software-Lizenzen und Abonnements nach Typ und Kosten</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Software-Lizenz Übersicht</CardTitle>
+                  <CardDescription>Analyse der Software-Lizenzen und Abonnements nach Typ und Kosten</CardDescription>
+                </div>
+                <ReportInfoTooltip 
+                  title="Software-Lizenzen"
+                  description="Dieser Bericht gibt eine Übersicht über alle Software-Lizenzen und Abonnements im Unternehmen.
+
+Was zeigt dieser Bericht:
+- Verfügbare vs. genutzte Lizenzen pro Software
+- Ablaufdaten und Verlängerungszeiträume
+- Lizenzkosten und Budget-Auswirkungen
+- Nicht oder selten genutzte Software-Lizenzen
+
+Anwendung:
+Nutzen Sie diesen Bericht für die Lizenzverwaltung und Kostenkontrolle. Der Bericht hilft, unnötige Lizenzkosten zu vermeiden, bald ablaufende Lizenzen rechtzeitig zu verlängern und die Compliance sicherzustellen."
+                  showAsDialog={true}
+                />
+              </div>
               <div className="pt-4">
                 <DateRangeFilter value={dateRange} onChange={setDateRange} />
               </div>

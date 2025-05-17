@@ -12,6 +12,7 @@ import { exportEmployeeBudgetReport } from "@/utils/export";
 import { getEmployees } from "@/data/employees";
 import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
 import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
+import { ReportInfoTooltip } from "@/components/reports/ReportInfoTooltip";
 
 export default function EmployeeBudget() {
   const { toast } = useToast();
@@ -73,8 +74,26 @@ export default function EmployeeBudget() {
           
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">
-              <CardTitle>Mitarbeiter Budget Übersicht</CardTitle>
-              <CardDescription>Übersicht über verfügbares Budget pro Mitarbeiter</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Mitarbeiter Budget Übersicht</CardTitle>
+                  <CardDescription>Übersicht über verfügbares Budget pro Mitarbeiter</CardDescription>
+                </div>
+                <ReportInfoTooltip 
+                  title="Mitarbeiterbudget"
+                  description="Dieser Bericht gibt eine Übersicht über das verfügbare und genutzte Budget für IT-Assets pro Mitarbeiter.
+
+Was zeigt dieser Bericht:
+- Zugewiesenes Budget pro Mitarbeiter
+- Bereits genutztes Budget für Assets
+- Verbleibendes verfügbares Budget
+- Vergleich der Budgetnutzung zwischen verschiedenen Mitarbeitern/Abteilungen
+
+Anwendung:
+Nutzen Sie diesen Bericht für die Ressourcenplanung und um sicherzustellen, dass alle Mitarbeiter angemessen mit IT-Assets ausgestattet sind. Der Bericht hilft, Ungleichheiten in der Ressourcenverteilung zu identifizieren und Budget für neue Mitarbeiter oder spezielle Anforderungen zu planen."
+                  showAsDialog={true}
+                />
+              </div>
               <div className="pt-4">
                 <DateRangeFilter value={dateRange} onChange={setDateRange} />
               </div>

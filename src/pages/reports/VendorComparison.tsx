@@ -10,6 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useToast } from "@/hooks/use-toast";
 import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
 import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
+import { ReportInfoTooltip } from "@/components/reports/ReportInfoTooltip";
 
 export default function VendorComparison() {
   const { toast } = useToast();
@@ -71,8 +72,25 @@ export default function VendorComparison() {
           
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">
-              <CardTitle>Anbietervergleich</CardTitle>
-              <CardDescription>Vergleichende Analyse von Anbietern und Herstellern nach Preis, Qualität und Service</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Anbietervergleich</CardTitle>
+                  <CardDescription>Vergleichende Analyse von Anbietern und Herstellern nach Preis, Qualität und Service</CardDescription>
+                </div>
+                <ReportInfoTooltip 
+                  title="Anbietervergleich"
+                  description="Dieser Bericht bietet eine vergleichende Analyse verschiedener Anbieter und Hersteller von IT-Assets nach verschiedenen Kriterien.
+
+Was zeigt dieser Bericht:
+- Vergleich von Preis-Leistungs-Verhältnissen verschiedener Anbieter
+- Qualitätsbewertungen und Zuverlässigkeit der Assets nach Hersteller
+- Service- und Support-Qualität der Anbieter
+- Gesamtbewertung und Empfehlungen
+
+Anwendung:
+Nutzen Sie diesen Bericht für strategische Beschaffungsentscheidungen und die Auswahl der besten Anbieter für verschiedene Asset-Kategorien. Der Bericht hilft, fundierte Entscheidungen zu treffen, welche Anbieter für bestimmte IT-Anforderungen am besten geeignet sind."
+                />
+              </div>
               <div className="pt-4">
                 <DateRangeFilter value={dateRange} onChange={setDateRange} />
               </div>

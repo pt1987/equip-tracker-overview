@@ -12,6 +12,7 @@ import { exportYearlyPurchases } from "@/utils/export";
 import { getYearlyAssetPurchasesReport } from "@/data/reports";
 import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
 import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
+import { ReportInfoTooltip } from "@/components/reports/ReportInfoTooltip";
 
 export default function YearlyPurchases() {
   const { toast } = useToast();
@@ -73,8 +74,26 @@ export default function YearlyPurchases() {
           
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">
-              <CardTitle>Yearly Asset Purchases</CardTitle>
-              <CardDescription>Number of assets purchased per year by type</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Jährliche Asset-Anschaffungen</CardTitle>
+                  <CardDescription>Anzahl der angeschafften Assets pro Jahr nach Typ</CardDescription>
+                </div>
+                <ReportInfoTooltip 
+                  title="Jährliche Anschaffungen"
+                  description="Dieser Bericht zeigt die Anzahl der angeschafften IT-Assets pro Jahr, aufgeschlüsselt nach Asset-Typ.
+
+Was zeigt dieser Bericht:
+- Anzahl der erworbenen Assets pro Jahr und Kategorie
+- Trends im Anschaffungsverhalten über mehrere Jahre
+- Saisonale Muster bei Anschaffungen
+- Vergleich zwischen verschiedenen Asset-Kategorien
+
+Anwendung:
+Nutzen Sie diesen Bericht, um langfristige Beschaffungstrends zu erkennen und zukünftige Anschaffungszyklen zu planen. Der Bericht hilft, saisonale Schwankungen zu identifizieren und die Beschaffungsplanung entsprechend anzupassen."
+                  showAsDialog={true}
+                />
+              </div>
               <div className="pt-4">
                 <DateRangeFilter value={dateRange} onChange={setDateRange} />
               </div>

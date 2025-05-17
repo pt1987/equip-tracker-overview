@@ -10,6 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useToast } from "@/hooks/use-toast";
 import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
 import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
+import { ReportInfoTooltip } from "@/components/reports/ReportInfoTooltip";
 
 export default function MaintenanceCost() {
   const { toast } = useToast();
@@ -71,8 +72,25 @@ export default function MaintenanceCost() {
           
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">
-              <CardTitle>Wartungs- und Reparaturkosten</CardTitle>
-              <CardDescription>Analyse der Wartungskosten im Verhältnis zum Asset-Wert</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Wartungs- und Reparaturkosten</CardTitle>
+                  <CardDescription>Analyse der Wartungskosten im Verhältnis zum Asset-Wert</CardDescription>
+                </div>
+                <ReportInfoTooltip 
+                  title="Wartungskosten"
+                  description="Dieser Bericht analysiert die Wartungs- und Reparaturkosten der IT-Assets im Verhältnis zu ihrem Anschaffungswert.
+
+Was zeigt dieser Bericht:
+- Wartungskosten pro Asset-Kategorie
+- Verhältnis von Wartungskosten zum Anschaffungswert
+- Häufigkeit der Reparaturen und Wartungen
+- Kostentrends über die Lebensdauer eines Assets
+
+Anwendung:
+Nutzen Sie diesen Bericht, um zu identifizieren, welche Assets überdurchschnittlich hohe Wartungskosten verursachen. Diese Analyse hilft bei Entscheidungen, wann ein Asset ausgetauscht werden sollte, anstatt weitere Wartungskosten zu investieren."
+                />
+              </div>
               <div className="pt-4">
                 <DateRangeFilter value={dateRange} onChange={setDateRange} />
               </div>

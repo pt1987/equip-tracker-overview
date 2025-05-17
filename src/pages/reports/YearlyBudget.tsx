@@ -12,6 +12,7 @@ import { exportYearlyBudget } from "@/utils/export";
 import { getYearlyBudgetReport } from "@/data/reports";
 import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
 import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
+import { ReportInfoTooltip } from "@/components/reports/ReportInfoTooltip";
 
 export default function YearlyBudget() {
   const { toast } = useToast();
@@ -73,8 +74,25 @@ export default function YearlyBudget() {
           
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">
-              <CardTitle>Yearly Budget Usage</CardTitle>
-              <CardDescription>Budget spent on assets per year</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Jährliches Budget</CardTitle>
+                  <CardDescription>Budget für Assets pro Jahr</CardDescription>
+                </div>
+                <ReportInfoTooltip 
+                  title="Jährliches Budget"
+                  description="Dieser Bericht zeigt die Budgetausgaben für IT-Assets pro Jahr im zeitlichen Verlauf.
+
+Was zeigt dieser Bericht:
+- Jährliche Gesamtausgaben für IT-Assets
+- Vergleich der Ausgaben zwischen verschiedenen Jahren
+- Prozentuale Verteilung des Budgets über den Zeitraum
+- Trend-Analyse der IT-Ausgaben
+
+Anwendung:
+Nutzen Sie diesen Bericht für die langfristige Budgetplanung und um Ausgabentrends zu erkennen. Der Bericht hilft bei der Beurteilung, ob IT-Ausgaben über die Zeit steigen oder fallen und unterstützt bei der Prognose zukünftiger Budgetanforderungen."
+                />
+              </div>
               <div className="pt-4">
                 <DateRangeFilter value={dateRange} onChange={setDateRange} />
               </div>

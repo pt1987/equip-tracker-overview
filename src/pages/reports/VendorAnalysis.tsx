@@ -12,6 +12,7 @@ import { exportVendorPurchaseReport } from "@/utils/export";
 import { getVendorPurchaseReport } from "@/data/reports";
 import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
 import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
+import { ReportInfoTooltip } from "@/components/reports/ReportInfoTooltip";
 
 export default function VendorAnalysis() {
   const { toast } = useToast();
@@ -73,8 +74,25 @@ export default function VendorAnalysis() {
           
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">
-              <CardTitle>Anbieter Einkaufs Analyse</CardTitle>
-              <CardDescription>Analyse der Verteilung und Umsätze nach Anbietern und Herstellern</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Anbieter Einkaufs Analyse</CardTitle>
+                  <CardDescription>Analyse der Verteilung und Umsätze nach Anbietern und Herstellern</CardDescription>
+                </div>
+                <ReportInfoTooltip 
+                  title="Anbieteranalyse"
+                  description="Dieser Bericht analysiert die Verteilung der IT-Ausgaben nach Anbietern und Herstellern.
+
+Was zeigt dieser Bericht:
+- Ausgabenverteilung nach Anbietern/Herstellern
+- Top-Anbieter nach Ausgabenvolumen
+- Anzahl der erworbenen Assets pro Anbieter
+- Preisentwicklung und Konditionen im Zeitverlauf
+
+Anwendung:
+Nutzen Sie diesen Bericht für das Lieferantenmanagement und die Optimierung von Einkaufsprozessen. Die Analyse hilft, Abhängigkeiten von einzelnen Anbietern zu erkennen, Verhandlungspositionen zu stärken und strategische Einkaufsentscheidungen zu treffen."
+                />
+              </div>
               <div className="pt-4">
                 <DateRangeFilter value={dateRange} onChange={setDateRange} />
               </div>

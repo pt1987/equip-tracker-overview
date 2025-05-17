@@ -9,6 +9,7 @@ import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
 import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
 import { ReportExportButton } from "@/components/reports/ReportExportButton";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { ReportInfoTooltip } from "@/components/reports/ReportInfoTooltip";
 
 export default function ROII() {
   const { dateRange, setDateRange } = useDateRangeFilter();
@@ -50,8 +51,26 @@ export default function ROII() {
           
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">
-              <CardTitle>IT-Investitionsrendite</CardTitle>
-              <CardDescription>Detaillierte Analyse der Rendite von IT-Investitionen und deren geschäftlicher Wert</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>IT-Investitionsrendite</CardTitle>
+                  <CardDescription>Detaillierte Analyse der Rendite von IT-Investitionen und deren geschäftlicher Wert</CardDescription>
+                </div>
+                <ReportInfoTooltip 
+                  title="IT-Investitionsrendite (ROI)"
+                  description="Dieser Bericht analysiert die Rendite der IT-Investitionen (Return on IT Investment) im Unternehmen.
+
+Was zeigt dieser Bericht:
+- Investitionskosten pro Asset-Kategorie
+- Geschätzter Wertbeitrag/Rendite der IT-Investitionen
+- ROI-Kennzahlen für unterschiedliche Asset-Typen
+- Amortisationszeiträume für Investitionen
+
+Anwendung:
+Nutzen Sie diesen Bericht für Budgetentscheidungen und zur Priorisierung zukünftiger IT-Investitionen. Die Daten ermöglichen eine fundierte Bewertung, welche IT-Bereiche den größten geschäftlichen Nutzen bringen und wo Investitionen am effektivsten eingesetzt werden können."
+                  showAsDialog={true}
+                />
+              </div>
               <div className="pt-4">
                 <DateRangeFilter value={dateRange} onChange={setDateRange} />
               </div>

@@ -12,6 +12,7 @@ import { exportUsageDuration } from "@/utils/export";
 import { getAssetUsageDurationReport } from "@/data/reports";
 import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
 import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
+import { ReportInfoTooltip } from "@/components/reports/ReportInfoTooltip";
 
 export default function UsageDuration() {
   const { toast } = useToast();
@@ -73,8 +74,25 @@ export default function UsageDuration() {
           
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">
-              <CardTitle>Average Asset Usage Duration</CardTitle>
-              <CardDescription>Average usage duration by asset category</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Durchschnittliche Asset-Nutzungsdauer</CardTitle>
+                  <CardDescription>Durchschnittliche Nutzungsdauer nach Asset-Kategorie</CardDescription>
+                </div>
+                <ReportInfoTooltip 
+                  title="Nutzungsdauer"
+                  description="Dieser Bericht zeigt die durchschnittliche Nutzungsdauer von IT-Assets nach Kategorien.
+
+Was zeigt dieser Bericht:
+- Durchschnittliche Nutzungsdauer pro Asset-Kategorie
+- Vergleich der tatsächlichen mit der erwarteten Nutzungsdauer
+- Assets mit überdurchschnittlich kurzer oder langer Nutzungsdauer
+- Trends in der Nutzungsdauer über verschiedene Zeiträume
+
+Anwendung:
+Nutzen Sie diesen Bericht, um die Effizienz und Langlebigkeit verschiedener Asset-Typen zu vergleichen und bessere Prognosen für zukünftige Ersatzzyklen zu erstellen. Die Analyse hilft, den ROI von Investitionen besser zu verstehen und die Beschaffungsstrategie zu optimieren."
+                />
+              </div>
               <div className="pt-4">
                 <DateRangeFilter value={dateRange} onChange={setDateRange} />
               </div>

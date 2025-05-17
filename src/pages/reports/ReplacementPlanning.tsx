@@ -10,6 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useToast } from "@/hooks/use-toast";
 import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
 import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
+import { ReportInfoTooltip } from "@/components/reports/ReportInfoTooltip";
 
 export default function ReplacementPlanning() {
   const { toast } = useToast();
@@ -71,8 +72,26 @@ export default function ReplacementPlanning() {
           
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">
-              <CardTitle>Ersatzplanung</CardTitle>
-              <CardDescription>Analyse und Planung für den Austausch von Assets nach Alter und Zustand</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Ersatzplanung</CardTitle>
+                  <CardDescription>Analyse und Planung für den Austausch von Assets nach Alter und Zustand</CardDescription>
+                </div>
+                <ReportInfoTooltip 
+                  title="Ersatzplanung"
+                  description="Dieser Bericht unterstützt die Planung für den Austausch und die Erneuerung von IT-Assets.
+
+Was zeigt dieser Bericht:
+- Assets, die das Ende ihrer Lebensdauer erreichen
+- Priorisierte Liste der zu ersetzenden Assets
+- Geschätzte Ersatzkosten und Budget-Auswirkungen
+- Optimale Zeitpunkte für Ersatzinvestitionen
+
+Anwendung:
+Nutzen Sie diesen Bericht für die vorausschauende Planung von Asset-Erneuerungen. Die Daten helfen, Ersatzinvestitionen über mehrere Perioden zu verteilen und rechtzeitig Budgets für notwendige Erneuerungen einzuplanen, bevor die alten Assets ausfallen oder ineffizient werden."
+                  showAsDialog={true}
+                />
+              </div>
               <div className="pt-4">
                 <DateRangeFilter value={dateRange} onChange={setDateRange} />
               </div>

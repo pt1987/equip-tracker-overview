@@ -12,6 +12,7 @@ import { exportFixedAssetsReport } from "@/utils/export";
 import { getFixedAssetsReport } from "@/data/reports";
 import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
 import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
+import { ReportInfoTooltip } from "@/components/reports/ReportInfoTooltip";
 
 export default function FixedAssets() {
   const { toast } = useToast();
@@ -73,8 +74,26 @@ export default function FixedAssets() {
           
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">
-              <CardTitle>Anlagevermögen & GWG Übersicht</CardTitle>
-              <CardDescription>Übersicht über Anlagevermögen und geringwertige Wirtschaftsgüter</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Anlagevermögen & GWG Übersicht</CardTitle>
+                  <CardDescription>Übersicht über Anlagevermögen und geringwertige Wirtschaftsgüter</CardDescription>
+                </div>
+                <ReportInfoTooltip 
+                  title="Anlagevermögen & GWG"
+                  description="Dieser Bericht bietet eine Übersicht über das IT-Anlagevermögen und geringwertige Wirtschaftsgüter (GWG) im Unternehmen.
+
+Was zeigt dieser Bericht:
+- Aufschlüsselung von Assets nach Anlagevermögen vs. GWG
+- Abschreibungswerte und Buchwerte des Anlagevermögens
+- Bilanzielle Wertentwicklung der IT-Assets
+- GWG-Quoten und deren Entwicklung
+
+Anwendung:
+Nutzen Sie diesen Bericht für die Buchhaltung, steuerliche Planung und das Finanzberichtswesen. Der Bericht unterstützt die Einhaltung von Bilanzierungsvorschriften und bietet eine klare Übersicht über abschreibungspflichtige Assets versus Sofortabschreibungen."
+                  showAsDialog={true}
+                />
+              </div>
               <div className="pt-4">
                 <DateRangeFilter value={dateRange} onChange={setDateRange} />
               </div>

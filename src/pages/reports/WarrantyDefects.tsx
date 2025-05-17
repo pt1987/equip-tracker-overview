@@ -12,6 +12,7 @@ import { exportWarrantyDefects } from "@/utils/export";
 import { getWarrantyDefectReport } from "@/data/reports";
 import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
 import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
+import { ReportInfoTooltip } from "@/components/reports/ReportInfoTooltip";
 
 export default function WarrantyDefects() {
   const { toast } = useToast();
@@ -73,8 +74,26 @@ export default function WarrantyDefects() {
           
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">
-              <CardTitle>Defective Hardware Warranty Analysis</CardTitle>
-              <CardDescription>Analysis of defective hardware with and without warranty</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Defekte Hardware Garantie-Analyse</CardTitle>
+                  <CardDescription>Analyse der defekten Hardware mit und ohne Garantie</CardDescription>
+                </div>
+                <ReportInfoTooltip 
+                  title="Garantie & Defekte"
+                  description="Dieser Bericht analysiert defekte Hardware im Zusammenhang mit deren Garantiestatus.
+
+Was zeigt dieser Bericht:
+- Defekte Assets nach Kategorie und Typ
+- Verhältnis von Defekten innerhalb und außerhalb der Garantie
+- Häufigkeit bestimmter Defektarten
+- Kostenersparnis durch Garantieansprüche
+
+Anwendung:
+Nutzen Sie diesen Bericht für die Qualitätsbewertung von Assets und zur Optimierung des Garantiemanagements. Die Analyse hilft, besonders fehleranfällige Asset-Typen zu identifizieren und zukünftige Beschaffungsentscheidungen zu verbessern."
+                  showAsDialog={true}
+                />
+              </div>
               <div className="pt-4">
                 <DateRangeFilter value={dateRange} onChange={setDateRange} />
               </div>

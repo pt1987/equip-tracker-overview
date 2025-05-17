@@ -12,6 +12,7 @@ import { exportOrderTimeline } from "@/utils/export";
 import { getOrderTimelineByEmployee } from "@/data/reports";
 import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
 import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
+import { ReportInfoTooltip } from "@/components/reports/ReportInfoTooltip";
 
 export default function OrderTimeline() {
   const { toast } = useToast();
@@ -73,8 +74,25 @@ export default function OrderTimeline() {
           
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">
-              <CardTitle>Employee Order Timeline</CardTitle>
-              <CardDescription>Timeline of asset purchases per employee</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Mitarbeiter Bestellverlauf</CardTitle>
+                  <CardDescription>Zeitlicher Verlauf der Asset-Anschaffungen pro Mitarbeiter</CardDescription>
+                </div>
+                <ReportInfoTooltip 
+                  title="Bestellverlauf"
+                  description="Dieser Bericht zeigt den zeitlichen Verlauf der Asset-Bestellungen und -Anschaffungen pro Mitarbeiter.
+
+Was zeigt dieser Bericht:
+- Zeitliche Abfolge aller Bestellungen pro Mitarbeiter
+- Bestellvolumen und -häufigkeit im Zeitverlauf
+- Ausgaben pro Mitarbeiter über die Zeit
+- Identifikation von Bestellmustern
+
+Anwendung:
+Nutzen Sie diesen Bericht, um die Beschaffungshistorie einzelner Mitarbeiter zu analysieren und typische Erneuerungszyklen zu erkennen. Der Bericht hilft, ungewöhnliche Bestellmuster zu identifizieren und die Ressourcenverteilung über die Zeit zu verstehen."
+                />
+              </div>
               <div className="pt-4">
                 <DateRangeFilter value={dateRange} onChange={setDateRange} />
               </div>

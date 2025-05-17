@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
 import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
 import { ReportExportButton } from "@/components/reports/ReportExportButton";
+import { ReportInfoTooltip } from "@/components/reports/ReportInfoTooltip";
 
 export default function DepartmentAssets() {
   const { dateRange, setDateRange } = useDateRangeFilter();
@@ -34,8 +35,26 @@ export default function DepartmentAssets() {
           
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">
-              <CardTitle>Abteilungsübersicht</CardTitle>
-              <CardDescription>Verteilung und Nutzung von Assets nach Abteilungen und Mitarbeitern</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Abteilungsübersicht</CardTitle>
+                  <CardDescription>Verteilung und Nutzung von Assets nach Abteilungen und Mitarbeitern</CardDescription>
+                </div>
+                <ReportInfoTooltip 
+                  title="Abteilungsübersicht"
+                  description="Dieser Bericht zeigt die Verteilung und Nutzung von IT-Assets nach Abteilungen und Mitarbeitern.
+
+Was zeigt dieser Bericht:
+- Anzahl der Assets pro Abteilung
+- Wert der Assets pro Abteilung
+- Verteilung der Asset-Typen innerhalb einer Abteilung
+- Nutzungsgrad der Assets nach Abteilung
+
+Anwendung:
+Nutzen Sie diesen Bericht, um die Asset-Verteilung zwischen Abteilungen zu vergleichen und Ressourcen entsprechend zu verteilen. Abteilungen mit älteren Assets oder höherem Nutzungsgrad könnten priorisiert werden."
+                  showAsDialog={true}
+                />
+              </div>
               <div className="pt-4">
                 <DateRangeFilter value={dateRange} onChange={setDateRange} />
               </div>

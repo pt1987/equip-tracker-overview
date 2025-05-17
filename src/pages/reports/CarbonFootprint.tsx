@@ -9,6 +9,7 @@ import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
 import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
 import { ReportExportButton } from "@/components/reports/ReportExportButton";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { ReportInfoTooltip } from "@/components/reports/ReportInfoTooltip";
 
 export default function CarbonFootprint() {
   const { dateRange, setDateRange } = useDateRangeFilter();
@@ -51,8 +52,25 @@ export default function CarbonFootprint() {
           
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">
-              <CardTitle>CO2-Fußabdruck Analyse</CardTitle>
-              <CardDescription>Umweltauswirkungen und Nachhaltigkeitsanalyse der IT-Assets</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>CO2-Fußabdruck Analyse</CardTitle>
+                  <CardDescription>Umweltauswirkungen und Nachhaltigkeitsanalyse der IT-Assets</CardDescription>
+                </div>
+                <ReportInfoTooltip 
+                  title="CO2-Fußabdruck"
+                  description="Dieser Bericht analysiert den Umwelteinfluss und CO2-Fußabdruck der IT-Assets im Unternehmen.
+
+Was zeigt dieser Bericht:
+- Geschätzter CO2-Ausstoß pro Asset-Kategorie
+- CO2-Ausstoß pro Nutzer/Abteilung
+- Trends im CO2-Verbrauch über Zeit
+- Einsparpotenziale durch Ersatz älterer Geräte
+
+Anwendung:
+Nutzen Sie diesen Bericht für Nachhaltigkeitsinitiativen und als Grundlage für umweltbewusste Beschaffungsentscheidungen. Die Daten helfen, den ökologischen Fußabdruck der IT-Infrastruktur zu reduzieren und Umweltziele zu erreichen."
+                />
+              </div>
               <div className="pt-4">
                 <DateRangeFilter value={dateRange} onChange={setDateRange} />
               </div>

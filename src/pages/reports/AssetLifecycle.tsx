@@ -10,6 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useToast } from "@/hooks/use-toast";
 import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
 import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
+import { ReportInfoTooltip } from "@/components/reports/ReportInfoTooltip";
 
 export default function AssetLifecycle() {
   const { toast } = useToast();
@@ -71,8 +72,26 @@ export default function AssetLifecycle() {
           
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">
-              <CardTitle>Asset-Lebenszyklus Analyse</CardTitle>
-              <CardDescription>Detaillierte Analyse des Asset-Lebenszyklus nach Kategorien</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Asset-Lebenszyklus Analyse</CardTitle>
+                  <CardDescription>Detaillierte Analyse des Asset-Lebenszyklus nach Kategorien</CardDescription>
+                </div>
+                <ReportInfoTooltip 
+                  title="Asset-Lebenszyklus"
+                  description="Dieser Bericht analysiert den vollständigen Lebenszyklus von IT-Assets von der Anschaffung bis zur Ausmusterung.
+
+Was zeigt dieser Bericht:
+- Durchschnittliche Lebensdauer nach Asset-Kategorie
+- Zeit von der Anschaffung bis zur Bereitstellung
+- Nutzungsdauer bis zur Ausmusterung
+- Effizienz des Asset-Lebenszyklus-Managements
+
+Anwendung:
+Nutzen Sie diesen Bericht, um die Effizienz Ihres Asset-Lebenszyklus-Managements zu bewerten und Optimierungspotenziale zu identifizieren. Die Analyse hilft, fundierte Entscheidungen über Austauschzyklen und Beschaffungsstrategien zu treffen."
+                  showAsDialog={true}
+                />
+              </div>
               <div className="pt-4">
                 <DateRangeFilter value={dateRange} onChange={setDateRange} />
               </div>

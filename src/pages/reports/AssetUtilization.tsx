@@ -9,6 +9,7 @@ import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
 import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
 import { ReportExportButton } from "@/components/reports/ReportExportButton";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { ReportInfoTooltip } from "@/components/reports/ReportInfoTooltip";
 
 export default function AssetUtilization() {
   const { dateRange, setDateRange } = useDateRangeFilter();
@@ -51,8 +52,25 @@ export default function AssetUtilization() {
           
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">
-              <CardTitle>Asset-Auslastung Analyse</CardTitle>
-              <CardDescription>Detaillierte Analyse der Nutzungszeit und Verfügbarkeit von Assets</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Asset-Auslastung Analyse</CardTitle>
+                  <CardDescription>Detaillierte Analyse der Nutzungszeit und Verfügbarkeit von Assets</CardDescription>
+                </div>
+                <ReportInfoTooltip 
+                  title="Asset-Auslastung"
+                  description="Dieser Bericht analysiert die Nutzungsintensität und Auslastung der IT-Assets im Unternehmen.
+
+Was zeigt dieser Bericht:
+- Prozentuale Auslastung nach Asset-Kategorie
+- Ungenutzte oder selten genutzte Assets
+- Überlastete Assets mit hoher Ausfallgefahr
+- Nutzungsmuster über verschiedene Zeiträume
+
+Anwendung:
+Nutzen Sie diesen Bericht, um ineffizient eingesetzte Assets zu identifizieren und Ressourcen besser zu verteilen. Die Analyse hilft, Überkapazitäten zu reduzieren und unterbeanspruchte Assets umzuverteilen oder auszumustern."
+                />
+              </div>
               <div className="pt-4">
                 <DateRangeFilter value={dateRange} onChange={setDateRange} />
               </div>
