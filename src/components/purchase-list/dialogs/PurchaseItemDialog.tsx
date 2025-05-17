@@ -7,9 +7,10 @@ import { ReceiptText } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { memo } from "react";
 import { usePurchaseDialog } from "@/hooks/purchase/usePurchaseDialog";
-import PurchaseOverviewTab from "./dialogs/PurchaseOverviewTab";
-import DocumentTab from "./dialogs/DocumentTab";
-import HistoryTab from "./dialogs/HistoryTab";
+// Fix the import paths - they should be from the current directory, not from a nested "dialogs" directory
+import PurchaseOverviewTab from "./PurchaseOverviewTab";
+import DocumentTab from "./DocumentTab";
+import HistoryTab from "./HistoryTab";
 
 interface PurchaseItemDialogProps {
   item: PurchaseItem;
