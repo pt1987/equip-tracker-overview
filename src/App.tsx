@@ -34,6 +34,18 @@ import Users from "./pages/admin/Users";
 import Roles from "./pages/admin/Roles";
 import Logs from "./pages/admin/Logs";
 import Intune from "./pages/admin/Intune";
+
+// Import new report pages
+import ReportingOverview from "./pages/reports/ReportingOverview";
+import OrderTimeline from "./pages/reports/OrderTimeline";
+import YearlyBudget from "./pages/reports/YearlyBudget";
+import YearlyPurchases from "./pages/reports/YearlyPurchases";
+import UsageDuration from "./pages/reports/UsageDuration";
+import WarrantyDefects from "./pages/reports/WarrantyDefects";
+import FixedAssets from "./pages/reports/FixedAssets";
+import EmployeeBudget from "./pages/reports/EmployeeBudget";
+import VendorAnalysis from "./pages/reports/VendorAnalysis";
+
 import "./styles/landing.css";
 import "./styles/compatibility.css";
 
@@ -93,7 +105,18 @@ const AppContent = () => {
                     <Route path="/asset/edit/:id" element={<CreateEditAsset />} />
                     <Route path="/employee/create" element={<CreateEditEmployee />} />
                     <Route path="/employee/edit/:id" element={<CreateEditEmployee />} />
-                    <Route path="/reporting" element={<Reporting />} />
+                    
+                    {/* Updated Reporting Routes */}
+                    <Route path="/reporting" element={<ReportingOverview />} />
+                    <Route path="/reporting/order-timeline" element={<OrderTimeline />} />
+                    <Route path="/reporting/yearly-budget" element={<YearlyBudget />} />
+                    <Route path="/reporting/yearly-purchases" element={<YearlyPurchases />} />
+                    <Route path="/reporting/usage-duration" element={<UsageDuration />} />
+                    <Route path="/reporting/warranty-defects" element={<WarrantyDefects />} />
+                    <Route path="/reporting/fixed-assets" element={<FixedAssets />} />
+                    <Route path="/reporting/employee-budget" element={<EmployeeBudget />} />
+                    <Route path="/reporting/vendor-analysis" element={<VendorAnalysis />} />
+                    
                     <Route path="/depreciation" element={<Depreciation />} />
                     <Route path="/damage-management" element={<DamageManagement />} />
                     <Route path="/hardware-order" element={<HardwareOrder />} />

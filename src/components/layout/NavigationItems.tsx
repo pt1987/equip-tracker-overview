@@ -16,11 +16,27 @@ import {
   PlusCircle,
   UserPlus,
   Shield,
-  Server
+  Server,
+  BarChart3,
+  CalendarClock,
+  DollarSign,
+  Clock,
+  FileLineChart,
+  ShoppingBag,
+  UserCheck,
+  BarChartHorizontal
 } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 
 export interface NavItem {
+  title: string;
+  href: string;
+  icon: LucideIcon;
+  subItems?: SubNavItem[];
+  isExpanded?: boolean;
+}
+
+export interface SubNavItem {
   title: string;
   href: string;
   icon: LucideIcon;
@@ -56,6 +72,53 @@ export const navItems: NavItem[] = [
     title: "Reporting",
     href: "/reporting",
     icon: FileBarChart2,
+    subItems: [
+      {
+        title: "Übersicht",
+        href: "/reporting",
+        icon: FileBarChart2,
+      },
+      {
+        title: "Bestellverlauf",
+        href: "/reporting/order-timeline",
+        icon: CalendarClock,
+      },
+      {
+        title: "Jährliches Budget",
+        href: "/reporting/yearly-budget",
+        icon: DollarSign,
+      },
+      {
+        title: "Jährliche Anschaffungen",
+        href: "/reporting/yearly-purchases",
+        icon: ShoppingBag,
+      },
+      {
+        title: "Nutzungsdauer",
+        href: "/reporting/usage-duration", 
+        icon: Clock,
+      },
+      {
+        title: "Garantie & Defekte",
+        href: "/reporting/warranty-defects",
+        icon: FileLineChart,
+      },
+      {
+        title: "Anlagevermögen & GWG",
+        href: "/reporting/fixed-assets",
+        icon: BarChart3,
+      },
+      {
+        title: "Mitarbeiterbudget",
+        href: "/reporting/employee-budget",
+        icon: UserCheck,
+      },
+      {
+        title: "Anbieteranalyse",
+        href: "/reporting/vendor-analysis",
+        icon: BarChartHorizontal,
+      }
+    ],
   },
   {
     title: "Abschreibungen",
@@ -93,7 +156,15 @@ export const NavigationItems = {
       UserPlus: UserPlus,
       Shield: Shield,
       Users: Users,
-      Server: Server
+      Server: Server,
+      BarChart3: BarChart3,
+      CalendarClock: CalendarClock,
+      DollarSign: DollarSign,
+      Clock: Clock,
+      FileLineChart: FileLineChart,
+      ShoppingBag: ShoppingBag,
+      UserCheck: UserCheck,
+      BarChartHorizontal: BarChartHorizontal
     };
 
     // Get the component from the map

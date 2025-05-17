@@ -1,16 +1,25 @@
 
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
-import { LogIn, LogOut } from "lucide-react";
+import { ChevronDown, ChevronRight, LogIn, LogOut } from "lucide-react";
 import { NavigationItems, navItems } from "./NavigationItems";
 
 export function MobileSidebar() {
   const location = useLocation();
   const { isAuthenticated, logout, hasPermission } = useAuth();
+  const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
+  
+  const toggleMenu = (menuTitle: string) => {
+    setExpandedMenus(prev => ({
+      ...prev,
+      [menuTitle]: !prev[menuTitle]
+    }));
+  };
   
   const createLinks = [];
   if (hasPermission('canEditAssets')) {
@@ -27,6 +36,11 @@ export function MobileSidebar() {
     { to: "/admin/intune", label: "Intune Integration", icon: "Server" },
   ] : [];
 
+  const isInSubPath = (item: any) => {
+    if (!item.subItems) return false;
+    return item.subItems.some((subItem: any) => location.pathname === subItem.href);
+  };
+
   return (
     <div className="flex flex-col h-full">
       <div className="px-4 pb-4 flex justify-between items-center">
@@ -40,17 +54,62 @@ export function MobileSidebar() {
       <div className="flex-1 overflow-y-auto py-4">
         <ul className="space-y-1 px-2">
           {navItems.map((item) => (
-            <li key={item.href}>
-              <Link
-                to={item.href}
-                className={cn(
-                  "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
-                  location.pathname === item.href ? "font-medium bg-secondary" : ""
-                )}
-              >
-                <item.icon size={20} />
-                <span>{item.title}</span>
-              </Link>
+            <li key={item.href} className="space-y-1">
+              {item.subItems ? (
+                <>
+                  <button
+                    onClick={() => toggleMenu(item.title)}
+                    className={cn(
+                      "w-full flex items-center justify-between gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
+                      (location.pathname === item.href || isInSubPath(item) || expandedMenus[item.title])
+                        ? "font-medium bg-secondary"
+                        : ""
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <item.icon size={20} />
+                      <span>{item.title}</span>
+                    </div>
+                    {expandedMenus[item.title] ? (
+                      <ChevronDown size={16} />
+                    ) : (
+                      <ChevronRight size={16} />
+                    )}
+                  </button>
+                  
+                  {expandedMenus[item.title] && (
+                    <ul className="pl-10 space-y-1 mt-1">
+                      {item.subItems.map((subItem) => (
+                        <li key={subItem.href}>
+                          <Link
+                            to={subItem.href}
+                            className={cn(
+                              "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
+                              location.pathname === subItem.href
+                                ? "font-medium bg-secondary"
+                                : ""
+                            )}
+                          >
+                            <subItem.icon size={16} />
+                            <span>{subItem.title}</span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </>
+              ) : (
+                <Link
+                  to={item.href}
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
+                    location.pathname === item.href ? "font-medium bg-secondary" : ""
+                  )}
+                >
+                  <item.icon size={20} />
+                  <span>{item.title}</span>
+                </Link>
+              )}
             </li>
           ))}
           
