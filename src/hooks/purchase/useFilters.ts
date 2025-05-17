@@ -1,53 +1,95 @@
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { PurchaseListFilter } from "@/lib/purchase-list-types";
 import { DateRange } from "react-day-picker";
 
-export function useFilters() {
-  const [filters, setFilters] = useState<PurchaseListFilter>({});
+export function useFilters(
+  initialFilters: PurchaseListFilter = {},
+  setFiltersCallback?: (filters: PurchaseListFilter) => void
+) {
+  const [filters, setFilters] = useState<PurchaseListFilter>(initialFilters);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(
-    filters.dateRange?.from || filters.dateRange?.to
+    initialFilters.dateRange?.from || initialFilters.dateRange?.to
       ? {
-          from: filters.dateRange.from ? new Date(filters.dateRange.from) : undefined,
-          to: filters.dateRange.to ? new Date(filters.dateRange.to) : undefined,
+          from: initialFilters.dateRange.from ? new Date(initialFilters.dateRange.from) : undefined,
+          to: initialFilters.dateRange.to ? new Date(initialFilters.dateRange.to) : undefined,
         }
       : undefined
   );
+
+  // Update local state when props change
+  useEffect(() => {
+    setFilters(initialFilters);
+    setDateRange(
+      initialFilters.dateRange?.from || initialFilters.dateRange?.to
+        ? {
+            from: initialFilters.dateRange.from ? new Date(initialFilters.dateRange.from) : undefined,
+            to: initialFilters.dateRange.to ? new Date(initialFilters.dateRange.to) : undefined,
+          }
+        : undefined
+    );
+  }, [initialFilters]);
 
   const handleDateRangeChange = useCallback((range: DateRange | undefined) => {
     // Update local state with the new range
     setDateRange(range);
     
+    // Create updated filters
+    let updatedFilters: PurchaseListFilter;
+    
     // Only update filters if date range has values
     if (range?.from || range?.to) {
-      setFilters({
+      updatedFilters = {
         ...filters,
         dateRange: {
           from: range.from ? range.from.toISOString() : "",
           to: range.to ? range.to.toISOString() : "",
         },
-      });
+      };
     } else {
       // Remove date range filter if both dates are undefined
       const { dateRange, ...rest } = filters;
-      setFilters(rest);
+      updatedFilters = rest;
     }
-  }, [filters]);
+    
+    // Update local state
+    setFilters(updatedFilters);
+    
+    // Call the parent callback if provided
+    if (setFiltersCallback) {
+      setFiltersCallback(updatedFilters);
+    }
+  }, [filters, setFiltersCallback]);
 
   const handleFilterChange = useCallback((field: string, value: any) => {
+    let updatedFilters: PurchaseListFilter;
+    
     if (value) {
-      setFilters(prev => ({ ...prev, [field]: value }));
+      updatedFilters = { ...filters, [field]: value };
     } else {
       const newFilters = { ...filters };
       delete newFilters[field as keyof PurchaseListFilter];
-      setFilters(newFilters);
+      updatedFilters = newFilters;
     }
-  }, [filters]);
+    
+    // Update local state
+    setFilters(updatedFilters);
+    
+    // Call the parent callback if provided
+    if (setFiltersCallback) {
+      setFiltersCallback(updatedFilters);
+    }
+  }, [filters, setFiltersCallback]);
 
   const clearAllFilters = useCallback(() => {
     setFilters({});
     setDateRange(undefined);
-  }, []);
+    
+    // Call the parent callback with empty filters
+    if (setFiltersCallback) {
+      setFiltersCallback({});
+    }
+  }, [setFiltersCallback]);
 
   return {
     filters,

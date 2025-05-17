@@ -1,9 +1,9 @@
 
+import { FC, memo } from "react";
 import { FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { memo } from "react";
 
-const DocumentTab = memo(() => {
+const DocumentTab: FC = memo(() => {
   return (
     <div className="py-4 flex flex-col items-center justify-center">
       <div className="bg-muted p-6 rounded-md text-center">

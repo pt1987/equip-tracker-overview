@@ -21,7 +21,7 @@ const PurchaseFilters = memo(({ filters, setFilters }: PurchaseFiltersProps) => 
     handleDateRangeChange,
     handleFilterChange,
     clearAllFilters
-  } = useFilters();
+  } = useFilters(filters, setFilters);
 
   const isAnyFilterApplied = Object.keys(filters).length > 0;
 

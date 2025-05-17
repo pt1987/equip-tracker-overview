@@ -1,12 +1,12 @@
 
-import { memo } from "react";
+import { FC, memo } from "react";
 import PurchaseHistoryList from "../PurchaseHistoryList";
 
 interface HistoryTabProps {
   purchaseId: string;
 }
 
-const HistoryTab = memo(({ purchaseId }: HistoryTabProps) => {
+const HistoryTab: FC<HistoryTabProps> = memo(({ purchaseId }) => {
   return (
     <div className="py-4">
       <PurchaseHistoryList purchaseId={purchaseId} />
