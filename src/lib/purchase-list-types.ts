@@ -79,6 +79,7 @@ export interface PurchaseListFilter {
   vatRate?: TaxRate;
   status?: PurchaseStatus;
   gobdStatus?: GoBDStatus;
+  searchTerm?: string;           // New: Added search term for global search
 }
 
 export interface PurchaseFormValues {

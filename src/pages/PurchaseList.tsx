@@ -6,14 +6,16 @@ import { PurchaseListFilter } from "@/lib/purchase-list-types";
 import PurchaseListTable from "@/components/purchase-list/PurchaseListTable";
 import PurchaseUploader from "@/components/purchase-list/PurchaseUploader";
 import PurchaseFilters from "@/components/purchase-list/PurchaseFilters";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { FileSpreadsheet, FileBarChart, FileUp } from "lucide-react";
+import { FileSpreadsheet, FileBarChart, FileUp, Search } from "lucide-react";
 import { usePurchaseItems } from "@/hooks/usePurchaseItems";
+import SearchFilter from "@/components/shared/SearchFilter";
 
 export default function PurchaseList() {
   const [activeTab, setActiveTab] = useState<"list" | "upload">("list");
   const [filters, setFilters] = useState<PurchaseListFilter>({});
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const { toast } = useToast();
   
   const { 
@@ -23,7 +25,7 @@ export default function PurchaseList() {
     refresh,
     exportToDatev,
     exportForAudit
-  } = usePurchaseItems(filters);
+  } = usePurchaseItems({...filters, searchTerm});
 
   const handleExportDatev = async () => {
     try {
@@ -57,6 +59,10 @@ export default function PurchaseList() {
       });
       console.error("Audit export error:", error);
     }
+  };
+
+  const handleSearch = (value: string) => {
+    setSearchTerm(value);
   };
 
   return (
@@ -113,7 +119,20 @@ export default function PurchaseList() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <PurchaseFilters filters={filters} setFilters={setFilters} />
+              <div className="space-y-4">
+                <div className="flex flex-col md:flex-row gap-4">
+                  <SearchFilter 
+                    placeholder="Suchbegriff eingeben..." 
+                    onSearch={handleSearch} 
+                    className="w-full md:w-1/3" 
+                  />
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <Search className="h-4 w-4 mr-2" />
+                    <span>Suche in Lieferanten, Artikelbeschreibungen und Rechnungsnummern</span>
+                  </div>
+                </div>
+                <PurchaseFilters filters={filters} setFilters={setFilters} />
+              </div>
             </CardContent>
           </Card>
 

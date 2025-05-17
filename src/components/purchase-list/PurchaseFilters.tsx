@@ -1,14 +1,15 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DateRangePicker } from "@/components/ui/date-range-picker";
-import { PurchaseListFilter, PurchaseStatus, GoBDStatus, TaxRate } from "@/lib/purchase-list-types";
 import { X } from "lucide-react";
 import { DateRange } from "react-day-picker";
-import { de } from "date-fns/locale";
+import { PurchaseListFilter } from "@/lib/purchase-list-types";
+import DateRangeSection from "./filters/DateRangeSection";
+import SupplierFilter from "./filters/SupplierFilter";
+import CostCenterFilter from "./filters/CostCenterFilter";
+import VatRateFilter from "./filters/VatRateFilter";
+import StatusFilter from "./filters/StatusFilter";
+import GoBDStatusFilter from "./filters/GoBDStatusFilter";
 
 interface PurchaseFiltersProps {
   filters: PurchaseListFilter;
@@ -45,159 +46,70 @@ export default function PurchaseFilters({ filters, setFilters }: PurchaseFilters
     }
   };
 
-  const handleSupplierChange = (value: string) => {
-    if (value) {
-      setFilters({ ...filters, supplier: value });
-    } else {
-      const { supplier, ...rest } = filters;
-      setFilters(rest);
-    }
-  };
-
-  const handleCostCenterChange = (value: string) => {
-    if (value) {
-      setFilters({ ...filters, costCenter: value });
-    } else {
-      const { costCenter, ...rest } = filters;
-      setFilters(rest);
-    }
-  };
-
-  const handleVatRateChange = (value: string) => {
-    if (value && value !== "none") {
-      setFilters({ ...filters, vatRate: parseInt(value) as TaxRate });
-    } else {
-      const { vatRate, ...rest } = filters;
-      setFilters(rest);
-    }
-  };
-
-  const handleStatusChange = (value: string) => {
-    if (value && value !== "none") {
-      setFilters({ ...filters, status: value as PurchaseStatus });
-    } else {
-      const { status, ...rest } = filters;
-      setFilters(rest);
-    }
-  };
-
-  const handleGoBDStatusChange = (value: string) => {
-    if (value && value !== "none") {
-      setFilters({ ...filters, gobdStatus: value as GoBDStatus });
-    } else {
-      const { gobdStatus, ...rest } = filters;
-      setFilters(rest);
-    }
-  };
-
   const clearAllFilters = () => {
     setFilters({});
     setDateRange(undefined);
   };
 
+  const handleFilterChange = (field: string, value: any) => {
+    if (value) {
+      setFilters({ ...filters, [field]: value });
+    } else {
+      const newFilters = { ...filters };
+      delete newFilters[field as keyof PurchaseListFilter];
+      setFilters(newFilters);
+    }
+  };
+
+  const isAnyFilterApplied = Object.keys(filters).length > 0;
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="date-range">Belegdatum</Label>
-          <DateRangePicker
-            value={dateRange}
-            onChange={handleDateRangeChange}
-            placeholder="Datumsbereich auswählen"
-            align="start"
-            locale={de}
-          />
-        </div>
+        <DateRangeSection 
+          dateRange={dateRange} 
+          onChange={handleDateRangeChange} 
+        />
 
-        <div className="space-y-2">
-          <Label htmlFor="supplier">Lieferant</Label>
-          <Input
-            id="supplier"
-            value={filters.supplier || ""}
-            onChange={(e) => handleSupplierChange(e.target.value)}
-            placeholder="Lieferant eingeben"
-          />
-        </div>
+        <SupplierFilter 
+          value={filters.supplier || ""} 
+          onChange={(value) => handleFilterChange("supplier", value)} 
+        />
 
-        <div className="space-y-2">
-          <Label htmlFor="cost-center">Kostenstelle</Label>
-          <Input
-            id="cost-center"
-            value={filters.costCenter || ""}
-            onChange={(e) => handleCostCenterChange(e.target.value)}
-            placeholder="Kostenstelle eingeben"
-          />
-        </div>
+        <CostCenterFilter 
+          value={filters.costCenter || ""} 
+          onChange={(value) => handleFilterChange("costCenter", value)} 
+        />
 
-        <div className="space-y-2">
-          <Label htmlFor="vat-rate">MwSt-Satz</Label>
-          <Select
-            value={filters.vatRate?.toString() || "none"}
-            onValueChange={handleVatRateChange}
-          >
-            <SelectTrigger id="vat-rate">
-              <SelectValue placeholder="MwSt-Satz auswählen" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">Alle</SelectItem>
-              <SelectItem value="0">0%</SelectItem>
-              <SelectItem value="7">7%</SelectItem>
-              <SelectItem value="19">19%</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <VatRateFilter 
+          value={filters.vatRate?.toString() || "none"} 
+          onChange={(value) => handleFilterChange("vatRate", value !== "none" ? parseInt(value) : undefined)} 
+        />
 
-        <div className="space-y-2">
-          <Label htmlFor="status">Status</Label>
-          <Select
-            value={filters.status || "none"}
-            onValueChange={handleStatusChange}
-          >
-            <SelectTrigger id="status">
-              <SelectValue placeholder="Status auswählen" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">Alle</SelectItem>
-              <SelectItem value="draft">Entwurf</SelectItem>
-              <SelectItem value="pending">Prüfung ausstehend</SelectItem>
-              <SelectItem value="approved">Genehmigt</SelectItem>
-              <SelectItem value="rejected">Abgelehnt</SelectItem>
-              <SelectItem value="exported">Exportiert</SelectItem>
-              <SelectItem value="archived">Archiviert</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <StatusFilter 
+          value={filters.status || "none"} 
+          onChange={(value) => handleFilterChange("status", value !== "none" ? value : undefined)} 
+        />
 
-        <div className="space-y-2">
-          <Label htmlFor="gobd-status">GoBD-Status</Label>
-          <Select
-            value={filters.gobdStatus || "none"}
-            onValueChange={handleGoBDStatusChange}
-          >
-            <SelectTrigger id="gobd-status">
-              <SelectValue placeholder="GoBD-Status auswählen" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">Alle</SelectItem>
-              <SelectItem value="red">Nicht konform</SelectItem>
-              <SelectItem value="yellow">Prüfen</SelectItem>
-              <SelectItem value="green">GoBD-konform</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <GoBDStatusFilter 
+          value={filters.gobdStatus || "none"} 
+          onChange={(value) => handleFilterChange("gobdStatus", value !== "none" ? value : undefined)} 
+        />
       </div>
 
-      <div className="flex justify-end">
-        <Button 
-          variant="ghost" 
-          onClick={clearAllFilters} 
-          size="sm"
-          className="text-muted-foreground"
-        >
-          <X className="h-4 w-4 mr-2" />
-          Filter zurücksetzen
-        </Button>
-      </div>
+      {isAnyFilterApplied && (
+        <div className="flex justify-end">
+          <Button 
+            variant="ghost" 
+            onClick={clearAllFilters} 
+            size="sm"
+            className="text-muted-foreground"
+          >
+            <X className="h-4 w-4 mr-2" />
+            Filter zurücksetzen
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
