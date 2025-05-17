@@ -1,9 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Key, Lock, LogIn, Mail, UserPlus, User } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -43,23 +43,36 @@ export default function Login() {
   const [showSignupPasswordConfirm, setShowSignupPasswordConfirm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
+  const [redirecting, setRedirecting] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
   const { login, signup, isAuthenticated, loading: authLoading } = useAuth();
 
-  // Log authentication state for debugging
-  console.log("Login page - Auth state:", { isAuthenticated, authLoading, currentPath: location.pathname });
+  // Debugging information
+  console.log("Login page - Auth state:", { 
+    isAuthenticated, 
+    authLoading, 
+    currentPath: location.pathname, 
+    redirecting 
+  });
 
   // Weiterleitung zum Dashboard, falls bereits authentifiziert
   useEffect(() => {
-    console.log("Login page - Checking auth state for redirect:", { isAuthenticated, authLoading });
-    // Only redirect if auth is initialized and user is authenticated
-    if (!authLoading && isAuthenticated) {
+    // Only redirect if:
+    // 1. Not already redirecting
+    // 2. Auth state is resolved (not loading) 
+    // 3. User is authenticated
+    if (!redirecting && !authLoading && isAuthenticated) {
       console.log("Login page - User is authenticated, redirecting to dashboard");
-      navigate("/dashboard", { replace: true });
+      setRedirecting(true);
+      
+      // Use setTimeout to prevent immediate redirection that could cause loops
+      setTimeout(() => {
+        navigate("/dashboard", { replace: true });
+      }, 300);
     }
-  }, [isAuthenticated, authLoading, navigate]);
+  }, [isAuthenticated, authLoading, navigate, redirecting]);
 
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -82,6 +95,11 @@ export default function Login() {
   });
 
   const onLoginSubmit = async (data: LoginFormValues) => {
+    if (redirecting) {
+      console.log("Already redirecting, preventing duplicate login attempt");
+      return;
+    }
+    
     console.log("Attempting login with:", data.email);
     setIsLoading(true);
     
@@ -94,6 +112,8 @@ export default function Login() {
           title: "Erfolgreich angemeldet",
           description: "Willkommen im Asset-Tracker.",
         });
+        // Login successful, don't set isLoading to false here.
+        // The redirect will happen via the useEffect that checks if user is authenticated.
       } else {
         setIsLoading(false);
         toast({
@@ -303,7 +323,7 @@ export default function Login() {
                       </Button>
                     </div>
 
-                    <Button type="submit" className="w-full" disabled={isLoading || authLoading}>
+                    <Button type="submit" className="w-full" disabled={isLoading || authLoading || redirecting}>
                       {isLoading ? (
                         <div className="flex items-center">
                           <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

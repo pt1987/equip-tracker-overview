@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "@/components/ui/use-toast";
 import { 
@@ -42,7 +43,8 @@ export const useDashboardData = () => {
       defectiveAssets: 0,
       totalBudget: 0,
       totalBudgetUsed: 0
-    }
+    },
+    refetch: refetchDashboardStats
   } = useQuery({
     queryKey: ["dashboardStats"],
     queryFn: getDashboardStats
@@ -50,7 +52,8 @@ export const useDashboardData = () => {
   
   // Get asset type distribution
   const {
-    data: assetTypeDistribution = []
+    data: assetTypeDistribution = [],
+    refetch: refetchAssetTypeDistribution
   } = useQuery({
     queryKey: ["assetTypeDistribution"],
     queryFn: getAssetTypeDistribution
@@ -58,7 +61,8 @@ export const useDashboardData = () => {
   
   // Get asset status distribution
   const {
-    data: assetStatusDistribution = []
+    data: assetStatusDistribution = [],
+    refetch: refetchAssetStatusDistribution
   } = useQuery({
     queryKey: ["assetStatusDistribution"],
     queryFn: getAssetStatusDistribution
@@ -66,7 +70,8 @@ export const useDashboardData = () => {
   
   // Get recent assets
   const {
-    data: recentAssets = []
+    data: recentAssets = [],
+    refetch: refetchRecentAssets
   } = useQuery({
     queryKey: ["recentAssets"],
     queryFn: () => getRecentAssets(5)
@@ -74,7 +79,8 @@ export const useDashboardData = () => {
   
   // Get recent employees
   const {
-    data: recentEmployees = []
+    data: recentEmployees = [],
+    refetch: refetchRecentEmployees
   } = useQuery({
     queryKey: ["recentEmployees"],
     queryFn: () => getRecentEmployees(5)
@@ -82,7 +88,8 @@ export const useDashboardData = () => {
   
   // Get asset status percentages
   const {
-    data: statusPercentages = {}
+    data: statusPercentages = {},
+    refetch: refetchStatusPercentages
   } = useQuery({
     queryKey: ["assetStatusPercentages"],
     queryFn: getAssetStatusPercentages,
@@ -100,7 +107,8 @@ export const useDashboardData = () => {
   
   // Get total asset count
   const {
-    data: totalAssetCount = 0
+    data: totalAssetCount = 0,
+    refetch: refetchTotalAssetCount
   } = useQuery({
     queryKey: ["totalAssetCount"],
     queryFn: getTotalAssetCount
@@ -108,11 +116,34 @@ export const useDashboardData = () => {
   
   // Get owner company distribution
   const {
-    data: ownerCompanyDistribution = []
+    data: ownerCompanyDistribution = [],
+    refetch: refetchOwnerCompanyDistribution
   } = useQuery({
     queryKey: ["ownerCompanyDistribution"],
     queryFn: getOwnerCompanyDistribution
   });
+  
+  // Function to refresh all data
+  const refetchDashboardData = useCallback(() => {
+    console.log("Refreshing all dashboard data");
+    refetchDashboardStats();
+    refetchAssetTypeDistribution();
+    refetchAssetStatusDistribution();
+    refetchRecentAssets();
+    refetchRecentEmployees();
+    refetchStatusPercentages();
+    refetchTotalAssetCount();
+    refetchOwnerCompanyDistribution();
+  }, [
+    refetchDashboardStats,
+    refetchAssetTypeDistribution,
+    refetchAssetStatusDistribution,
+    refetchRecentAssets,
+    refetchRecentEmployees,
+    refetchStatusPercentages,
+    refetchTotalAssetCount,
+    refetchOwnerCompanyDistribution
+  ]);
   
   useEffect(() => {
     if (dashboardStats && assetTypeDistribution && assetStatusDistribution) {
@@ -129,6 +160,7 @@ export const useDashboardData = () => {
     recentEmployees,
     statusPercentages,
     totalAssetCount,
-    ownerCompanyDistribution
+    ownerCompanyDistribution,
+    refetchDashboardData
   };
 };

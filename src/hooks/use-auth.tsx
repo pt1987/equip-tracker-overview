@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -123,6 +124,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       (event, currentSession) => {
         console.log(`Auth state changed. Event: ${event}. Session: ${currentSession ? 'exists' : 'null'}`);
         
+        // Only update state, don't navigate here to prevent loops
         setSession(currentSession);
         
         if (currentSession?.user) {
@@ -159,6 +161,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       console.log("Initial session check:", currentSession ? 'Session exists' : 'No session');
+      
+      // Only update state, don't navigate here to prevent loops
       setSession(currentSession);
       
       if (currentSession?.user) {
@@ -260,13 +264,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       console.log("Login successful, session:", data.session ? "exists" : "null");
       
-      // Manual navigation to dashboard after successful login
-      if (data.session) {
-        console.log("Login successful - redirecting to dashboard");
-        setTimeout(() => {
-          navigate("/dashboard", { replace: true });
-        }, 100);
-      }
+      // Navigation is now handled entirely by ProtectedRoute to prevent loops
+      // Let the AuthProvider update the auth state, and then let ProtectedRoute
+      // redirect based on that auth state, rather than doing it here
       
       return true;
     } catch (error: any) {
@@ -379,28 +379,37 @@ export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const { isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [redirectAttempted, setRedirectAttempted] = useState(false);
+  const [redirected, setRedirected] = useState(false);
   
   useEffect(() => {
-    // Only redirect if:
-    // 1. Not loading
-    // 2. Not authenticated
-    // 3. Not already on login page
-    // 4. Haven't attempted a redirect yet in this render cycle
-    if (!loading && !isAuthenticated && location.pathname !== "/login" && !redirectAttempted) {
-      console.log("User not authenticated, redirecting to login");
-      setRedirectAttempted(true);
-      navigate("/login", { replace: true });
+    // If already redirected, don't redirect again in this component lifecycle
+    if (redirected) {
+      return;
     }
-  }, [isAuthenticated, loading, navigate, location.pathname, redirectAttempted]);
+    
+    // Wait for loading to complete before making routing decisions
+    if (!loading) {
+      if (!isAuthenticated && location.pathname !== "/login") {
+        console.log(`Protected route accessed while not authenticated. Current path: ${location.pathname}. Redirecting to login.`);
+        setRedirected(true);
+        navigate("/login", { replace: true });
+      } else {
+        console.log(`Auth state for current route (${location.pathname}): authenticated=${isAuthenticated}, loading=${loading}`);
+      }
+    }
+  }, [isAuthenticated, loading, navigate, location.pathname, redirected]);
   
   if (loading) {
+    console.log("Auth is still loading, showing loading spinner");
     return <div className="flex justify-center items-center h-screen">Laden...</div>;
   }
   
-  // Allow rendering children if:
-  // 1. User is authenticated OR
-  // 2. Current path is login page
+  // Special case for dashboard to debug the reload issue
+  if (location.pathname === "/dashboard") {
+    console.log("Dashboard rendering. Auth state:", { isAuthenticated, loading });
+  }
+  
+  // Simple rendering logic - show children if authenticated or on login page
   return (isAuthenticated || location.pathname === "/login") ? <>{children}</> : null;
 };
 

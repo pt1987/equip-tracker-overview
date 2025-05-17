@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import PageTransition from "@/components/layout/PageTransition";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
@@ -23,8 +23,14 @@ const IndexPage = () => {
     assetStatusDistribution,
     recentAssets,
     recentEmployees,
-    ownerCompanyDistribution
+    ownerCompanyDistribution,
+    refetchDashboardData
   } = useDashboardData();
+  
+  // Log when dashboard renders to help debug reload issues
+  useEffect(() => {
+    console.log("Dashboard page rendered. Auth should be stable now.");
+  }, []);
   
   if (loading) {
     return (
