@@ -8,7 +8,25 @@ import { Card, CardContent } from "@/components/ui/card";
 import { CircleDollarSign } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
-const getMaintenanceCostData = async (dateRange?: any) => {
+interface MaintenanceCostItem {
+  assetId: string;
+  assetName: string;
+  category: string;
+  purchaseValue: number;
+  totalMaintenanceCost: number;
+  maintenanceRatio: number;
+  maintenanceCount: number;
+}
+
+interface CategoryData {
+  category: string;
+  totalAssets: number;
+  totalMaintenanceCost: number;
+  totalPurchaseValue: number;
+  maintenanceRatio?: number;
+}
+
+const getMaintenanceCostData = async (dateRange?: any): Promise<MaintenanceCostItem[]> => {
   // Sample data - in real implementation, this would fetch from API
   return [
     { assetId: "A1001", assetName: "MacBook Pro 16", category: "Laptops", purchaseValue: 2400, totalMaintenanceCost: 350, maintenanceRatio: 14.6, maintenanceCount: 2 },
@@ -33,7 +51,7 @@ export default function MaintenanceCostReport() {
   const categoryData = React.useMemo(() => {
     if (!data) return [];
     
-    const categoryMap = new Map();
+    const categoryMap = new Map<string, CategoryData>();
     data.forEach(item => {
       if (!categoryMap.has(item.category)) {
         categoryMap.set(item.category, {
@@ -44,7 +62,7 @@ export default function MaintenanceCostReport() {
         });
       }
       
-      const category = categoryMap.get(item.category);
+      const category = categoryMap.get(item.category)!;
       category.totalAssets++;
       category.totalMaintenanceCost += item.totalMaintenanceCost;
       category.totalPurchaseValue += item.purchaseValue;
@@ -85,7 +103,7 @@ export default function MaintenanceCostReport() {
                   label={{ value: 'Kosten (€)', angle: -90, position: 'insideLeft' }} />
                 <YAxis yAxisId="right" orientation="right" 
                   label={{ value: '%', angle: 90, position: 'insideRight' }} />
-                <Tooltip formatter={(value, name) => {
+                <Tooltip formatter={(value: number, name: string) => {
                   if (name === "totalMaintenanceCost") return [formatCurrency(value), "Wartungskosten"];
                   if (name === "maintenanceRatio") return [`${value.toFixed(1)}%`, "% vom Kaufwert"];
                   return [value, name];
@@ -122,7 +140,7 @@ export default function MaintenanceCostReport() {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value) => formatCurrency(value)} />
+                <Tooltip formatter={(value: number) => formatCurrency(value)} />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>

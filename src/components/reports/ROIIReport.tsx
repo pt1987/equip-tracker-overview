@@ -8,7 +8,27 @@ import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
-const getROIIData = async (dateRange?: any) => {
+interface ROIIData {
+  category: string;
+  initialInvestment: number;
+  operationalCost: number;
+  businessValue: number;
+  roi: number;
+  paybackPeriodMonths: number;
+}
+
+interface PieDataItem {
+  name: string;
+  value: number;
+}
+
+interface TotalStats {
+  totalInvestment: number;
+  totalValue: number;
+  overallROI: number;
+}
+
+const getROIIData = async (dateRange?: any): Promise<ROIIData[]> => {
   // Sample data - in real implementation, this would fetch from API
   return [
     { category: "Laptops", initialInvestment: 125000, operationalCost: 25000, businessValue: 180000, roi: 36.0, paybackPeriodMonths: 22 },
@@ -95,7 +115,7 @@ export default function ROIIReport() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="category" />
                 <YAxis domain={[0, 'dataMax + 10']} />
-                <Tooltip formatter={(value, name) => {
+                <Tooltip formatter={(value: number, name: string) => {
                   if (name === "roi") return [`${value}%`, "ROI"];
                   return [value, name];
                 }} />
@@ -130,7 +150,7 @@ export default function ROIIReport() {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value) => formatCurrency(value)} />
+                <Tooltip formatter={(value: number) => formatCurrency(value)} />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
@@ -148,7 +168,7 @@ export default function ROIIReport() {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="category" />
               <YAxis domain={[0, 'dataMax + 5']} />
-              <Tooltip formatter={(value, name) => {
+              <Tooltip formatter={(value: number, name: string) => {
                 if (name === "paybackPeriodMonths") return [`${value} Monate`, "Amortisationszeit"];
                 return [value, name];
               }} />

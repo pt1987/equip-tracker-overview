@@ -7,7 +7,27 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Activity } from "lucide-react";
 
-const getAssetUtilizationData = async (dateRange?: any) => {
+// Define types for our data
+interface AssetUtilizationItem {
+  assetId: string;
+  assetName: string;
+  category: string;
+  utilizationRatio: number;
+  totalBookings: number;
+  totalBookingDays: number;
+  idleDays: number;
+  availabilityRate: number;
+}
+
+interface CategoryAverage {
+  category: string;
+  avgUtilization: number;
+  avgAvailability: number;
+  avgBookings: number;
+  assetCount: number;
+}
+
+const getAssetUtilizationData = async (dateRange?: any): Promise<AssetUtilizationItem[]> => {
   // Sample data - in real implementation, this would fetch from API
   return [
     { assetId: "P1001", assetName: "MacBook Pro 16", category: "Laptops", utilizationRatio: 84, totalBookings: 12, totalBookingDays: 45, idleDays: 5, availabilityRate: 92 },
@@ -20,10 +40,16 @@ const getAssetUtilizationData = async (dateRange?: any) => {
   ];
 };
 
-const getCategoryAverages = (data) => {
+const getCategoryAverages = (data: AssetUtilizationItem[] | undefined): CategoryAverage[] => {
   if (!data || !data.length) return [];
   
-  const categories = {};
+  const categories: Record<string, {
+    category: string;
+    count: number;
+    totalUtilization: number;
+    totalAvailability: number;
+    totalBookings: number;
+  }> = {};
   
   data.forEach(item => {
     if (!categories[item.category]) {
@@ -117,7 +143,7 @@ export default function AssetUtilizationReport() {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis type="number" domain={[0, 100]} />
               <YAxis dataKey="assetName" type="category" width={150} />
-              <Tooltip formatter={(value) => [`${value}%`, 'Nutzungsrate']} />
+              <Tooltip formatter={(value: number) => [`${value}%`, 'Nutzungsrate']} />
               <Legend />
               <Bar dataKey="utilizationRatio" name="Nutzungsrate" fill="#8884d8" />
               <Bar dataKey="availabilityRate" name="Verfügbarkeit" fill="#82ca9d" />
@@ -138,7 +164,7 @@ export default function AssetUtilizationReport() {
               <XAxis dataKey="category" />
               <YAxis yAxisId="left" domain={[0, 100]} />
               <YAxis yAxisId="right" orientation="right" />
-              <Tooltip formatter={(value, name) => {
+              <Tooltip formatter={(value: number, name: string) => {
                 if (name === "avgUtilization" || name === "avgAvailability") return [`${value.toFixed(1)}%`, name === "avgUtilization" ? "Nutzungsrate" : "Verfügbarkeit"];
                 if (name === "avgBookings") return [`${value.toFixed(1)}`, "Durchschn. Buchungen"];
                 if (name === "assetCount") return [`${value}`, "Anzahl Geräte"];

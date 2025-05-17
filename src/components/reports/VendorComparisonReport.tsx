@@ -8,7 +8,33 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Building } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
-const getVendorComparisonData = async (dateRange?: any) => {
+interface VendorData {
+  vendor: string;
+  assetCount: number;
+  totalSpent: number;
+  reliabilityScore: number;
+  defectRate: number;
+  avgResponseTimeDays: number;
+  satisfactionScore: number;
+  onTimeDeliveryRate: number;
+}
+
+interface RadarData {
+  vendor: string;
+  reliability: number;
+  defectRate: number;
+  responseTime: number;
+  satisfaction: number;
+  delivery: number;
+}
+
+interface TotalStats {
+  totalSpent: number;
+  avgReliability: number;
+  avgSatisfaction: number;
+}
+
+const getVendorComparisonData = async (dateRange?: any): Promise<VendorData[]> => {
   // Sample data - in real implementation, this would fetch from API
   return [
     { vendor: "Dell", assetCount: 82, totalSpent: 180000, reliabilityScore: 87, defectRate: 4.5, avgResponseTimeDays: 1.2, satisfactionScore: 4.2, onTimeDeliveryRate: 95 },
@@ -21,7 +47,7 @@ const getVendorComparisonData = async (dateRange?: any) => {
 };
 
 // Normalize data for radar chart (0-100 scale)
-const normalizeData = (data) => {
+const normalizeData = (data: VendorData[] | undefined): RadarData[] => {
   if (!data) return [];
   
   return data.map(vendor => {
@@ -115,7 +141,7 @@ export default function VendorComparisonReport() {
               <Radar name="Microsoft" dataKey="delivery" stroke="#FF33F3" fill="#FF33F3" fillOpacity={0.2} />
               <Legend />
               <Tooltip 
-                formatter={(value, name) => {
+                formatter={(value: number, name: string) => {
                   if (name === "defectRate") return [`${(100 - value) / 10}%`, "Defektrate"];
                   if (name === "responseTime") return [`${(5 * (100 - value) / 100).toFixed(1)} Tage`, "Reaktionszeit"];
                   if (name === "satisfaction") return [`${(value / 100 * 5).toFixed(1)}/5`, "Zufriedenheit"];
@@ -141,7 +167,7 @@ export default function VendorComparisonReport() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="vendor" />
                 <YAxis />
-                <Tooltip formatter={(value) => formatCurrency(value)} />
+                <Tooltip formatter={(value: number) => formatCurrency(value)} />
                 <Legend />
                 <Bar dataKey="totalSpent" name="Ausgaben" fill="#8884d8" />
               </BarChart>
@@ -160,7 +186,7 @@ export default function VendorComparisonReport() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="vendor" />
                 <YAxis domain={[0, 'dataMax + 1']} />
-                <Tooltip formatter={(value) => [`${value}%`, "Defektrate"]} />
+                <Tooltip formatter={(value: number) => [`${value}%`, "Defektrate"]} />
                 <Legend />
                 <Bar dataKey="defectRate" name="Defektrate (%)" fill="#82ca9d" />
               </BarChart>

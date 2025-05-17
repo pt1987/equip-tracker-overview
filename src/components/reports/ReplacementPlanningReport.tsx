@@ -9,7 +9,35 @@ import { RefreshCcw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
-const getReplacementPlanningData = async (dateRange?: any) => {
+interface ReplacementAsset {
+  assetId: string;
+  assetName: string;
+  category: string;
+  purchaseDate: string;
+  recommendedReplaceDate: string;
+  ageInMonths: number;
+  conditionScore: number;
+  replacementPriority: 'high' | 'medium' | 'low';
+  estimatedReplacementCost: number;
+}
+
+interface PriorityCount {
+  name: string;
+  count: number;
+  value: number;
+  color: string;
+}
+
+interface CategoryData {
+  category: string;
+  high: number;
+  medium: number;
+  low: number;
+  total: number;
+  cost: number;
+}
+
+const getReplacementPlanningData = async (dateRange?: any): Promise<ReplacementAsset[]> => {
   // Sample data - in real implementation, this would fetch from API
   return [
     { assetId: "A1001", assetName: "MacBook Pro 2020", category: "Laptops", purchaseDate: "2020-08-15", recommendedReplaceDate: "2023-08-15", ageInMonths: 36, conditionScore: 6.5, replacementPriority: "high", estimatedReplacementCost: 2400 },
@@ -79,7 +107,7 @@ export default function ReplacementPlanningReport() {
   const categoryData = React.useMemo(() => {
     if (!data) return [];
     
-    const categories = {};
+    const categories: Record<string, CategoryData> = {};
     
     data.forEach(item => {
       if (!categories[item.category]) {
@@ -175,7 +203,7 @@ export default function ReplacementPlanningReport() {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value) => formatCurrency(value)} />
+                <Tooltip formatter={(value: number) => formatCurrency(value)} />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
@@ -192,7 +220,7 @@ export default function ReplacementPlanningReport() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="category" />
                 <YAxis />
-                <Tooltip formatter={(value, name) => {
+                <Tooltip formatter={(value: number, name: string) => {
                   if (name === "high") return [value, "Hohe Priorität"];
                   if (name === "medium") return [value, "Mittlere Priorität"];
                   if (name === "low") return [value, "Niedrige Priorität"];

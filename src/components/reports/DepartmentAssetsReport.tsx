@@ -8,7 +8,26 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Building2 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
-const getDepartmentAssetsData = async (dateRange?: any) => {
+interface DepartmentAsset {
+  department: string;
+  assetCount: number;
+  totalValue: number;
+  assetsByType: {
+    laptop: number;
+    smartphone: number;
+    tablet: number;
+    accessory: number;
+  };
+  employeeCount: number;
+  assetsPerEmployee: number;
+}
+
+interface PieDataItem {
+  name: string;
+  value: number;
+}
+
+const getDepartmentAssetsData = async (dateRange?: any): Promise<DepartmentAsset[]> => {
   // Sample data - in real implementation, this would fetch from API
   return [
     { department: "Engineering", assetCount: 120, totalValue: 280000, assetsByType: { laptop: 45, smartphone: 40, tablet: 15, accessory: 20 }, employeeCount: 42, assetsPerEmployee: 2.86 },
@@ -84,7 +103,7 @@ export default function DepartmentAssetsReport() {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value) => [`${value} Assets`, ""]} />
+                <Tooltip formatter={(value: number) => [`${value} Assets`, ""]} />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
@@ -113,7 +132,7 @@ export default function DepartmentAssetsReport() {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value) => [formatCurrency(value), ""]} />
+                <Tooltip formatter={(value: number) => [formatCurrency(value), ""]} />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
@@ -131,7 +150,7 @@ export default function DepartmentAssetsReport() {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="department" />
               <YAxis />
-              <Tooltip formatter={(value, name) => {
+              <Tooltip formatter={(value: number, name: string) => {
                 if (name === "assetsPerEmployee") return [`${value.toFixed(2)}`, "Assets pro Mitarbeiter"];
                 if (name === "employeeCount") return [`${value}`, "Anzahl Mitarbeiter"];
                 return [value, name];
