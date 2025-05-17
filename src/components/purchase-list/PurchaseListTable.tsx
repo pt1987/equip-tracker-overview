@@ -121,68 +121,70 @@ const GoBDStatusBadge = memo(({ status }: { status: string }) => {
 
 GoBDStatusBadge.displayName = "GoBDStatusBadge";
 
-// Table Row Component
-const TableRowItem = memo(({ item, onViewDetails }: { item: PurchaseItem, onViewDetails: (item: PurchaseItem) => void }) => {
-  return (
-    <TableRow key={item.id}>
-      <TableCell>{formatDate(item.documentDate)}</TableCell>
-      <TableCell>{item.supplier}</TableCell>
-      <TableCell className="max-w-[200px] truncate" title={item.itemDescription}>
-        {item.itemDescription}
-      </TableCell>
-      <TableCell className="text-right">{item.quantity}</TableCell>
-      <TableCell>{item.unit}</TableCell>
-      <TableCell className="text-right">{formatCurrency(item.netAmount)}</TableCell>
-      <TableCell className="text-right">{formatCurrency(item.vatAmount)}</TableCell>
-      <TableCell className="text-right">{item.vatRate}%</TableCell>
-      <TableCell>{item.accountNumber}</TableCell>
-      <TableCell>{item.costCenter}</TableCell>
-      <TableCell>
-        {item.assetId ? (
-          <a 
-            href={`/asset/${item.assetId}`} 
-            className="text-primary hover:underline"
-          >
-            {item.assetId}
-          </a>
-        ) : (
-          "-"
-        )}
-      </TableCell>
-      <TableCell><StatusBadge status={item.status} /></TableCell>
-      <TableCell><GoBDStatusBadge status={item.gobdStatus} /></TableCell>
-      <TableCell>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => onViewDetails(item)}
-              >
-                <Eye className="h-4 w-4" />
-                <span className="sr-only">Details anzeigen</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p className="text-xs">Details anzeigen</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </TableCell>
-    </TableRow>
-  );
-});
+// Table Row Component - Optimized with memo
+const TableRowItem = memo(({ item, onViewDetails }: { item: PurchaseItem, onViewDetails: (item: PurchaseItem) => void }) => (
+  <TableRow>
+    <TableCell>{formatDate(item.documentDate)}</TableCell>
+    <TableCell>{item.supplier}</TableCell>
+    <TableCell className="max-w-[200px] truncate" title={item.itemDescription}>
+      {item.itemDescription}
+    </TableCell>
+    <TableCell className="text-right">{item.quantity}</TableCell>
+    <TableCell>{item.unit}</TableCell>
+    <TableCell className="text-right">{formatCurrency(item.netAmount)}</TableCell>
+    <TableCell className="text-right">{formatCurrency(item.vatAmount)}</TableCell>
+    <TableCell className="text-right">{item.vatRate}%</TableCell>
+    <TableCell>{item.accountNumber}</TableCell>
+    <TableCell>{item.costCenter}</TableCell>
+    <TableCell>
+      {item.assetId ? (
+        <a 
+          href={`/asset/${item.assetId}`} 
+          className="text-primary hover:underline"
+        >
+          {item.assetId}
+        </a>
+      ) : (
+        "-"
+      )}
+    </TableCell>
+    <TableCell><StatusBadge status={item.status} /></TableCell>
+    <TableCell><GoBDStatusBadge status={item.gobdStatus} /></TableCell>
+    <TableCell>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => onViewDetails(item)}
+            >
+              <Eye className="h-4 w-4" />
+              <span className="sr-only">Details anzeigen</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p className="text-xs">Details anzeigen</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </TableCell>
+  </TableRow>
+));
 
 TableRowItem.displayName = "TableRowItem";
 
-// Main component
-export default function PurchaseListTable({ items, isLoading, error, onRefresh }: PurchaseListTableProps) {
+// Main component with useMemo and stable callbacks
+const PurchaseListTable = memo(({ items, isLoading, error, onRefresh }: PurchaseListTableProps) => {
   const [selectedItem, setSelectedItem] = useState<PurchaseItem | null>(null);
 
-  const handleViewDetails = (item: PurchaseItem) => {
+  const handleViewDetails = useMemo(() => (item: PurchaseItem) => {
     setSelectedItem(item);
-  };
+  }, []);
+
+  const handleCloseDialog = useMemo(() => () => {
+    setSelectedItem(null);
+  }, []);
 
   // Memoize the table to prevent unnecessary re-renders
   const tableContent = useMemo(() => {
@@ -199,41 +201,39 @@ export default function PurchaseListTable({ items, isLoading, error, onRefresh }
     }
 
     return (
-      <div>
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Belegdatum</TableHead>
-                <TableHead>Lieferant</TableHead>
-                <TableHead>Artikel-/Güterbezeichnung</TableHead>
-                <TableHead className="text-right">Menge</TableHead>
-                <TableHead>Einheit</TableHead>
-                <TableHead className="text-right">Nettobetrag €</TableHead>
-                <TableHead className="text-right">MwSt €</TableHead>
-                <TableHead className="text-right">MwSt-Satz %</TableHead>
-                <TableHead>Sachkonto</TableHead>
-                <TableHead>Kostenstelle</TableHead>
-                <TableHead>Asset-ID</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>GoBD</TableHead>
-                <TableHead className="w-[50px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {items.map((item) => (
-                <TableRowItem 
-                  key={item.id} 
-                  item={item} 
-                  onViewDetails={handleViewDetails}
-                />
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Belegdatum</TableHead>
+              <TableHead>Lieferant</TableHead>
+              <TableHead>Artikel-/Güterbezeichnung</TableHead>
+              <TableHead className="text-right">Menge</TableHead>
+              <TableHead>Einheit</TableHead>
+              <TableHead className="text-right">Nettobetrag €</TableHead>
+              <TableHead className="text-right">MwSt €</TableHead>
+              <TableHead className="text-right">MwSt-Satz %</TableHead>
+              <TableHead>Sachkonto</TableHead>
+              <TableHead>Kostenstelle</TableHead>
+              <TableHead>Asset-ID</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>GoBD</TableHead>
+              <TableHead className="w-[50px]"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {items.map((item) => (
+              <TableRowItem 
+                key={item.id} 
+                item={item} 
+                onViewDetails={handleViewDetails}
+              />
+            ))}
+          </TableBody>
+        </Table>
       </div>
     );
-  }, [items, isLoading, error, onRefresh]);
+  }, [items, isLoading, error, onRefresh, handleViewDetails]);
 
   return (
     <>
@@ -243,10 +243,14 @@ export default function PurchaseListTable({ items, isLoading, error, onRefresh }
         <PurchaseItemDialog 
           item={selectedItem} 
           open={!!selectedItem} 
-          onOpenChange={() => setSelectedItem(null)}
+          onOpenChange={handleCloseDialog}
           onUpdate={onRefresh}
         />
       )}
     </>
   );
-}
+});
+
+PurchaseListTable.displayName = "PurchaseListTable";
+
+export default PurchaseListTable;

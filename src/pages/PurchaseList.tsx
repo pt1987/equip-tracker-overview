@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PurchaseListFilter } from "@/lib/purchase-list-types";
@@ -8,7 +8,7 @@ import PurchaseUploader from "@/components/purchase-list/PurchaseUploader";
 import PurchaseFilters from "@/components/purchase-list/PurchaseFilters";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { FileSpreadsheet, FileBarChart, FileUp, Search } from "lucide-react";
+import { FileSpreadsheet, FileBarChart, Search } from "lucide-react";
 import { usePurchaseItems } from "@/hooks/usePurchaseItems";
 import SearchFilter from "@/components/shared/SearchFilter";
 
@@ -27,7 +27,8 @@ export default function PurchaseList() {
     exportForAudit
   } = usePurchaseItems({...filters, searchTerm});
 
-  const handleExportDatev = async () => {
+  // Memoized handlers to prevent unnecessary re-renders
+  const handleExportDatev = useCallback(async () => {
     try {
       await exportToDatev();
       toast({
@@ -42,9 +43,9 @@ export default function PurchaseList() {
       });
       console.error("DATEV export error:", error);
     }
-  };
+  }, [exportToDatev, toast]);
 
-  const handleExportAudit = async () => {
+  const handleExportAudit = useCallback(async () => {
     try {
       await exportForAudit();
       toast({
@@ -59,11 +60,116 @@ export default function PurchaseList() {
       });
       console.error("Audit export error:", error);
     }
-  };
+  }, [exportForAudit, toast]);
 
-  const handleSearch = (value: string) => {
+  const handleSearch = useCallback((value: string) => {
     setSearchTerm(value);
-  };
+  }, []);
+
+  const handleTabChange = useCallback((value: string) => {
+    setActiveTab(value as "list" | "upload");
+  }, []);
+
+  const handleFilterChange = useCallback((newFilters: PurchaseListFilter) => {
+    setFilters(newFilters);
+  }, []);
+
+  const handleUploaderSuccess = useCallback(() => {
+    setActiveTab("list");
+    refresh();
+    toast({
+      title: "Beleg erfolgreich erfasst",
+      description: "Der Beleg wurde erfolgreich hochgeladen und verarbeitet.",
+    });
+  }, [refresh, toast]);
+
+  // Memoize components to prevent unnecessary re-renders
+  const filterSection = useMemo(() => (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle>Filter</CardTitle>
+        <CardDescription>
+          Eingrenzen der angezeigten Einkäufe nach verschiedenen Kriterien
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            <SearchFilter 
+              placeholder="Suchbegriff eingeben..." 
+              onSearch={handleSearch} 
+              className="w-full md:w-1/3" 
+            />
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Search className="h-4 w-4 mr-2" />
+              <span>Suche in Lieferanten, Artikelbeschreibungen und Rechnungsnummern</span>
+            </div>
+          </div>
+          <PurchaseFilters filters={filters} setFilters={handleFilterChange} />
+        </div>
+      </CardContent>
+    </Card>
+  ), [filters, handleFilterChange, handleSearch]);
+
+  const exportButtons = useMemo(() => (
+    <div className="flex flex-wrap gap-2">
+      <Button 
+        onClick={handleExportDatev} 
+        variant="outline" 
+        className="flex items-center gap-2"
+      >
+        <FileSpreadsheet className="h-4 w-4" />
+        DATEV-Export
+      </Button>
+      <Button 
+        onClick={handleExportAudit} 
+        variant="outline" 
+        className="flex items-center gap-2"
+      >
+        <FileBarChart className="h-4 w-4" />
+        DSFinV-BF-Export
+      </Button>
+    </div>
+  ), [handleExportAudit, handleExportDatev]);
+
+  const purchaseListContent = useMemo(() => (
+    <TabsContent value="list" className="space-y-4">
+      {filterSection}
+
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle>Einkaufsliste</CardTitle>
+          <CardDescription>
+            Alle erfassten Einkäufe mit GoBD-Konformitätsstatus
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <PurchaseListTable 
+            items={items} 
+            isLoading={isLoading} 
+            error={error} 
+            onRefresh={refresh}
+          />
+        </CardContent>
+      </Card>
+    </TabsContent>
+  ), [filterSection, items, isLoading, error, refresh]);
+
+  const uploadContent = useMemo(() => (
+    <TabsContent value="upload" className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Neuen Beleg erfassen</CardTitle>
+          <CardDescription>
+            Laden Sie einen neuen Beleg hoch oder erfassen Sie die Daten manuell
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <PurchaseUploader onSuccess={handleUploaderSuccess} />
+        </CardContent>
+      </Card>
+    </TabsContent>
+  ), [handleUploaderSuccess]);
 
   return (
     <div className="container mx-auto px-4 py-6 space-y-6 max-w-7xl">
@@ -77,30 +183,13 @@ export default function PurchaseList() {
           </p>
         </div>
         
-        <div className="flex flex-wrap gap-2">
-          <Button 
-            onClick={handleExportDatev} 
-            variant="outline" 
-            className="flex items-center gap-2"
-          >
-            <FileSpreadsheet className="h-4 w-4" />
-            DATEV-Export
-          </Button>
-          <Button 
-            onClick={handleExportAudit} 
-            variant="outline" 
-            className="flex items-center gap-2"
-          >
-            <FileBarChart className="h-4 w-4" />
-            DSFinV-BF-Export
-          </Button>
-        </div>
+        {exportButtons}
       </div>
 
       <Tabs 
         defaultValue="list" 
         value={activeTab}
-        onValueChange={(value) => setActiveTab(value as "list" | "upload")}
+        onValueChange={handleTabChange}
         className="space-y-4"
       >
         <div className="flex justify-between items-center">
@@ -110,70 +199,8 @@ export default function PurchaseList() {
           </TabsList>
         </div>
 
-        <TabsContent value="list" className="space-y-4">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle>Filter</CardTitle>
-              <CardDescription>
-                Eingrenzen der angezeigten Einkäufe nach verschiedenen Kriterien
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex flex-col md:flex-row gap-4">
-                  <SearchFilter 
-                    placeholder="Suchbegriff eingeben..." 
-                    onSearch={handleSearch} 
-                    className="w-full md:w-1/3" 
-                  />
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <Search className="h-4 w-4 mr-2" />
-                    <span>Suche in Lieferanten, Artikelbeschreibungen und Rechnungsnummern</span>
-                  </div>
-                </div>
-                <PurchaseFilters filters={filters} setFilters={setFilters} />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle>Einkaufsliste</CardTitle>
-              <CardDescription>
-                Alle erfassten Einkäufe mit GoBD-Konformitätsstatus
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <PurchaseListTable 
-                items={items} 
-                isLoading={isLoading} 
-                error={error} 
-                onRefresh={refresh}
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="upload" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Neuen Beleg erfassen</CardTitle>
-              <CardDescription>
-                Laden Sie einen neuen Beleg hoch oder erfassen Sie die Daten manuell
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <PurchaseUploader onSuccess={() => {
-                setActiveTab("list");
-                refresh();
-                toast({
-                  title: "Beleg erfolgreich erfasst",
-                  description: "Der Beleg wurde erfolgreich hochgeladen und verarbeitet.",
-                });
-              }} />
-            </CardContent>
-          </Card>
-        </TabsContent>
+        {purchaseListContent}
+        {uploadContent}
       </Tabs>
     </div>
   );

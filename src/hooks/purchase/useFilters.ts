@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { PurchaseListFilter } from "@/lib/purchase-list-types";
 import { DateRange } from "react-day-picker";
 
@@ -17,19 +17,7 @@ export function useFilters(
       : undefined
   );
 
-  // Update local state when props change
-  useEffect(() => {
-    setFilters(initialFilters);
-    setDateRange(
-      initialFilters.dateRange?.from || initialFilters.dateRange?.to
-        ? {
-            from: initialFilters.dateRange.from ? new Date(initialFilters.dateRange.from) : undefined,
-            to: initialFilters.dateRange.to ? new Date(initialFilters.dateRange.to) : undefined,
-          }
-        : undefined
-    );
-  }, [initialFilters]);
-
+  // Use memoized handlers to prevent unnecessary re-renders
   const handleDateRangeChange = useCallback((range: DateRange | undefined) => {
     // Update local state with the new range
     setDateRange(range);
@@ -90,6 +78,21 @@ export function useFilters(
       setFiltersCallback({});
     }
   }, [setFiltersCallback]);
+
+  // Update local state when props change, use effect with proper deps
+  useEffect(() => {
+    if (JSON.stringify(initialFilters) !== JSON.stringify(filters)) {
+      setFilters(initialFilters);
+      setDateRange(
+        initialFilters.dateRange?.from || initialFilters.dateRange?.to
+          ? {
+              from: initialFilters.dateRange.from ? new Date(initialFilters.dateRange.from) : undefined,
+              to: initialFilters.dateRange.to ? new Date(initialFilters.dateRange.to) : undefined,
+            }
+          : undefined
+      );
+    }
+  }, [initialFilters]);
 
   return {
     filters,
