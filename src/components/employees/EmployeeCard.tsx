@@ -1,7 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Employee } from "@/lib/types";
 import { useEmployeeAssets } from "@/hooks/use-employee-assets";
 import EmployeeCardHeader from "./card/EmployeeCardHeader";
@@ -10,7 +9,7 @@ import AssetSummaryDisplay from "./card/AssetSummaryDisplay";
 
 interface EmployeeCardProps {
   employee: Employee;
-  index?: number; // Added this optional prop to match usage in Employees.tsx
+  index?: number;
 }
 
 const EmployeeCard: React.FC<EmployeeCardProps> = ({ employee, index }) => {
@@ -18,24 +17,21 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ employee, index }) => {
   const { data: assetSummary, isLoading } = useEmployeeAssets(employee.id);
 
   return (
-    <Card className="glass-card">
-      <CardHeader>
-        <CardTitle>
-          <EmployeeCardHeader employee={employee} />
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <CardDescription>
-          <EmployeeInfoDisplay employee={employee} />
-          <AssetSummaryDisplay assetSummary={assetSummary} isLoading={isLoading} />
-        </CardDescription>
-      </CardContent>
-      <CardFooter className="flex justify-between">
-        <Link to={`/employee/${employee.id}`}>
-          <Button>View Details</Button>
-        </Link>
-      </CardFooter>
-    </Card>
+    <Link to={`/employee/${employee.id}`} className="block w-full">
+      <Card className="glass-card hover:shadow-lg transition-all duration-200 hover:border-primary/20 cursor-pointer">
+        <CardHeader>
+          <CardTitle>
+            <EmployeeCardHeader employee={employee} />
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <CardDescription>
+            <EmployeeInfoDisplay employee={employee} />
+            <AssetSummaryDisplay assetSummary={assetSummary} isLoading={isLoading} />
+          </CardDescription>
+        </CardContent>
+      </Card>
+    </Link>
   );
 };
 

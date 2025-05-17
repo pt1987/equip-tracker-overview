@@ -1,6 +1,5 @@
 
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
 import { Employee } from "@/lib/types";
 import { formatDate, calculateEmploymentDuration } from "@/lib/utils";
 
@@ -45,7 +44,6 @@ const EmployeeListView = ({ employees }: EmployeeListViewProps) => {
               {calculateEmploymentDuration(employee.startDate)}
             </p>
           </div>
-          <ArrowRight size={16} className="text-muted-foreground" />
         </Link>
       ))}
     </div>
