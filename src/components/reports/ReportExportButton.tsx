@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { exportPurchaseList } from "@/utils/purchase-export";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ReportExportButtonProps {
   reportName: string;
@@ -13,8 +14,9 @@ interface ReportExportButtonProps {
 
 export function ReportExportButton({ reportName, data = [] }: ReportExportButtonProps) {
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   
-  const exportReport = async (format: 'excel' | 'pdf') => {
+  const exportReport = async (format: 'excel' | 'pdf' | 'csv') => {
     try {
       // If data is provided, use the export utility
       if (data && data.length > 0) {
@@ -40,8 +42,8 @@ export function ReportExportButton({ reportName, data = [] }: ReportExportButton
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="ml-auto">
-          <FileBarChart className="mr-2 h-4 w-4" />
-          Export Report
+          <FileBarChart className="h-4 w-4 mr-2" />
+          {!isMobile ? "Export Report" : "Export"}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
@@ -50,6 +52,9 @@ export function ReportExportButton({ reportName, data = [] }: ReportExportButton
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => exportReport('pdf')}>
           Export as PDF
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => exportReport('csv')}>
+          Export as CSV
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

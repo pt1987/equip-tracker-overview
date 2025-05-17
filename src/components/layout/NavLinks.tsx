@@ -24,6 +24,7 @@ import {
   BarChart3,
   UserCheck,
   BarChartHorizontal,
+  ReceiptText
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -219,6 +220,11 @@ export const NavLinks = () => {
         icon={<ShoppingBag size={16} />}
         label="Hardware-Bestellung"
         hasDividerAbove
+      />
+      <NavLink
+        href="/purchase-list"
+        icon={<ReceiptText size={16} />}
+        label="Einkaufsliste"
       />
       
       {/* Add Admin section for users with admin permission */}

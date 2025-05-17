@@ -225,7 +225,8 @@ export const NavigationItems = {
       RefreshCcw: RefreshCcw,
       Leaf: Leaf,
       TrendingUp: TrendingUp,
-      Building: Building
+      Building: Building,
+      ReceiptText: ReceiptText
     };
 
     // Get the component from the map
