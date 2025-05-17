@@ -1,7 +1,7 @@
 
-import { memo, useMemo } from "react";
+import { memo } from "react";
+import { Table, TableBody } from "@/components/ui/table";
 import { PurchaseItem } from "@/lib/purchase-list-types";
-import { Table, TableHeader, TableBody, TableRow, TableHead } from "@/components/ui/table";
 import TableRowItem from "./TableRowItem";
 import LoadingTable from "./LoadingTable";
 import ErrorDisplay from "./ErrorDisplay";
@@ -15,64 +15,38 @@ interface TableContentProps {
   onViewDetails: (item: PurchaseItem) => void;
 }
 
-const TableContent = memo(({ 
-  items, 
-  isLoading, 
-  error, 
-  onRefresh,
-  onViewDetails 
-}: TableContentProps) => {
-  
-  // Memoize the table content to prevent unnecessary re-renders
-  const content = useMemo(() => {
-    if (error) {
-      return <ErrorDisplay error={error} onRefresh={onRefresh} />;
-    }
+const TableContent = memo(({ items, isLoading, error, onRefresh, onViewDetails }: TableContentProps) => {
+  // Show loading state
+  if (isLoading) {
+    return <LoadingTable />;
+  }
 
-    if (isLoading) {
-      return <LoadingTable />;
-    }
+  // Show error state
+  if (error) {
+    return <ErrorDisplay error={error} onRefresh={onRefresh} />;
+  }
 
-    if (items.length === 0) {
-      return <EmptyState />;
-    }
+  // Show empty state if no items
+  if (!items.length) {
+    return <EmptyState onRefresh={onRefresh} />;
+  }
 
-    return (
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Belegdatum</TableHead>
-              <TableHead>Lieferant</TableHead>
-              <TableHead>Artikel-/Güterbezeichnung</TableHead>
-              <TableHead className="text-right">Menge</TableHead>
-              <TableHead>Einheit</TableHead>
-              <TableHead className="text-right">Nettobetrag €</TableHead>
-              <TableHead className="text-right">MwSt €</TableHead>
-              <TableHead className="text-right">MwSt-Satz %</TableHead>
-              <TableHead>Sachkonto</TableHead>
-              <TableHead>Kostenstelle</TableHead>
-              <TableHead>Asset-ID</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>GoBD</TableHead>
-              <TableHead className="w-[50px]"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {items.map((item) => (
-              <TableRowItem 
-                key={item.id} 
-                item={item} 
-                onViewDetails={onViewDetails}
-              />
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    );
-  }, [items, isLoading, error, onRefresh, onViewDetails]);
-
-  return content;
+  // Show table with items
+  return (
+    <div className="overflow-x-auto border rounded-md">
+      <Table>
+        <TableBody>
+          {items.map((item) => (
+            <TableRowItem 
+              key={item.id} 
+              item={item} 
+              onViewDetails={() => onViewDetails(item)} 
+            />
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
 });
 
 TableContent.displayName = "TableContent";

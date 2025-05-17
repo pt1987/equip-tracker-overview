@@ -22,13 +22,19 @@ const PurchaseListTable = memo(({ items, isLoading, error, onRefresh }: Purchase
     setSelectedItem(null);
   }, []);
 
+  // Ensure refresh callback is properly wrapped
+  const handleRefresh = useCallback(() => {
+    console.log("Refreshing purchase list data");
+    onRefresh();
+  }, [onRefresh]);
+
   return (
     <>
       <TableContent
         items={items}
         isLoading={isLoading}
         error={error}
-        onRefresh={onRefresh}
+        onRefresh={handleRefresh}
         onViewDetails={handleViewDetails}
       />
       
@@ -37,7 +43,7 @@ const PurchaseListTable = memo(({ items, isLoading, error, onRefresh }: Purchase
           item={selectedItem} 
           open={!!selectedItem} 
           onOpenChange={handleCloseDialog}
-          onUpdate={onRefresh}
+          onUpdate={handleRefresh}
         />
       )}
     </>
