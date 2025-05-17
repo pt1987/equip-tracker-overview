@@ -21,6 +21,8 @@ interface DraggableGridProps {
 const DraggableGrid = ({ items }: DraggableGridProps) => {
   const [layout, setLayout] = useState<Record<string, any>>({});
   const [mounted, setMounted] = useState(false);
+  // Add debounce timer ref to prevent multiple toasts
+  const saveTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
   // Load saved layout from localStorage
   useEffect(() => {
@@ -73,12 +75,21 @@ const DraggableGrid = ({ items }: DraggableGridProps) => {
     // Save the layout to localStorage
     localStorage.setItem('dashboardLayout', JSON.stringify(allLayouts));
     
-    // Show toast notification
-    toast({
-      title: "Layout gespeichert",
-      description: "Das Dashboard-Layout wurde automatisch gespeichert.",
-      duration: 2000
-    });
+    // Clear previous timeout to prevent multiple toasts
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    
+    // Only show toast once after 500ms of inactivity
+    saveTimeoutRef.current = setTimeout(() => {
+      toast({
+        title: "Layout gespeichert",
+        description: "Das Dashboard-Layout wurde automatisch gespeichert.",
+        duration: 2000
+      });
+      // Clear the timeout reference
+      saveTimeoutRef.current = null;
+    }, 2000);
   };
 
   return (
