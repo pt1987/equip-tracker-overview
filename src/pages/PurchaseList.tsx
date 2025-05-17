@@ -2,14 +2,13 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PurchaseItem, PurchaseListFilter } from "@/lib/purchase-list-types";
+import { PurchaseListFilter } from "@/lib/purchase-list-types";
 import PurchaseListTable from "@/components/purchase-list/PurchaseListTable";
 import PurchaseUploader from "@/components/purchase-list/PurchaseUploader";
 import PurchaseFilters from "@/components/purchase-list/PurchaseFilters";
-import { useToast } from "@/components/ui/use-toast"; // Updated import path
+import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
-import { FileBarChart, FileSpreadsheet, FileUp } from "lucide-react";
-import { exportPurchaseList } from "@/utils/purchase-export";
+import { FileSpreadsheet, FileBarChart, FileUp } from "lucide-react";
 import { usePurchaseItems } from "@/hooks/usePurchaseItems";
 
 export default function PurchaseList() {

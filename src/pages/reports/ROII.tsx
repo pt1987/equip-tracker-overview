@@ -1,38 +1,16 @@
 
 import React from "react";
-import { FileBarChart, TrendingUp } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 import PageTransition from "@/components/layout/PageTransition";
 import ReportsNavigation from "@/components/layout/ReportsNavigation";
 import ROIIReport from "@/components/reports/ROIIReport";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useToast } from "@/hooks/use-toast";
 import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
 import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
+import { ReportExportButton } from "@/components/reports/ReportExportButton";
 
 export default function ROII() {
-  const { toast } = useToast();
   const { dateRange, setDateRange } = useDateRangeFilter();
-  
-  const exportReport = async (format: 'excel' | 'pdf') => {
-    try {
-      // In einer realen Implementierung würden hier die Daten abgerufen werden
-      // und an eine Export-Funktion übergeben werden
-      
-      toast({
-        title: "Report exportiert",
-        description: `Der Bericht wurde als ${format.toUpperCase()} exportiert.`
-      });
-    } catch (error) {
-      toast({
-        title: "Export fehlgeschlagen",
-        description: "Beim Exportieren des Berichts ist ein Fehler aufgetreten.",
-        variant: "destructive"
-      });
-      console.error("Export error:", error);
-    }
-  };
   
   return (
     <PageTransition>
@@ -49,22 +27,7 @@ export default function ROII() {
               </p>
             </div>
             
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="ml-auto">
-                  <FileBarChart className="mr-2 h-4 w-4" />
-                  Export Report
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => exportReport('excel')}>
-                  Export as Excel
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => exportReport('pdf')}>
-                  Export as PDF
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <ReportExportButton reportName="IT-Investitionsrendite" />
           </div>
           
           <ReportsNavigation />
