@@ -80,7 +80,7 @@ export default function UsageDuration() {
               </div>
             </CardHeader>
             <CardContent>
-              <AssetUsageDurationReport dateRange={dateRange} />
+              <AssetUsageDurationReport />
             </CardContent>
           </Card>
         </div>

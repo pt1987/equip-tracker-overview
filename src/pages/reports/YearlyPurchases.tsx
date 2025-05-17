@@ -80,7 +80,7 @@ export default function YearlyPurchases() {
               </div>
             </CardHeader>
             <CardContent>
-              <AssetPurchasesReport dateRange={dateRange} />
+              <AssetPurchasesReport />
             </CardContent>
           </Card>
         </div>

@@ -80,7 +80,7 @@ export default function VendorAnalysis() {
               </div>
             </CardHeader>
             <CardContent>
-              <VendorPurchaseReport dateRange={dateRange} />
+              <VendorPurchaseReport />
             </CardContent>
           </Card>
         </div>

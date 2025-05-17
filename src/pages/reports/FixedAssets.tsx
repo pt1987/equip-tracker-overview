@@ -80,7 +80,7 @@ export default function FixedAssets() {
               </div>
             </CardHeader>
             <CardContent>
-              <FixedAssetsReport dateRange={dateRange} />
+              <FixedAssetsReport />
             </CardContent>
           </Card>
         </div>
