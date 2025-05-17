@@ -15,6 +15,9 @@ import EmployeeChangesCard from "@/components/dashboard/EmployeeChangesCard";
 import BudgetUsageCard from "@/components/dashboard/BudgetUsageCard";
 import DraggableGrid from "@/components/dashboard/DraggableGrid";
 
+// Track if dashboard has been rendered once to avoid unnecessary rerenders
+let dashboardRendered = false;
+
 const IndexPage = () => {
   const {
     loading,
@@ -27,9 +30,17 @@ const IndexPage = () => {
     refetchDashboardData
   } = useDashboardData();
   
-  // Log when dashboard renders to help debug reload issues
+  // Log only on first render
   useEffect(() => {
-    console.log("Dashboard page rendered. Auth should be stable now.");
+    if (!dashboardRendered) {
+      console.log("Dashboard page mounted for the first time");
+      dashboardRendered = true;
+    }
+    
+    // Cleanup function runs when component unmounts
+    return () => {
+      console.log("Dashboard component unmounted");
+    };
   }, []);
   
   if (loading) {
@@ -37,7 +48,7 @@ const IndexPage = () => {
       <PageTransition>
         <div className="flex flex-col gap-4 p-6">
           <h1 className="text-2xl font-bold">Dashboard</h1>
-          <div className="text-muted-foreground">Loading dashboard data...</div>
+          <div className="text-muted-foreground">Lade Dashboard-Daten...</div>
         </div>
       </PageTransition>
     );

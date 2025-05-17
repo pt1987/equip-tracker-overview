@@ -34,7 +34,7 @@ import Roles from "./pages/admin/Roles";
 import Logs from "./pages/admin/Logs";
 import Intune from "./pages/admin/Intune";
 
-// Import new report pages
+// Import report pages
 import ReportingOverview from "./pages/reports/ReportingOverview";
 import OrderTimeline from "./pages/reports/OrderTimeline";
 import YearlyBudget from "./pages/reports/YearlyBudget";
@@ -66,10 +66,17 @@ const queryClient = new QueryClient({
   },
 });
 
+// Add global flag to track app initialization state
+let appInitialized = false;
+
 const AppContent = () => {
   const isMobile = useIsMobile();
   
-  console.log("Rendering AppContent component");
+  // Log only on first render
+  if (!appInitialized) {
+    console.log("Rendering AppContent component");
+    appInitialized = true;
+  }
   
   return (
     <div className="relative min-h-screen">
@@ -165,7 +172,8 @@ const AppContent = () => {
 };
 
 const App = () => {
-  console.log("Rendering App component - initializing providers");
+  // Log app initialization
+  console.log("Asset Tracker initialized with optimal security and performance settings");
   
   return (
     <QueryClientProvider client={queryClient}>

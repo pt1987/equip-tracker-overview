@@ -14,7 +14,9 @@ import {
 } from "@/data/assets/stats";
 import { getAssets } from "@/data/assets";
 import { getEmployees } from "@/data/employees";
-import { Asset, AssetType, AssetStatus, OwnerCompanyDistribution } from "@/lib/types";
+
+// Track if dashboard data has been loaded to avoid unnecessary notifications
+let dataLoaded = false;
 
 // Helper functions moved from Index.tsx
 const getRecentAssets = async (limit = 5) => {
@@ -47,7 +49,9 @@ export const useDashboardData = () => {
     refetch: refetchDashboardStats
   } = useQuery({
     queryKey: ["dashboardStats"],
-    queryFn: getDashboardStats
+    queryFn: getDashboardStats,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000,  // 10 minutes
   });
   
   // Get asset type distribution
@@ -56,7 +60,9 @@ export const useDashboardData = () => {
     refetch: refetchAssetTypeDistribution
   } = useQuery({
     queryKey: ["assetTypeDistribution"],
-    queryFn: getAssetTypeDistribution
+    queryFn: getAssetTypeDistribution,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
   
   // Get asset status distribution
@@ -65,7 +71,9 @@ export const useDashboardData = () => {
     refetch: refetchAssetStatusDistribution
   } = useQuery({
     queryKey: ["assetStatusDistribution"],
-    queryFn: getAssetStatusDistribution
+    queryFn: getAssetStatusDistribution,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
   
   // Get recent assets
@@ -74,7 +82,9 @@ export const useDashboardData = () => {
     refetch: refetchRecentAssets
   } = useQuery({
     queryKey: ["recentAssets"],
-    queryFn: () => getRecentAssets(5)
+    queryFn: () => getRecentAssets(5),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
   
   // Get recent employees
@@ -83,7 +93,9 @@ export const useDashboardData = () => {
     refetch: refetchRecentEmployees
   } = useQuery({
     queryKey: ["recentEmployees"],
-    queryFn: () => getRecentEmployees(5)
+    queryFn: () => getRecentEmployees(5),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
   
   // Get asset status percentages
@@ -93,14 +105,19 @@ export const useDashboardData = () => {
   } = useQuery({
     queryKey: ["assetStatusPercentages"],
     queryFn: getAssetStatusPercentages,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     meta: {
       onError: (error: Error) => {
         console.error("Failed to fetch asset percentages:", error);
-        toast({
-          title: "Fehler",
-          description: "Prozentdaten konnten nicht geladen werden.",
-          variant: "destructive"
-        });
+        // Only show toast once
+        if (dataLoaded) {
+          toast({
+            title: "Fehler",
+            description: "Prozentdaten konnten nicht geladen werden.",
+            variant: "destructive"
+          });
+        }
       }
     }
   });
@@ -111,7 +128,9 @@ export const useDashboardData = () => {
     refetch: refetchTotalAssetCount
   } = useQuery({
     queryKey: ["totalAssetCount"],
-    queryFn: getTotalAssetCount
+    queryFn: getTotalAssetCount,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
   
   // Get owner company distribution
@@ -120,7 +139,9 @@ export const useDashboardData = () => {
     refetch: refetchOwnerCompanyDistribution
   } = useQuery({
     queryKey: ["ownerCompanyDistribution"],
-    queryFn: getOwnerCompanyDistribution
+    queryFn: getOwnerCompanyDistribution,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
   
   // Function to refresh all data
@@ -148,6 +169,8 @@ export const useDashboardData = () => {
   useEffect(() => {
     if (dashboardStats && assetTypeDistribution && assetStatusDistribution) {
       setLoading(false);
+      // Mark as loaded once we have data
+      dataLoaded = true;
     }
   }, [dashboardStats, assetTypeDistribution, assetStatusDistribution]);
   

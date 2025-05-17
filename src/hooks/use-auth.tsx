@@ -35,10 +35,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authInitialized, setAuthInitialized] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  const [authInitialized, setAuthInitialized] = useState(false);
+  
+  // Track login state to prevent multiple redirects
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const fetchUserProfileData = async (userId: string, userEmail: string | null, userName: string | null = null) => {
     try {
@@ -117,6 +120,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
+    let isMounted = true;
     console.log("Setting up auth state listener");
     
     // Set up auth state listener FIRST
@@ -124,34 +128,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       (event, currentSession) => {
         console.log(`Auth state changed. Event: ${event}. Session: ${currentSession ? 'exists' : 'null'}`);
         
+        if (!isMounted) return;
+        
         // Only update state, don't navigate here to prevent loops
         setSession(currentSession);
         
         if (currentSession?.user) {
           console.log("User is authenticated. Fetching profile data.");
           
+          // Update loading state immediately
+          setLoading(true);
+          
           // Defer Supabase calls with setTimeout to avoid deadlock
           setTimeout(async () => {
+            if (!isMounted) return;
+            
             try {
               const userData = await fetchUserProfileData(
                 currentSession.user.id,
                 currentSession.user.email,
                 currentSession.user.user_metadata?.name
               );
-              setUser(userData);
-              setLoading(false);
-              setAuthInitialized(true);
+              
+              if (isMounted) {
+                setUser(userData);
+                setLoading(false);
+                setAuthInitialized(true);
+              }
             } catch (err) {
               console.error("Error in auth state change handler:", err);
-              setLoading(false);
-              setAuthInitialized(true);
+              if (isMounted) {
+                setLoading(false);
+                setAuthInitialized(true);
+              }
             }
           }, 0);
         } else {
           console.log("No authenticated user.");
-          setUser(null);
-          setLoading(false);
-          setAuthInitialized(true);
+          if (isMounted) {
+            setUser(null);
+            setLoading(false);
+            setAuthInitialized(true);
+          }
         }
       }
     );
@@ -162,41 +180,59 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       console.log("Initial session check:", currentSession ? 'Session exists' : 'No session');
       
+      if (!isMounted) return;
+      
       // Only update state, don't navigate here to prevent loops
       setSession(currentSession);
       
       if (currentSession?.user) {
         console.log("User is logged in, fetching profile data");
         
+        // Update loading state immediately
+        setLoading(true);
+        
         // Defer Supabase calls with setTimeout to avoid deadlock
         setTimeout(async () => {
+          if (!isMounted) return;
+          
           try {
             const userData = await fetchUserProfileData(
               currentSession.user.id,
               currentSession.user.email,
               currentSession.user.user_metadata?.name
             );
-            setUser(userData);
+            
+            if (isMounted) {
+              setUser(userData);
+              setLoading(false);
+              setAuthInitialized(true);
+            }
           } catch (err) {
             console.error("Error in session check:", err);
-          } finally {
-            setLoading(false);
-            setAuthInitialized(true);
+            if (isMounted) {
+              setLoading(false);
+              setAuthInitialized(true);
+            }
           }
         }, 0);
       } else {
-        setLoading(false);
-        setAuthInitialized(true);
+        if (isMounted) {
+          setLoading(false);
+          setAuthInitialized(true);
+        }
       }
     }).catch(error => {
       console.error("Error checking session:", error);
-      setLoading(false);
-      setAuthInitialized(true);
+      if (isMounted) {
+        setLoading(false);
+        setAuthInitialized(true);
+      }
     });
 
     const cleanup = setupInactivityTimeout();
     
     return () => {
+      isMounted = false;
       console.log("Cleaning up auth listeners");
       subscription.unsubscribe();
       cleanup();
@@ -244,6 +280,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string): Promise<boolean> => {
     console.log("Attempting login for:", email);
     setLoading(true);
+    setIsLoggingIn(true);
     
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -259,14 +296,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           description: error.message,
         });
         setLoading(false);
+        setIsLoggingIn(false);
         return false;
       }
 
       console.log("Login successful, session:", data.session ? "exists" : "null");
       
-      // Navigation is now handled entirely by ProtectedRoute to prevent loops
-      // Let the AuthProvider update the auth state, and then let ProtectedRoute
-      // redirect based on that auth state, rather than doing it here
+      // Don't navigate here - let the auth state change handler do it
+      // This prevents loops where login triggers navigation which triggers login
       
       return true;
     } catch (error: any) {
@@ -277,6 +314,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         description: error.message || "Bitte versuchen Sie es später erneut.",
       });
       setLoading(false);
+      setIsLoggingIn(false);
       return false;
     }
   };
@@ -330,7 +368,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = async () => {
     console.log("Logging out user");
     await supabase.auth.signOut();
-    navigate("/login");
+    
+    // We need to force a navigation to /login here
+    // This ensures that the user sees the login screen
+    navigate("/login", { replace: true });
   };
 
   const authContextValue = {
@@ -357,7 +398,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       hasEmployeeData: !!user.employeeData 
     } : null,
     authInitialized,
-    currentPath: location.pathname
+    currentPath: location.pathname,
+    isLoggingIn
   });
 
   return (
@@ -379,34 +421,43 @@ export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const { isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [redirected, setRedirected] = useState(false);
+  const [redirectAttempted, setRedirectAttempted] = useState(false);
   
   useEffect(() => {
-    // If already redirected, don't redirect again in this component lifecycle
-    if (redirected) {
-      return;
+    // Special debug for login page to see what's happening
+    if (location.pathname === "/login") {
+      console.log("On login page. Auth state:", { isAuthenticated, loading, redirectAttempted });
     }
     
     // Wait for loading to complete before making routing decisions
     if (!loading) {
-      if (!isAuthenticated && location.pathname !== "/login") {
-        console.log(`Protected route accessed while not authenticated. Current path: ${location.pathname}. Redirecting to login.`);
-        setRedirected(true);
-        navigate("/login", { replace: true });
-      } else {
-        console.log(`Auth state for current route (${location.pathname}): authenticated=${isAuthenticated}, loading=${loading}`);
+      // If we're on the login page and authenticated, go to dashboard
+      if (isAuthenticated && location.pathname === "/login" && !redirectAttempted) {
+        console.log("User is authenticated on login page. Redirecting to dashboard.");
+        setRedirectAttempted(true);
+        setTimeout(() => {
+          navigate("/dashboard", { replace: true });
+        }, 100);
+      } 
+      // If we're not on the login page and not authenticated, go to login
+      else if (!isAuthenticated && location.pathname !== "/login" && !redirectAttempted) {
+        console.log("Protected route accessed while not authenticated. Current path:", location.pathname);
+        setRedirectAttempted(true);
+        setTimeout(() => {
+          navigate("/login", { replace: true });
+        }, 100);
       }
     }
-  }, [isAuthenticated, loading, navigate, location.pathname, redirected]);
+  }, [isAuthenticated, loading, navigate, location.pathname, redirectAttempted]);
+  
+  // Reset redirect flag when location changes
+  useEffect(() => {
+    setRedirectAttempted(false);
+  }, [location.pathname]);
   
   if (loading) {
     console.log("Auth is still loading, showing loading spinner");
     return <div className="flex justify-center items-center h-screen">Laden...</div>;
-  }
-  
-  // Special case for dashboard to debug the reload issue
-  if (location.pathname === "/dashboard") {
-    console.log("Dashboard rendering. Auth state:", { isAuthenticated, loading });
   }
   
   // Simple rendering logic - show children if authenticated or on login page

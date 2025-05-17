@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -49,12 +48,11 @@ export default function Login() {
   const { toast } = useToast();
   const { login, signup, isAuthenticated, loading: authLoading } = useAuth();
 
-  // Debugging information
+  // Debugging logs to trace what's happening
   console.log("Login page - Auth state:", { 
     isAuthenticated, 
     authLoading, 
-    currentPath: location.pathname, 
-    redirecting 
+    currentPath: location.pathname
   });
 
   // Weiterleitung zum Dashboard, falls bereits authentifiziert
@@ -95,15 +93,13 @@ export default function Login() {
   });
 
   const onLoginSubmit = async (data: LoginFormValues) => {
-    if (redirecting) {
-      console.log("Already redirecting, preventing duplicate login attempt");
-      return;
-    }
-    
-    console.log("Attempting login with:", data.email);
+    console.log("Login form submitted with:", data.email);
     setIsLoading(true);
     
     try {
+      // Clear any existing errors
+      loginForm.clearErrors();
+      
       const success = await login(data.email, data.password);
       console.log("Login result:", success);
       
@@ -112,18 +108,14 @@ export default function Login() {
           title: "Erfolgreich angemeldet",
           description: "Willkommen im Asset-Tracker.",
         });
-        // Login successful, don't set isLoading to false here.
-        // The redirect will happen via the useEffect that checks if user is authenticated.
+        
+        // Success notification only - the auth handler will redirect
       } else {
         setIsLoading(false);
-        toast({
-          variant: "destructive",
-          title: "Anmeldung fehlgeschlagen",
-          description: "Bitte überprüfen Sie Ihre Anmeldedaten und versuchen Sie es erneut.",
-        });
+        // Error message already shown by the login function
       }
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("Login submission error:", error);
       setIsLoading(false);
       toast({
         variant: "destructive",
@@ -228,6 +220,13 @@ export default function Login() {
     }
   };
 
+  // Reset loading state if auth loading changes
+  useEffect(() => {
+    if (!authLoading) {
+      setIsLoading(false);
+    }
+  }, [authLoading]);
+
   return (
     <PageTransition>
       <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-50 dark:bg-gray-900">
@@ -267,6 +266,7 @@ export default function Login() {
                                 placeholder="name@example.com" 
                                 className="pl-10" 
                                 {...field} 
+                                disabled={isLoading || authLoading}
                               />
                             </div>
                           </FormControl>
@@ -288,6 +288,7 @@ export default function Login() {
                                 type={showLoginPassword ? "text" : "password"} 
                                 className="pl-10 pr-10" 
                                 {...field} 
+                                disabled={isLoading || authLoading}
                               />
                               <Button
                                 type="button"
@@ -295,6 +296,7 @@ export default function Login() {
                                 size="icon"
                                 className="absolute right-0 top-0 h-10 w-10"
                                 onClick={() => setShowLoginPassword(!showLoginPassword)}
+                                disabled={isLoading || authLoading}
                               >
                                 {showLoginPassword ? (
                                   <EyeOff className="h-4 w-4" />
@@ -318,12 +320,13 @@ export default function Login() {
                         className="p-0 h-auto" 
                         onClick={() => navigate("/reset-password")}
                         type="button"
+                        disabled={isLoading || authLoading}
                       >
                         Passwort vergessen?
                       </Button>
                     </div>
 
-                    <Button type="submit" className="w-full" disabled={isLoading || authLoading || redirecting}>
+                    <Button type="submit" className="w-full" disabled={isLoading || authLoading}>
                       {isLoading ? (
                         <div className="flex items-center">
                           <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
