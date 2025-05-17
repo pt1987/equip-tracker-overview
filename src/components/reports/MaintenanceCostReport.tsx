@@ -15,7 +15,7 @@ const getMaintenanceCostData = async (dateRange?: any) => {
     { assetId: "A1002", assetName: "Dell XPS 15", category: "Laptops", purchaseValue: 1800, totalMaintenanceCost: 420, maintenanceRatio: 23.3, maintenanceCount: 3 },
     { assetId: "A1003", assetName: "iPhone 15 Pro", category: "Smartphones", purchaseValue: 1200, totalMaintenanceCost: 280, maintenanceRatio: 23.3, maintenanceCount: 2 },
     { assetId: "A1004", assetName: "Samsung S24 Ultra", category: "Smartphones", purchaseValue: 1100, totalMaintenanceCost: 210, maintenanceRatio: 19.1, maintenanceCount: 1 },
-    { assetId: "A1005", assetName: "Dell 34" Monitor", category: "Monitors", purchaseValue: 800, totalMaintenanceCost: 110, maintenanceRatio: 13.8, maintenanceCount: 1 }
+    { assetId: "A1005", assetName: "Dell 34\" Monitor", category: "Monitors", purchaseValue: 800, totalMaintenanceCost: 110, maintenanceRatio: 13.8, maintenanceCount: 1 }
   ];
 };
 
