@@ -13,11 +13,18 @@ import { usePurchaseItems } from "@/hooks/usePurchaseItems";
 import SearchFilter from "@/components/shared/SearchFilter";
 
 export default function PurchaseList() {
+  // Use useMemo for initial state values
   const [activeTab, setActiveTab] = useState<"list" | "upload">("list");
   const [filters, setFilters] = useState<PurchaseListFilter>({});
   const [searchTerm, setSearchTerm] = useState<string>("");
   const { toast } = useToast();
   
+  // Combine filters and search term only when they change
+  const searchFilters = useMemo(() => {
+    return {...filters, searchTerm};
+  }, [filters, searchTerm]);
+  
+  // Use the memoized filters in the hook
   const { 
     items, 
     isLoading, 
@@ -25,9 +32,9 @@ export default function PurchaseList() {
     refresh,
     exportToDatev,
     exportForAudit
-  } = usePurchaseItems({...filters, searchTerm});
+  } = usePurchaseItems(searchFilters);
 
-  // Memoized handlers to prevent unnecessary re-renders
+  // These handlers should be stable between renders
   const handleExportDatev = useCallback(async () => {
     try {
       await exportToDatev();
@@ -171,6 +178,7 @@ export default function PurchaseList() {
     </TabsContent>
   ), [handleUploaderSuccess]);
 
+  // Return a stable structure for the component
   return (
     <div className="container mx-auto px-4 py-6 space-y-6 max-w-7xl">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">

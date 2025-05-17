@@ -1,5 +1,5 @@
 
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import { PurchaseListFilter } from "@/lib/purchase-list-types";
 import DateRangeSection from "./filters/DateRangeSection";
 import SupplierFilter from "./filters/SupplierFilter";
@@ -16,6 +16,7 @@ interface PurchaseFiltersProps {
 }
 
 const PurchaseFilters = memo(({ filters, setFilters }: PurchaseFiltersProps) => {
+  // Use the optimized filter hook
   const {
     dateRange,
     handleDateRangeChange,
@@ -23,7 +24,10 @@ const PurchaseFilters = memo(({ filters, setFilters }: PurchaseFiltersProps) => 
     clearAllFilters
   } = useFilters(filters, setFilters);
 
-  const isAnyFilterApplied = Object.keys(filters).length > 0;
+  // Compute this value only when filters change
+  const isAnyFilterApplied = useMemo(() => {
+    return Object.keys(filters).length > 0;
+  }, [filters]);
 
   return (
     <FilterContainer 

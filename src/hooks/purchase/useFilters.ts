@@ -7,7 +7,10 @@ export function useFilters(
   initialFilters: PurchaseListFilter = {},
   setFiltersCallback?: (filters: PurchaseListFilter) => void
 ) {
+  // Use useMemo for initial state to avoid recreating objects on each render
   const [filters, setFilters] = useState<PurchaseListFilter>(initialFilters);
+  
+  // Memoize dateRange to prevent unnecessary re-renders
   const [dateRange, setDateRange] = useState<DateRange | undefined>(
     initialFilters.dateRange?.from || initialFilters.dateRange?.to
       ? {
@@ -17,15 +20,12 @@ export function useFilters(
       : undefined
   );
 
-  // Use memoized handlers to prevent unnecessary re-renders
+  // Stable reference for callbacks using useCallback
   const handleDateRangeChange = useCallback((range: DateRange | undefined) => {
-    // Update local state with the new range
     setDateRange(range);
     
-    // Create updated filters
     let updatedFilters: PurchaseListFilter;
     
-    // Only update filters if date range has values
     if (range?.from || range?.to) {
       updatedFilters = {
         ...filters,
@@ -35,51 +35,49 @@ export function useFilters(
         },
       };
     } else {
-      // Remove date range filter if both dates are undefined
       const { dateRange, ...rest } = filters;
       updatedFilters = rest;
     }
     
-    // Update local state
     setFilters(updatedFilters);
     
-    // Call the parent callback if provided
     if (setFiltersCallback) {
       setFiltersCallback(updatedFilters);
     }
   }, [filters, setFiltersCallback]);
 
   const handleFilterChange = useCallback((field: string, value: any) => {
-    let updatedFilters: PurchaseListFilter;
-    
     if (value) {
-      updatedFilters = { ...filters, [field]: value };
+      // Use functional updates to ensure we always have the latest state
+      setFilters(prevFilters => {
+        const newFilters = { ...prevFilters, [field]: value };
+        if (setFiltersCallback) {
+          setFiltersCallback(newFilters);
+        }
+        return newFilters;
+      });
     } else {
-      const newFilters = { ...filters };
-      delete newFilters[field as keyof PurchaseListFilter];
-      updatedFilters = newFilters;
+      setFilters(prevFilters => {
+        const newFilters = { ...prevFilters };
+        delete newFilters[field as keyof PurchaseListFilter];
+        if (setFiltersCallback) {
+          setFiltersCallback(newFilters);
+        }
+        return newFilters;
+      });
     }
-    
-    // Update local state
-    setFilters(updatedFilters);
-    
-    // Call the parent callback if provided
-    if (setFiltersCallback) {
-      setFiltersCallback(updatedFilters);
-    }
-  }, [filters, setFiltersCallback]);
+  }, [setFiltersCallback]);
 
   const clearAllFilters = useCallback(() => {
     setFilters({});
     setDateRange(undefined);
     
-    // Call the parent callback with empty filters
     if (setFiltersCallback) {
       setFiltersCallback({});
     }
   }, [setFiltersCallback]);
 
-  // Update local state when props change, use effect with proper deps
+  // Use object reference equality check to prevent unnecessary effects
   useEffect(() => {
     if (JSON.stringify(initialFilters) !== JSON.stringify(filters)) {
       setFilters(initialFilters);

@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { PurchaseItem, PurchaseListFilter } from "@/lib/purchase-list-types";
 import { useMockData } from "./purchase/useMockData";
 import { useFilterPurchases } from "./purchase/useFilterPurchases";
@@ -19,6 +19,9 @@ export function usePurchaseItems(filters: PurchaseListFilter = {}) {
   // Export features hook
   const { exportToDatev, exportForAudit } = useExportFeatures();
 
+  // Memoize the filter key to avoid unnecessary fetches
+  const filterKey = useMemo(() => JSON.stringify(filters), [filters]);
+
   const fetchItems = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -26,7 +29,7 @@ export function usePurchaseItems(filters: PurchaseListFilter = {}) {
     try {
       // In a real implementation, this would fetch the items from the database
       // For demo purposes, we'll simulate a delay and return mock data
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500)); // Reduced delay
       
       // Get mock items
       const mockItems = getMockPurchaseItems();
@@ -43,12 +46,16 @@ export function usePurchaseItems(filters: PurchaseListFilter = {}) {
   }, [filters, getMockPurchaseItems, filterPurchaseItems]);
 
   useEffect(() => {
+    const fetchData = async () => {
+      await fetchItems();
+    };
+    
+    fetchData();
+  }, [filterKey, fetchItems]);
+
+  const refresh = useCallback(() => {
     fetchItems();
   }, [fetchItems]);
-
-  const refresh = () => {
-    fetchItems();
-  };
 
   return {
     items,
