@@ -95,6 +95,7 @@ export default function Login() {
           description: "Willkommen im Asset-Tracker.",
         });
       } else {
+        setIsLoading(false);
         toast({
           variant: "destructive",
           title: "Anmeldung fehlgeschlagen",
@@ -103,13 +104,12 @@ export default function Login() {
       }
     } catch (error) {
       console.error("Login error:", error);
+      setIsLoading(false);
       toast({
         variant: "destructive",
         title: "Anmeldung fehlgeschlagen",
         description: error instanceof Error ? error.message : "Ein unbekannter Fehler ist aufgetreten",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 

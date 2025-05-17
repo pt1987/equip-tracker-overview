@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -264,7 +263,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Manual navigation to dashboard after successful login
       if (data.session) {
         console.log("Login successful - redirecting to dashboard");
-        navigate("/dashboard");
+        setTimeout(() => {
+          navigate("/dashboard", { replace: true });
+        }, 100);
       }
       
       return true;
@@ -378,20 +379,29 @@ export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const { isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [redirectAttempted, setRedirectAttempted] = useState(false);
   
   useEffect(() => {
-    // Prevent redirect loops by checking current path
-    if (!loading && !isAuthenticated && location.pathname !== "/login") {
+    // Only redirect if:
+    // 1. Not loading
+    // 2. Not authenticated
+    // 3. Not already on login page
+    // 4. Haven't attempted a redirect yet in this render cycle
+    if (!loading && !isAuthenticated && location.pathname !== "/login" && !redirectAttempted) {
       console.log("User not authenticated, redirecting to login");
-      navigate("/login");
+      setRedirectAttempted(true);
+      navigate("/login", { replace: true });
     }
-  }, [isAuthenticated, loading, navigate, location]);
+  }, [isAuthenticated, loading, navigate, location.pathname, redirectAttempted]);
   
   if (loading) {
     return <div className="flex justify-center items-center h-screen">Laden...</div>;
   }
   
-  return isAuthenticated || location.pathname === "/login" ? <>{children}</> : null;
+  // Allow rendering children if:
+  // 1. User is authenticated OR
+  // 2. Current path is login page
+  return (isAuthenticated || location.pathname === "/login") ? <>{children}</> : null;
 };
 
 // Add this function to the existing file to get the current user ID
