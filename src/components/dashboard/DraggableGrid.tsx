@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { toast } from '@/components/ui/use-toast';
-import { DragHandle } from 'lucide-react';
+import { GripVertical } from 'lucide-react';
 import 'react-grid-layout/css/styles.css';
 import '../dashboard-grid.css';
 
@@ -99,7 +99,7 @@ const DraggableGrid = ({ items }: DraggableGridProps) => {
         <div key={item.id} className="dashboard-grid-item">
           <div className="dashboard-item-content">
             <div className="dashboard-item-drag-handle" title="Drag to reorder">
-              <DragHandle size={14} />
+              <GripVertical size={14} />
             </div>
             {item.content}
           </div>
