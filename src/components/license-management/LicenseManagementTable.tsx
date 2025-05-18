@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { formatDate, formatCurrency } from "@/lib/utils";
@@ -205,12 +204,20 @@ export default function LicenseManagementTable() {
         newLicense.assigned_count || 0
       );
       
+      // Fix: Ensure required fields are included
+      const licenseToCreate = {
+        name: newLicense.name,                    // Required field
+        license_type: newLicense.license_type,    // Required field
+        total_licenses: newLicense.total_licenses || 0,
+        assigned_count: newLicense.assigned_count || 0,
+        cost_per_license: newLicense.cost_per_license || 0,
+        status: status,
+        expiry_date: newLicense.expiry_date || null
+      };
+      
       const { error } = await supabase
         .from('software_licenses')
-        .insert({
-          ...newLicense,
-          status
-        });
+        .insert(licenseToCreate);
         
       if (error) throw error;
       
