@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate, formatCurrency } from "@/lib/utils";
@@ -73,16 +72,24 @@ export default function LicenseManagementTable() {
   const { data: licenses, isLoading, isError, refetch } = useQuery({
     queryKey: ['licenseManagement'],
     queryFn: async () => {
+      console.log("Fetching license management data");
       const { data, error } = await supabase
         .from('software_licenses')
         .select('*')
         .order('name');
         
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching license data:", error);
+        throw error;
+      }
+      
+      console.log("License data fetched:", data);
       return data as LicenseData[];
     },
     // Add refetchOnWindowFocus to ensure data syncs when coming back to this page
-    refetchOnWindowFocus: true
+    refetchOnWindowFocus: true,
+    // Add staleTime to prevent unnecessary refetches
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   // Initialize editing licenses when licenses data changes
@@ -142,6 +149,8 @@ export default function LicenseManagementTable() {
       // Calculate the status
       licenseToUpdate.status = calculateStatus(licenseToUpdate.total_licenses, licenseToUpdate.assigned_count);
       
+      console.log("Updating license:", licenseToUpdate);
+      
       const { error } = await supabase
         .from('software_licenses')
         .update(licenseToUpdate)
@@ -160,7 +169,7 @@ export default function LicenseManagementTable() {
       queryClient.invalidateQueries({ queryKey: ['licenseManagement'] });
       queryClient.invalidateQueries({ queryKey: ['softwareLicenses'] });
       
-      refetch();
+      await refetch();
     } catch (error) {
       console.error('Error updating license:', error);
       toast({
@@ -173,6 +182,8 @@ export default function LicenseManagementTable() {
 
   const deleteLicense = async (id: string, name: string) => {
     try {
+      console.log("Deleting license:", id);
+      
       const { error } = await supabase
         .from('software_licenses')
         .delete()
@@ -189,7 +200,7 @@ export default function LicenseManagementTable() {
       queryClient.invalidateQueries({ queryKey: ['licenseManagement'] });
       queryClient.invalidateQueries({ queryKey: ['softwareLicenses'] });
       
-      refetch();
+      await refetch();
     } catch (error) {
       console.error('Error deleting license:', error);
       toast({
@@ -228,6 +239,8 @@ export default function LicenseManagementTable() {
         expiry_date: newLicense.expiry_date || null
       };
       
+      console.log("Creating new license:", licenseToCreate);
+      
       const { error } = await supabase
         .from('software_licenses')
         .insert(licenseToCreate);
@@ -254,7 +267,7 @@ export default function LicenseManagementTable() {
       queryClient.invalidateQueries({ queryKey: ['licenseManagement'] });
       queryClient.invalidateQueries({ queryKey: ['softwareLicenses'] });
       
-      refetch();
+      await refetch();
     } catch (error) {
       console.error('Error creating license:', error);
       toast({

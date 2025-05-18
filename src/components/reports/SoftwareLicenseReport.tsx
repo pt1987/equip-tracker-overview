@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
@@ -25,7 +24,7 @@ interface SoftwareLicense {
 const getSoftwareLicenseData = async (dateRange?: any) => {
   console.log("Fetching software license data with date range:", dateRange);
   
-  // Query to get software licenses data from Supabase
+  // Query to get software licenses data from Supabase - using the same table as LicenseManagementTable
   let query = supabase
     .from('software_licenses')
     .select('*')
@@ -48,8 +47,16 @@ const getSoftwareLicenseData = async (dateRange?: any) => {
     throw new Error("Failed to fetch software license data");
   }
 
+  console.log("Fetched licenses data:", licenses); // Debug log
+
+  // Check if we got data
+  if (!licenses || licenses.length === 0) {
+    console.log("No license data returned from database");
+    return [];
+  }
+
   // Calculate derived properties
-  return (licenses || []).map((license: SoftwareLicense) => {
+  return licenses.map((license: SoftwareLicense) => {
     const totalCost = license.cost_per_license * license.total_licenses;
     
     // Determine compliance status if not already set
@@ -94,7 +101,9 @@ export default function SoftwareLicenseReport() {
     queryKey: ['softwareLicenses', dateRange],
     queryFn: () => getSoftwareLicenseData(dateRange),
     // Add refetchOnWindowFocus to ensure data syncs when coming back to this page
-    refetchOnWindowFocus: true
+    refetchOnWindowFocus: true,
+    // Add staleTime to prevent unnecessary refetches
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   // Calculate statistics
@@ -138,11 +147,14 @@ export default function SoftwareLicenseReport() {
   }
 
   if (isError) {
-    return <div className="text-center py-12 text-muted-foreground">Fehler beim Laden der Daten</div>;
+    return <div className="text-center py-12 text-red-600 font-medium">Fehler beim Laden der Daten. Bitte versuchen Sie es später erneut.</div>;
   }
 
   if (!data || data.length === 0) {
-    return <div className="text-center py-12 text-muted-foreground">Keine Software-Lizenzdaten verfügbar</div>;
+    return <div className="text-center py-12 text-muted-foreground">
+      <p>Keine Software-Lizenzdaten verfügbar</p>
+      <p className="mt-2 text-sm">Fügen Sie neue Lizenzen über die Lizenzmanagement-Seite hinzu.</p>
+    </div>;
   }
 
   return (
