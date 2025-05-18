@@ -146,7 +146,7 @@ export default function AssetLifecycleReport() {
               <Tooltip formatter={(value, name) => {
                 if (name === "averageLifespanMonths") return [`${value} Monate`, "Durchschn. Lebensdauer"];
                 if (name === "purchaseToDeploymentDays") return [`${value} Tage`, "Zeit bis zur Bereitstellung"];
-                if (name === "deploymentToRetirementMonths") return [`${value} Monate", "Nutzungszeit"];
+                if (name === "deploymentToRetirementMonths") return [`${value} Monate`, "Nutzungszeit"];
                 return [value, name];
               }} />
               <Legend />
