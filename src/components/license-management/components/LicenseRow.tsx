@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Edit, Trash2, Save, X } from "lucide-react";
 import { formatDate, formatCurrency } from "@/lib/utils";
-import { ComplianceBadge } from "./ComplianceBadge";
+import { ComplianceBadge } from "../../reports/components/ComplianceBadge";
+import { LicenseDetailsDialog } from "./LicenseDetailsDialog";
 
 interface LicenseData {
   id: string;
@@ -26,6 +27,7 @@ interface LicenseRowProps {
   toggleEdit: (index: number) => void;
   saveLicense: (index: number) => void;
   deleteLicense: (id: string, name: string) => void;
+  onAssignmentChange?: () => void;
 }
 
 export const LicenseRow = ({ 
@@ -34,7 +36,8 @@ export const LicenseRow = ({
   handleInputChange,
   toggleEdit,
   saveLicense,
-  deleteLicense
+  deleteLicense,
+  onAssignmentChange = () => {}
 }: LicenseRowProps) => {
   return (
     <TableRow>
@@ -117,6 +120,12 @@ export const LicenseRow = ({
           </div>
         ) : (
           <div className="flex justify-end space-x-2">
+            <LicenseDetailsDialog
+              license={license}
+              onAssignmentChange={() => {
+                onAssignmentChange();
+              }}
+            />
             <Button size="sm" variant="outline" onClick={() => toggleEdit(index)}>
               <Edit className="h-4 w-4" />
             </Button>

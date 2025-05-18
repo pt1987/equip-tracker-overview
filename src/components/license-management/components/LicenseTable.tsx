@@ -28,6 +28,7 @@ interface LicenseTableProps {
   toggleEdit: (index: number) => void;
   saveLicense: (index: number) => void;
   deleteLicense: (id: string, name: string) => void;
+  onAssignmentChange?: () => void;
 }
 
 export const LicenseTable = ({
@@ -35,7 +36,8 @@ export const LicenseTable = ({
   handleInputChange,
   toggleEdit,
   saveLicense,
-  deleteLicense
+  deleteLicense,
+  onAssignmentChange = () => {}
 }: LicenseTableProps) => {
   return (
     <Table>
@@ -68,6 +70,7 @@ export const LicenseTable = ({
               toggleEdit={toggleEdit}
               saveLicense={saveLicense}
               deleteLicense={deleteLicense}
+              onAssignmentChange={onAssignmentChange}
             />
           ))
         )}

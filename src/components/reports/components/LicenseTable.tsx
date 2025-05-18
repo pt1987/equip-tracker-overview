@@ -1,8 +1,25 @@
 
-import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import React, { useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { ComplianceBadge } from "./ComplianceBadge";
+import { Users } from "lucide-react";
+import { LicenseDetailsDialog } from "../../license-management/components/LicenseDetailsDialog";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface License {
   id: string;
@@ -12,45 +29,66 @@ interface License {
   total_licenses: number;
   assigned_count: number;
   cost_per_license: number;
-  complianceStatus: string;
+  status: string;
+  complianceStatus?: string;
+  totalCost?: number;
 }
 
-export const LicenseTable = ({ data }: { data: License[] }) => {
+interface LicenseTableProps {
+  data: License[];
+}
+
+export const LicenseTable = ({ data }: LicenseTableProps) => {
+  const queryClient = useQueryClient();
+  
+  const handleAssignmentChange = () => {
+    queryClient.invalidateQueries({ queryKey: ['softwareLicenses'] });
+  };
+
   return (
     <Card>
-      <CardContent className="pt-6">
-        <div className="mb-6">
-          <h3 className="text-lg font-medium">Software Lizenzen</h3>
-        </div>
+      <CardHeader>
+        <CardTitle>Softwarelizenzen</CardTitle>
+      </CardHeader>
+      <CardContent>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-muted">
-              <tr>
-                <th className="p-3">Software</th>
-                <th className="p-3">Lizenztyp</th>
-                <th className="p-3">Ablaufdatum</th>
-                <th className="p-3">Zugewiesen</th>
-                <th className="p-3">Gesamt</th>
-                <th className="p-3">Kosten pro Lizenz</th>
-                <th className="p-3">Gesamtkosten</th>
-                <th className="p-3">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.map((item, index) => (
-                <tr key={index} className="border-b hover:bg-muted/50">
-                  <td className="p-3 font-medium">{item.name}</td>
-                  <td className="p-3">{item.license_type}</td>
-                  <td className="p-3">{item.expiry_date ? formatDate(item.expiry_date) : '-'}</td>
-                  <td className="p-3">{item.assigned_count}</td>
-                  <td className="p-3">{item.total_licenses}</td>
-                  <td className="p-3">{formatCurrency(item.cost_per_license)}</td>
-                  <td className="p-3">{formatCurrency(item.cost_per_license * item.total_licenses)}</td>
-                  <td className="p-3"><ComplianceBadge status={item.complianceStatus} /></td>
-                </tr>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Typ</TableHead>
+                <TableHead>Gesamt</TableHead>
+                <TableHead>Zugewiesen</TableHead>
+                <TableHead>Ablaufdatum</TableHead>
+                <TableHead>Kosten/Lizenz</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data.map((license) => (
+                <TableRow key={license.id}>
+                  <TableCell>{license.name}</TableCell>
+                  <TableCell>{license.license_type}</TableCell>
+                  <TableCell>{license.total_licenses}</TableCell>
+                  <TableCell>{license.assigned_count}</TableCell>
+                  <TableCell>
+                    {license.expiry_date ? formatDate(license.expiry_date) : '-'}
+                  </TableCell>
+                  <TableCell>{formatCurrency(license.cost_per_license)}</TableCell>
+                  <TableCell>
+                    <ComplianceBadge status={license.status || license.complianceStatus || 'compliant'} />
+                  </TableCell>
+                  <TableCell>
+                    <LicenseDetailsDialog
+                      license={license}
+                      onAssignmentChange={handleAssignmentChange}
+                    />
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </CardContent>
     </Card>

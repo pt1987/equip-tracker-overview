@@ -373,6 +373,45 @@ export type Database = {
         }
         Relationships: []
       }
+      license_assignments: {
+        Row: {
+          assigned_at: string | null
+          employee_id: string
+          id: string
+          license_id: string
+          notes: string | null
+        }
+        Insert: {
+          assigned_at?: string | null
+          employee_id: string
+          id?: string
+          license_id: string
+          notes?: string | null
+        }
+        Update: {
+          assigned_at?: string | null
+          employee_id?: string
+          id?: string
+          license_id?: string
+          notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "license_assignments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "license_assignments_license_id_fkey"
+            columns: ["license_id"]
+            isOneToOne: false
+            referencedRelation: "software_licenses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       maintenance_costs: {
         Row: {
           asset_id: string | null

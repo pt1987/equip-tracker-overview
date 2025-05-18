@@ -232,6 +232,11 @@ export const useLicenseManagement = () => {
     }
   };
 
+  const refetchLicenses = () => {
+    queryClient.invalidateQueries({ queryKey: ['softwareLicenses'] });
+    refetch();
+  };
+
   return {
     licenses,
     isLoading,
@@ -245,6 +250,7 @@ export const useLicenseManagement = () => {
     toggleEdit,
     saveLicense,
     deleteLicense,
-    createLicense
+    createLicense,
+    refetchLicenses
   };
 };

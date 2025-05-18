@@ -20,7 +20,8 @@ export default function LicenseManagementTable() {
     toggleEdit,
     saveLicense,
     deleteLicense,
-    createLicense
+    createLicense,
+    refetchLicenses
   } = useLicenseManagement();
 
   if (isLoading) {
@@ -48,6 +49,7 @@ export default function LicenseManagementTable() {
             toggleEdit={toggleEdit}
             saveLicense={saveLicense}
             deleteLicense={deleteLicense}
+            onAssignmentChange={refetchLicenses}
           />
         </div>
       </div>
@@ -61,4 +63,4 @@ export default function LicenseManagementTable() {
       />
     </div>
   );
-}
+};
