@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate, formatCurrency } from "@/lib/utils";
@@ -85,11 +86,7 @@ export default function LicenseManagementTable() {
       
       console.log("License data fetched:", data);
       return data as LicenseData[];
-    },
-    // Add refetchOnWindowFocus to ensure data syncs when coming back to this page
-    refetchOnWindowFocus: true,
-    // Add staleTime to prevent unnecessary refetches
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    }
   });
 
   // Initialize editing licenses when licenses data changes
@@ -165,7 +162,7 @@ export default function LicenseManagementTable() {
       
       toggleEdit(index);
       
-      // Invalidate both queries to ensure data consistency
+      // Invalidate queries to ensure data consistency
       queryClient.invalidateQueries({ queryKey: ['licenseManagement'] });
       queryClient.invalidateQueries({ queryKey: ['softwareLicenses'] });
       
@@ -196,7 +193,7 @@ export default function LicenseManagementTable() {
         description: `Die Lizenz "${name}" wurde erfolgreich gelöscht.`,
       });
       
-      // Invalidate both queries to ensure data consistency
+      // Invalidate queries to ensure data consistency
       queryClient.invalidateQueries({ queryKey: ['licenseManagement'] });
       queryClient.invalidateQueries({ queryKey: ['softwareLicenses'] });
       
@@ -263,7 +260,7 @@ export default function LicenseManagementTable() {
       
       setIsDialogOpen(false);
       
-      // Invalidate both queries to ensure data consistency
+      // Invalidate queries to ensure data consistency
       queryClient.invalidateQueries({ queryKey: ['licenseManagement'] });
       queryClient.invalidateQueries({ queryKey: ['softwareLicenses'] });
       

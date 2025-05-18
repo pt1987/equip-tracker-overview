@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
@@ -24,7 +25,7 @@ interface SoftwareLicense {
 const getSoftwareLicenseData = async (dateRange?: any) => {
   console.log("Fetching software license data with date range:", dateRange);
   
-  // Query to get software licenses data from Supabase - using the same table as LicenseManagementTable
+  // Query to get software licenses data from Supabase
   let query = supabase
     .from('software_licenses')
     .select('*')
@@ -47,9 +48,9 @@ const getSoftwareLicenseData = async (dateRange?: any) => {
     throw new Error("Failed to fetch software license data");
   }
 
-  console.log("Fetched licenses data:", licenses); // Debug log
+  console.log("Fetched software license data:", licenses);
 
-  // Check if we got data
+  // Return empty array if no data
   if (!licenses || licenses.length === 0) {
     console.log("No license data returned from database");
     return [];
@@ -100,8 +101,6 @@ export default function SoftwareLicenseReport() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['softwareLicenses', dateRange],
     queryFn: () => getSoftwareLicenseData(dateRange),
-    // Add refetchOnWindowFocus to ensure data syncs when coming back to this page
-    refetchOnWindowFocus: true,
     // Add staleTime to prevent unnecessary refetches
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
