@@ -44,6 +44,11 @@ const getAssetLifecycleData = async (dateRange?: any) => {
     throw new Error("Failed to fetch asset lifecycle data");
   }
 
+  // If no data is available, return empty array
+  if (!assets || assets.length === 0) {
+    return [];
+  }
+
   // Group assets by category and analyze lifecycle data
   const categories: Record<string, {
     count: number;
@@ -52,7 +57,7 @@ const getAssetLifecycleData = async (dateRange?: any) => {
     deploymentToRetirement: number;
   }> = {};
   
-  assets?.forEach(asset => {
+  assets.forEach(asset => {
     const category = asset.category || 'Unknown';
     const purchaseDate = new Date(asset.purchase_date);
     const today = new Date();

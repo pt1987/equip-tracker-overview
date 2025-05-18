@@ -8,16 +8,68 @@ import { Card, CardContent } from "@/components/ui/card";
 import { KeyRound } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
+
+interface SoftwareLicense {
+  id: string;
+  name: string;
+  license_type: string;
+  expiry_date: string | null;
+  total_licenses: number;
+  assigned_count: number;
+  cost_per_license: number;
+  status: string;
+  created_at?: string;
+}
 
 const getSoftwareLicenseData = async (dateRange?: any) => {
-  // Sample data - in real implementation, this would fetch from API
-  return [
-    { name: "Microsoft 365", licenseType: "Subscription", expiryDate: "2025-12-31", assignedCount: 45, totalLicenses: 50, costPerLicense: 120, totalCost: 6000, complianceStatus: "compliant" },
-    { name: "Adobe Creative Cloud", licenseType: "Subscription", expiryDate: "2025-10-15", assignedCount: 12, totalLicenses: 15, costPerLicense: 600, totalCost: 9000, complianceStatus: "compliant" },
-    { name: "Jetbrains Suite", licenseType: "Subscription", expiryDate: "2025-08-22", assignedCount: 18, totalLicenses: 15, costPerLicense: 500, totalCost: 7500, complianceStatus: "overused" },
-    { name: "Slack", licenseType: "Subscription", expiryDate: "2025-11-05", assignedCount: 30, totalLicenses: 50, costPerLicense: 80, totalCost: 4000, complianceStatus: "underused" },
-    { name: "Figma", licenseType: "Subscription", expiryDate: "2025-09-18", assignedCount: 8, totalLicenses: 10, costPerLicense: 180, totalCost: 1800, complianceStatus: "compliant" }
-  ];
+  console.log("Fetching software license data with date range:", dateRange);
+  
+  // Query to get software licenses data from Supabase
+  let query = supabase
+    .from('software_licenses')
+    .select('*')
+    .order('name');
+    
+  // Apply date filter if provided (filtering by expiry date)
+  if (dateRange?.from && dateRange?.to) {
+    const fromDate = new Date(dateRange.from);
+    const toDate = new Date(dateRange.to);
+    
+    query = query
+      .gte('expiry_date', fromDate.toISOString())
+      .lte('expiry_date', toDate.toISOString());
+  }
+  
+  const { data: licenses, error } = await query;
+  
+  if (error) {
+    console.error("Error fetching software license data:", error);
+    throw new Error("Failed to fetch software license data");
+  }
+
+  // Calculate derived properties
+  return (licenses || []).map((license: SoftwareLicense) => {
+    const totalCost = license.cost_per_license * license.total_licenses;
+    
+    // Determine compliance status if not already set
+    let complianceStatus = license.status;
+    if (!complianceStatus) {
+      if (license.assigned_count > license.total_licenses) {
+        complianceStatus = "overused";
+      } else if (license.assigned_count < license.total_licenses * 0.8) {
+        complianceStatus = "underused";
+      } else {
+        complianceStatus = "compliant";
+      }
+    }
+    
+    return {
+      ...license,
+      totalCost,
+      complianceStatus
+    };
+  });
 };
 
 const ComplianceBadge = ({ status }: { status: string }) => {
@@ -45,18 +97,18 @@ export default function SoftwareLicenseReport() {
 
   // Calculate statistics
   const stats = React.useMemo(() => {
-    if (!data) return { totalCost: 0, totalLicenses: 0, assignedLicenses: 0, utilizationRate: 0 };
+    if (!data || data.length === 0) return { totalCost: 0, totalLicenses: 0, assignedLicenses: 0, utilizationRate: 0 };
     
     const totalCost = data.reduce((sum, item) => sum + item.totalCost, 0);
-    const totalLicenses = data.reduce((sum, item) => sum + item.totalLicenses, 0);
-    const assignedLicenses = data.reduce((sum, item) => sum + item.assignedCount, 0);
+    const totalLicenses = data.reduce((sum, item) => sum + item.total_licenses, 0);
+    const assignedLicenses = data.reduce((sum, item) => sum + item.assigned_count, 0);
     const utilizationRate = totalLicenses > 0 ? (assignedLicenses / totalLicenses) * 100 : 0;
     
     return { totalCost, totalLicenses, assignedLicenses, utilizationRate };
   }, [data]);
 
   const complianceData = React.useMemo(() => {
-    if (!data) return [];
+    if (!data || data.length === 0) return [];
     
     const counts = {
       compliant: 0,
@@ -85,6 +137,10 @@ export default function SoftwareLicenseReport() {
 
   if (isError) {
     return <div className="text-center py-12 text-muted-foreground">Fehler beim Laden der Daten</div>;
+  }
+
+  if (!data || data.length === 0) {
+    return <div className="text-center py-12 text-muted-foreground">Keine Software-Lizenzdaten verfügbar</div>;
   }
 
   return (
@@ -130,8 +186,8 @@ export default function SoftwareLicenseReport() {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="totalLicenses" name="Gesamt Lizenzen" fill="#8884d8" />
-                <Bar dataKey="assignedCount" name="Zugewiesen" fill="#82ca9d" />
+                <Bar dataKey="total_licenses" name="Gesamt Lizenzen" fill="#8884d8" />
+                <Bar dataKey="assigned_count" name="Zugewiesen" fill="#82ca9d" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -143,26 +199,32 @@ export default function SoftwareLicenseReport() {
               <KeyRound className="mr-2 h-5 w-5 text-primary" />
               <h3 className="text-lg font-medium">Compliance Status</h3>
             </div>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={complianceData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={90}
-                  fill="#8884d8"
-                  paddingAngle={4}
-                  dataKey="value"
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                >
-                  {complianceData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+            {complianceData.some(item => item.value > 0) ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={complianceData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={90}
+                    fill="#8884d8"
+                    paddingAngle={4}
+                    dataKey="value"
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  >
+                    {complianceData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-[300px]">
+                <p className="text-muted-foreground">Keine Compliance-Daten verfügbar</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -190,11 +252,11 @@ export default function SoftwareLicenseReport() {
                 {data.map((item, index) => (
                   <tr key={index} className="border-b hover:bg-muted/50">
                     <td className="p-3 font-medium">{item.name}</td>
-                    <td className="p-3">{item.licenseType}</td>
-                    <td className="p-3">{formatDate(item.expiryDate)}</td>
-                    <td className="p-3">{item.assignedCount}</td>
-                    <td className="p-3">{item.totalLicenses}</td>
-                    <td className="p-3">{formatCurrency(item.costPerLicense)}</td>
+                    <td className="p-3">{item.license_type}</td>
+                    <td className="p-3">{item.expiry_date ? formatDate(item.expiry_date) : '-'}</td>
+                    <td className="p-3">{item.assigned_count}</td>
+                    <td className="p-3">{item.total_licenses}</td>
+                    <td className="p-3">{formatCurrency(item.cost_per_license)}</td>
                     <td className="p-3">{formatCurrency(item.totalCost)}</td>
                     <td className="p-3"><ComplianceBadge status={item.complianceStatus} /></td>
                   </tr>

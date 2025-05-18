@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { KeyRound } from "lucide-react";
 import PageTransition from "@/components/layout/PageTransition";
 import ReportsNavigation from "@/components/layout/ReportsNavigation";
@@ -10,25 +10,35 @@ import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
 import { ReportExportButton } from "@/components/reports/ReportExportButton";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ReportInfoTooltip } from "@/components/reports/ReportInfoTooltip";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function SoftwareLicense() {
   const { dateRange, setDateRange } = useDateRangeFilter();
-  const [reportData, setReportData] = useState<any[]>([]);
   const isMobile = useIsMobile();
   
-  // Hier würde normalerweise die Datenabfrage für den Report stattfinden
-  useEffect(() => {
-    // Hier würde ein API-Aufruf stehen, der Daten basierend auf dateRange holt
-    // Für dieses Beispiel simulieren wir die Daten
-    const mockData = [
-      { software: "Microsoft Office", licenses: 120, used: 108, expiry: "2023-12-31", cost: 12000 },
-      { software: "Adobe Creative Cloud", licenses: 45, used: 42, expiry: "2023-11-15", cost: 24000 },
-      { software: "AutoCAD", licenses: 15, used: 12, expiry: "2024-03-01", cost: 18000 },
-      { software: "VMWare", licenses: 8, used: 8, expiry: "2024-06-30", cost: 16000 }
-    ];
-    
-    setReportData(mockData);
-  }, [dateRange]);
+  const { data: reportData = [] } = useQuery({
+    queryKey: ['softwareLicensesExport', dateRange],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('software_licenses')
+        .select('*')
+        .order('name');
+      
+      if (error) {
+        console.error("Error fetching software licenses for export:", error);
+        return [];
+      }
+      
+      return data.map(license => ({
+        software: license.name,
+        licenses: license.total_licenses,
+        used: license.assigned_count,
+        expiry: license.expiry_date,
+        cost: license.cost_per_license * license.total_licenses
+      }));
+    }
+  });
   
   return (
     <PageTransition>
