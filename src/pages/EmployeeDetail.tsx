@@ -27,7 +27,7 @@ const EmployeeDetail = () => {
 
   return (
     <PageTransition>
-      <div className="p-3 md:p-4 xl:p-6 space-y-6 max-w-full pb-24 mt-12 md:mt-0">
+      <div className="p-3 md:p-6 space-y-6 max-w-full pb-24 mt-12 md:mt-0">
         <PageHeader />
         
         <EmployeeDetailContainer

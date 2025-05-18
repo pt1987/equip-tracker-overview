@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Pencil, Trash2, QrCode } from "lucide-react";
+import { Pencil, Trash2, QrCode, MoreHorizontal } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +16,7 @@ interface EmployeeActionsProps {
 
 export default function EmployeeActions({ onEdit, onDelete }: EmployeeActionsProps) {
   return (
-    <div className="absolute top-0 right-0 flex items-center gap-2">
+    <div className="flex items-center gap-2 mt-2 md:mt-0">
       <QRCodeDialog currentUrl={window.location.href} />
       
       <Button variant="outline" size="icon" className="h-8 w-8" onClick={onEdit}>

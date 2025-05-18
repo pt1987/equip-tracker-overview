@@ -50,34 +50,21 @@ export default function EmployeeMetrics({ employee, assetCount }: EmployeeMetric
           <div className="p-2.5 rounded-full bg-green-100">
             <Euro size={16} className="text-green-700" />
           </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Budget</p>
-            <p className="font-medium">{formatCurrency(employee.budget)}</p>
+          <div className="w-full">
+            <div className="flex justify-between items-center">
+              <p className="text-xs text-muted-foreground">Budget</p>
+              <p className="text-xs font-medium">{budgetPercentage}%</p>
+            </div>
+            <Progress 
+              value={budgetPercentage} 
+              className="h-1.5 my-1" 
+              aria-label={`Budget usage: ${budgetPercentage}% of ${formatCurrency(employee.budget)}`}
+            />
+            <div className="flex justify-between text-xs">
+              <p className="font-medium">{formatCurrency(employee.usedBudget)}</p>
+              <p className="font-medium text-muted-foreground">von {formatCurrency(employee.budget)}</p>
+            </div>
           </div>
-        </div>
-      </div>
-      
-      {/* Budget usage section (previously in BudgetSection.tsx) */}
-      <div className="mb-4">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-sm font-medium">Budget Nutzung</span>
-          <span className="text-sm font-medium">{budgetPercentage}%</span>
-        </div>
-        
-        <Progress 
-          value={budgetPercentage} 
-          className="h-2" 
-          aria-label={`Budget usage: ${budgetPercentage}% of ${formatCurrency(employee.budget)}`}
-        />
-        
-        <div className="flex justify-between text-xs text-muted-foreground mt-1">
-          <span>{formatCurrency(employee.usedBudget)}</span>
-          <span>{formatCurrency(employee.budget)}</span>
-        </div>
-        
-        <div className="mt-3 text-sm">
-          <span className="font-medium">Verfügbares Budget: </span>
-          <span>{formatCurrency(remainingBudget)}</span>
         </div>
       </div>
     </div>

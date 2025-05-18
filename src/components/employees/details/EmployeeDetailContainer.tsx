@@ -65,7 +65,7 @@ export default function EmployeeDetailContainer({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2">
-        <div className="glass-card p-6 mb-6">
+        <div className="glass-card p-4 sm:p-6 mb-6">
           {isEditing ? (
             <EmployeeDetailEdit 
               employee={employee} 
@@ -88,7 +88,6 @@ export default function EmployeeDetailContainer({
       <div>
         <QuickStatsSection 
           assetsByType={assetsByType}
-          currentUrl={window.location.href}
         />
       </div>
     </div>

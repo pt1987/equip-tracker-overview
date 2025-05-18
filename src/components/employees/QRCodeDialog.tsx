@@ -23,9 +23,9 @@ export default function QRCodeDialog({ currentUrl }: QRCodeDialogProps) {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button 
-          variant="ghost" 
+          variant="outline" 
           size="icon"
-          className="h-8 w-8 rounded-full bg-primary/5 hover:bg-primary/10"
+          className="h-8 w-8"
         >
           <QrCode className="h-4 w-4" />
           <span className="sr-only">QR-Code anzeigen</span>

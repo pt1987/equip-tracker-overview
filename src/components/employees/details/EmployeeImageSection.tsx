@@ -16,8 +16,8 @@ export default function EmployeeImageSection({ employee }: EmployeeImageSectionP
   };
 
   return (
-    <div className="w-full md:w-1/4 flex-shrink-0">
-      <div className="aspect-square bg-muted rounded-full overflow-hidden">
+    <div className="flex justify-center md:justify-start">
+      <div className="relative w-32 h-32 md:w-48 md:h-48 bg-muted rounded-full overflow-hidden">
         <motion.img 
           src={getEmployeeImage()} 
           alt={`${employee.firstName} ${employee.lastName}`}
