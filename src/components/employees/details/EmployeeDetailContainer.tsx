@@ -5,7 +5,6 @@ import { toast } from "@/hooks/use-toast";
 import EmployeeDetailView from "@/components/employees/EmployeeDetailView";
 import EmployeeDetailEdit from "@/components/employees/EmployeeDetailEdit";
 import AssetSection from "@/components/employees/details/AssetSection";
-import BudgetSection from "@/components/employees/details/BudgetSection";
 import QuickStatsSection from "@/components/employees/details/QuickStatsSection";
 
 interface EmployeeDetailContainerProps {
@@ -82,11 +81,6 @@ export default function EmployeeDetailContainer({
             />
           )}
         </div>
-        
-        <BudgetSection 
-          budget={employee.budget} 
-          usedBudget={employee.usedBudget} 
-        />
         
         <AssetSection assets={assets} />
       </div>

@@ -6,11 +6,9 @@ import {
   TabletIcon,
   MouseIcon,
   KeyboardIcon,
-  PackageIcon,
-  QrCode
+  PackageIcon
 } from "lucide-react";
 import { ReportInfoTooltip } from "@/components/reports/ReportInfoTooltip";
-import QRCodeDialog from "../QRCodeDialog";
 
 interface QuickStatsSectionProps {
   assetsByType: Record<string, Asset[]>;
@@ -23,16 +21,6 @@ export default function QuickStatsSection({
 }: QuickStatsSectionProps) {
   return (
     <div>
-      <div className="glass-card p-6 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Mitarbeiter QR-Code</h2>
-          <QRCodeDialog currentUrl={currentUrl} />
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Scannen Sie diesen QR-Code, um schnell auf die Mitarbeiterdetails zuzugreifen
-        </p>
-      </div>
-      
       <div className="glass-card p-6">
         <h2 className="text-lg font-semibold mb-4">Schnellübersicht</h2>
         

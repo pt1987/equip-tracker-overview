@@ -1,23 +1,13 @@
 
-import { useState } from "react";
-import { Pencil, Trash } from "lucide-react";
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { MoreHorizontal, Pencil, Trash2, QrCode } from "lucide-react";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import QRCodeDialog from "../QRCodeDialog";
 
 interface EmployeeActionsProps {
   onEdit: () => void;
@@ -25,53 +15,29 @@ interface EmployeeActionsProps {
 }
 
 export default function EmployeeActions({ onEdit, onDelete }: EmployeeActionsProps) {
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  
   return (
     <div className="absolute top-0 right-0 flex items-center gap-2">
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button 
-              onClick={onEdit} 
-              className="p-2 rounded-md hover:bg-muted transition-colors"
-            >
-              <Pencil size={18} className="text-muted-foreground hover:text-foreground" />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>Bearbeiten</TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <QRCodeDialog currentUrl={window.location.href} />
       
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <AlertDialogTrigger asChild>
-                <button className="p-2 rounded-md hover:bg-muted transition-colors">
-                  <Trash size={18} className="text-muted-foreground hover:text-destructive" />
-                </button>
-              </AlertDialogTrigger>
-            </TooltipTrigger>
-            <TooltipContent>Löschen</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Sind Sie sicher?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Diese Aktion kann nicht rückgängig gemacht werden. Der Mitarbeiter und alle zugehörigen Daten werden dauerhaft gelöscht.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-            <AlertDialogAction onClick={onDelete}>
-              Löschen bestätigen
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <Button variant="outline" size="icon" className="h-8 w-8" onClick={onEdit}>
+        <Pencil className="h-4 w-4" />
+        <span className="sr-only">Edit</span>
+      </Button>
+      
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <MoreHorizontal className="h-4 w-4" />
+            <span className="sr-only">More</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={onDelete} className="text-destructive focus:text-destructive">
+            <Trash2 className="mr-2 h-4 w-4" />
+            <span>Löschen</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }
