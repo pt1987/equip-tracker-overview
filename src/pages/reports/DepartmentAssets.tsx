@@ -9,9 +9,81 @@ import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
 import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
 import { ReportExportButton } from "@/components/reports/ReportExportButton";
 import { ReportInfoTooltip } from "@/components/reports/ReportInfoTooltip";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function DepartmentAssets() {
   const { dateRange, setDateRange } = useDateRangeFilter();
+  
+  // Query to fetch data for export
+  const { data: reportData = [] } = useQuery({
+    queryKey: ['departmentAssetsExport', dateRange],
+    queryFn: async () => {
+      try {
+        // Get employees grouped by cluster (department)
+        const { data: employees, error: employeeError } = await supabase
+          .from('employees')
+          .select('cluster, id');
+        
+        if (employeeError) {
+          console.error("Error fetching employees for export:", employeeError);
+          return [];
+        }
+        
+        // Get assets
+        const { data: assets, error: assetError } = await supabase
+          .from('assets')
+          .select('*');
+        
+        if (assetError) {
+          console.error("Error fetching assets for export:", assetError);
+          return [];
+        }
+        
+        // Group employees by department
+        const departmentEmployees: Record<string, any[]> = {};
+        employees.forEach(emp => {
+          const dept = emp.cluster || 'Unknown';
+          if (!departmentEmployees[dept]) {
+            departmentEmployees[dept] = [];
+          }
+          departmentEmployees[dept].push(emp);
+        });
+        
+        // Create employee ID to department map
+        const employeeDeptMap: Record<string, string> = {};
+        employees.forEach(emp => {
+          employeeDeptMap[emp.id] = emp.cluster || 'Unknown';
+        });
+        
+        // Group assets by department
+        const departmentAssets: Record<string, any[]> = {};
+        assets.forEach(asset => {
+          const dept = asset.employee_id ? employeeDeptMap[asset.employee_id] || 'Unassigned' : 'Unassigned';
+          if (!departmentAssets[dept]) {
+            departmentAssets[dept] = [];
+          }
+          departmentAssets[dept].push(asset);
+        });
+        
+        // Format data for export
+        return Object.keys(departmentEmployees).map(dept => {
+          const deptAssets = departmentAssets[dept] || [];
+          return {
+            department: dept,
+            employees: departmentEmployees[dept].length,
+            assets: deptAssets.length,
+            totalValue: deptAssets.reduce((sum, asset) => sum + (Number(asset.price) || 0), 0),
+            assetsPerEmployee: departmentEmployees[dept].length > 0 ? 
+              deptAssets.length / departmentEmployees[dept].length : 0
+          };
+        });
+      } catch (error) {
+        console.error("Error preparing department assets for export:", error);
+        return [];
+      }
+    }
+  });
   
   return (
     <PageTransition>
@@ -28,7 +100,7 @@ export default function DepartmentAssets() {
               </p>
             </div>
             
-            <ReportExportButton reportName="Abteilungsübersicht" />
+            <ReportExportButton reportName="Abteilungsübersicht" data={reportData} />
           </div>
           
           <ReportsNavigation />

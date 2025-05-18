@@ -7,8 +7,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Building2 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
-interface DepartmentAsset {
+interface DepartmentAssetData {
   department: string;
   assetCount: number;
   totalValue: number;
@@ -22,21 +23,117 @@ interface DepartmentAsset {
   assetsPerEmployee: number;
 }
 
-interface PieDataItem {
-  name: string;
-  value: number;
-}
+const getDepartmentAssetsData = async (dateRange?: any): Promise<DepartmentAssetData[]> => {
+  console.log("Fetching department assets data with date range:", dateRange);
+  
+  try {
+    // First, get employees grouped by cluster (department)
+    const { data: employeesByDepartment, error: employeeError } = await supabase
+      .from('employees')
+      .select('cluster, id')
+      .order('cluster');
+    
+    if (employeeError) {
+      console.error("Error fetching employees by department:", employeeError);
+      throw employeeError;
+    }
+    
+    // Count employees by department
+    const departmentCounts: Record<string, number> = {};
+    employeesByDepartment.forEach(emp => {
+      const dept = emp.cluster || 'Unknown';
+      departmentCounts[dept] = (departmentCounts[dept] || 0) + 1;
+    });
 
-const getDepartmentAssetsData = async (dateRange?: any): Promise<DepartmentAsset[]> => {
-  // Sample data - in real implementation, this would fetch from API
-  return [
-    { department: "Engineering", assetCount: 120, totalValue: 280000, assetsByType: { laptop: 45, smartphone: 40, tablet: 15, accessory: 20 }, employeeCount: 42, assetsPerEmployee: 2.86 },
-    { department: "Design", assetCount: 65, totalValue: 145000, assetsByType: { laptop: 22, smartphone: 18, tablet: 20, accessory: 5 }, employeeCount: 18, assetsPerEmployee: 3.61 },
-    { department: "Marketing", assetCount: 38, totalValue: 78000, assetsByType: { laptop: 15, smartphone: 15, tablet: 5, accessory: 3 }, employeeCount: 12, assetsPerEmployee: 3.17 },
-    { department: "Sales", assetCount: 42, totalValue: 95000, assetsByType: { laptop: 18, smartphone: 20, tablet: 2, accessory: 2 }, employeeCount: 15, assetsPerEmployee: 2.8 },
-    { department: "HR", assetCount: 18, totalValue: 35000, assetsByType: { laptop: 8, smartphone: 6, tablet: 2, accessory: 2 }, employeeCount: 6, assetsPerEmployee: 3.0 },
-    { department: "Finance", assetCount: 25, totalValue: 55000, assetsByType: { laptop: 10, smartphone: 8, tablet: 3, accessory: 4 }, employeeCount: 8, assetsPerEmployee: 3.13 }
-  ];
+    // Get all assets
+    let assetsQuery = supabase
+      .from('assets')
+      .select('*');
+    
+    // Apply date filter if provided
+    if (dateRange?.from && dateRange?.to) {
+      assetsQuery = assetsQuery
+        .gte('purchase_date', new Date(dateRange.from).toISOString().split('T')[0])
+        .lte('purchase_date', new Date(dateRange.to).toISOString().split('T')[0]);
+    }
+    
+    const { data: assets, error: assetError } = await assetsQuery;
+    
+    if (assetError) {
+      console.error("Error fetching assets:", assetError);
+      throw assetError;
+    }
+
+    // Get employee details to determine department for each asset
+    const { data: employees, error: detailError } = await supabase
+      .from('employees')
+      .select('id, cluster');
+    
+    if (detailError) {
+      console.error("Error fetching employee details:", detailError);
+      throw detailError;
+    }
+
+    // Create a map of employee ID to department
+    const employeeDepartmentMap: Record<string, string> = {};
+    employees.forEach(emp => {
+      employeeDepartmentMap[emp.id] = emp.cluster || 'Unknown';
+    });
+
+    // Group assets by department using the employee's department
+    const departmentAssets: Record<string, {
+      assets: any[],
+      assetTypes: Record<string, number>
+    }> = {};
+
+    assets.forEach(asset => {
+      // Determine the department based on the asset's assigned employee
+      const department = asset.employee_id ? 
+        employeeDepartmentMap[asset.employee_id] || 'Unassigned' : 
+        'Unassigned';
+
+      if (!departmentAssets[department]) {
+        departmentAssets[department] = {
+          assets: [],
+          assetTypes: { laptop: 0, smartphone: 0, tablet: 0, accessory: 0 }
+        };
+      }
+
+      departmentAssets[department].assets.push(asset);
+
+      // Update asset type count
+      const assetType = asset.type ? asset.type.toLowerCase() : 'accessory';
+      if (assetType.includes('laptop') || assetType.includes('notebook')) {
+        departmentAssets[department].assetTypes.laptop += 1;
+      } else if (assetType.includes('phone') || assetType.includes('smartphone')) {
+        departmentAssets[department].assetTypes.smartphone += 1;
+      } else if (assetType.includes('tablet') || assetType.includes('ipad')) {
+        departmentAssets[department].assetTypes.tablet += 1;
+      } else {
+        departmentAssets[department].assetTypes.accessory += 1;
+      }
+    });
+
+    // Format the data for the report
+    return Object.keys(departmentAssets).map(department => {
+      const deptAssets = departmentAssets[department].assets;
+      const assetCount = deptAssets.length;
+      const totalValue = deptAssets.reduce((sum, asset) => sum + (Number(asset.price) || 0), 0);
+      const employeeCount = departmentCounts[department] || 0;
+      
+      return {
+        department,
+        assetCount,
+        totalValue,
+        assetsByType: departmentAssets[department].assetTypes,
+        employeeCount,
+        assetsPerEmployee: employeeCount > 0 ? assetCount / employeeCount : 0
+      };
+    }).filter(dept => dept.assetCount > 0 || dept.employeeCount > 0);
+  } catch (error) {
+    console.error("Error in getDepartmentAssetsData:", error);
+    return [];
+  }
 };
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
@@ -50,7 +147,7 @@ export default function DepartmentAssetsReport() {
   });
 
   const pieData = React.useMemo(() => {
-    if (!data) return [];
+    if (!data || data.length === 0) return [];
     return data.map(item => ({
       name: item.department,
       value: item.assetCount
@@ -58,7 +155,7 @@ export default function DepartmentAssetsReport() {
   }, [data]);
 
   const valuePieData = React.useMemo(() => {
-    if (!data) return [];
+    if (!data || data.length === 0) return [];
     return data.map(item => ({
       name: item.department,
       value: item.totalValue
@@ -75,6 +172,10 @@ export default function DepartmentAssetsReport() {
 
   if (isError) {
     return <div className="text-center py-12 text-muted-foreground">Fehler beim Laden der Daten</div>;
+  }
+
+  if (!data || data.length === 0) {
+    return <div className="text-center py-12 text-muted-foreground">Keine Abteilungsdaten verfügbar</div>;
   }
 
   return (
