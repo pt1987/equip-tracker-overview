@@ -3,7 +3,7 @@ import React from "react";
 import { Building2 } from "lucide-react";
 import PageTransition from "@/components/layout/PageTransition";
 import ReportsNavigation from "@/components/layout/ReportsNavigation";
-import DepartmentAssetsReport from "@/components/reports/DepartmentAssetsReport";
+import DepartmentAssetsReport from "@/components/reports/department/DepartmentAssetsReport";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
 import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
