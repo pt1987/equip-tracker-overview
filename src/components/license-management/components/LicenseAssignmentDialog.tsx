@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useEmployeesList } from "../hooks/useEmployeesList";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -176,7 +176,7 @@ export const LicenseAssignmentDialog = ({
           </div>
 
           {currentAssignedCount >= totalLicenses && (
-            <Alert variant="warning">
+            <Alert variant="destructive">
               <AlertDescription>
                 Alle verfügbaren Lizenzen sind bereits zugewiesen. Erhöhen Sie die Gesamtanzahl der Lizenzen, um weitere Zuweisungen vorzunehmen.
               </AlertDescription>
