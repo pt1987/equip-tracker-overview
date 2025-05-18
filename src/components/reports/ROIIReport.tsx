@@ -93,8 +93,8 @@ export default function ROIIReport() {
                     }
                   />
                   <Tooltip formatter={(value, name) => {
-                    if (name === 'investment') return [formatCurrency(value as number), 'Investition'];
-                    if (name === 'return') return [formatCurrency(value as number), 'Ertrag'];
+                    if (name === 'investment') return [formatCurrency(Number(value)), 'Investition'];
+                    if (name === 'return') return [formatCurrency(Number(value)), 'Ertrag'];
                     return [value, name];
                   }} />
                   <Legend />
@@ -124,13 +124,13 @@ export default function ROIIReport() {
                     fill="#8884d8"
                     dataKey="roi"
                     nameKey="category"
-                    label={({ category, roi }) => `${category}: ${roi.toFixed(1)}%`}
+                    label={({ category, roi }) => `${category}: ${Number(roi).toFixed(1)}%`}
                   >
                     {data.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value) => [`${value.toFixed(2)}%`, 'ROI']} />
+                  <Tooltip formatter={(value) => [`${Number(value).toFixed(2)}%`, 'ROI']} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
