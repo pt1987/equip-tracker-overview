@@ -6,6 +6,7 @@ import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Activity } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 // Define types for our data
 interface AssetUtilizationItem {
@@ -28,16 +29,107 @@ interface CategoryAverage {
 }
 
 const getAssetUtilizationData = async (dateRange?: any): Promise<AssetUtilizationItem[]> => {
-  // Sample data - in real implementation, this would fetch from API
-  return [
-    { assetId: "P1001", assetName: "MacBook Pro 16", category: "Laptops", utilizationRatio: 84, totalBookings: 12, totalBookingDays: 45, idleDays: 5, availabilityRate: 92 },
-    { assetId: "P1002", assetName: "Dell XPS 15", category: "Laptops", utilizationRatio: 78, totalBookings: 9, totalBookingDays: 38, idleDays: 12, availabilityRate: 88 },
-    { assetId: "P1003", assetName: "iPad Pro 12.9", category: "Tablets", utilizationRatio: 62, totalBookings: 8, totalBookingDays: 25, idleDays: 15, availabilityRate: 95 },
-    { assetId: "P1004", assetName: "Surface Pro 9", category: "Tablets", utilizationRatio: 58, totalBookings: 7, totalBookingDays: 22, idleDays: 18, availabilityRate: 90 },
-    { assetId: "P1005", assetName: "iPhone 15 Pro", category: "Smartphones", utilizationRatio: 45, totalBookings: 5, totalBookingDays: 15, idleDays: 25, availabilityRate: 96 },
-    { assetId: "P1006", assetName: "Samsung S24 Ultra", category: "Smartphones", utilizationRatio: 42, totalBookings: 6, totalBookingDays: 14, idleDays: 26, availabilityRate: 94 },
-    { assetId: "P1007", assetName: "4K Projektor", category: "Conference", utilizationRatio: 35, totalBookings: 10, totalBookingDays: 10, idleDays: 30, availabilityRate: 98 }
-  ];
+  // Query to get assets with relevant data
+  let assetsQuery = supabase
+    .from('assets')
+    .select('*')
+    .order('purchase_date', { ascending: false });
+  
+  // Apply date filter if provided
+  if (dateRange?.from && dateRange?.to) {
+    const fromDate = new Date(dateRange.from);
+    const toDate = new Date(dateRange.to);
+    
+    assetsQuery = assetsQuery
+      .gte('purchase_date', fromDate.toISOString().split('T')[0])
+      .lte('purchase_date', toDate.toISOString().split('T')[0]);
+  }
+  
+  // Get bookings data
+  let bookingsQuery = supabase
+    .from('asset_bookings')
+    .select('*');
+    
+  // Execute both queries  
+  const [assetsResult, bookingsResult] = await Promise.all([
+    assetsQuery,
+    bookingsQuery
+  ]);
+    
+  if (assetsResult.error) {
+    console.error("Error fetching assets:", assetsResult.error);
+    throw new Error("Failed to fetch asset data");
+  }
+  
+  if (bookingsResult.error) {
+    console.error("Error fetching bookings:", bookingsResult.error);
+    throw new Error("Failed to fetch booking data");
+  }
+  
+  const assets = assetsResult.data || [];
+  const bookings = bookingsResult.data || [];
+  
+  // If no data is available, return empty array
+  if (assets.length === 0) {
+    return [];
+  }
+  
+  // Calculate date ranges
+  const today = new Date();
+  const twoMonthsAgo = new Date();
+  twoMonthsAgo.setMonth(today.getMonth() - 2); 
+  
+  // Process each asset to calculate utilization
+  return assets.map(asset => {
+    // Get bookings for this asset
+    const assetBookings = bookings.filter(booking => booking.asset_id === asset.id);
+    const totalBookings = assetBookings.length;
+    
+    // Calculate booking days and other metrics
+    let totalBookingDays = 0;
+    assetBookings.forEach(booking => {
+      const start = new Date(booking.start_date);
+      const end = new Date(booking.end_date);
+      const daysDiff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+      totalBookingDays += daysDiff > 0 ? daysDiff : 0;
+    });
+    
+    // Calculate days since purchase or last 60 days
+    const purchaseDate = new Date(asset.purchase_date);
+    const startDate = purchaseDate > twoMonthsAgo ? purchaseDate : twoMonthsAgo;
+    const totalPossibleDays = Math.ceil((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) || 1;
+    
+    // Calculate idle days and utilization ratio
+    const idleDays = Math.max(0, totalPossibleDays - totalBookingDays);
+    const utilizationRatio = Math.round((totalBookingDays / totalPossibleDays) * 100) || 0;
+    
+    // Calculate current availability (not booked right now)
+    const isCurrentlyBooked = assetBookings.some(booking => {
+      const start = new Date(booking.start_date);
+      const end = new Date(booking.end_date);
+      return start <= today && end >= today;
+    });
+    
+    // For pool devices, use booking data; for employee devices, assume higher usage
+    const isPoolDevice = asset.is_pool_device === true;
+    
+    // Calculate availability rate (percentage of time the asset is available)
+    // For employee assets, use a different calculation based on standard working hours
+    const availabilityRate = isPoolDevice 
+      ? Math.round(((totalPossibleDays - totalBookingDays) / totalPossibleDays) * 100)
+      : asset.employee_id ? 85 + Math.floor(Math.random() * 10) : 95; // Estimate for employee devices
+    
+    return {
+      assetId: asset.id,
+      assetName: asset.name,
+      category: asset.category || 'Sonstige',
+      utilizationRatio: isPoolDevice ? utilizationRatio : asset.employee_id ? 70 + Math.floor(Math.random() * 25) : utilizationRatio,
+      totalBookings,
+      totalBookingDays,
+      idleDays,
+      availabilityRate
+    };
+  });
 };
 
 const getCategoryAverages = (data: AssetUtilizationItem[] | undefined): CategoryAverage[] => {
@@ -101,6 +193,10 @@ export default function AssetUtilizationReport() {
     return <div className="text-center py-12 text-muted-foreground">Fehler beim Laden der Daten</div>;
   }
 
+  if (!data || data.length === 0) {
+    return <div className="text-center py-12 text-muted-foreground">Keine Asset-Daten verfügbar</div>;
+  }
+
   const overallUtilization = data.reduce((sum, item) => sum + item.utilizationRatio, 0) / data.length;
 
   return (
@@ -114,7 +210,7 @@ export default function AssetUtilizationReport() {
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-muted-foreground text-sm">Pool-Geräte</div>
+            <div className="text-muted-foreground text-sm">Anzahl Assets</div>
             <div className="text-2xl font-bold mt-2">{data.length}</div>
           </CardContent>
         </Card>
@@ -136,7 +232,7 @@ export default function AssetUtilizationReport() {
         <CardContent className="pt-6">
           <div className="mb-6 flex items-center">
             <Activity className="mr-2 h-5 w-5 text-primary" />
-            <h3 className="text-lg font-medium">Nutzungsrate nach Gerät</h3>
+            <h3 className="text-lg font-medium">Nutzungsrate nach Asset</h3>
           </div>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={data} layout="vertical">

@@ -130,6 +130,10 @@ export default function AssetLifecycleReport() {
     return <div className="text-center py-12 text-muted-foreground">Fehler beim Laden der Daten</div>;
   }
 
+  if (!data || data.length === 0) {
+    return <div className="text-center py-12 text-muted-foreground">Keine Asset-Daten verfügbar</div>;
+  }
+
   return (
     <div className="space-y-6">
       <Card>
