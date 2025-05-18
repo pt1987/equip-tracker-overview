@@ -78,7 +78,7 @@ export default function EmployeeDetailContainer({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" id="employee-detail-container">
       <div>
         <div className="glass-card p-3 sm:p-4 mb-3">
           {isEditing ? (

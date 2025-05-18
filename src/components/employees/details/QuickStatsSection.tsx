@@ -9,6 +9,7 @@ import {
   KeyboardIcon,
   PackageIcon
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface QuickStatsSectionProps {
   assetsByType: Record<string, Asset[]>;
@@ -28,6 +29,14 @@ export default function QuickStatsSection({ assetsByType }: QuickStatsSectionPro
     (sum, assets) => sum + assets.reduce((assetSum, asset) => assetSum + asset.price, 0), 
     0
   );
+
+  // Funktion zum Scrollen zu einer bestimmten Asset-Sektion
+  const scrollToAssetSection = (type: string) => {
+    const section = document.getElementById(`asset-section-${type}`);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   // Define the asset types and their corresponding icons
   const assetTypes = [
@@ -53,7 +62,12 @@ export default function QuickStatsSection({ assetsByType }: QuickStatsSectionPro
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
         {assetTypes.map(({ type, label, icon }) => (
-          <div key={type} className="p-2 bg-muted/30 rounded border border-border">
+          <div 
+            key={type} 
+            className="p-2 bg-muted/30 rounded border border-border hover:bg-secondary/20 transition-colors cursor-pointer"
+            onClick={() => scrollToAssetSection(type)}
+            aria-label={`Zu ${label} springen`}
+          >
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-1">
                 {icon}

@@ -100,7 +100,7 @@ export default function AssetSection({ assets }: AssetSectionProps) {
       {assets.length > 0 ? (
         <div className="space-y-3">
           {Object.entries(assetsByType).map(([type, typeAssets]) => (
-            <div key={type}>
+            <div key={type} id={`asset-section-${type}`}>
               <div className="flex items-center gap-1 mb-1 pb-1 border-b border-border">
                 <AssetTypeIcon type={type as Asset["type"]} />
                 <h3 className="text-sm font-medium">
