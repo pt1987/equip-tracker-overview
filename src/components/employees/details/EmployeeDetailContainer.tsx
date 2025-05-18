@@ -1,11 +1,12 @@
-
 import { useState } from "react";
 import { Employee, Asset } from "@/lib/types";
 import { toast } from "@/hooks/use-toast";
 import EmployeeDetailView from "@/components/employees/EmployeeDetailView";
 import EmployeeDetailEdit from "@/components/employees/EmployeeDetailEdit";
 import AssetSection from "@/components/employees/details/AssetSection";
+import LicenseSection from "@/components/employees/details/LicenseSection";
 import { updateEmployee } from "@/data/employees";
+import { useLicenseData } from "./useLicenseData";
 
 interface EmployeeDetailContainerProps {
   employee: Employee;
@@ -20,6 +21,9 @@ export default function EmployeeDetailContainer({
 }: EmployeeDetailContainerProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  
+  // Fetch license data for this employee
+  const { licenses, isLoadingLicenses } = useLicenseData(employee.id);
   
   const handleEdit = () => {
     setIsEditing(true);
@@ -97,6 +101,12 @@ export default function EmployeeDetailContainer({
             />
           )}
         </div>
+        
+        {/* Add License Section before Asset Section */}
+        <LicenseSection 
+          licenses={licenses} 
+          isLoading={isLoadingLicenses} 
+        />
         
         <AssetSection assets={assets} />
       </div>

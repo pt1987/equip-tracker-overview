@@ -1,10 +1,10 @@
 
 import { useState, useEffect } from "react";
-import { Asset } from "@/lib/types";
+import { Asset, Employee } from "@/lib/types";
 import { getEmployeeById } from "@/data/employees";
 
 export function useEmployeeData(asset: Asset) {
-  const [employeeData, setEmployeeData] = useState<any | null>(null);
+  const [employeeData, setEmployeeData] = useState<Employee | null>(null);
   const [isLoadingEmployee, setIsLoadingEmployee] = useState(false);
 
   useEffect(() => {
