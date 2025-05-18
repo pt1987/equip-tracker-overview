@@ -33,6 +33,7 @@ import Users from "./pages/admin/Users";
 import Roles from "./pages/admin/Roles";
 import Logs from "./pages/admin/Logs";
 import Intune from "./pages/admin/Intune";
+import LicenseManagement from "./pages/LicenseManagement";
 
 // Import report pages
 import ReportingOverview from "./pages/reports/ReportingOverview";
@@ -130,6 +131,7 @@ const AppContent = () => {
                       <Route path="/asset/edit/:id" element={<CreateEditAsset />} />
                       <Route path="/employee/create" element={<CreateEditEmployee />} />
                       <Route path="/employee/edit/:id" element={<CreateEditEmployee />} />
+                      <Route path="/license-management" element={<LicenseManagement />} />
                       
                       {/* Keep all the existing report routes */}
                       <Route path="/reporting" element={<Reporting />} />

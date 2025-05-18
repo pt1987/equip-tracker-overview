@@ -18,7 +18,8 @@ import {
   BarChart3,
   UserCheck,
   BarChartHorizontal,
-  ReceiptText
+  ReceiptText,
+  KeyRound
 } from "lucide-react";
 import { NavLinkItem, NavSubmenuItem, NavSubmenuProps } from "../types/navigation-types";
 
@@ -63,6 +64,11 @@ export const getMainNavigationItems = (): NavLinkItem[] => {
       href: "/damage-management",
       icon: <AlertTriangle size={16} />,
       label: "Schadensmanagement"
+    },
+    {
+      href: "/license-management",
+      icon: <KeyRound size={16} />,
+      label: "Lizenzmanagement"
     },
     {
       href: "/hardware-order",
@@ -128,6 +134,11 @@ export const getReportingSubmenuItems = (): NavSubmenuProps => {
         href: "/reporting/vendor-analysis",
         icon: <BarChartHorizontal size={16} />,
         label: "Anbieteranalyse"
+      },
+      {
+        href: "/reporting/software-license",
+        icon: <KeyRound size={16} />,
+        label: "Software-Lizenzen"
       },
       {
         href: "/reporting/roii",
