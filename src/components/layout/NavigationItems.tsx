@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   LayoutDashboard,
@@ -75,6 +74,11 @@ export const navItems: NavItem[] = [
     title: "Pool-Geräte",
     href: "/pool-assets",
     icon: Package,
+  },
+  {
+    title: "Lizenzmanagement",
+    href: "/license-management",
+    icon: KeyRound,
   },
   {
     title: "Reporting",
