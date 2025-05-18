@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate, formatCurrency } from "@/lib/utils";
@@ -69,11 +68,11 @@ export default function LicenseManagementTable() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch licenses data
+  // Fetch licenses data - using the same query key as the report
   const { data: licenses, isLoading, isError, refetch } = useQuery({
-    queryKey: ['licenseManagement'],
+    queryKey: ['softwareLicenses'],
     queryFn: async () => {
-      console.log("Fetching license management data");
+      console.log("Management: Fetching license management data");
       const { data, error } = await supabase
         .from('software_licenses')
         .select('*')
@@ -84,9 +83,13 @@ export default function LicenseManagementTable() {
         throw error;
       }
       
-      console.log("License data fetched:", data);
+      console.log("Management: License data fetched:", data);
       return data as LicenseData[];
-    }
+    },
+    // Immediately refresh data when component mounts
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true
   });
 
   // Initialize editing licenses when licenses data changes
@@ -162,10 +165,10 @@ export default function LicenseManagementTable() {
       
       toggleEdit(index);
       
-      // Invalidate queries to ensure data consistency
-      queryClient.invalidateQueries({ queryKey: ['licenseManagement'] });
+      // Force refresh both components
       queryClient.invalidateQueries({ queryKey: ['softwareLicenses'] });
       
+      // Refetch immediately
       await refetch();
     } catch (error) {
       console.error('Error updating license:', error);
@@ -193,10 +196,10 @@ export default function LicenseManagementTable() {
         description: `Die Lizenz "${name}" wurde erfolgreich gelöscht.`,
       });
       
-      // Invalidate queries to ensure data consistency
-      queryClient.invalidateQueries({ queryKey: ['licenseManagement'] });
+      // Force refresh both components
       queryClient.invalidateQueries({ queryKey: ['softwareLicenses'] });
       
+      // Refetch immediately
       await refetch();
     } catch (error) {
       console.error('Error deleting license:', error);
@@ -260,10 +263,10 @@ export default function LicenseManagementTable() {
       
       setIsDialogOpen(false);
       
-      // Invalidate queries to ensure data consistency
-      queryClient.invalidateQueries({ queryKey: ['licenseManagement'] });
+      // Force refresh both components
       queryClient.invalidateQueries({ queryKey: ['softwareLicenses'] });
       
+      // Refetch immediately
       await refetch();
     } catch (error) {
       console.error('Error creating license:', error);

@@ -22,64 +22,6 @@ interface SoftwareLicense {
   created_at?: string;
 }
 
-const getSoftwareLicenseData = async (dateRange?: any) => {
-  console.log("Fetching software license data with date range:", dateRange);
-  
-  // Query to get software licenses data from Supabase
-  let query = supabase
-    .from('software_licenses')
-    .select('*')
-    .order('name');
-    
-  // Apply date filter if provided (filtering by expiry date)
-  if (dateRange?.from && dateRange?.to) {
-    const fromDate = new Date(dateRange.from);
-    const toDate = new Date(dateRange.to);
-    
-    query = query
-      .gte('expiry_date', fromDate.toISOString())
-      .lte('expiry_date', toDate.toISOString());
-  }
-  
-  const { data: licenses, error } = await query;
-  
-  if (error) {
-    console.error("Error fetching software license data:", error);
-    throw new Error("Failed to fetch software license data");
-  }
-
-  console.log("Fetched software license data:", licenses);
-
-  // Return empty array if no data
-  if (!licenses || licenses.length === 0) {
-    console.log("No license data returned from database");
-    return [];
-  }
-
-  // Calculate derived properties
-  return licenses.map((license: SoftwareLicense) => {
-    const totalCost = license.cost_per_license * license.total_licenses;
-    
-    // Determine compliance status if not already set
-    let complianceStatus = license.status;
-    if (!complianceStatus) {
-      if (license.assigned_count > license.total_licenses) {
-        complianceStatus = "overused";
-      } else if (license.assigned_count < license.total_licenses * 0.8) {
-        complianceStatus = "underused";
-      } else {
-        complianceStatus = "compliant";
-      }
-    }
-    
-    return {
-      ...license,
-      totalCost,
-      complianceStatus
-    };
-  });
-};
-
 const ComplianceBadge = ({ status }: { status: string }) => {
   switch (status) {
     case "compliant":
@@ -98,18 +40,59 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 export default function SoftwareLicenseReport() {
   const { dateRange } = useDateRangeFilter();
 
+  // Use the same query key as LicenseManagementTable to share the cache
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['softwareLicenses', dateRange],
-    queryFn: () => getSoftwareLicenseData(dateRange),
-    // Add staleTime to prevent unnecessary refetches
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    queryKey: ['softwareLicenses'],
+    queryFn: async () => {
+      console.log("Report: Fetching software license data");
+      
+      const { data: licenses, error } = await supabase
+        .from('software_licenses')
+        .select('*')
+        .order('name');
+        
+      if (error) {
+        console.error("Error fetching software license data:", error);
+        throw error;
+      }
+      
+      console.log("Report: Fetched license data:", licenses);
+      
+      if (!licenses || licenses.length === 0) {
+        console.log("Report: No license data returned");
+        return [];
+      }
+      
+      return licenses.map((license: SoftwareLicense) => {
+        const totalCost = license.cost_per_license * license.total_licenses;
+        
+        let complianceStatus = license.status;
+        if (!complianceStatus) {
+          if (license.assigned_count > license.total_licenses) {
+            complianceStatus = "overused";
+          } else if (license.assigned_count < license.total_licenses * 0.8) {
+            complianceStatus = "underused";
+          } else {
+            complianceStatus = "compliant";
+          }
+        }
+        
+        return {
+          ...license,
+          totalCost,
+          complianceStatus
+        };
+      });
+    },
+    refetchOnWindowFocus: true,
+    staleTime: 0, // Always fetch fresh data
   });
 
   // Calculate statistics
   const stats = React.useMemo(() => {
     if (!data || data.length === 0) return { totalCost: 0, totalLicenses: 0, assignedLicenses: 0, utilizationRate: 0 };
     
-    const totalCost = data.reduce((sum, item) => sum + item.totalCost, 0);
+    const totalCost = data.reduce((sum, item) => sum + (item.cost_per_license * item.total_licenses), 0);
     const totalLicenses = data.reduce((sum, item) => sum + item.total_licenses, 0);
     const assignedLicenses = data.reduce((sum, item) => sum + item.assigned_count, 0);
     const utilizationRate = totalLicenses > 0 ? (assignedLicenses / totalLicenses) * 100 : 0;
@@ -127,7 +110,9 @@ export default function SoftwareLicenseReport() {
     };
     
     data.forEach(item => {
-      counts[item.complianceStatus]++;
+      if (item.complianceStatus === "compliant") counts.compliant++;
+      else if (item.complianceStatus === "overused") counts.overused++;
+      else if (item.complianceStatus === "underused") counts.underused++;
     });
     
     return [
@@ -270,7 +255,7 @@ export default function SoftwareLicenseReport() {
                     <td className="p-3">{item.assigned_count}</td>
                     <td className="p-3">{item.total_licenses}</td>
                     <td className="p-3">{formatCurrency(item.cost_per_license)}</td>
-                    <td className="p-3">{formatCurrency(item.totalCost)}</td>
+                    <td className="p-3">{formatCurrency(item.cost_per_license * item.total_licenses)}</td>
                     <td className="p-3"><ComplianceBadge status={item.complianceStatus} /></td>
                   </tr>
                 ))}
