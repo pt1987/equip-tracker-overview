@@ -5,6 +5,7 @@ import { toast } from "@/hooks/use-toast";
 import EmployeeDetailView from "@/components/employees/EmployeeDetailView";
 import EmployeeDetailEdit from "@/components/employees/EmployeeDetailEdit";
 import AssetSection from "@/components/employees/details/AssetSection";
+import { updateEmployee } from "@/data/employees";
 
 interface EmployeeDetailContainerProps {
   employee: Employee;
@@ -18,6 +19,7 @@ export default function EmployeeDetailContainer({
   onEmployeeUpdated 
 }: EmployeeDetailContainerProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   
   const handleEdit = () => {
     setIsEditing(true);
@@ -29,14 +31,36 @@ export default function EmployeeDetailContainer({
   
   const handleSave = async (data: any) => {
     try {
-      // The actual save logic is handled in the parent component
-      // We just need to call the callback here
+      setIsSaving(true);
+      
+      // Directly save the employee data using the updateEmployee function
+      if (employee.id) {
+        const success = await updateEmployee(employee.id, {
+          first_name: data.firstName,
+          last_name: data.lastName,
+          email: data.email || "",
+          position: data.position,
+          cluster: data.cluster,
+          competence_level: data.competenceLevel,
+          start_date: new Date(data.entryDate || data.startDate).toISOString().split('T')[0],
+          budget: data.budget,
+          image_url: data.imageUrl || data.profileImage
+        });
+        
+        if (!success) {
+          throw new Error("Failed to update employee");
+        }
+      }
+      
+      // Call the callback to refresh data
       onEmployeeUpdated();
       
       toast({
         title: "Mitarbeiter aktualisiert",
         description: "Die Änderungen wurden erfolgreich gespeichert."
       });
+      
+      setIsEditing(false);
     } catch (error) {
       console.error("Error in handleSave:", error);
       toast({
@@ -44,9 +68,9 @@ export default function EmployeeDetailContainer({
         title: "Fehler beim Speichern",
         description: "Die Änderungen konnten nicht gespeichert werden."
       });
+    } finally {
+      setIsSaving(false);
     }
-    
-    setIsEditing(false);
   };
   
   const handleDelete = () => {
@@ -61,7 +85,8 @@ export default function EmployeeDetailContainer({
             <EmployeeDetailEdit 
               employee={employee} 
               onSave={handleSave} 
-              onCancel={handleCancel} 
+              onCancel={handleCancel}
+              isSaving={isSaving}
             />
           ) : (
             <EmployeeDetailView 

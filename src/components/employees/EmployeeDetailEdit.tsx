@@ -12,12 +12,14 @@ interface EmployeeDetailEditProps {
   employee: Employee;
   onSave: (data: any) => void;
   onCancel: () => void;
+  isSaving?: boolean;
 }
 
 export default function EmployeeDetailEdit({
   employee,
   onSave,
   onCancel,
+  isSaving = false
 }: EmployeeDetailEditProps) {
   const [imagePreview, setImagePreview] = useState(employee.imageUrl || "");
   
@@ -77,15 +79,17 @@ export default function EmployeeDetailEdit({
               <button 
                 type="button"
                 onClick={onCancel}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50"
+                disabled={isSaving}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 disabled:opacity-50"
               >
-                Cancel
+                Abbrechen
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700"
+                disabled={isSaving}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 disabled:opacity-50"
               >
-                Save Changes
+                {isSaving ? "Wird gespeichert..." : "Speichern"}
               </button>
             </div>
           </div>
