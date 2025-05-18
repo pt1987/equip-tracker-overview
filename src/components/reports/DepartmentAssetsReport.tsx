@@ -83,7 +83,12 @@ const getDepartmentAssetsData = async (dateRange?: any): Promise<DepartmentAsset
     // Group assets by department using the employee's department
     const departmentAssets: Record<string, {
       assets: any[],
-      assetTypes: Record<string, number>
+      assetTypes: {
+        laptop: number;
+        smartphone: number;
+        tablet: number;
+        accessory: number;
+      }
     }> = {};
 
     assets.forEach(asset => {

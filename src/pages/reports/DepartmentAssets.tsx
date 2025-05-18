@@ -31,9 +31,18 @@ export default function DepartmentAssets() {
         }
         
         // Get assets
-        const { data: assets, error: assetError } = await supabase
+        let assetsQuery = supabase
           .from('assets')
           .select('*');
+        
+        // Apply date filter if provided
+        if (dateRange?.from && dateRange?.to) {
+          assetsQuery = assetsQuery
+            .gte('purchase_date', new Date(dateRange.from).toISOString().split('T')[0])
+            .lte('purchase_date', new Date(dateRange.to).toISOString().split('T')[0]);
+        }
+        
+        const { data: assets, error: assetError } = await assetsQuery;
         
         if (assetError) {
           console.error("Error fetching assets for export:", assetError);
@@ -56,26 +65,56 @@ export default function DepartmentAssets() {
           employeeDeptMap[emp.id] = emp.cluster || 'Unknown';
         });
         
-        // Group assets by department
-        const departmentAssets: Record<string, any[]> = {};
+        // Group assets by department and count by type
+        const departmentAssets: Record<string, {
+          assets: any[],
+          assetsByType: {
+            laptop: number;
+            smartphone: number;
+            tablet: number;
+            accessory: number;
+          }
+        }> = {};
+        
         assets.forEach(asset => {
           const dept = asset.employee_id ? employeeDeptMap[asset.employee_id] || 'Unassigned' : 'Unassigned';
+          
           if (!departmentAssets[dept]) {
-            departmentAssets[dept] = [];
+            departmentAssets[dept] = {
+              assets: [],
+              assetsByType: { laptop: 0, smartphone: 0, tablet: 0, accessory: 0 }
+            };
           }
-          departmentAssets[dept].push(asset);
+          
+          departmentAssets[dept].assets.push(asset);
+          
+          // Count by type
+          const assetType = asset.type ? asset.type.toLowerCase() : 'accessory';
+          if (assetType.includes('laptop') || assetType.includes('notebook')) {
+            departmentAssets[dept].assetsByType.laptop += 1;
+          } else if (assetType.includes('phone') || assetType.includes('smartphone')) {
+            departmentAssets[dept].assetsByType.smartphone += 1;
+          } else if (assetType.includes('tablet') || assetType.includes('ipad')) {
+            departmentAssets[dept].assetsByType.tablet += 1;
+          } else {
+            departmentAssets[dept].assetsByType.accessory += 1;
+          }
         });
         
         // Format data for export
         return Object.keys(departmentEmployees).map(dept => {
-          const deptAssets = departmentAssets[dept] || [];
+          const deptAssets = departmentAssets[dept]?.assets || [];
           return {
             department: dept,
             employees: departmentEmployees[dept].length,
             assets: deptAssets.length,
             totalValue: deptAssets.reduce((sum, asset) => sum + (Number(asset.price) || 0), 0),
             assetsPerEmployee: departmentEmployees[dept].length > 0 ? 
-              deptAssets.length / departmentEmployees[dept].length : 0
+              deptAssets.length / departmentEmployees[dept].length : 0,
+            laptops: departmentAssets[dept]?.assetsByType.laptop || 0,
+            smartphones: departmentAssets[dept]?.assetsByType.smartphone || 0,
+            tablets: departmentAssets[dept]?.assetsByType.tablet || 0,
+            accessories: departmentAssets[dept]?.assetsByType.accessory || 0
           };
         });
       } catch (error) {
