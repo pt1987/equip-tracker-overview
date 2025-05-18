@@ -1,5 +1,6 @@
+
 import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,6 +67,7 @@ export default function LicenseManagementTable() {
   });
   
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Fetch licenses data
   const { data: licenses, isLoading, isError, refetch } = useQuery({
@@ -78,7 +80,9 @@ export default function LicenseManagementTable() {
         
       if (error) throw error;
       return data as LicenseData[];
-    }
+    },
+    // Add refetchOnWindowFocus to ensure data syncs when coming back to this page
+    refetchOnWindowFocus: true
   });
 
   // Initialize editing licenses when licenses data changes
@@ -151,6 +155,11 @@ export default function LicenseManagementTable() {
       });
       
       toggleEdit(index);
+      
+      // Invalidate both queries to ensure data consistency
+      queryClient.invalidateQueries({ queryKey: ['licenseManagement'] });
+      queryClient.invalidateQueries({ queryKey: ['softwareLicenses'] });
+      
       refetch();
     } catch (error) {
       console.error('Error updating license:', error);
@@ -175,6 +184,10 @@ export default function LicenseManagementTable() {
         title: "Lizenz gelöscht",
         description: `Die Lizenz "${name}" wurde erfolgreich gelöscht.`,
       });
+      
+      // Invalidate both queries to ensure data consistency
+      queryClient.invalidateQueries({ queryKey: ['licenseManagement'] });
+      queryClient.invalidateQueries({ queryKey: ['softwareLicenses'] });
       
       refetch();
     } catch (error) {
@@ -204,7 +217,7 @@ export default function LicenseManagementTable() {
         newLicense.assigned_count || 0
       );
       
-      // Fix: Ensure required fields are included
+      // Ensure required fields are included
       const licenseToCreate = {
         name: newLicense.name,                    // Required field
         license_type: newLicense.license_type,    // Required field
@@ -236,6 +249,11 @@ export default function LicenseManagementTable() {
       });
       
       setIsDialogOpen(false);
+      
+      // Invalidate both queries to ensure data consistency
+      queryClient.invalidateQueries({ queryKey: ['licenseManagement'] });
+      queryClient.invalidateQueries({ queryKey: ['softwareLicenses'] });
+      
       refetch();
     } catch (error) {
       console.error('Error creating license:', error);

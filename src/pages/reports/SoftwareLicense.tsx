@@ -20,7 +20,7 @@ export default function SoftwareLicense() {
           
           <div className="mt-4 md:mt-0">
             <Link to="/license-management">
-              <Button variant="outline" className="flex items-center gap-2">
+              <Button className="flex items-center gap-2">
                 <KeyRound size={18} />
                 Zum Lizenzmanagement
               </Button>

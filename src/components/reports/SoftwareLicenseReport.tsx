@@ -92,7 +92,9 @@ export default function SoftwareLicenseReport() {
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['softwareLicenses', dateRange],
-    queryFn: () => getSoftwareLicenseData(dateRange)
+    queryFn: () => getSoftwareLicenseData(dateRange),
+    // Add refetchOnWindowFocus to ensure data syncs when coming back to this page
+    refetchOnWindowFocus: true
   });
 
   // Calculate statistics
