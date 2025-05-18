@@ -29,8 +29,8 @@ export default function EmployeeDetailView({
   });
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col md:flex-row gap-6">
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col md:flex-row gap-4">
         <div className="relative w-full md:w-auto">
           <EmployeeImageSection employee={employee} />
         </div>
@@ -49,8 +49,8 @@ export default function EmployeeDetailView({
         </div>
       </div>
       
-      {/* Quick stats section between first and second card */}
-      <div className="glass-card p-4">
+      {/* Quick stats section between first and second card - more compact */}
+      <div className="glass-card p-3">
         <QuickStatsSection assetsByType={assetsByType} />
       </div>
     </div>

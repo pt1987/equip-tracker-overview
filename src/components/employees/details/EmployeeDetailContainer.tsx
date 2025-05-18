@@ -54,9 +54,9 @@ export default function EmployeeDetailContainer({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       <div>
-        <div className="glass-card p-4 sm:p-6 mb-6">
+        <div className="glass-card p-3 sm:p-4 mb-3">
           {isEditing ? (
             <EmployeeDetailEdit 
               employee={employee} 

@@ -20,9 +20,10 @@ import {
 interface AssetCardProps {
   asset: Asset;
   index?: number;
+  hideEmployeeInfo?: boolean;
 }
 
-export default function AssetCard({ asset, index = 0 }: AssetCardProps) {
+export default function AssetCard({ asset, index = 0, hideEmployeeInfo = false }: AssetCardProps) {
   // Fetch employee data from Supabase if there is an employeeId
   const { data: employee } = useQuery({
     queryKey: ["employee", asset.employeeId],
@@ -44,7 +45,7 @@ export default function AssetCard({ asset, index = 0 }: AssetCardProps) {
         imageUrl: data.image_url
       };
     },
-    enabled: !!asset.employeeId,
+    enabled: !!asset.employeeId && !hideEmployeeInfo,
   });
   
   const getAssetTypeLabel = (type: Asset["type"]) => {
@@ -52,10 +53,10 @@ export default function AssetCard({ asset, index = 0 }: AssetCardProps) {
       case "laptop": return "Laptop";
       case "smartphone": return "Smartphone";
       case "tablet": return "Tablet";
-      case "mouse": return "Mouse";
-      case "keyboard": return "Keyboard";
-      case "accessory": return "Accessory";
-      default: return "Other";
+      case "mouse": return "Maus";
+      case "keyboard": return "Tastatur";
+      case "accessory": return "Zubehör";
+      default: return "Sonstiges";
     }
   };
   
@@ -69,13 +70,13 @@ export default function AssetCard({ asset, index = 0 }: AssetCardProps) {
   // Get appropriate icon based on asset type
   const getAssetIcon = () => {
     switch (asset.type) {
-      case "laptop": return <Laptop className="w-12 h-12 text-primary/70" />;
-      case "smartphone": return <Smartphone className="w-12 h-12 text-primary/70" />;
-      case "tablet": return <Tablet className="w-12 h-12 text-primary/70" />;
-      case "mouse": return <Mouse className="w-12 h-12 text-primary/70" />;
-      case "keyboard": return <Keyboard className="w-12 h-12 text-primary/70" />;
+      case "laptop": return <Laptop className="w-12 h-12 text-gray-700" />;
+      case "smartphone": return <Smartphone className="w-12 h-12 text-gray-700" />;
+      case "tablet": return <Tablet className="w-12 h-12 text-gray-700" />;
+      case "mouse": return <Mouse className="w-12 h-12 text-gray-700" />;
+      case "keyboard": return <Keyboard className="w-12 h-12 text-gray-700" />;
       case "accessory": 
-      default: return <Package className="w-12 h-12 text-primary/70" />;
+      default: return <Package className="w-12 h-12 text-gray-700" />;
     }
   };
 
@@ -87,7 +88,7 @@ export default function AssetCard({ asset, index = 0 }: AssetCardProps) {
     >
       <Link to={`/asset/${asset.id}`} className="block w-full group">
         <div className="glass-card overflow-hidden transition-all duration-300 hover:shadow-card group-hover:border-primary/20">
-          <div className="relative h-40 overflow-hidden bg-muted">
+          <div className="relative h-32 overflow-hidden bg-muted">
             {asset.imageUrl ? (
               <img 
                 src={asset.imageUrl} 
@@ -105,35 +106,35 @@ export default function AssetCard({ asset, index = 0 }: AssetCardProps) {
             </div>
           </div>
           
-          <div className="p-4">
-            <div className="flex items-start justify-between mb-2">
+          <div className="p-3">
+            <div className="flex items-start justify-between mb-1">
               <div>
-                <div className="inline-flex items-center px-2 py-1 mb-2 rounded-full bg-secondary text-xs font-medium">
+                <div className="inline-flex items-center px-2 py-0.5 mb-1 rounded-full bg-secondary text-xs font-medium">
                   {getAssetTypeLabel(asset.type)}
                 </div>
-                <h3 className="font-medium line-clamp-1 text-balance group-hover:text-primary transition-colors">
+                <h3 className="font-medium line-clamp-1 text-balance group-hover:text-primary transition-colors text-sm">
                   {asset.name}
                 </h3>
-                <p className="text-sm text-muted-foreground line-clamp-1">
+                <p className="text-xs text-muted-foreground line-clamp-1">
                   {asset.manufacturer} {asset.model}
                 </p>
               </div>
             </div>
             
-            <div className="mt-3 space-y-2">
+            <div className="mt-2 space-y-1">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 text-muted-foreground">
-                  <CalendarClock size={14} />
+                <div className="flex items-center gap-1 text-muted-foreground">
+                  <CalendarClock size={12} className="text-gray-700" />
                   <span className="text-xs">{purchaseDate}</span>
                 </div>
-                <div className="flex items-center gap-1.5 text-muted-foreground">
-                  <Euro size={14} />
+                <div className="flex items-center gap-1 text-muted-foreground">
+                  <Euro size={12} className="text-gray-700" />
                   <span className="text-xs font-medium">{formatCurrency(asset.price)}</span>
                 </div>
               </div>
               
-              {employee && (
-                <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
+              {employee && !hideEmployeeInfo && (
+                <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border">
                   <div className="flex-shrink-0 w-6 h-6 rounded-full overflow-hidden bg-muted">
                     {employee.imageUrl ? (
                       <img 
