@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { TrendingUp } from "lucide-react";
 import PageTransition from "@/components/layout/PageTransition";
 import ReportsNavigation from "@/components/layout/ReportsNavigation";
@@ -10,24 +10,18 @@ import { useDateRangeFilter } from "@/hooks/useDateRangeFilter";
 import { ReportExportButton } from "@/components/reports/ReportExportButton";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ReportInfoTooltip } from "@/components/reports/ReportInfoTooltip";
+import { useQuery } from "@tanstack/react-query";
+import { getROIIData } from "@/components/reports/roii/useROIIData";
 
 export default function ROII() {
   const { dateRange, setDateRange } = useDateRangeFilter();
-  const [reportData, setReportData] = useState<any[]>([]);
   const isMobile = useIsMobile();
   
-  // Hier würde normalerweise die Datenabfrage für den Report stattfinden
-  useEffect(() => {
-    // Hier würde ein API-Aufruf stehen, der Daten basierend auf dateRange holt
-    // Für dieses Beispiel simulieren wir die Daten
-    const mockData = [
-      { category: "Laptops", investment: 45000, return: 70000, roi: 0.56 },
-      { category: "Server", investment: 120000, return: 240000, roi: 1.0 },
-      { category: "Software", investment: 35000, return: 42000, roi: 0.2 }
-    ];
-    
-    setReportData(mockData);
-  }, [dateRange]);
+  // Query to fetch data for export
+  const { data: reportData = [] } = useQuery({
+    queryKey: ['roiiExport', dateRange],
+    queryFn: () => getROIIData(dateRange)
+  });
   
   return (
     <PageTransition>
