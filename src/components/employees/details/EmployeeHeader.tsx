@@ -13,9 +13,9 @@ export default function EmployeeHeader({ employee }: EmployeeHeaderProps) {
         <Badge variant="secondary" className="px-2 py-1 mb-2 text-xs font-medium">
           {employee.cluster}
         </Badge>
-        {employee.competence_level && (
+        {employee.competenceLevel && (
           <Badge variant="outline" className="px-2 py-1 mb-2 text-xs font-medium">
-            {employee.competence_level}
+            {employee.competenceLevel}
           </Badge>
         )}
       </div>
