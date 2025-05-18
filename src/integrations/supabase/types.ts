@@ -105,6 +105,51 @@ export type Database = {
           },
         ]
       }
+      asset_vendors: {
+        Row: {
+          asset_id: string | null
+          created_at: string | null
+          id: string
+          manufacturer: string
+          price: number
+          purchase_date: string | null
+          vendor_id: string | null
+        }
+        Insert: {
+          asset_id?: string | null
+          created_at?: string | null
+          id?: string
+          manufacturer: string
+          price: number
+          purchase_date?: string | null
+          vendor_id?: string | null
+        }
+        Update: {
+          asset_id?: string | null
+          created_at?: string | null
+          id?: string
+          manufacturer?: string
+          price?: number
+          purchase_date?: string | null
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_vendors_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_vendors_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assets: {
         Row: {
           actual_return_date: string | null
@@ -328,6 +373,44 @@ export type Database = {
         }
         Relationships: []
       }
+      maintenance_costs: {
+        Row: {
+          asset_id: string | null
+          cost: number
+          created_at: string | null
+          description: string | null
+          id: string
+          maintenance_date: string | null
+          maintenance_type: string
+        }
+        Insert: {
+          asset_id?: string | null
+          cost?: number
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          maintenance_date?: string | null
+          maintenance_type: string
+        }
+        Update: {
+          asset_id?: string | null
+          cost?: number
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          maintenance_date?: string | null
+          maintenance_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_costs_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -355,6 +438,146 @@ export type Database = {
         }
         Relationships: []
       }
+      software_licenses: {
+        Row: {
+          assigned_count: number
+          cost_per_license: number
+          created_at: string | null
+          expiry_date: string | null
+          id: string
+          license_type: string
+          name: string
+          status: string
+          total_licenses: number
+        }
+        Insert: {
+          assigned_count?: number
+          cost_per_license?: number
+          created_at?: string | null
+          expiry_date?: string | null
+          id?: string
+          license_type: string
+          name: string
+          status?: string
+          total_licenses?: number
+        }
+        Update: {
+          assigned_count?: number
+          cost_per_license?: number
+          created_at?: string | null
+          expiry_date?: string | null
+          id?: string
+          license_type?: string
+          name?: string
+          status?: string
+          total_licenses?: number
+        }
+        Relationships: []
+      }
+      vendors: {
+        Row: {
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string | null
+          id: string
+          rating: number | null
+          vendor_name: string
+        }
+        Insert: {
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          id?: string
+          rating?: number | null
+          vendor_name: string
+        }
+        Update: {
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          id?: string
+          rating?: number | null
+          vendor_name?: string
+        }
+        Relationships: []
+      }
+      warranty_defects: {
+        Row: {
+          asset_id: string | null
+          created_at: string | null
+          defect_date: string | null
+          defect_type: string
+          has_warranty: boolean | null
+          id: string
+          repair_cost: number | null
+          resolution: string | null
+          warranty_covered: boolean | null
+        }
+        Insert: {
+          asset_id?: string | null
+          created_at?: string | null
+          defect_date?: string | null
+          defect_type: string
+          has_warranty?: boolean | null
+          id?: string
+          repair_cost?: number | null
+          resolution?: string | null
+          warranty_covered?: boolean | null
+        }
+        Update: {
+          asset_id?: string | null
+          created_at?: string | null
+          defect_date?: string | null
+          defect_type?: string
+          has_warranty?: boolean | null
+          id?: string
+          repair_cost?: number | null
+          resolution?: string | null
+          warranty_covered?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "warranty_defects_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      yearly_budget: {
+        Row: {
+          budget_amount: number
+          category: string
+          created_at: string | null
+          id: string
+          month: number
+          quarter: number
+          spent_amount: number
+          year: number
+        }
+        Insert: {
+          budget_amount?: number
+          category: string
+          created_at?: string | null
+          id?: string
+          month: number
+          quarter: number
+          spent_amount?: number
+          year: number
+        }
+        Update: {
+          budget_amount?: number
+          category?: string
+          created_at?: string | null
+          id?: string
+          month?: number
+          quarter?: number
+          spent_amount?: number
+          year?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -363,6 +586,10 @@ export type Database = {
       get_safe_user_email: {
         Args: { user_id: string }
         Returns: string
+      }
+      populate_report_test_data: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       update_user_email: {
         Args: { user_id: string; new_email: string }

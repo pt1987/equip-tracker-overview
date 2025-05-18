@@ -1,37 +1,67 @@
 
-import { useEffect, useState } from "react";
-import { getYearlyBudgetReport } from "@/data/reports";
-import { YearlyBudgetReport } from "@/lib/types";
+import { useState } from "react";
+import { DateRange } from "react-day-picker";
 import ReactECharts from "echarts-for-react";
 import { formatCurrency } from "@/lib/utils";
-import { DateRange } from "react-day-picker";
 import { getCommonOptions } from "@/lib/echarts-theme";
 import * as echarts from 'echarts';
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { YearlyBudgetReport } from "@/lib/types";
 
 interface BudgetYearlyReportProps {
   dateRange?: DateRange;
 }
 
-export default function BudgetYearlyReport({ dateRange }: BudgetYearlyReportProps) {
-  const [data, setData] = useState<YearlyBudgetReport[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+// Function to fetch yearly budget data from Supabase
+const getYearlyBudgetReport = async (dateRange?: DateRange): Promise<YearlyBudgetReport[]> => {
+  let query = supabase
+    .from('yearly_budget')
+    .select('year, spent_amount')
+    .order('year', { ascending: true });
   
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const budgetData = await getYearlyBudgetReport(dateRange);
-        setData(budgetData);
-      } catch (error) {
-        console.error("Error fetching budget data:", error);
-        setData([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  // Apply date filter if provided
+  if (dateRange?.from && dateRange?.to) {
+    const fromYear = new Date(dateRange.from).getFullYear();
+    const toYear = new Date(dateRange.to).getFullYear();
     
-    fetchData();
-  }, [dateRange]);
+    query = query
+      .gte('year', fromYear)
+      .lte('year', toYear);
+  }
+  
+  const { data, error } = await query;
+  
+  if (error) {
+    console.error("Error fetching yearly budget data:", error);
+    throw new Error("Failed to fetch yearly budget data");
+  }
+  
+  // Aggregate data by year
+  const yearlyData: Record<number, number> = {};
+  
+  data?.forEach(item => {
+    const { year, spent_amount } = item;
+    if (!yearlyData[year]) {
+      yearlyData[year] = 0;
+    }
+    yearlyData[year] += Number(spent_amount);
+  });
+  
+  // Transform into array of objects
+  return Object.keys(yearlyData).map(year => ({
+    year: parseInt(year),
+    totalSpent: yearlyData[parseInt(year)]
+  })).sort((a, b) => a.year - b.year);
+};
+
+export default function BudgetYearlyReport({ dateRange }: BudgetYearlyReportProps) {
+  const { data = [], isLoading, isError } = useQuery({
+    queryKey: ['yearlyBudget', dateRange],
+    queryFn: () => getYearlyBudgetReport(dateRange),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000,  // 10 minutes
+  });
   
   if (isLoading) {
     return (
@@ -41,7 +71,7 @@ export default function BudgetYearlyReport({ dateRange }: BudgetYearlyReportProp
     );
   }
   
-  if (data.length === 0) {
+  if (isError || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-muted-foreground">No budget data available for the selected period.</div>
