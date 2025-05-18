@@ -17,8 +17,8 @@ export default function EmployeeMetrics({ employee, assetCount }: EmployeeMetric
     <div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-full bg-blue-100">
-            <CalendarClock size={16} className="text-blue-700" />
+          <div className="p-2.5 rounded-full bg-gray-100">
+            <CalendarClock size={16} className="text-gray-700" />
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Startdatum</p>
@@ -27,8 +27,8 @@ export default function EmployeeMetrics({ employee, assetCount }: EmployeeMetric
         </div>
         
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-full bg-blue-100">
-            <CalendarClock size={16} className="text-blue-700" />
+          <div className="p-2.5 rounded-full bg-gray-100">
+            <CalendarClock size={16} className="text-gray-700" />
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Beschäftigungsdauer</p>
@@ -37,22 +37,12 @@ export default function EmployeeMetrics({ employee, assetCount }: EmployeeMetric
         </div>
         
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-full bg-purple-100">
-            <PackageIcon size={16} className="text-purple-700" />
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Geräte</p>
-            <p className="font-medium">{assetCount}</p>
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-full bg-green-100">
-            <Euro size={16} className="text-green-700" />
+          <div className="p-2.5 rounded-full bg-gray-100">
+            <Euro size={16} className="text-gray-700" />
           </div>
           <div className="w-full">
             <div className="flex justify-between items-center">
-              <p className="text-xs text-muted-foreground">Budget</p>
+              <p className="text-xs text-muted-foreground">Budget ({formatCurrency(employee.usedBudget)} von {formatCurrency(employee.budget)})</p>
               <p className="text-xs font-medium">{budgetPercentage}%</p>
             </div>
             <Progress 
@@ -60,10 +50,7 @@ export default function EmployeeMetrics({ employee, assetCount }: EmployeeMetric
               className="h-1.5 my-1" 
               aria-label={`Budget usage: ${budgetPercentage}% of ${formatCurrency(employee.budget)}`}
             />
-            <div className="flex justify-between text-xs">
-              <p className="font-medium">{formatCurrency(employee.usedBudget)}</p>
-              <p className="font-medium text-muted-foreground">von {formatCurrency(employee.budget)}</p>
-            </div>
+            <p className="text-xs font-medium">Verfügbar: {formatCurrency(remainingBudget)}</p>
           </div>
         </div>
       </div>

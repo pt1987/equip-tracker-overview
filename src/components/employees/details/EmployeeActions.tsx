@@ -20,15 +20,15 @@ export default function EmployeeActions({ onEdit, onDelete }: EmployeeActionsPro
       <QRCodeDialog currentUrl={window.location.href} />
       
       <Button variant="outline" size="icon" className="h-8 w-8" onClick={onEdit}>
-        <Pencil className="h-4 w-4" />
-        <span className="sr-only">Edit</span>
+        <Pencil className="h-4 w-4 text-gray-700" />
+        <span className="sr-only">Bearbeiten</span>
       </Button>
       
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" className="h-8 w-8">
-            <MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">More</span>
+            <MoreHorizontal className="h-4 w-4 text-gray-700" />
+            <span className="sr-only">Mehr</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">

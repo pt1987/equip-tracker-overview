@@ -5,7 +5,6 @@ import { toast } from "@/hooks/use-toast";
 import EmployeeDetailView from "@/components/employees/EmployeeDetailView";
 import EmployeeDetailEdit from "@/components/employees/EmployeeDetailEdit";
 import AssetSection from "@/components/employees/details/AssetSection";
-import QuickStatsSection from "@/components/employees/details/QuickStatsSection";
 
 interface EmployeeDetailContainerProps {
   employee: Employee;
@@ -19,14 +18,6 @@ export default function EmployeeDetailContainer({
   onEmployeeUpdated 
 }: EmployeeDetailContainerProps) {
   const [isEditing, setIsEditing] = useState(false);
-  
-  const assetsByType: Record<string, Asset[]> = {};
-  assets.forEach(asset => {
-    if (!assetsByType[asset.type]) {
-      assetsByType[asset.type] = [];
-    }
-    assetsByType[asset.type].push(asset);
-  });
   
   const handleEdit = () => {
     setIsEditing(true);
@@ -63,8 +54,8 @@ export default function EmployeeDetailContainer({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div className="lg:col-span-2">
+    <div className="space-y-6">
+      <div>
         <div className="glass-card p-4 sm:p-6 mb-6">
           {isEditing ? (
             <EmployeeDetailEdit 
@@ -83,12 +74,6 @@ export default function EmployeeDetailContainer({
         </div>
         
         <AssetSection assets={assets} />
-      </div>
-      
-      <div>
-        <QuickStatsSection 
-          assetsByType={assetsByType}
-        />
       </div>
     </div>
   );

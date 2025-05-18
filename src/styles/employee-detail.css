@@ -4,4 +4,32 @@
   background-color: hsl(var(--card));
   border-radius: 0.5rem;
   border: 1px solid hsl(var(--border));
+  transition: all 0.2s ease;
+}
+
+/* Improved spacing for mobile */
+@media (max-width: 640px) {
+  .glass-card {
+    padding: 1rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+}
+
+/* Better responsiveness for asset cards */
+.asset-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .asset-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .asset-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }

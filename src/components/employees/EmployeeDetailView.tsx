@@ -4,6 +4,7 @@ import EmployeeImageSection from "./details/EmployeeImageSection";
 import EmployeeHeader from "./details/EmployeeHeader";
 import EmployeeMetrics from "./details/EmployeeMetrics";
 import EmployeeActions from "./details/EmployeeActions";
+import QuickStatsSection from "./details/QuickStatsSection";
 
 interface EmployeeDetailViewProps {
   employee: Employee;
@@ -18,23 +19,39 @@ export default function EmployeeDetailView({
   onEdit,
   onDelete
 }: EmployeeDetailViewProps) {
+  // Group assets by type
+  const assetsByType: Record<string, Asset[]> = {};
+  assets.forEach(asset => {
+    if (!assetsByType[asset.type]) {
+      assetsByType[asset.type] = [];
+    }
+    assetsByType[asset.type].push(asset);
+  });
+
   return (
-    <div className="flex flex-col md:flex-row gap-6">
-      <div className="relative w-full md:w-auto">
-        <EmployeeImageSection employee={employee} />
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col md:flex-row gap-6">
+        <div className="relative w-full md:w-auto">
+          <EmployeeImageSection employee={employee} />
+        </div>
+        
+        <div className="flex-1 relative">
+          <EmployeeHeader employee={employee} />
+          
+          <EmployeeMetrics 
+            employee={employee} 
+            assetCount={assets.length} 
+          />
+          
+          <div className="absolute top-0 right-0">
+            <EmployeeActions onEdit={onEdit} onDelete={onDelete} />
+          </div>
+        </div>
       </div>
       
-      <div className="flex-1 relative">
-        <EmployeeHeader employee={employee} />
-        
-        <EmployeeMetrics 
-          employee={employee} 
-          assetCount={assets.length} 
-        />
-        
-        <div className="absolute top-0 right-0">
-          <EmployeeActions onEdit={onEdit} onDelete={onDelete} />
-        </div>
+      {/* Quick stats section between first and second card */}
+      <div className="glass-card p-4">
+        <QuickStatsSection assetsByType={assetsByType} />
       </div>
     </div>
   );

@@ -22,19 +22,19 @@ type AssetIcon = {
 export function AssetTypeIcon({ type }: { type: Asset["type"] }) {
   switch (type) {
     case "laptop":
-      return <LaptopIcon size={18} className="text-blue-600" />;
+      return <LaptopIcon size={18} className="text-gray-700" />;
     case "smartphone":
-      return <SmartphoneIcon size={18} className="text-purple-600" />;
+      return <SmartphoneIcon size={18} className="text-gray-700" />;
     case "tablet":
-      return <TabletIcon size={18} className="text-green-600" />;
+      return <TabletIcon size={18} className="text-gray-700" />;
     case "mouse":
-      return <MouseIcon size={18} className="text-amber-600" />;
+      return <MouseIcon size={18} className="text-gray-700" />;
     case "keyboard":
-      return <KeyboardIcon size={18} className="text-gray-600" />;
+      return <KeyboardIcon size={18} className="text-gray-700" />;
     case "accessory":
-      return <PackageIcon size={18} className="text-pink-600" />;
+      return <PackageIcon size={18} className="text-gray-700" />;
     default:
-      return <PackageIcon size={18} />;
+      return <PackageIcon size={18} className="text-gray-700" />;
   }
 }
 
@@ -48,13 +48,13 @@ import {
 } from "lucide-react";
 
 // Define German translations for asset types
-const assetTypeTranslations: Record<string, string> = {
-  laptop: "Laptop",
-  smartphone: "Smartphone",
-  tablet: "Tablet",
-  mouse: "Maus",
-  keyboard: "Tastatur",
-  accessory: "Zubehör"
+const assetTypeTranslations: Record<string, { singular: string, plural: string }> = {
+  laptop: { singular: "Laptop", plural: "Laptops" },
+  smartphone: { singular: "Smartphone", plural: "Smartphones" },
+  tablet: { singular: "Tablet", plural: "Tablets" },
+  mouse: { singular: "Maus", plural: "Mäuse" },
+  keyboard: { singular: "Tastatur", plural: "Tastaturen" },
+  accessory: { singular: "Zubehör", plural: "Zubehör" }
 };
 
 export default function AssetSection({ assets }: AssetSectionProps) {
@@ -81,15 +81,21 @@ export default function AssetSection({ assets }: AssetSectionProps) {
     }));
   };
 
+  // Get correct type label based on count (singular/plural)
+  const getTypeLabel = (type: string, count: number) => {
+    const translation = assetTypeTranslations[type] || { singular: type, plural: type + 's' };
+    return count !== 1 ? translation.plural : translation.singular;
+  };
+
   return (
-    <div className="glass-card p-6">
-      <div className="flex items-center justify-between gap-2 mb-6">
+    <div className="glass-card p-4 sm:p-6">
+      <div className="flex items-center justify-between gap-2 mb-4">
         <div className="flex items-center gap-2">
-          <PackageIcon size={18} />
+          <PackageIcon size={18} className="text-gray-700" />
           <h2 className="text-lg font-semibold">Assets</h2>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="text-sm font-medium hidden md:block">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <div className="text-sm font-medium hidden sm:block">
             Gesamtwert: <span className="text-primary">{formatCurrency(assets.reduce((sum, asset) => sum + asset.price, 0))}</span>
           </div>
           <ViewToggle view={assetView} onViewChange={setAssetView} />
@@ -97,12 +103,14 @@ export default function AssetSection({ assets }: AssetSectionProps) {
       </div>
       
       {assets.length > 0 ? (
-        <div className="space-y-6">
+        <div className="space-y-4">
           {Object.entries(assetsByType).map(([type, typeAssets]) => (
             <div key={type}>
-              <div className="flex items-center gap-2 mb-4 pb-2 border-b border-border">
+              <div className="flex items-center gap-2 mb-2 pb-1 border-b border-border">
                 <AssetTypeIcon type={type as Asset["type"]} />
-                <h3 className="font-medium">{assetTypeTranslations[type] || type}s</h3>
+                <h3 className="font-medium">
+                  {getTypeLabel(type, typeAssets.length)}
+                </h3>
                 <span className="ml-2 text-sm text-muted-foreground">
                   ({typeAssets.length})
                 </span>
@@ -184,8 +192,8 @@ export default function AssetSection({ assets }: AssetSectionProps) {
           ))}
         </div>
       ) : (
-        <div className="text-center p-8">
-          <div className="mx-auto w-16 h-16 mb-4 rounded-full bg-muted flex items-center justify-center">
+        <div className="text-center p-4 sm:p-8">
+          <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 mb-4 rounded-full bg-muted flex items-center justify-center">
             <PackageIcon size={24} className="text-muted-foreground" />
           </div>
           <h3 className="text-lg font-medium mb-2">Keine Assets zugewiesen</h3>
