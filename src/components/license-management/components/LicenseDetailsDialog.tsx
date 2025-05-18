@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,11 +32,11 @@ export const LicenseDetailsDialog = ({ license, onAssignmentChange }: LicenseDet
 
   return (
     <>
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" onClick={() => setIsOpen(true)}>
-          <Users className="h-4 w-4" />
-        </Button>
-      </DialogTrigger>
+      {/* Button to open the dialog - moved outside of DialogTrigger */}
+      <Button variant="ghost" size="sm" onClick={() => setIsOpen(true)}>
+        <Users className="h-4 w-4" />
+      </Button>
+      
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="sm:max-w-[700px]">
           <DialogHeader>
