@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -312,11 +311,14 @@ export default function LandingPage() {
                   
                   {/* Image container */}
                   <div className="relative rounded-[38%_62%_68%_32%/38%_52%_58%_52%] overflow-hidden border-4 border-white/20 z-10 transform">
-                    <ImageWithFallback 
-                      src="/assets/dashboard-preview.jpg" 
+                    <img 
+                      src="/images/dashboard.jpg" 
                       alt="Dashboard Preview"
                       className="w-full h-full object-cover"
-                      fallbackClassName="p-8 bg-muted/30"
+                      onError={(e) => {
+                        e.currentTarget.src = "/placeholder.svg";
+                        e.currentTarget.className = "p-8 bg-muted/30";
+                      }}
                     />
                   </div>
                 </div>
@@ -453,11 +455,14 @@ export default function LandingPage() {
                 
                 {/* Image inside blob */}
                 <div className="relative rounded-[58%_42%_28%_72%/48%_58%_42%_52%] overflow-hidden border-4 border-white/20 z-10">
-                  <ImageWithFallback 
-                    src="/assets/license-management.jpg" 
+                  <img 
+                    src="/images/license.jpg" 
                     alt="License Management" 
                     className="aspect-[4/3] object-cover w-full"
-                    fallbackClassName="p-8 bg-muted/30"
+                    onError={(e) => {
+                      e.currentTarget.src = "/placeholder.svg";
+                      e.currentTarget.className = "p-8 bg-muted/30";
+                    }}
                   />
                 </div>
               </motion.div>
@@ -493,11 +498,14 @@ export default function LandingPage() {
                 transition={{ duration: 0.7 }}
                 viewport={{ once: true }}
               >
-                <ImageWithFallback 
-                  src="/assets/booking-system.jpg" 
+                <img 
+                  src="/images/booking.jpg" 
                   alt="Asset Booking System" 
                   className="w-full aspect-[16/9] object-cover"
-                  fallbackClassName="p-8 bg-muted/30"
+                  onError={(e) => {
+                    e.currentTarget.src = "/placeholder.svg";
+                    e.currentTarget.className = "p-8 bg-muted/30";
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent/10"></div>
                 <div className="absolute bottom-0 left-0 right-0 p-6">
@@ -521,11 +529,14 @@ export default function LandingPage() {
                 transition={{ duration: 0.7 }}
                 viewport={{ once: true }}
               >
-                <ImageWithFallback 
-                  src="/assets/license-management-detail.jpg" 
+                <img 
+                  src="/images/license-detail.jpg" 
                   alt="License Management Details" 
                   className="w-full aspect-[16/9] object-cover"
-                  fallbackClassName="p-8 bg-muted/30"
+                  onError={(e) => {
+                    e.currentTarget.src = "/placeholder.svg";
+                    e.currentTarget.className = "p-8 bg-muted/30";
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent/10"></div>
                 <div className="absolute bottom-0 left-0 right-0 p-6">
