@@ -34,6 +34,37 @@
   transform: translateY(-5px);
 }
 
+/* Blob animation */
+@keyframes blobAnimation {
+  0% {
+    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+  }
+  25% {
+    border-radius: 50% 50% 60% 40% / 45% 55% 45% 55%;
+  }
+  50% {
+    border-radius: 60% 40% 40% 60% / 50% 45% 55% 45%;
+  }
+  75% {
+    border-radius: 45% 55% 50% 50% / 55% 45% 55% 45%;
+  }
+  100% {
+    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+  }
+}
+
+.animate-blob {
+  animation: blobAnimation 8s ease-in-out infinite;
+}
+
+.animate-blob-slow {
+  animation: blobAnimation 15s ease-in-out infinite;
+}
+
+.animate-blob-fast {
+  animation: blobAnimation 5s ease-in-out infinite;
+}
+
 /* Fix for Safari compatibility with user-select */
 @media (hover:hover) and (pointer:fine) {
   [data-vaul-drawer] {
