@@ -19,7 +19,7 @@ import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
 import PageTransition from "@/components/layout/PageTransition";
-import ImageWithFallback from "@/components/ui/ImageWithFallback";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 const FeatureCard = ({ 
   icon, 
