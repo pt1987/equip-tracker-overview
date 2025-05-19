@@ -1,5 +1,6 @@
 
 import { motion } from "framer-motion";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 interface AssetImageProps {
   imageUrl: string | undefined;
@@ -21,10 +22,8 @@ export default function AssetImage({ imageUrl, altText }: AssetImageProps) {
 
   return (
     <div className="relative flex items-center justify-center">
-      <motion.img 
-        src={getAssetImage()} 
-        alt={altText} 
-        className="max-h-[360px] w-auto object-contain" 
+      <motion.div 
+        className="w-full"
         initial={{
           opacity: 0,
           scale: 1.05
@@ -35,11 +34,15 @@ export default function AssetImage({ imageUrl, altText }: AssetImageProps) {
         }} 
         transition={{
           duration: 0.5
-        }} 
-        onError={e => {
-          (e.target as HTMLImageElement).src = '/placeholder.svg';
-        }} 
-      />
+        }}
+      >
+        <ImageWithFallback
+          src={getAssetImage()} 
+          alt={altText} 
+          className="max-h-[360px] w-auto object-contain mx-auto" 
+          fallbackClassName="p-8 bg-muted/30"
+        />
+      </motion.div>
     </div>
   );
 }

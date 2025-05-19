@@ -1,6 +1,7 @@
 
 import { motion } from "framer-motion";
 import { Employee } from "@/lib/types";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 interface EmployeeImageSectionProps {
   employee: Employee;
@@ -18,18 +19,19 @@ export default function EmployeeImageSection({ employee }: EmployeeImageSectionP
   return (
     <div className="flex justify-center md:justify-start">
       <div className="relative w-32 h-32 md:w-48 md:h-48 bg-muted rounded-full overflow-hidden">
-        <motion.img 
-          src={getEmployeeImage()} 
-          alt={`${employee.firstName} ${employee.lastName}`}
-          className="w-full h-full object-cover object-center"
+        <motion.div
+          className="w-full h-full"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
-          onError={(e) => {
-            // Fallback if the image fails to load
-            (e.target as HTMLImageElement).src = 'https://avatar.vercel.sh/' + employee.id;
-          }}
-        />
+        >
+          <ImageWithFallback 
+            src={getEmployeeImage()} 
+            alt={`${employee.firstName} ${employee.lastName}`}
+            className="w-full h-full object-cover object-center"
+            fallbackSrc={`https://avatar.vercel.sh/${employee.id}`}
+          />
+        </motion.div>
       </div>
     </div>
   );

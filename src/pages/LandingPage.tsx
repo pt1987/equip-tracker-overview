@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -20,6 +19,7 @@ import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
 import PageTransition from "@/components/layout/PageTransition";
+import ImageWithFallback from "@/components/ui/ImageWithFallback";
 
 const FeatureCard = ({ 
   icon, 
@@ -278,15 +278,11 @@ export default function LandingPage() {
                 <div className="aspect-[16/9] relative bg-gradient-to-tr from-background to-secondary/5 rounded-xl shadow-2xl overflow-hidden border border-secondary/20">
                   <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
                   <div className="w-full h-full bg-cover bg-center flex items-center justify-center">
-                    <img 
+                    <ImageWithFallback 
                       src="/assets/dashboard-preview.jpg" 
                       alt="Dashboard Preview"
                       className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = "/placeholder.svg";
-                        target.classList.add("p-8", "bg-muted/30");
-                      }}
+                      fallbackClassName="p-8 bg-muted/30"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent opacity-70"></div>
                     <div className="absolute bottom-8 left-8 right-8 z-10">
@@ -411,15 +407,11 @@ export default function LandingPage() {
                 <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-secondary/10 rounded-full blur-3xl"></div>
                 
                 <div className="relative bg-card rounded-xl shadow-xl overflow-hidden border border-secondary/20 z-10">
-                  <img 
+                  <ImageWithFallback 
                     src="/assets/license-management.jpg" 
                     alt="License Management" 
                     className="aspect-[4/3] object-cover w-full"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = "/placeholder.svg";
-                      target.className = "aspect-[4/3] w-full p-8 bg-muted/30";
-                    }}
+                    fallbackClassName="p-8 bg-muted/30"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent"></div>
                   <div className="absolute bottom-0 left-0 right-0 p-6">
@@ -460,15 +452,11 @@ export default function LandingPage() {
                 transition={{ duration: 0.7 }}
                 viewport={{ once: true }}
               >
-                <img 
+                <ImageWithFallback 
                   src="/assets/booking-system.jpg" 
                   alt="Asset Booking System" 
                   className="w-full aspect-[16/9] object-cover"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = "/placeholder.svg";
-                    target.className = "w-full aspect-[16/9] p-8 bg-muted/30";
-                  }}
+                  fallbackClassName="p-8 bg-muted/30"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent/10"></div>
                 <div className="absolute bottom-0 left-0 right-0 p-6">
@@ -492,15 +480,11 @@ export default function LandingPage() {
                 transition={{ duration: 0.7 }}
                 viewport={{ once: true }}
               >
-                <img 
+                <ImageWithFallback 
                   src="/assets/license-management-detail.jpg" 
                   alt="License Management Details" 
                   className="w-full aspect-[16/9] object-cover"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = "/placeholder.svg";
-                    target.className = "w-full aspect-[16/9] p-8 bg-muted/30";
-                  }}
+                  fallbackClassName="p-8 bg-muted/30"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent/10"></div>
                 <div className="absolute bottom-0 left-0 right-0 p-6">
