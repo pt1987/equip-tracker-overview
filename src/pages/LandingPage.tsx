@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -22,8 +23,15 @@ import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
 import PageTransition from "@/components/layout/PageTransition";
-import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { toast } from "@/components/ui/use-toast";
+
+// Bildpfade definieren, damit sie leicht ausgetauscht werden können
+const IMAGES = {
+  dashboard: "/images/dashboard.jpg",
+  license: "/images/license.jpg",
+  booking: "/images/booking.jpg",
+  licenseDetail: "/images/license-detail.jpg"
+};
 
 const FeatureCard = ({ 
   icon, 
@@ -64,6 +72,12 @@ export default function LandingPage() {
   const heroRef = useRef<HTMLDivElement>(null);
   const [scrolled, setScrolled] = useState(false);
   const [email, setEmail] = useState("");
+  const [imagesLoaded, setImagesLoaded] = useState({
+    dashboard: false,
+    license: false,
+    booking: false,
+    licenseDetail: false
+  });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -96,6 +110,13 @@ export default function LandingPage() {
       });
       setEmail("");
     }
+  };
+
+  const handleImageLoad = (imageKey: keyof typeof imagesLoaded) => {
+    setImagesLoaded(prev => ({
+      ...prev,
+      [imageKey]: true
+    }));
   };
 
   const features = [
@@ -311,10 +332,16 @@ export default function LandingPage() {
                   
                   {/* Image container */}
                   <div className="relative rounded-[38%_62%_68%_32%/38%_52%_58%_52%] overflow-hidden border-4 border-white/20 z-10 transform">
+                    {!imagesLoaded.dashboard && (
+                      <div className="w-full h-full object-cover aspect-video bg-muted/30 animate-pulse flex items-center justify-center">
+                        <span className="text-white/50">Bild wird geladen...</span>
+                      </div>
+                    )}
                     <img 
-                      src="/images/dashboard.jpg" 
+                      src={IMAGES.dashboard} 
                       alt="Dashboard Preview"
-                      className="w-full h-full object-cover"
+                      className={`w-full h-full object-cover ${!imagesLoaded.dashboard ? 'hidden' : ''}`}
+                      onLoad={() => handleImageLoad('dashboard')}
                       onError={(e) => {
                         e.currentTarget.src = "/placeholder.svg";
                         e.currentTarget.className = "p-8 bg-muted/30";
@@ -455,10 +482,16 @@ export default function LandingPage() {
                 
                 {/* Image inside blob */}
                 <div className="relative rounded-[58%_42%_28%_72%/48%_58%_42%_52%] overflow-hidden border-4 border-white/20 z-10">
+                  {!imagesLoaded.license && (
+                    <div className="aspect-[4/3] object-cover w-full bg-muted/30 animate-pulse flex items-center justify-center">
+                      <span className="text-white/50">Bild wird geladen...</span>
+                    </div>
+                  )}
                   <img 
-                    src="/images/license.jpg" 
+                    src={IMAGES.license} 
                     alt="License Management" 
-                    className="aspect-[4/3] object-cover w-full"
+                    className={`aspect-[4/3] object-cover w-full ${!imagesLoaded.license ? 'hidden' : ''}`}
+                    onLoad={() => handleImageLoad('license')}
                     onError={(e) => {
                       e.currentTarget.src = "/placeholder.svg";
                       e.currentTarget.className = "p-8 bg-muted/30";
@@ -498,10 +531,16 @@ export default function LandingPage() {
                 transition={{ duration: 0.7 }}
                 viewport={{ once: true }}
               >
+                {!imagesLoaded.booking && (
+                  <div className="w-full aspect-[16/9] bg-muted/30 animate-pulse flex items-center justify-center">
+                    <span className="text-muted-foreground">Bild wird geladen...</span>
+                  </div>
+                )}
                 <img 
-                  src="/images/booking.jpg" 
+                  src={IMAGES.booking} 
                   alt="Asset Booking System" 
-                  className="w-full aspect-[16/9] object-cover"
+                  className={`w-full aspect-[16/9] object-cover ${!imagesLoaded.booking ? 'hidden' : ''}`}
+                  onLoad={() => handleImageLoad('booking')}
                   onError={(e) => {
                     e.currentTarget.src = "/placeholder.svg";
                     e.currentTarget.className = "p-8 bg-muted/30";
@@ -529,10 +568,16 @@ export default function LandingPage() {
                 transition={{ duration: 0.7 }}
                 viewport={{ once: true }}
               >
+                {!imagesLoaded.licenseDetail && (
+                  <div className="w-full aspect-[16/9] bg-muted/30 animate-pulse flex items-center justify-center">
+                    <span className="text-muted-foreground">Bild wird geladen...</span>
+                  </div>
+                )}
                 <img 
-                  src="/images/license-detail.jpg" 
+                  src={IMAGES.licenseDetail} 
                   alt="License Management Details" 
-                  className="w-full aspect-[16/9] object-cover"
+                  className={`w-full aspect-[16/9] object-cover ${!imagesLoaded.licenseDetail ? 'hidden' : ''}`}
+                  onLoad={() => handleImageLoad('licenseDetail')}
                   onError={(e) => {
                     e.currentTarget.src = "/placeholder.svg";
                     e.currentTarget.className = "p-8 bg-muted/30";
@@ -658,3 +703,4 @@ export default function LandingPage() {
     </PageTransition>
   );
 }
+
