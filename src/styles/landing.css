@@ -9,7 +9,6 @@
 
 /* Dashboard preview image */
 .bg-dashboard-preview {
-  background-image: url('/placeholder.svg');
   background-size: cover;
   background-position: center;
 }
@@ -48,4 +47,25 @@
   .bg-dashboard-preview {
     background-position: top center;
   }
+}
+
+/* Modern card styling */
+.feature-card {
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Image fallback styling */
+.img-fallback {
+  padding: 2rem;
+  background-color: rgba(127, 127, 127, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

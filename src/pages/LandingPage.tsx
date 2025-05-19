@@ -11,7 +11,10 @@ import {
   CheckCircle, 
   ChevronRight,
   ArrowRight,
-  ArrowDown
+  ArrowDown,
+  KeyRound,
+  Calendar,
+  AlertCircle
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
@@ -96,6 +99,21 @@ export default function LandingPage() {
       description: "Generieren Sie detaillierte Berichte über Ihre Assets und deren Nutzung."
     },
     {
+      icon: <KeyRound className="h-6 w-6 text-primary" />,
+      title: "Lizenzmanagement",
+      description: "Verwalten Sie Software-Lizenzen und weisen Sie diese Mitarbeitern zu."
+    },
+    {
+      icon: <Calendar className="h-6 w-6 text-primary" />,
+      title: "Asset Buchungssystem",
+      description: "Planen und verwalten Sie die Nutzung von gemeinsam genutzten Ressourcen."
+    },
+    {
+      icon: <AlertCircle className="h-6 w-6 text-primary" />,
+      title: "Schadensmanagement",
+      description: "Dokumentieren und verfolgen Sie Schäden an Assets für bessere Wartungsplanung."
+    },
+    {
       icon: <FileLineChart className="h-6 w-6 text-primary" />,
       title: "Abschreibungsmanagement",
       description: "Verfolgen Sie Abschreibungen und den finanziellen Wert Ihrer Assets."
@@ -103,7 +121,7 @@ export default function LandingPage() {
     {
       icon: <Users className="h-6 w-6 text-primary" />,
       title: "Mitarbeiterverwaltung",
-      description: "Weisen Sie Assets Mitarbeitern zu und verwalten Sie Budgets."
+      description: "Weisen Sie Assets und Lizenzen Mitarbeitern zu und verwalten Sie Budgets."
     },
     {
       icon: <CheckCircle className="h-6 w-6 text-primary" />,
@@ -114,6 +132,8 @@ export default function LandingPage() {
 
   const benefits = [
     "Zentrale Verwaltung aller IT-Assets",
+    "Lückenlose Lizenzverwaltung und -zuweisung",
+    "Effizientes Ressourcenmanagement durch Buchungssystem",
     "Reduzierung von Kosten durch optimierte Asset-Nutzung",
     "Verbesserung der Compliance und Audit-Vorbereitung",
     "Automatisierung von Inventarprozessen",
@@ -217,7 +237,7 @@ export default function LandingPage() {
                 transition={{ duration: 0.7, delay: 0.4 }}
               >
                 Professionelles Asset Management mit ISO 27001 Konformität. 
-                <span className="block mt-2">Verwalten Sie alle Assets Ihres Unternehmens intelligent und sicher.</span>
+                <span className="block mt-2">Verwalten Sie alle Assets, Lizenzen und Buchungen Ihres Unternehmens intelligent und sicher.</span>
               </motion.p>
               
               <motion.div
@@ -257,7 +277,17 @@ export default function LandingPage() {
               >
                 <div className="aspect-[16/9] relative bg-gradient-to-tr from-background to-secondary/5 rounded-xl shadow-2xl overflow-hidden border border-secondary/20">
                   <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-                  <div className="w-full h-full bg-dashboard-preview bg-cover bg-center flex items-center justify-center">
+                  <div className="w-full h-full bg-cover bg-center flex items-center justify-center">
+                    <img 
+                      src="/assets/dashboard-preview.jpg" 
+                      alt="Dashboard Preview"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = "/placeholder.svg";
+                        target.classList.add("p-8", "bg-muted/30");
+                      }}
+                    />
                     <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent opacity-70"></div>
                     <div className="absolute bottom-8 left-8 right-8 z-10">
                       <h3 className="text-2xl font-bold mb-2">Asset Management Dashboard</h3>
@@ -381,38 +411,109 @@ export default function LandingPage() {
                 <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-secondary/10 rounded-full blur-3xl"></div>
                 
                 <div className="relative bg-card rounded-xl shadow-xl overflow-hidden border border-secondary/20 z-10">
-                  <div className="aspect-[4/3] relative bg-gradient-to-br from-background to-secondary/5">
-                    <div className="absolute inset-0 flex flex-col p-8">
-                      <h3 className="text-xl font-semibold mb-6">Asset Statistiken</h3>
-                      
-                      {/* Mock Dashboard Chart */}
-                      <div className="flex-grow grid grid-cols-2 gap-4">
-                        <div className="bg-background/50 rounded-lg p-4 shadow-inner border border-secondary/10">
-                          <div className="h-3 w-20 bg-primary/20 rounded-full mb-2"></div>
-                          <div className="h-40 flex items-end justify-around">
-                            <div className="w-4 bg-primary/70 h-[30%] rounded-t"></div>
-                            <div className="w-4 bg-primary/70 h-[60%] rounded-t"></div>
-                            <div className="w-4 bg-primary/70 h-[40%] rounded-t"></div>
-                            <div className="w-4 bg-primary/70 h-[80%] rounded-t"></div>
-                            <div className="w-4 bg-primary/70 h-[50%] rounded-t"></div>
-                          </div>
-                        </div>
-                        
-                        <div className="bg-background/50 rounded-lg p-4 shadow-inner border border-secondary/10">
-                          <div className="h-3 w-16 bg-primary/20 rounded-full mb-2"></div>
-                          <div className="h-40 flex items-center justify-center">
-                            <div className="relative w-32 h-32">
-                              <div className="absolute inset-0 border-8 border-primary/20 rounded-full"></div>
-                              <div className="absolute inset-0 border-8 border-primary border-t-transparent rounded-full transform rotate-45"></div>
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="text-xl font-bold">76%</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                  <img 
+                    src="/assets/license-management.jpg" 
+                    alt="License Management" 
+                    className="aspect-[4/3] object-cover w-full"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "/placeholder.svg";
+                      target.className = "aspect-[4/3] w-full p-8 bg-muted/30";
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent"></div>
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    <h3 className="text-xl font-semibold mb-2">Neues Lizenzmanagement</h3>
+                    <p className="text-muted-foreground">Verwalten Sie Software-Lizenzen und halten Sie den Überblick über Zuweisungen.</p>
                   </div>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </section>
+
+        {/* New Features Showcase */}
+        <section className="py-24 bg-background">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true }}
+              >
+                <span className="px-3 py-1 rounded-full text-sm font-medium bg-primary/10 text-primary mb-4 inline-block">
+                  Neu
+                </span>
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">Unsere neuesten Funktionen</h2>
+                <p className="text-muted-foreground max-w-2xl mx-auto">
+                  Entdecken Sie die neuesten Erweiterungen unseres Asset Management Systems.
+                </p>
+              </motion.div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <motion.div
+                className="relative overflow-hidden rounded-xl border border-secondary/20 shadow-lg"
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.7 }}
+                viewport={{ once: true }}
+              >
+                <img 
+                  src="/assets/booking-system.jpg" 
+                  alt="Asset Booking System" 
+                  className="w-full aspect-[16/9] object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = "/placeholder.svg";
+                    target.className = "w-full aspect-[16/9] p-8 bg-muted/30";
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent/10"></div>
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <h3 className="text-xl font-semibold mb-2">Asset Buchungssystem</h3>
+                  <p className="text-base mb-4">
+                    Optimieren Sie die Nutzung geteilter Ressourcen mit unserem neuen Buchungssystem. Planen Sie im Voraus und vermeiden Sie Konflikte bei der Ressourcennutzung.
+                  </p>
+                  <Link to={isAuthenticated ? "/asset-bookings" : "/login"}>
+                    <Button variant="outline" className="bg-background/50 backdrop-blur-sm">
+                      Mehr erfahren
+                      <ChevronRight className="ml-1 h-4 w-4" />
+                    </Button>
+                  </Link>
+                </div>
+              </motion.div>
+
+              <motion.div
+                className="relative overflow-hidden rounded-xl border border-secondary/20 shadow-lg"
+                initial={{ opacity: 0, x: 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.7 }}
+                viewport={{ once: true }}
+              >
+                <img 
+                  src="/assets/license-management-detail.jpg" 
+                  alt="License Management Details" 
+                  className="w-full aspect-[16/9] object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = "/placeholder.svg";
+                    target.className = "w-full aspect-[16/9] p-8 bg-muted/30";
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent/10"></div>
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <h3 className="text-xl font-semibold mb-2">Lizenzmanagement</h3>
+                  <p className="text-base mb-4">
+                    Behalten Sie den Überblick über alle Software-Lizenzen, deren Ablaufdaten und Zuweisungen zu Mitarbeitern. Optimieren Sie Ihre Lizenzkosten durch bessere Übersicht.
+                  </p>
+                  <Link to={isAuthenticated ? "/license-management" : "/login"}>
+                    <Button variant="outline" className="bg-background/50 backdrop-blur-sm">
+                      Mehr erfahren
+                      <ChevronRight className="ml-1 h-4 w-4" />
+                    </Button>
+                  </Link>
                 </div>
               </motion.div>
             </div>
