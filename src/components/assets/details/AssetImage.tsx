@@ -21,7 +21,7 @@ export default function AssetImage({ imageUrl, altText }: AssetImageProps) {
   };
 
   return (
-    <div className="relative flex items-center justify-center">
+    <div className="relative flex items-center justify-center w-full">
       <motion.div 
         className="w-full"
         initial={{

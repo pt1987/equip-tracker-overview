@@ -31,17 +31,17 @@ export default function QRCodeDialog({ currentUrl }: QRCodeDialogProps) {
           <span className="sr-only">QR-Code anzeigen</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-w-[90vw] w-full">
         <DialogHeader>
           <DialogTitle>Mitarbeiter QR-Code</DialogTitle>
           <DialogDescription>
             Scannen Sie diesen Code, um schnell auf die Mitarbeiterdetails zuzugreifen
           </DialogDescription>
         </DialogHeader>
-        <div className="flex items-center justify-center p-6">
+        <div className="flex items-center justify-center p-4 sm:p-6">
           <QRCode 
             value={currentUrl}
-            size={200}
+            size={Math.min(200, window.innerWidth - 100)}
             title="Mitarbeiter QR-Code"
           />
         </div>

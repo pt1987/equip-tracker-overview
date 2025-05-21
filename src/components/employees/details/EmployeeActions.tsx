@@ -16,13 +16,13 @@ interface EmployeeActionsProps {
 
 export default function EmployeeActions({ onEdit, onDelete }: EmployeeActionsProps) {
   return (
-    <div className="flex items-center gap-2 mt-2 md:mt-0">
-      <QRCodeDialog currentUrl={window.location.href} />
-      
+    <div className="flex items-center gap-2">
       <Button variant="outline" size="icon" className="h-8 w-8" onClick={onEdit}>
         <Pencil className="h-4 w-4 text-gray-700" />
         <span className="sr-only">Bearbeiten</span>
       </Button>
+      
+      <QRCodeDialog currentUrl={window.location.href} />
       
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

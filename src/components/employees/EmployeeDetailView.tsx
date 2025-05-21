@@ -36,15 +36,19 @@ export default function EmployeeDetailView({
         </div>
         
         <div className="flex-1 relative">
-          <EmployeeHeader employee={employee} />
-          
-          <EmployeeMetrics 
-            employee={employee} 
-            assetCount={assets.length} 
-          />
-          
-          <div className="absolute top-0 right-0">
-            <EmployeeActions onEdit={onEdit} onDelete={onDelete} />
+          <div className="flex flex-col md:flex-row md:items-start justify-between">
+            <div className="flex-1">
+              <EmployeeHeader employee={employee} />
+              
+              <EmployeeMetrics 
+                employee={employee} 
+                assetCount={assets.length} 
+              />
+            </div>
+            
+            <div className="mt-2 md:mt-0 md:ml-4 self-start">
+              <EmployeeActions onEdit={onEdit} onDelete={onDelete} />
+            </div>
           </div>
         </div>
       </div>
