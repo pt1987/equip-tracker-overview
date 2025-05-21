@@ -30,24 +30,25 @@ export default function EmployeeDetailView({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative w-full md:w-auto">
-          <EmployeeImageSection employee={employee} />
+      <div className="relative w-full">
+        {/* Actions positioned at top right of the container */}
+        <div className="absolute top-2 right-2 z-10">
+          <EmployeeActions onEdit={onEdit} onDelete={onDelete} />
         </div>
-        
-        <div className="flex-1 relative">
-          <div className="flex flex-col md:flex-row md:items-start justify-between">
-            <div className="flex-1">
+
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="w-full md:w-auto">
+            <EmployeeImageSection employee={employee} />
+          </div>
+          
+          <div className="flex-1">
+            <div className="flex flex-col">
               <EmployeeHeader employee={employee} />
               
               <EmployeeMetrics 
                 employee={employee} 
                 assetCount={assets.length} 
               />
-            </div>
-            
-            <div className="mt-2 md:mt-0 md:ml-4 self-start">
-              <EmployeeActions onEdit={onEdit} onDelete={onDelete} />
             </div>
           </div>
         </div>

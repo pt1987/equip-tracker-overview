@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, QrCode, MoreVertical } from "lucide-react";
+import { Pencil, Trash2, QrCode, EllipsisVertical } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +18,6 @@ interface EmployeeActionsProps {
 export default function EmployeeActions({ onEdit, onDelete }: EmployeeActionsProps) {
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
 
-  // Handler für den QR-Code Button im Dropdown
   const handleQrCodeClick = () => {
     setQrDialogOpen(true);
   };
@@ -32,7 +31,15 @@ export default function EmployeeActions({ onEdit, onDelete }: EmployeeActionsPro
           <span className="sr-only">Bearbeiten</span>
         </Button>
         
-        <QRCodeDialog currentUrl={window.location.href} isOpen={qrDialogOpen} onOpenChange={setQrDialogOpen} />
+        <Button 
+          variant="outline" 
+          size="icon"
+          className="h-8 w-8"
+          onClick={handleQrCodeClick}
+        >
+          <QrCode className="h-4 w-4" />
+          <span className="sr-only">QR-Code anzeigen</span>
+        </Button>
         
         <Button variant="outline" size="icon" className="h-8 w-8 text-destructive" onClick={onDelete}>
           <Trash2 className="h-4 w-4" />
@@ -45,7 +52,7 @@ export default function EmployeeActions({ onEdit, onDelete }: EmployeeActionsPro
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreVertical className="h-4 w-4 text-gray-700" />
+              <EllipsisVertical className="h-4 w-4 text-gray-700" />
               <span className="sr-only">Mehr</span>
             </Button>
           </DropdownMenuTrigger>
@@ -66,14 +73,12 @@ export default function EmployeeActions({ onEdit, onDelete }: EmployeeActionsPro
         </DropdownMenu>
       </div>
       
-      {/* Unsichtbarer QR-Code Dialog, der über den Dropdown-Menüpunkt geöffnet wird */}
-      <div className="hidden">
-        <QRCodeDialog 
-          currentUrl={window.location.href} 
-          isOpen={qrDialogOpen} 
-          onOpenChange={setQrDialogOpen} 
-        />
-      </div>
+      {/* QR Code Dialog */}
+      <QRCodeDialog 
+        currentUrl={window.location.href} 
+        isOpen={qrDialogOpen} 
+        onOpenChange={setQrDialogOpen} 
+      />
     </>
   );
 }
