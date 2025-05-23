@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -24,6 +23,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
 import PageTransition from "@/components/layout/PageTransition";
 import { toast } from "@/components/ui/use-toast";
+import { useLandingPageImage } from "@/hooks/use-landing-page-image";
 
 // Bildpfade definieren, damit sie leicht ausgetauscht werden können
 const IMAGES = {
@@ -79,6 +79,20 @@ export default function LandingPage() {
     licenseDetail: false
   });
 
+  // Fetch images from storage using our hooks
+  const { image: dashboardImage, isLoading: isDashboardLoading } = useLandingPageImage('dashboard');
+  const { image: licenseImage, isLoading: isLicenseLoading } = useLandingPageImage('license');
+  const { image: bookingImage, isLoading: isBookingLoading } = useLandingPageImage('booking');
+  const { image: licenseDetailImage, isLoading: isLicenseDetailLoading } = useLandingPageImage('licenseDetail');
+
+  // Define image URLs with fallbacks
+  const IMAGES = {
+    dashboard: dashboardImage?.url || "/images/dashboard.jpg",
+    license: licenseImage?.url || "/images/license.jpg",
+    booking: bookingImage?.url || "/images/booking.jpg",
+    licenseDetail: licenseDetailImage?.url || "/images/license-detail.jpg"
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       const position = window.scrollY;
@@ -94,6 +108,16 @@ export default function LandingPage() {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
+
+  useEffect(() => {
+    // Log the fetched image URLs for debugging
+    console.log("Landing page images loaded:", {
+      dashboard: dashboardImage?.url,
+      license: licenseImage?.url,
+      booking: bookingImage?.url,
+      licenseDetail: licenseDetailImage?.url
+    });
+  }, [dashboardImage, licenseImage, bookingImage, licenseDetailImage]);
 
   const scrollToFeatures = () => {
     document.getElementById('features')?.scrollIntoView({
@@ -332,7 +356,7 @@ export default function LandingPage() {
                   
                   {/* Image container */}
                   <div className="relative rounded-[38%_62%_68%_32%/38%_52%_58%_52%] overflow-hidden border-4 border-white/20 z-10 transform">
-                    {!imagesLoaded.dashboard && (
+                    {!imagesLoaded.dashboard && (isDashboardLoading || !dashboardImage) && (
                       <div className="w-full h-full object-cover aspect-video bg-muted/30 animate-pulse flex items-center justify-center">
                         <span className="text-white/50">Bild wird geladen...</span>
                       </div>
@@ -343,6 +367,7 @@ export default function LandingPage() {
                       className={`w-full h-full object-cover ${!imagesLoaded.dashboard ? 'hidden' : ''}`}
                       onLoad={() => handleImageLoad('dashboard')}
                       onError={(e) => {
+                        console.log("Error loading dashboard image");
                         e.currentTarget.src = "/placeholder.svg";
                         e.currentTarget.className = "p-8 bg-muted/30";
                       }}
@@ -482,7 +507,7 @@ export default function LandingPage() {
                 
                 {/* Image inside blob */}
                 <div className="relative rounded-[58%_42%_28%_72%/48%_58%_42%_52%] overflow-hidden border-4 border-white/20 z-10">
-                  {!imagesLoaded.license && (
+                  {!imagesLoaded.license && (isLicenseLoading || !licenseImage) && (
                     <div className="aspect-[4/3] object-cover w-full bg-muted/30 animate-pulse flex items-center justify-center">
                       <span className="text-white/50">Bild wird geladen...</span>
                     </div>
@@ -493,6 +518,7 @@ export default function LandingPage() {
                     className={`aspect-[4/3] object-cover w-full ${!imagesLoaded.license ? 'hidden' : ''}`}
                     onLoad={() => handleImageLoad('license')}
                     onError={(e) => {
+                      console.log("Error loading license image");
                       e.currentTarget.src = "/placeholder.svg";
                       e.currentTarget.className = "p-8 bg-muted/30";
                     }}
@@ -531,7 +557,7 @@ export default function LandingPage() {
                 transition={{ duration: 0.7 }}
                 viewport={{ once: true }}
               >
-                {!imagesLoaded.booking && (
+                {!imagesLoaded.booking && (isBookingLoading || !bookingImage) && (
                   <div className="w-full aspect-[16/9] bg-muted/30 animate-pulse flex items-center justify-center">
                     <span className="text-muted-foreground">Bild wird geladen...</span>
                   </div>
@@ -542,6 +568,7 @@ export default function LandingPage() {
                   className={`w-full aspect-[16/9] object-cover ${!imagesLoaded.booking ? 'hidden' : ''}`}
                   onLoad={() => handleImageLoad('booking')}
                   onError={(e) => {
+                    console.log("Error loading booking image");
                     e.currentTarget.src = "/placeholder.svg";
                     e.currentTarget.className = "p-8 bg-muted/30";
                   }}
@@ -568,7 +595,7 @@ export default function LandingPage() {
                 transition={{ duration: 0.7 }}
                 viewport={{ once: true }}
               >
-                {!imagesLoaded.licenseDetail && (
+                {!imagesLoaded.licenseDetail && (isLicenseDetailLoading || !licenseDetailImage) && (
                   <div className="w-full aspect-[16/9] bg-muted/30 animate-pulse flex items-center justify-center">
                     <span className="text-muted-foreground">Bild wird geladen...</span>
                   </div>
@@ -579,6 +606,7 @@ export default function LandingPage() {
                   className={`w-full aspect-[16/9] object-cover ${!imagesLoaded.licenseDetail ? 'hidden' : ''}`}
                   onLoad={() => handleImageLoad('licenseDetail')}
                   onError={(e) => {
+                    console.log("Error loading licenseDetail image");
                     e.currentTarget.src = "/placeholder.svg";
                     e.currentTarget.className = "p-8 bg-muted/30";
                   }}
@@ -703,4 +731,3 @@ export default function LandingPage() {
     </PageTransition>
   );
 }
-

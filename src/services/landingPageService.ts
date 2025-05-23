@@ -117,9 +117,8 @@ export async function deleteLandingPageImage(image: LandingPageImage): Promise<v
   }
 }
 
-// Updates landing page images in LandingPage.tsx
-export async function updateLandingPageImage(imageType: string): Promise<void> {
-  // Get all images of this type
+// Gets a landing page image by type
+export async function getLandingPageImageByType(imageType: string): Promise<LandingPageImage | null> {
   const { data, error } = await supabase
     .from("landing_page_images")
     .select("*")
@@ -128,24 +127,50 @@ export async function updateLandingPageImage(imageType: string): Promise<void> {
     .limit(1);
 
   if (error) {
-    throw new Error(`Error fetching images for type ${imageType}: ${error.message}`);
+    console.error(`Error fetching image for type ${imageType}:`, error);
+    return null;
   }
 
   if (data && data.length > 0) {
-    const latestImage = data[0];
-    
-    // Generate URL for the image
-    const { data: publicUrlData } = supabase
+    const image = data[0];
+    const { data: publicUrl } = supabase
       .storage
       .from("landing_page_images")
-      .getPublicUrl(latestImage.storage_path);
+      .getPublicUrl(image.storage_path);
 
-    // Code here could update the image in LandingPage.tsx
-    // If working with a constant in LandingPage.tsx
-    console.log(`Image URL for ${imageType}: ${publicUrlData.publicUrl}`);
-
-    return;
+    return {
+      ...image,
+      url: publicUrl.publicUrl
+    };
   }
-  
-  throw new Error(`No image found for type ${imageType}`);
+
+  return null;
+}
+
+// Gets all images by type
+export async function getLandingPageImagesByType(imageType: string): Promise<LandingPageImage[]> {
+  const { data, error } = await supabase
+    .from("landing_page_images")
+    .select("*")
+    .eq("image_type", imageType)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw new Error(`Error fetching images for type ${imageType}: ${error.message}`);
+  }
+
+  // Generate URL for each image
+  const imagesWithUrls = await Promise.all(data.map(async (image) => {
+    const { data: publicUrl } = supabase
+      .storage
+      .from("landing_page_images")
+      .getPublicUrl(image.storage_path);
+
+    return {
+      ...image,
+      url: publicUrl.publicUrl
+    };
+  }));
+
+  return imagesWithUrls;
 }
