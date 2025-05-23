@@ -3,14 +3,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { LandingPageImage } from "@/lib/types";
 import { v4 as uuidv4 } from "uuid";
 
-// Schnittstelle für Metadaten beim Hochladen
+// Interface for upload metadata
 interface ImageUploadMetadata {
   displayName: string;
   description?: string;
   imageType: string;
 }
 
-// Holt alle Landing Page Bilder mit URLs
+// Gets all landing page images with URLs
 export async function getLandingPageImages(): Promise<LandingPageImage[]> {
   const { data, error } = await supabase
     .from("landing_page_images")
@@ -21,7 +21,7 @@ export async function getLandingPageImages(): Promise<LandingPageImage[]> {
     throw new Error(`Error fetching landing page images: ${error.message}`);
   }
 
-  // Für jedes Bild die URL generieren
+  // Generate URL for each image
   const imagesWithUrls = await Promise.all(data.map(async (image) => {
     const { data: publicUrl } = supabase
       .storage
@@ -37,15 +37,15 @@ export async function getLandingPageImages(): Promise<LandingPageImage[]> {
   return imagesWithUrls;
 }
 
-// Lädt ein Bild hoch
+// Uploads an image
 export async function uploadLandingPageImage(file: File, metadata: ImageUploadMetadata): Promise<LandingPageImage> {
   const { displayName, description, imageType } = metadata;
   
-  // Eindeutigen Dateipfad generieren
+  // Generate unique file path
   const fileExt = file.name.split('.').pop();
   const filePath = `${imageType}/${uuidv4()}.${fileExt}`;
   
-  // Bild in Storage hochladen
+  // Upload image to storage
   const { error: uploadError } = await supabase
     .storage
     .from("landing_page_images")
@@ -55,13 +55,13 @@ export async function uploadLandingPageImage(file: File, metadata: ImageUploadMe
     throw new Error(`Error uploading image: ${uploadError.message}`);
   }
   
-  // URL für das Bild generieren
+  // Generate URL for the image
   const { data: publicUrlData } = supabase
     .storage
     .from("landing_page_images")
     .getPublicUrl(filePath);
     
-  // Metadaten in Datenbank speichern
+  // Store metadata in database
   const { data: user } = await supabase.auth.getUser();
   
   if (!user || !user.user) {
@@ -82,7 +82,7 @@ export async function uploadLandingPageImage(file: File, metadata: ImageUploadMe
     .single();
     
   if (insertError) {
-    // Bei Fehler das hochgeladene Bild löschen
+    // Delete the uploaded image if metadata insertion fails
     await supabase.storage.from("landing_page_images").remove([filePath]);
     throw new Error(`Error inserting image metadata: ${insertError.message}`);
   }
@@ -93,9 +93,9 @@ export async function uploadLandingPageImage(file: File, metadata: ImageUploadMe
   };
 }
 
-// Löscht ein Bild und seine Metadaten
+// Deletes an image and its metadata
 export async function deleteLandingPageImage(image: LandingPageImage): Promise<void> {
-  // Metadaten aus der Datenbank löschen
+  // Delete metadata from database
   const { error: deleteMetadataError } = await supabase
     .from("landing_page_images")
     .delete()
@@ -105,7 +105,7 @@ export async function deleteLandingPageImage(image: LandingPageImage): Promise<v
     throw new Error(`Error deleting image metadata: ${deleteMetadataError.message}`);
   }
   
-  // Bild aus dem Storage löschen
+  // Delete image from storage
   const { error: deleteFileError } = await supabase
     .storage
     .from("landing_page_images")
@@ -113,13 +113,13 @@ export async function deleteLandingPageImage(image: LandingPageImage): Promise<v
     
   if (deleteFileError) {
     console.error(`Warning: Could not delete image file: ${deleteFileError.message}`);
-    // Hier werfen wir keinen Fehler, da die Metadaten bereits gelöscht wurden
+    // We don't throw an error here since metadata was already deleted
   }
 }
 
-// Aktualisiert die Landing Page Bilder in der LandingPage.tsx
+// Updates landing page images in LandingPage.tsx
 export async function updateLandingPageImage(imageType: string): Promise<void> {
-  // Alle Bilder dieses Typs holen
+  // Get all images of this type
   const { data, error } = await supabase
     .from("landing_page_images")
     .select("*")
@@ -134,14 +134,14 @@ export async function updateLandingPageImage(imageType: string): Promise<void> {
   if (data && data.length > 0) {
     const latestImage = data[0];
     
-    // URL für das Bild generieren
+    // Generate URL for the image
     const { data: publicUrlData } = supabase
       .storage
       .from("landing_page_images")
       .getPublicUrl(latestImage.storage_path);
 
-    // Hier könnte Code stehen, um das Bild in der LandingPage zu aktualisieren
-    // Falls mit einer Konstanten in der LandingPage.tsx gearbeitet wird
+    // Code here could update the image in LandingPage.tsx
+    // If working with a constant in LandingPage.tsx
     console.log(`Image URL for ${imageType}: ${publicUrlData.publicUrl}`);
 
     return;

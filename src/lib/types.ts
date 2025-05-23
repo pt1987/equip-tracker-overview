@@ -496,7 +496,7 @@ export interface LandingPageImage {
   description?: string;
   image_type: string;
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
   created_by: string;
-  url: string; // URL zum Abrufen des Bildes
+  url: string; // This will be populated from storage URL
 }
