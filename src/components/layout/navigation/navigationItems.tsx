@@ -1,4 +1,3 @@
-
 import {
   Calendar,
   FileBarChart,
@@ -19,7 +18,9 @@ import {
   UserCheck,
   BarChartHorizontal,
   ReceiptText,
-  KeyRound
+  KeyRound,
+  FileText,
+  Image
 } from "lucide-react";
 import { NavLinkItem, NavSubmenuItem, NavSubmenuProps } from "../types/navigation-types";
 
@@ -154,28 +155,38 @@ export const getReportingSubmenuItems = (): NavSubmenuProps => {
   };
 };
 
-export const getAdminNavigationItems = (): NavLinkItem[] => {
+export function getAdminNavigationItems(): NavLinkItem[] {
   return [
     {
       href: "/admin/dashboard",
-      icon: <Shield size={16} />,
-      label: "Admin Bereich",
+      icon: <LayoutDashboard className="h-5 w-5" />,
+      label: "Dashboard",
       hasDividerAbove: true
     },
     {
       href: "/admin/users",
-      icon: <Users size={16} />,
-      label: "Benutzerverwaltung"
+      icon: <Users className="h-5 w-5" />,
+      label: "Benutzer"
     },
     {
       href: "/admin/roles",
-      icon: <Shield size={16} />,
+      icon: <Shield className="h-5 w-5" />,
       label: "Rollen & Berechtigungen"
     },
     {
+      href: "/admin/logs",
+      icon: <FileText className="h-5 w-5" />,
+      label: "Audit-Logs"
+    },
+    {
       href: "/admin/intune",
-      icon: <Server size={16} />,
+      icon: <Server className="h-5 w-5" />,
       label: "Intune"
+    },
+    {
+      href: "/admin/landing-page-images",
+      icon: <Image className="h-5 w-5" />,
+      label: "Landing Page Bilder"
     }
   ];
-};
+}

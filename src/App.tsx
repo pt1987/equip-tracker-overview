@@ -33,6 +33,7 @@ import Users from "./pages/admin/Users";
 import Roles from "./pages/admin/Roles";
 import Logs from "./pages/admin/Logs";
 import Intune from "./pages/admin/Intune";
+import LandingPageImages from "./pages/admin/LandingPageImages";
 import LicenseManagement from "./pages/LicenseManagement";
 
 // Import report pages
@@ -104,6 +105,7 @@ const AppContent = () => {
                     <Route path="/roles" element={<Roles />} />
                     <Route path="/logs" element={<Logs />} />
                     <Route path="/intune" element={<Intune />} />
+                    <Route path="/landing-page-images" element={<LandingPageImages />} />
                     <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
                   </Routes>
                 </AdminLayout>

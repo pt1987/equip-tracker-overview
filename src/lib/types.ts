@@ -487,3 +487,16 @@ export interface VendorComparisonReport {
   satisfactionScore: number; // 0-5
   onTimeDeliveryRate: number; // Percentage
 }
+
+export interface LandingPageImage {
+  id: string;
+  file_name: string;
+  storage_path: string;
+  display_name: string;
+  description?: string;
+  image_type: string;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+  url: string; // URL zum Abrufen des Bildes
+}

@@ -373,6 +373,42 @@ export type Database = {
         }
         Relationships: []
       }
+      landing_page_images: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          description: string | null
+          display_name: string
+          file_name: string
+          id: string
+          image_type: string
+          storage_path: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by: string
+          description?: string | null
+          display_name: string
+          file_name: string
+          id?: string
+          image_type: string
+          storage_path: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          description?: string | null
+          display_name?: string
+          file_name?: string
+          id?: string
+          image_type?: string
+          storage_path?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       license_assignments: {
         Row: {
           assigned_at: string | null
