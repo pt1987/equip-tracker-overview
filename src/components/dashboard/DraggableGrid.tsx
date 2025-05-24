@@ -22,7 +22,6 @@ const DraggableGrid = ({ items }: DraggableGridProps) => {
   const [layout, setLayout] = useState<Record<string, any>>({});
   const [mounted, setMounted] = useState(false);
 
-  // Load saved layout from localStorage
   useEffect(() => {
     setMounted(true);
     const savedLayout = localStorage.getItem('dashboardLayout');
@@ -35,7 +34,6 @@ const DraggableGrid = ({ items }: DraggableGridProps) => {
     }
   }, []);
 
-  // Generate layout based on items with their default sizes
   const generateLayouts = () => {
     const layouts = {
       lg: [],
@@ -44,11 +42,10 @@ const DraggableGrid = ({ items }: DraggableGridProps) => {
       xs: []
     };
 
-    // Use saved layout positions if available
     items.forEach((item, index) => {
       const savedItemLayout = layout?.lg?.find((l: any) => l.i === item.id);
       
-      // Default position calculation if no saved layout
+      // Responsive positioning
       let y = Math.floor(index / 2) * item.defaultSize.h;
       let x = (index % 2) * item.defaultSize.w;
       
@@ -70,20 +67,18 @@ const DraggableGrid = ({ items }: DraggableGridProps) => {
   };
 
   const handleLayoutChange = (currentLayout: any, allLayouts: any) => {
-    // Save the layout to localStorage without showing any toast
     localStorage.setItem('dashboardLayout', JSON.stringify(allLayouts));
   };
 
   return (
     <div className="relative">
-      <div className="absolute inset-0 bg-gradient-mica -z-10 rounded-2xl opacity-30" />
       <ResponsiveGridLayout
-        className="layout relative z-10"
+        className="layout"
         layouts={layout.lg ? layout : generateLayouts()}
         breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480 }}
         cols={{ lg: 2, md: 2, sm: 2, xs: 1 }}
         rowHeight={400}
-        containerPadding={[12, 12]}
+        containerPadding={[0, 0]}
         margin={[20, 20]}
         onLayoutChange={(layout, allLayouts) => handleLayoutChange(layout, allLayouts)}
         draggableHandle=".dashboard-item-drag-handle"
@@ -93,13 +88,13 @@ const DraggableGrid = ({ items }: DraggableGridProps) => {
         {items.map((item, index) => (
           <div key={item.id} className="dashboard-grid-item">
             <MicaCard 
-              className="h-full" 
+              className="h-full relative" 
               variant={index % 3 === 0 ? 'elevated' : index % 5 === 0 ? 'accent' : 'default'}
             >
               <div className="dashboard-item-drag-handle mica-drag-handle" title="Drag to reorder">
                 <GripVertical size={14} className="text-muted-foreground/60" />
               </div>
-              <div className="relative z-10">
+              <div className="h-full">
                 {item.content}
               </div>
             </MicaCard>

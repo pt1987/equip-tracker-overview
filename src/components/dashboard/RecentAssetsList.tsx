@@ -1,55 +1,65 @@
 
 import { motion } from "framer-motion";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Package, Calendar } from "lucide-react";
 import StatusBadge from "@/components/assets/StatusBadge";
 import { cn } from "@/lib/utils";
 import { Asset } from "@/lib/types";
+import MicaCard from "./MicaCard";
 
 interface RecentAssetsListProps {
   recentAssets: Asset[];
 }
 
 export default function RecentAssetsList({ recentAssets }: RecentAssetsListProps) {
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case "laptop": return "bg-blue-500/20 text-blue-600 border-blue-500/30";
+      case "smartphone": return "bg-emerald-500/20 text-emerald-600 border-emerald-500/30";
+      case "tablet": return "bg-purple-500/20 text-purple-600 border-purple-500/30";
+      default: return "bg-gray-500/20 text-gray-600 border-gray-500/30";
+    }
+  };
+
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="col-span-1">
-      <Card className="h-full">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg font-medium">Zuletzt hinzugefügte Assets</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ScrollArea className="h-[280px] pr-4">
-            <div className="space-y-4">
-              {recentAssets.map((asset) => (
-                <div key={asset.id} className="flex items-start space-x-3 pb-3 border-b last:border-0 last:pb-0">
-                  <div className="mt-1">
-                    <div className={cn("p-2 rounded-md", 
-                      asset.type === "laptop" ? "bg-blue-100 text-blue-700" : 
-                      asset.type === "smartphone" ? "bg-green-100 text-green-700" : 
-                      asset.type === "tablet" ? "bg-purple-100 text-purple-700" : 
-                      "bg-gray-100 text-gray-700")}>
-                      <Package size={16} />
-                    </div>
-                  </div>
-                  <div className="space-y-1 flex-1 min-w-0">
-                    <p className="text-sm font-medium line-clamp-1">{asset.name}</p>
-                    <div className="flex items-center text-xs text-muted-foreground">
-                      <Calendar size={12} className="mr-1" />
-                      {new Date(asset.purchaseDate).toLocaleDateString()}
-                    </div>
-                  </div>
-                  <StatusBadge status={asset.status} size="sm" />
+    <MicaCard className="h-full">
+      <div className="flex flex-col h-full">
+        <h3 className="text-lg font-semibold text-foreground/90 mb-4">Zuletzt hinzugefügte Assets</h3>
+        
+        <ScrollArea className="flex-1 pr-2">
+          <div className="space-y-3">
+            {recentAssets.map((asset, index) => (
+              <motion.div 
+                key={asset.id} 
+                className="flex items-center space-x-3 p-3 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-colors"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <div className={cn("p-2 rounded-lg border backdrop-blur-sm", getTypeColor(asset.type))}>
+                  <Package size={16} />
                 </div>
-              ))}
-              
-              {recentAssets.length === 0 && (
-                <p className="text-center text-muted-foreground py-4">Keine Assets gefunden</p>
-              )}
-            </div>
-          </ScrollArea>
-        </CardContent>
-      </Card>
-    </motion.div>
+                
+                <div className="flex-1 min-w-0 space-y-1">
+                  <p className="text-sm font-medium line-clamp-1 text-foreground/90">{asset.name}</p>
+                  <div className="flex items-center text-xs text-muted-foreground/70">
+                    <Calendar size={12} className="mr-1" />
+                    {new Date(asset.purchaseDate).toLocaleDateString()}
+                  </div>
+                </div>
+                
+                <StatusBadge status={asset.status} size="sm" />
+              </motion.div>
+            ))}
+            
+            {recentAssets.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground/60">
+                Keine Assets gefunden
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+      </div>
+    </MicaCard>
   );
 }

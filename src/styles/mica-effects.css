@@ -1,111 +1,130 @@
 
-/* Mica-inspired effects */
+/* Mica-inspired effects with improved consistency */
 .mica-card {
   position: relative;
-  background: rgba(243, 244, 246, 0.7);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.15) 0%, 
+    rgba(255, 255, 255, 0.05) 100%);
   backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
+  border-radius: 16px;
   box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.08),
-    0 2px 8px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    0 8px 32px rgba(0, 0, 0, 0.06),
+    0 2px 8px rgba(0, 0, 0, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  overflow: hidden;
 }
 
 .mica-card:hover {
-  background: rgba(243, 244, 246, 0.8);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.2) 0%, 
+    rgba(255, 255, 255, 0.08) 100%);
   border-color: rgba(255, 255, 255, 0.3);
   box-shadow: 
-    0 12px 40px rgba(0, 0, 0, 0.12),
-    0 4px 16px rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    0 12px 40px rgba(0, 0, 0, 0.08),
+    0 4px 16px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
   transform: translateY(-2px);
 }
 
 .mica-card-elevated {
   position: relative;
-  background: rgba(255, 255, 255, 0.8);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.2) 0%, 
+    rgba(255, 255, 255, 0.1) 100%);
   backdrop-filter: blur(24px) saturate(200%);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 20px;
   box-shadow: 
-    0 16px 48px rgba(0, 0, 0, 0.12),
-    0 4px 16px rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    0 16px 48px rgba(0, 0, 0, 0.08),
+    0 4px 16px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  overflow: hidden;
 }
 
 .mica-card-elevated:hover {
-  background: rgba(255, 255, 255, 0.9);
-  border-color: rgba(255, 255, 255, 0.4);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.25) 0%, 
+    rgba(255, 255, 255, 0.12) 100%);
+  border-color: rgba(255, 255, 255, 0.35);
   box-shadow: 
-    0 20px 60px rgba(0, 0, 0, 0.16),
-    0 6px 20px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    0 20px 60px rgba(0, 0, 0, 0.1),
+    0 6px 20px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .mica-card-accent {
   position: relative;
   background: linear-gradient(135deg, 
-    rgba(59, 130, 246, 0.1) 0%, 
-    rgba(147, 51, 234, 0.1) 100%);
+    rgba(59, 130, 246, 0.12) 0%, 
+    rgba(147, 51, 234, 0.12) 100%);
   backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  border-radius: 12px;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  border-radius: 16px;
   box-shadow: 
-    0 8px 32px rgba(59, 130, 246, 0.12),
-    0 2px 8px rgba(59, 130, 246, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    0 8px 32px rgba(59, 130, 246, 0.08),
+    0 2px 8px rgba(59, 130, 246, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  overflow: hidden;
 }
 
 .mica-card-accent:hover {
   background: linear-gradient(135deg, 
     rgba(59, 130, 246, 0.15) 0%, 
     rgba(147, 51, 234, 0.15) 100%);
-  border-color: rgba(59, 130, 246, 0.3);
+  border-color: rgba(59, 130, 246, 0.35);
   box-shadow: 
-    0 12px 40px rgba(59, 130, 246, 0.16),
-    0 4px 16px rgba(59, 130, 246, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    0 12px 40px rgba(59, 130, 246, 0.12),
+    0 4px 16px rgba(59, 130, 246, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 /* Dark mode variants */
 .dark .mica-card {
-  background: rgba(17, 24, 39, 0.7);
+  background: linear-gradient(135deg, 
+    rgba(31, 41, 55, 0.8) 0%, 
+    rgba(17, 24, 39, 0.6) 100%);
   border-color: rgba(75, 85, 99, 0.3);
   box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.3),
-    0 2px 8px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .dark .mica-card:hover {
-  background: rgba(17, 24, 39, 0.8);
+  background: linear-gradient(135deg, 
+    rgba(31, 41, 55, 0.9) 0%, 
+    rgba(17, 24, 39, 0.7) 100%);
   border-color: rgba(75, 85, 99, 0.4);
   box-shadow: 
-    0 12px 40px rgba(0, 0, 0, 0.4),
-    0 4px 16px rgba(0, 0, 0, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    0 12px 40px rgba(0, 0, 0, 0.3),
+    0 4px 16px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .dark .mica-card-elevated {
-  background: rgba(31, 41, 55, 0.8);
+  background: linear-gradient(135deg, 
+    rgba(31, 41, 55, 0.9) 0%, 
+    rgba(17, 24, 39, 0.8) 100%);
   border-color: rgba(75, 85, 99, 0.4);
   box-shadow: 
-    0 16px 48px rgba(0, 0, 0, 0.4),
-    0 4px 16px rgba(0, 0, 0, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    0 16px 48px rgba(0, 0, 0, 0.25),
+    0 4px 16px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .dark .mica-card-elevated:hover {
-  background: rgba(31, 41, 55, 0.9);
+  background: linear-gradient(135deg, 
+    rgba(31, 41, 55, 0.95) 0%, 
+    rgba(17, 24, 39, 0.85) 100%);
   border-color: rgba(75, 85, 99, 0.5);
   box-shadow: 
-    0 20px 60px rgba(0, 0, 0, 0.5),
-    0 6px 20px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    0 20px 60px rgba(0, 0, 0, 0.35),
+    0 6px 20px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .dark .mica-card-accent {
@@ -114,9 +133,9 @@
     rgba(147, 51, 234, 0.15) 100%);
   border-color: rgba(59, 130, 246, 0.3);
   box-shadow: 
-    0 8px 32px rgba(59, 130, 246, 0.2),
-    0 2px 8px rgba(59, 130, 246, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    0 8px 32px rgba(59, 130, 246, 0.15),
+    0 2px 8px rgba(59, 130, 246, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .dark .mica-card-accent:hover {
@@ -125,15 +144,23 @@
     rgba(147, 51, 234, 0.2) 100%);
   border-color: rgba(59, 130, 246, 0.4);
   box-shadow: 
-    0 12px 40px rgba(59, 130, 246, 0.25),
-    0 4px 16px rgba(59, 130, 246, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    0 12px 40px rgba(59, 130, 246, 0.2),
+    0 4px 16px rgba(59, 130, 246, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .mica-content {
   position: relative;
   z-index: 1;
   padding: 1.5rem;
+  height: 100%;
+}
+
+/* Responsive padding */
+@media (max-width: 768px) {
+  .mica-content {
+    padding: 1rem;
+  }
 }
 
 /* Minimalistic accent colors */
@@ -168,17 +195,4 @@
   background: linear-gradient(135deg, 
     rgba(17, 24, 39, 0.3) 0%, 
     rgba(31, 41, 55, 0.3) 100%);
-}
-
-/* Depth layers */
-.depth-layer-1 {
-  transform: translateZ(10px);
-}
-
-.depth-layer-2 {
-  transform: translateZ(20px);
-}
-
-.depth-layer-3 {
-  transform: translateZ(30px);
 }

@@ -5,11 +5,11 @@
 
 .react-grid-item.react-grid-placeholder {
   background: linear-gradient(135deg, 
-    rgba(59, 130, 246, 0.2) 0%, 
-    rgba(147, 51, 234, 0.2) 100%);
-  backdrop-filter: blur(10px);
-  border: 2px dashed rgba(59, 130, 246, 0.4);
-  border-radius: 12px;
+    rgba(59, 130, 246, 0.15) 0%, 
+    rgba(147, 51, 234, 0.15) 100%);
+  backdrop-filter: blur(20px);
+  border: 2px dashed rgba(59, 130, 246, 0.3);
+  border-radius: 16px;
   transition-duration: 200ms;
   z-index: 2;
   user-select: none;
@@ -18,7 +18,7 @@
 .dashboard-item-content {
   height: 100%;
   position: relative;
-  border-radius: 12px;
+  border-radius: 16px;
 }
 
 .dashboard-item-content > div {
@@ -27,22 +27,22 @@
 
 .mica-drag-handle {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 28px;
-  height: 28px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 6px;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: grab;
   z-index: 10;
   opacity: 0;
-  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  transform: scale(0.9);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform: scale(0.8);
 }
 
 .dashboard-grid-item:hover .mica-drag-handle {
@@ -51,8 +51,8 @@
 }
 
 .mica-drag-handle:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
   transform: scale(1.05);
 }
 
@@ -65,20 +65,34 @@
   display: none;
 }
 
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .mica-drag-handle {
+    width: 28px;
+    height: 28px;
+    top: 12px;
+    right: 12px;
+  }
+  
+  .dashboard-grid-item {
+    margin-bottom: 16px;
+  }
+}
+
 /* Dark mode adjustments */
 .dark .mica-drag-handle {
-  background: rgba(31, 41, 55, 0.8);
+  background: rgba(31, 41, 55, 0.6);
   border-color: rgba(75, 85, 99, 0.3);
 }
 
 .dark .mica-drag-handle:hover {
-  background: rgba(31, 41, 55, 0.9);
+  background: rgba(31, 41, 55, 0.8);
   border-color: rgba(75, 85, 99, 0.4);
 }
 
 .dark .react-grid-item.react-grid-placeholder {
   background: linear-gradient(135deg, 
-    rgba(59, 130, 246, 0.15) 0%, 
-    rgba(147, 51, 234, 0.15) 100%);
-  border-color: rgba(59, 130, 246, 0.3);
+    rgba(59, 130, 246, 0.1) 0%, 
+    rgba(147, 51, 234, 0.1) 100%);
+  border-color: rgba(59, 130, 246, 0.25);
 }
