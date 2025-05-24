@@ -19,6 +19,9 @@ export interface IntuneDeviceDetails {
   userPrincipalName?: string;
   operatingSystem?: string;
   osVersion?: string;
+  manufacturer?: string;
+  model?: string;
+  serialNumber?: string;
 }
 
 export interface IntuneCompliancePolicy {
