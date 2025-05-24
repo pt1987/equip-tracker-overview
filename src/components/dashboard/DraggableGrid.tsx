@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { GripVertical } from 'lucide-react';
+import MicaCard from './MicaCard';
 import 'react-grid-layout/css/styles.css';
 import '../dashboard-grid.css';
 
@@ -74,30 +75,38 @@ const DraggableGrid = ({ items }: DraggableGridProps) => {
   };
 
   return (
-    <ResponsiveGridLayout
-      className="layout"
-      layouts={layout.lg ? layout : generateLayouts()}
-      breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480 }}
-      cols={{ lg: 2, md: 2, sm: 2, xs: 1 }}
-      rowHeight={400}
-      containerPadding={[0, 0]}
-      margin={[16, 16]}
-      onLayoutChange={(layout, allLayouts) => handleLayoutChange(layout, allLayouts)}
-      draggableHandle=".dashboard-item-drag-handle"
-      isDraggable={true}
-      isResizable={false}
-    >
-      {items.map((item) => (
-        <div key={item.id} className="dashboard-grid-item">
-          <div className="dashboard-item-content">
-            <div className="dashboard-item-drag-handle" title="Drag to reorder">
-              <GripVertical size={14} />
-            </div>
-            {item.content}
+    <div className="relative">
+      <div className="absolute inset-0 bg-gradient-mica -z-10 rounded-2xl opacity-30" />
+      <ResponsiveGridLayout
+        className="layout relative z-10"
+        layouts={layout.lg ? layout : generateLayouts()}
+        breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480 }}
+        cols={{ lg: 2, md: 2, sm: 2, xs: 1 }}
+        rowHeight={400}
+        containerPadding={[12, 12]}
+        margin={[20, 20]}
+        onLayoutChange={(layout, allLayouts) => handleLayoutChange(layout, allLayouts)}
+        draggableHandle=".dashboard-item-drag-handle"
+        isDraggable={true}
+        isResizable={false}
+      >
+        {items.map((item, index) => (
+          <div key={item.id} className="dashboard-grid-item">
+            <MicaCard 
+              className="h-full" 
+              variant={index % 3 === 0 ? 'elevated' : index % 5 === 0 ? 'accent' : 'default'}
+            >
+              <div className="dashboard-item-drag-handle mica-drag-handle" title="Drag to reorder">
+                <GripVertical size={14} className="text-muted-foreground/60" />
+              </div>
+              <div className="relative z-10">
+                {item.content}
+              </div>
+            </MicaCard>
           </div>
-        </div>
-      ))}
-    </ResponsiveGridLayout>
+        ))}
+      </ResponsiveGridLayout>
+    </div>
   );
 };
 
