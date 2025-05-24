@@ -1,26 +1,36 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { LockIcon, ServerIcon, KeyIcon } from "lucide-react";
+import { LockIcon, ServerIcon, KeyIcon, SaveIcon, TrashIcon } from "lucide-react";
+import { useIntuneConfig, IntuneConfig } from "@/hooks/use-intune";
 
-interface IntuneConfigProps {
-  onConfigUpdate?: (config: {
-    tenantId: string;
-    clientId: string;
-    clientSecret: string;
-  }) => void;
+interface IntuneConsoleProps {
+  onConfigUpdate?: (config: IntuneConfig) => void;
 }
 
-export default function IntuneConsole({ onConfigUpdate }: IntuneConfigProps) {
-  const [tenantId, setTenantId] = React.useState('');
-  const [clientId, setClientId] = React.useState('');
-  const [clientSecret, setClientSecret] = React.useState('');
-  const [isConnecting, setIsConnecting] = React.useState(false);
+export default function IntuneConsole({ onConfigUpdate }: IntuneConsoleProps) {
   const { toast } = useToast();
+  const { config, updateConfig, clearConfig } = useIntuneConfig();
+  
+  const [tenantId, setTenantId] = useState('');
+  const [clientId, setClientId] = useState('');
+  const [clientSecret, setClientSecret] = useState('');
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [configExists, setConfigExists] = useState(false);
+
+  // Load existing configuration if available
+  useEffect(() => {
+    if (config) {
+      setTenantId(config.tenantId || '');
+      setClientId(config.clientId || '');
+      setClientSecret(config.clientSecret || '');
+      setConfigExists(true);
+    }
+  }, [config]);
 
   const handleSaveConfig = async () => {
     if (!tenantId || !clientId || !clientSecret) {
@@ -35,30 +45,47 @@ export default function IntuneConsole({ onConfigUpdate }: IntuneConfigProps) {
     setIsConnecting(true);
     
     try {
-      // Simulate API connection check
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Update the configuration
+      const newConfig = {
+        tenantId,
+        clientId,
+        clientSecret
+      };
+      
+      updateConfig(newConfig);
       
       if (onConfigUpdate) {
-        onConfigUpdate({
-          tenantId,
-          clientId,
-          clientSecret
-        });
+        onConfigUpdate(newConfig);
       }
       
       toast({
         title: "Konfiguration gespeichert",
         description: "Die Intune-Konfiguration wurde erfolgreich gespeichert.",
       });
+      
+      setConfigExists(true);
     } catch (error) {
       toast({
-        title: "Verbindungsfehler",
-        description: "Die Verbindung zu Microsoft Intune konnte nicht hergestellt werden.",
+        title: "Fehler",
+        description: "Die Konfiguration konnte nicht gespeichert werden.",
         variant: "destructive",
       });
     } finally {
       setIsConnecting(false);
     }
+  };
+
+  const handleClearConfig = () => {
+    clearConfig();
+    setTenantId('');
+    setClientId('');
+    setClientSecret('');
+    setConfigExists(false);
+    
+    toast({
+      title: "Konfiguration gelöscht",
+      description: "Die Intune-Konfiguration wurde erfolgreich gelöscht.",
+    });
   };
 
   return (
@@ -128,13 +155,27 @@ export default function IntuneConsole({ onConfigUpdate }: IntuneConfigProps) {
           </p>
         </div>
 
-        <Button 
-          className="w-full mt-6" 
-          onClick={handleSaveConfig}
-          disabled={isConnecting}
-        >
-          {isConnecting ? "Verbinde..." : "Konfiguration speichern"}
-        </Button>
+        <div className="flex gap-2 pt-4">
+          <Button 
+            className="flex-1" 
+            onClick={handleSaveConfig}
+            disabled={isConnecting}
+          >
+            <SaveIcon className="h-4 w-4 mr-2" />
+            {isConnecting ? "Verbinde..." : configExists ? "Konfiguration aktualisieren" : "Konfiguration speichern"}
+          </Button>
+          
+          {configExists && (
+            <Button 
+              variant="destructive" 
+              onClick={handleClearConfig}
+              disabled={isConnecting}
+            >
+              <TrashIcon className="h-4 w-4 mr-2" />
+              Löschen
+            </Button>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
