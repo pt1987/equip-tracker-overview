@@ -5,6 +5,7 @@ import IntuneConsole from "@/components/admin/IntuneConsole";
 import IntuneSyncComponent from "@/components/admin/IntuneSyncComponent";
 import IntuneComplianceComponent from "@/components/admin/IntuneComplianceComponent";
 import IntuneDeviceDetail from "@/components/admin/IntuneDeviceDetail";
+import IntuneDocumentation from "@/components/admin/IntuneDocumentation";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -24,7 +25,7 @@ interface ConsoleLog {
 export default function IntuneAdminPage() {
   const [logs, setLogs] = useState<ConsoleLog[]>([]);
   const { config, isConfigured } = useIntuneConfig();
-  const [activeTab, setActiveTab] = useState<string>("console");
+  const [activeTab, setActiveTab] = useState<string>("documentation");
 
   const logToConsole = (type: "info" | "error" | "request" | "response", message: string) => {
     setLogs(prev => [
@@ -102,7 +103,7 @@ export default function IntuneAdminPage() {
 
   return (
     <PageTransition>
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-8 p-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Microsoft Intune Integration</h1>
           <p className="text-muted-foreground">
@@ -112,14 +113,19 @@ export default function IntuneAdminPage() {
         
         <div className="w-full">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="mb-4">
-              <TabsTrigger value="console">Konfiguration</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="documentation">Dokumentation</TabsTrigger>
+              <TabsTrigger value="configuration">Konfiguration</TabsTrigger>
               <TabsTrigger value="sync" disabled={!isConfigured}>Synchronisierung</TabsTrigger>
               <TabsTrigger value="compliance" disabled={!isConfigured}>Compliance</TabsTrigger>
               <TabsTrigger value="device" disabled={!isConfigured}>Gerätedetails</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="console" className="space-y-6">
+            <TabsContent value="documentation" className="mt-6">
+              <IntuneDocumentation />
+            </TabsContent>
+            
+            <TabsContent value="configuration" className="mt-6 space-y-6">
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="md:col-span-1">
                   <IntuneConsole />
@@ -243,27 +249,9 @@ export default function IntuneAdminPage() {
                   </ScrollArea>
                 </CardContent>
               </Card>
-              
-              <div className="bg-blue-50 dark:bg-blue-900 p-4 rounded-md">
-                <h3 className="text-lg font-medium text-blue-800 dark:text-blue-200 mb-2">Sicherheitshinweise</h3>
-                <ul className="list-disc pl-5 space-y-2 text-blue-700 dark:text-blue-300">
-                  <li>
-                    Das Client Secret sollte im produktiven Einsatz nicht im Frontend gespeichert werden.
-                  </li>
-                  <li>
-                    Erstellen Sie einen dedizierten Service Principal mit minimalen Berechtigungen für die Integration.
-                  </li>
-                  <li>
-                    Aktivieren Sie die Conditional Access Policies, um den Zugriff auf die API zu beschränken.
-                  </li>
-                  <li>
-                    Überwachen Sie die API-Nutzung regelmäßig in Azure AD.
-                  </li>
-                </ul>
-              </div>
             </TabsContent>
             
-            <TabsContent value="sync">
+            <TabsContent value="sync" className="mt-6">
               {isConfigured ? (
                 <IntuneSyncComponent />
               ) : (
@@ -274,7 +262,7 @@ export default function IntuneAdminPage() {
                     <p className="text-muted-foreground">
                       Bitte konfigurieren Sie zuerst die Intune-Verbindung im Konfigurationsbereich.
                     </p>
-                    <Button onClick={() => setActiveTab("console")}>
+                    <Button onClick={() => setActiveTab("configuration")}>
                       Zur Konfiguration
                     </Button>
                   </div>
@@ -282,7 +270,7 @@ export default function IntuneAdminPage() {
               )}
             </TabsContent>
             
-            <TabsContent value="compliance">
+            <TabsContent value="compliance" className="mt-6">
               {isConfigured ? (
                 <IntuneComplianceComponent />
               ) : (
@@ -293,7 +281,7 @@ export default function IntuneAdminPage() {
                     <p className="text-muted-foreground">
                       Bitte konfigurieren Sie zuerst die Intune-Verbindung im Konfigurationsbereich.
                     </p>
-                    <Button onClick={() => setActiveTab("console")}>
+                    <Button onClick={() => setActiveTab("configuration")}>
                       Zur Konfiguration
                     </Button>
                   </div>
@@ -301,7 +289,7 @@ export default function IntuneAdminPage() {
               )}
             </TabsContent>
             
-            <TabsContent value="device">
+            <TabsContent value="device" className="mt-6">
               {isConfigured ? (
                 <IntuneDeviceDetail />
               ) : (
@@ -312,7 +300,7 @@ export default function IntuneAdminPage() {
                     <p className="text-muted-foreground">
                       Bitte konfigurieren Sie zuerst die Intune-Verbindung im Konfigurationsbereich.
                     </p>
-                    <Button onClick={() => setActiveTab("console")}>
+                    <Button onClick={() => setActiveTab("configuration")}>
                       Zur Konfiguration
                     </Button>
                   </div>
