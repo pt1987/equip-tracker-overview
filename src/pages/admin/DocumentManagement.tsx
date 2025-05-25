@@ -58,77 +58,8 @@ export default function DocumentManagement() {
   const [uploadTags, setUploadTags] = useState("");
 
   useEffect(() => {
-    initializeStorageAndFetchDocuments();
+    fetchDocuments();
   }, []);
-
-  const initializeStorageAndFetchDocuments = async () => {
-    try {
-      console.log('Initializing storage and fetching documents...');
-      
-      // First, check if bucket exists
-      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
-      
-      if (bucketsError) {
-        console.error('Error fetching buckets:', bucketsError);
-        toast({
-          variant: "destructive",
-          title: "Fehler",
-          description: "Konnte Storage-Buckets nicht laden."
-        });
-        setLoading(false);
-        return;
-      }
-
-      const adminBucket = buckets?.find(bucket => bucket.id === 'admin-documents');
-      
-      if (!adminBucket) {
-        console.log('admin-documents bucket does not exist, creating it...');
-        
-        // Create the bucket
-        const { error: createError } = await supabase.storage.createBucket('admin-documents', {
-          public: false,
-          allowedMimeTypes: [
-            'application/pdf',
-            'image/jpeg',
-            'image/jpg',
-            'image/png', 
-            'image/gif',
-            'text/plain',
-            'application/msword',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'application/vnd.ms-excel',
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-          ],
-          fileSizeLimit: 52428800 // 50MB
-        });
-        
-        if (createError) {
-          console.error('Error creating bucket:', createError);
-          toast({
-            variant: "destructive", 
-            title: "Fehler",
-            description: `Konnte Storage-Bucket nicht erstellen: ${createError.message}`
-          });
-          setLoading(false);
-          return;
-        } else {
-          console.log('Successfully created admin-documents bucket');
-        }
-      }
-
-      // Now fetch documents
-      await fetchDocuments();
-      
-    } catch (error) {
-      console.error('Unexpected error initializing storage:', error);
-      toast({
-        variant: "destructive",
-        title: "Fehler",
-        description: "Ein unerwarteter Fehler ist beim Initialisieren aufgetreten."
-      });
-      setLoading(false);
-    }
-  };
 
   const fetchDocuments = async () => {
     try {

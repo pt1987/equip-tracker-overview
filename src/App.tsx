@@ -55,7 +55,7 @@ import AdminRoles from "./pages/admin/Roles";
 import AdminLogs from "./pages/admin/Logs";
 import AdminIntune from "./pages/admin/Intune";
 import AdminLandingPageImages from "./pages/admin/LandingPageImages";
-import AdminDocuments from "./pages/admin/Documents";
+import DocumentManagement from "./pages/admin/DocumentManagement";
 import AdminLayout from "./components/admin/AdminLayout";
 
 const queryClient = new QueryClient();
@@ -340,7 +340,7 @@ const App = () => (
                       <Route path="logs" element={<AdminLogs />} />
                       <Route path="intune" element={<AdminIntune />} />
                       <Route path="landing-page-images" element={<AdminLandingPageImages />} />
-                      <Route path="documents" element={<AdminDocuments />} />
+                      <Route path="documents" element={<DocumentManagement />} />
                     </Routes>
                   </AdminLayout>
                 </ProtectedRoute>
