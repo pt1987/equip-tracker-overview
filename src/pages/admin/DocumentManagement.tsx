@@ -26,28 +26,29 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-interface AdminDocument {
+interface StorageDocument {
   id: string;
-  storage_path: string;
-  original_name: string;
-  file_size: number;
-  mime_type: string;
-  uploaded_by: string;
-  category: string;
-  description?: string;
-  tags?: string[];
+  name: string;
   created_at: string;
   updated_at: string;
+  metadata: {
+    size: number;
+    mimetype: string;
+    category?: string;
+    description?: string;
+    tags?: string[];
+    original_name?: string;
+  };
 }
 
 export default function DocumentManagement() {
-  const [documents, setDocuments] = useState<AdminDocument[]>([]);
+  const [documents, setDocuments] = useState<StorageDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
-  const [previewDocument, setPreviewDocument] = useState<AdminDocument | null>(null);
+  const [previewDocument, setPreviewDocument] = useState<StorageDocument | null>(null);
   const { toast } = useToast();
 
   // Upload form state
@@ -62,17 +63,32 @@ export default function DocumentManagement() {
 
   const fetchDocuments = async () => {
     try {
-      const { data, error } = await supabase
-        .from('admin_documents')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const { data, error } = await supabase.storage
+        .from('admin-documents')
+        .list('', {
+          limit: 100,
+          offset: 0,
+        });
 
       if (error) {
         console.error('Error fetching documents:', error);
-        // If table doesn't exist, create empty array
         setDocuments([]);
       } else {
-        setDocuments(data || []);
+        const formattedDocs: StorageDocument[] = (data || []).map(file => ({
+          id: file.id || file.name,
+          name: file.name,
+          created_at: file.created_at || new Date().toISOString(),
+          updated_at: file.updated_at || new Date().toISOString(),
+          metadata: {
+            size: file.metadata?.size || 0,
+            mimetype: file.metadata?.mimetype || 'application/octet-stream',
+            category: file.metadata?.category || 'general',
+            description: file.metadata?.description,
+            tags: file.metadata?.tags || [],
+            original_name: file.name
+          }
+        }));
+        setDocuments(formattedDocs);
       }
     } catch (error) {
       console.error('Error:', error);
@@ -95,32 +111,24 @@ export default function DocumentManagement() {
     setUploading(true);
     try {
       const fileName = `${Date.now()}-${uploadFile.name}`;
-      const filePath = `admin/${fileName}`;
+      
+      // Create metadata
+      const metadata = {
+        category: uploadCategory,
+        description: uploadDescription || undefined,
+        tags: uploadTags ? uploadTags.split(',').map(tag => tag.trim()) : [],
+        original_name: uploadFile.name
+      };
 
-      // Upload to storage
+      // Upload to storage with metadata
       const { error: uploadError } = await supabase.storage
         .from('admin-documents')
-        .upload(filePath, uploadFile);
+        .upload(fileName, uploadFile, {
+          metadata
+        });
 
       if (uploadError) {
         throw uploadError;
-      }
-
-      // Insert metadata (only if table exists)
-      try {
-        await supabase
-          .from('admin_documents')
-          .insert({
-            storage_path: filePath,
-            original_name: uploadFile.name,
-            file_size: uploadFile.size,
-            mime_type: uploadFile.type,
-            category: uploadCategory,
-            description: uploadDescription || null,
-            tags: uploadTags ? uploadTags.split(',').map(tag => tag.trim()) : null
-          });
-      } catch (dbError) {
-        console.warn('Could not insert metadata (table may not exist):', dbError);
       }
 
       toast({
@@ -142,25 +150,14 @@ export default function DocumentManagement() {
     }
   };
 
-  const handleDelete = async (document: AdminDocument) => {
+  const handleDelete = async (document: StorageDocument) => {
     try {
-      // Delete from storage
-      const { error: storageError } = await supabase.storage
+      const { error } = await supabase.storage
         .from('admin-documents')
-        .remove([document.storage_path]);
+        .remove([document.name]);
 
-      if (storageError) {
-        throw storageError;
-      }
-
-      // Delete metadata
-      try {
-        await supabase
-          .from('admin_documents')
-          .delete()
-          .eq('id', document.id);
-      } catch (dbError) {
-        console.warn('Could not delete metadata:', dbError);
+      if (error) {
+        throw error;
       }
 
       toast({
@@ -178,20 +175,20 @@ export default function DocumentManagement() {
     }
   };
 
-  const handleDownload = async (document: AdminDocument) => {
+  const handleDownload = async (document: StorageDocument) => {
     try {
       const { data, error } = await supabase.storage
         .from('admin-documents')
-        .download(document.storage_path);
+        .download(document.name);
 
       if (error) {
         throw error;
       }
 
       const url = URL.createObjectURL(data);
-      const a = document.createElement('a');
+      const a = window.document.createElement('a');
       a.href = url;
-      a.download = document.original_name;
+      a.download = document.metadata.original_name || document.name;
       a.click();
       URL.revokeObjectURL(url);
     } catch (error: any) {
@@ -211,9 +208,9 @@ export default function DocumentManagement() {
   };
 
   const filteredDocuments = documents.filter(doc => {
-    const matchesSearch = doc.original_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         (doc.description && doc.description.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesCategory = categoryFilter === "all" || doc.category === categoryFilter;
+    const matchesSearch = doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (doc.metadata.description && doc.metadata.description.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesCategory = categoryFilter === "all" || doc.metadata.category === categoryFilter;
     return matchesSearch && matchesCategory;
   });
 
@@ -318,19 +315,19 @@ export default function DocumentManagement() {
                     <div className="flex items-center gap-2">
                       <FileText className="h-4 w-4" />
                       <div>
-                        <div className="font-medium">{doc.original_name}</div>
-                        {doc.description && (
-                          <div className="text-sm text-muted-foreground">{doc.description}</div>
+                        <div className="font-medium">{doc.metadata.original_name || doc.name}</div>
+                        {doc.metadata.description && (
+                          <div className="text-sm text-muted-foreground">{doc.metadata.description}</div>
                         )}
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline">
-                      {getCategoryLabel(doc.category)}
+                      {getCategoryLabel(doc.metadata.category || 'general')}
                     </Badge>
                   </TableCell>
-                  <TableCell>{formatFileSize(doc.file_size)}</TableCell>
+                  <TableCell>{formatFileSize(doc.metadata.size)}</TableCell>
                   <TableCell>
                     {new Date(doc.created_at).toLocaleDateString('de-DE')}
                   </TableCell>
@@ -439,35 +436,35 @@ export default function DocumentManagement() {
       <Dialog open={!!previewDocument} onOpenChange={() => setPreviewDocument(null)}>
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{previewDocument?.original_name}</DialogTitle>
+            <DialogTitle>{previewDocument?.metadata.original_name || previewDocument?.name}</DialogTitle>
           </DialogHeader>
           {previewDocument && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <strong>Kategorie:</strong> {getCategoryLabel(previewDocument.category)}
+                  <strong>Kategorie:</strong> {getCategoryLabel(previewDocument.metadata.category || 'general')}
                 </div>
                 <div>
-                  <strong>Größe:</strong> {formatFileSize(previewDocument.file_size)}
+                  <strong>Größe:</strong> {formatFileSize(previewDocument.metadata.size)}
                 </div>
                 <div>
-                  <strong>MIME-Type:</strong> {previewDocument.mime_type}
+                  <strong>MIME-Type:</strong> {previewDocument.metadata.mimetype}
                 </div>
                 <div>
                   <strong>Hochgeladen:</strong> {new Date(previewDocument.created_at).toLocaleString('de-DE')}
                 </div>
               </div>
-              {previewDocument.description && (
+              {previewDocument.metadata.description && (
                 <div>
                   <strong>Beschreibung:</strong>
-                  <p className="mt-1">{previewDocument.description}</p>
+                  <p className="mt-1">{previewDocument.metadata.description}</p>
                 </div>
               )}
-              {previewDocument.tags && previewDocument.tags.length > 0 && (
+              {previewDocument.metadata.tags && previewDocument.metadata.tags.length > 0 && (
                 <div>
                   <strong>Tags:</strong>
                   <div className="flex gap-1 mt-1">
-                    {previewDocument.tags.map((tag, index) => (
+                    {previewDocument.metadata.tags.map((tag, index) => (
                       <Badge key={index} variant="secondary">{tag}</Badge>
                     ))}
                   </div>
