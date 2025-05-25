@@ -209,13 +209,6 @@ const App = () => (
               } />
               
               {/* Reporting routes */}
-              <Route path="/reporting" element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <ReportingOverview />
-                  </AppLayout>
-                </ProtectedRoute>
-              } />
               <Route path="/reporting/order-timeline" element={
                 <ProtectedRoute>
                   <AppLayout>

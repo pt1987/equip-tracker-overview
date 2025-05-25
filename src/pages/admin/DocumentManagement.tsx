@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -65,57 +64,6 @@ export default function DocumentManagement() {
     try {
       console.log('Fetching documents from admin-documents bucket...');
       
-      // First check if bucket exists
-      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
-      console.log('Available buckets:', buckets);
-      
-      if (bucketsError) {
-        console.error('Error fetching buckets:', bucketsError);
-        toast({
-          variant: "destructive",
-          title: "Fehler",
-          description: "Konnte Storage-Buckets nicht laden."
-        });
-        setDocuments([]);
-        setLoading(false);
-        return;
-      }
-
-      const adminBucket = buckets?.find(bucket => bucket.id === 'admin-documents');
-      if (!adminBucket) {
-        console.warn('admin-documents bucket does not exist');
-        // Create the bucket if it doesn't exist
-        const { error: createError } = await supabase.storage.createBucket('admin-documents', {
-          public: false,
-          allowedMimeTypes: [
-            'application/pdf',
-            'image/jpeg',
-            'image/png', 
-            'image/gif',
-            'text/plain',
-            'application/msword',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'application/vnd.ms-excel',
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-          ],
-          fileSizeLimit: 52428800 // 50MB
-        });
-        
-        if (createError) {
-          console.error('Error creating bucket:', createError);
-          toast({
-            variant: "destructive", 
-            title: "Fehler",
-            description: "Konnte Storage-Bucket nicht erstellen."
-          });
-        } else {
-          console.log('Created admin-documents bucket');
-        }
-        setDocuments([]);
-        setLoading(false);
-        return;
-      }
-
       const { data, error } = await supabase.storage
         .from('admin-documents')
         .list('', {
@@ -127,16 +75,25 @@ export default function DocumentManagement() {
 
       if (error) {
         console.error('Error fetching documents:', error);
-        toast({
-          variant: "destructive",
-          title: "Fehler", 
-          description: `Konnte Dokumente nicht laden: ${error.message}`
-        });
+        // Prüfen ob Bucket existiert
+        if (error.message.includes('Bucket not found')) {
+          toast({
+            variant: "destructive",
+            title: "Storage Bucket nicht gefunden",
+            description: "Das admin-documents Bucket existiert nicht. Bitte kontaktieren Sie den Administrator."
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Fehler", 
+            description: `Konnte Dokumente nicht laden: ${error.message}`
+          });
+        }
         setDocuments([]);
       } else {
         console.log('Raw storage files:', data);
         const formattedDocs: DocumentFile[] = (data || [])
-          .filter(file => file.name && !file.name.endsWith('/')) // Filter out folders
+          .filter(file => file.name && !file.name.endsWith('/'))
           .map(file => ({
             id: file.id || file.name,
             name: file.name,
