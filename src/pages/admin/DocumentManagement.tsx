@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -57,8 +58,77 @@ export default function DocumentManagement() {
   const [uploadTags, setUploadTags] = useState("");
 
   useEffect(() => {
-    fetchDocuments();
+    initializeStorageAndFetchDocuments();
   }, []);
+
+  const initializeStorageAndFetchDocuments = async () => {
+    try {
+      console.log('Initializing storage and fetching documents...');
+      
+      // First, check if bucket exists
+      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+      
+      if (bucketsError) {
+        console.error('Error fetching buckets:', bucketsError);
+        toast({
+          variant: "destructive",
+          title: "Fehler",
+          description: "Konnte Storage-Buckets nicht laden."
+        });
+        setLoading(false);
+        return;
+      }
+
+      const adminBucket = buckets?.find(bucket => bucket.id === 'admin-documents');
+      
+      if (!adminBucket) {
+        console.log('admin-documents bucket does not exist, creating it...');
+        
+        // Create the bucket
+        const { error: createError } = await supabase.storage.createBucket('admin-documents', {
+          public: false,
+          allowedMimeTypes: [
+            'application/pdf',
+            'image/jpeg',
+            'image/jpg',
+            'image/png', 
+            'image/gif',
+            'text/plain',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+          ],
+          fileSizeLimit: 52428800 // 50MB
+        });
+        
+        if (createError) {
+          console.error('Error creating bucket:', createError);
+          toast({
+            variant: "destructive", 
+            title: "Fehler",
+            description: `Konnte Storage-Bucket nicht erstellen: ${createError.message}`
+          });
+          setLoading(false);
+          return;
+        } else {
+          console.log('Successfully created admin-documents bucket');
+        }
+      }
+
+      // Now fetch documents
+      await fetchDocuments();
+      
+    } catch (error) {
+      console.error('Unexpected error initializing storage:', error);
+      toast({
+        variant: "destructive",
+        title: "Fehler",
+        description: "Ein unerwarteter Fehler ist beim Initialisieren aufgetreten."
+      });
+      setLoading(false);
+    }
+  };
 
   const fetchDocuments = async () => {
     try {
@@ -75,20 +145,11 @@ export default function DocumentManagement() {
 
       if (error) {
         console.error('Error fetching documents:', error);
-        // Prüfen ob Bucket existiert
-        if (error.message.includes('Bucket not found')) {
-          toast({
-            variant: "destructive",
-            title: "Storage Bucket nicht gefunden",
-            description: "Das admin-documents Bucket existiert nicht. Bitte kontaktieren Sie den Administrator."
-          });
-        } else {
-          toast({
-            variant: "destructive",
-            title: "Fehler", 
-            description: `Konnte Dokumente nicht laden: ${error.message}`
-          });
-        }
+        toast({
+          variant: "destructive",
+          title: "Fehler", 
+          description: `Konnte Dokumente nicht laden: ${error.message}`
+        });
         setDocuments([]);
       } else {
         console.log('Raw storage files:', data);
@@ -113,7 +174,7 @@ export default function DocumentManagement() {
         setDocuments(formattedDocs);
       }
     } catch (error) {
-      console.error('Unexpected error:', error);
+      console.error('Unexpected error fetching documents:', error);
       toast({
         variant: "destructive",
         title: "Fehler",
