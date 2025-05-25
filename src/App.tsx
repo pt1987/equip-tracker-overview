@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -113,6 +112,15 @@ const App = () => (
                 <ProtectedRoute>
                   <AppLayout>
                     <CreateEditAsset />
+                  </AppLayout>
+                </ProtectedRoute>
+              } />
+              
+              {/* Add the missing /asset/:id route */}
+              <Route path="/asset/:id" element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <AssetDetail />
                   </AppLayout>
                 </ProtectedRoute>
               } />
