@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider, ProtectedRoute } from "@/hooks/use-auth";
+import Navbar from "@/components/layout/Navbar";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
@@ -59,6 +60,15 @@ import AdminLayout from "./components/admin/AdminLayout";
 
 const queryClient = new QueryClient();
 
+const AppLayout = ({ children }: { children: React.ReactNode }) => (
+  <div className="min-h-screen bg-background">
+    <Navbar />
+    <main className="md:ml-64 pt-16 md:pt-0">
+      {children}
+    </main>
+  </div>
+);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
@@ -73,184 +83,256 @@ const App = () => (
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/dashboard" element={
                 <ProtectedRoute>
-                  <Index />
+                  <AppLayout>
+                    <Index />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/assets" element={
                 <ProtectedRoute>
-                  <Assets />
+                  <AppLayout>
+                    <Assets />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/assets/new" element={
                 <ProtectedRoute>
-                  <CreateEditAsset />
+                  <AppLayout>
+                    <CreateEditAsset />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/assets/:id" element={
                 <ProtectedRoute>
-                  <AssetDetail />
+                  <AppLayout>
+                    <AssetDetail />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/assets/:id/edit" element={
                 <ProtectedRoute>
-                  <CreateEditAsset />
+                  <AppLayout>
+                    <CreateEditAsset />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/employees" element={
                 <ProtectedRoute>
-                  <Employees />
+                  <AppLayout>
+                    <Employees />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/employees/new" element={
                 <ProtectedRoute>
-                  <CreateEditEmployee />
+                  <AppLayout>
+                    <CreateEditEmployee />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/employees/:id" element={
                 <ProtectedRoute>
-                  <EmployeeDetail />
+                  <AppLayout>
+                    <EmployeeDetail />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/employees/:id/edit" element={
                 <ProtectedRoute>
-                  <CreateEditEmployee />
+                  <AppLayout>
+                    <CreateEditEmployee />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/depreciation" element={
                 <ProtectedRoute>
-                  <Depreciation />
+                  <AppLayout>
+                    <Depreciation />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/reporting" element={
                 <ProtectedRoute>
-                  <Reporting />
+                  <AppLayout>
+                    <Reporting />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/history" element={
                 <ProtectedRoute>
-                  <History />
+                  <AppLayout>
+                    <History />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/pool-assets" element={
                 <ProtectedRoute>
-                  <PoolAssets />
+                  <AppLayout>
+                    <PoolAssets />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/hardware-order" element={
                 <ProtectedRoute>
-                  <HardwareOrder />
+                  <AppLayout>
+                    <HardwareOrder />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/bookings" element={
                 <ProtectedRoute>
-                  <AssetBookings />
+                  <AppLayout>
+                    <AssetBookings />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/purchase-list" element={
                 <ProtectedRoute>
-                  <PurchaseList />
+                  <AppLayout>
+                    <PurchaseList />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/damage-management" element={
                 <ProtectedRoute>
-                  <DamageManagement />
+                  <AppLayout>
+                    <DamageManagement />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/license-management" element={
                 <ProtectedRoute>
-                  <LicenseManagement />
+                  <AppLayout>
+                    <LicenseManagement />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               
               {/* Reporting routes */}
               <Route path="/reporting" element={
                 <ProtectedRoute>
-                  <ReportingOverview />
+                  <AppLayout>
+                    <ReportingOverview />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/reporting/order-timeline" element={
                 <ProtectedRoute>
-                  <OrderTimeline />
+                  <AppLayout>
+                    <OrderTimeline />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/reporting/yearly-budget" element={
                 <ProtectedRoute>
-                  <YearlyBudget />
+                  <AppLayout>
+                    <YearlyBudget />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/reporting/yearly-purchases" element={
                 <ProtectedRoute>
-                  <YearlyPurchases />
+                  <AppLayout>
+                    <YearlyPurchases />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/reporting/usage-duration" element={
                 <ProtectedRoute>
-                  <UsageDuration />
+                  <AppLayout>
+                    <UsageDuration />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/reporting/warranty-defects" element={
                 <ProtectedRoute>
-                  <WarrantyDefects />
+                  <AppLayout>
+                    <WarrantyDefects />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/reporting/fixed-assets" element={
                 <ProtectedRoute>
-                  <FixedAssets />
+                  <AppLayout>
+                    <FixedAssets />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/reporting/employee-budget" element={
                 <ProtectedRoute>
-                  <EmployeeBudget />
+                  <AppLayout>
+                    <EmployeeBudget />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/reporting/vendor-analysis" element={
                 <ProtectedRoute>
-                  <VendorAnalysis />
+                  <AppLayout>
+                    <VendorAnalysis />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/reporting/asset-lifecycle" element={
                 <ProtectedRoute>
-                  <AssetLifecycle />
+                  <AppLayout>
+                    <AssetLifecycle />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/reporting/maintenance-cost" element={
                 <ProtectedRoute>
-                  <MaintenanceCost />
+                  <AppLayout>
+                    <MaintenanceCost />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/reporting/software-license" element={
                 <ProtectedRoute>
-                  <SoftwareLicense />
+                  <AppLayout>
+                    <SoftwareLicense />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/reporting/department-assets" element={
                 <ProtectedRoute>
-                  <DepartmentAssets />
+                  <AppLayout>
+                    <DepartmentAssets />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/reporting/asset-utilization" element={
                 <ProtectedRoute>
-                  <AssetUtilization />
+                  <AppLayout>
+                    <AssetUtilization />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/reporting/replacement-planning" element={
                 <ProtectedRoute>
-                  <ReplacementPlanning />
+                  <AppLayout>
+                    <ReplacementPlanning />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/reporting/carbon-footprint" element={
                 <ProtectedRoute>
-                  <CarbonFootprint />
+                  <AppLayout>
+                    <CarbonFootprint />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/reporting/roii" element={
                 <ProtectedRoute>
-                  <ROII />
+                  <AppLayout>
+                    <ROII />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/reporting/vendor-comparison" element={
                 <ProtectedRoute>
-                  <VendorComparison />
+                  <AppLayout>
+                    <VendorComparison />
+                  </AppLayout>
                 </ProtectedRoute>
               } />
               
