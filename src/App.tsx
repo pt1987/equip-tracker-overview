@@ -1,8 +1,9 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider, ProtectedRoute } from "@/hooks/use-auth";
 import Navbar from "@/components/layout/Navbar";
@@ -115,6 +116,10 @@ const App = () => (
                   </AppLayout>
                 </ProtectedRoute>
               } />
+              
+              {/* Add redirect route for /asset/:id to /assets/:id */}
+              <Route path="/asset/:id" element={<Navigate to="/assets/:id" replace />} />
+              
               <Route path="/employees" element={
                 <ProtectedRoute>
                   <AppLayout>
