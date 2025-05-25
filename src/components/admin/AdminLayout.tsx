@@ -11,7 +11,8 @@ import {
   X,
   Home,
   Server,
-  ImageIcon
+  ImageIcon,
+  FolderOpen
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -103,6 +104,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { to: "/admin/logs", icon: <FileText className="h-5 w-5" />, label: "Audit-Logs" },
     { to: "/admin/intune", icon: <Server className="h-5 w-5" />, label: "Intune" },
     { to: "/admin/landing-page-images", icon: <ImageIcon className="h-5 w-5" />, label: "Landing Page Bilder" },
+    { to: "/admin/documents", icon: <FolderOpen className="h-5 w-5" />, label: "Dokumente" },
   ];
 
   const isCurrentPath = (path: string) => location.pathname === path;

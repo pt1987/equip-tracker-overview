@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-interface StorageDocument {
+interface DocumentFile {
   id: string;
   name: string;
   created_at: string;
@@ -42,13 +42,13 @@ interface StorageDocument {
 }
 
 export default function DocumentManagement() {
-  const [documents, setDocuments] = useState<StorageDocument[]>([]);
+  const [documents, setDocuments] = useState<DocumentFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
-  const [previewDocument, setPreviewDocument] = useState<StorageDocument | null>(null);
+  const [previewDocument, setPreviewDocument] = useState<DocumentFile | null>(null);
   const { toast } = useToast();
 
   // Upload form state
@@ -63,6 +63,59 @@ export default function DocumentManagement() {
 
   const fetchDocuments = async () => {
     try {
+      console.log('Fetching documents from admin-documents bucket...');
+      
+      // First check if bucket exists
+      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+      console.log('Available buckets:', buckets);
+      
+      if (bucketsError) {
+        console.error('Error fetching buckets:', bucketsError);
+        toast({
+          variant: "destructive",
+          title: "Fehler",
+          description: "Konnte Storage-Buckets nicht laden."
+        });
+        setDocuments([]);
+        setLoading(false);
+        return;
+      }
+
+      const adminBucket = buckets?.find(bucket => bucket.id === 'admin-documents');
+      if (!adminBucket) {
+        console.warn('admin-documents bucket does not exist');
+        // Create the bucket if it doesn't exist
+        const { error: createError } = await supabase.storage.createBucket('admin-documents', {
+          public: false,
+          allowedMimeTypes: [
+            'application/pdf',
+            'image/jpeg',
+            'image/png', 
+            'image/gif',
+            'text/plain',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+          ],
+          fileSizeLimit: 52428800 // 50MB
+        });
+        
+        if (createError) {
+          console.error('Error creating bucket:', createError);
+          toast({
+            variant: "destructive", 
+            title: "Fehler",
+            description: "Konnte Storage-Bucket nicht erstellen."
+          });
+        } else {
+          console.log('Created admin-documents bucket');
+        }
+        setDocuments([]);
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase.storage
         .from('admin-documents')
         .list('', {
@@ -70,28 +123,45 @@ export default function DocumentManagement() {
           offset: 0,
         });
 
+      console.log('Storage list result:', { data, error });
+
       if (error) {
         console.error('Error fetching documents:', error);
+        toast({
+          variant: "destructive",
+          title: "Fehler", 
+          description: `Konnte Dokumente nicht laden: ${error.message}`
+        });
         setDocuments([]);
       } else {
-        const formattedDocs: StorageDocument[] = (data || []).map(file => ({
-          id: file.id || file.name,
-          name: file.name,
-          created_at: file.created_at || new Date().toISOString(),
-          updated_at: file.updated_at || new Date().toISOString(),
-          metadata: {
-            size: file.metadata?.size || 0,
-            mimetype: file.metadata?.mimetype || 'application/octet-stream',
-            category: file.metadata?.category || 'general',
-            description: file.metadata?.description,
-            tags: file.metadata?.tags || [],
-            original_name: file.name
-          }
-        }));
+        console.log('Raw storage files:', data);
+        const formattedDocs: DocumentFile[] = (data || [])
+          .filter(file => file.name && !file.name.endsWith('/')) // Filter out folders
+          .map(file => ({
+            id: file.id || file.name,
+            name: file.name,
+            created_at: file.created_at || new Date().toISOString(),
+            updated_at: file.updated_at || new Date().toISOString(),
+            metadata: {
+              size: file.metadata?.size || 0,
+              mimetype: file.metadata?.mimetype || 'application/octet-stream',
+              category: file.metadata?.category || 'general',
+              description: file.metadata?.description,
+              tags: file.metadata?.tags || [],
+              original_name: file.metadata?.original_name || file.name
+            }
+          }));
+        
+        console.log('Formatted documents:', formattedDocs);
         setDocuments(formattedDocs);
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Unexpected error:', error);
+      toast({
+        variant: "destructive",
+        title: "Fehler",
+        description: "Ein unerwarteter Fehler ist aufgetreten."
+      });
       setDocuments([]);
     } finally {
       setLoading(false);
@@ -120,6 +190,8 @@ export default function DocumentManagement() {
         original_name: uploadFile.name
       };
 
+      console.log('Uploading file with metadata:', { fileName, metadata });
+
       // Upload to storage with metadata
       const { error: uploadError } = await supabase.storage
         .from('admin-documents')
@@ -128,9 +200,11 @@ export default function DocumentManagement() {
         });
 
       if (uploadError) {
+        console.error('Upload error:', uploadError);
         throw uploadError;
       }
 
+      console.log('File uploaded successfully');
       toast({
         title: "Erfolg",
         description: "Dokument wurde erfolgreich hochgeladen."
@@ -140,6 +214,7 @@ export default function DocumentManagement() {
       resetUploadForm();
       fetchDocuments();
     } catch (error: any) {
+      console.error('Upload failed:', error);
       toast({
         variant: "destructive",
         title: "Upload fehlgeschlagen",
@@ -150,13 +225,15 @@ export default function DocumentManagement() {
     }
   };
 
-  const handleDelete = async (document: StorageDocument) => {
+  const handleDelete = async (document: DocumentFile) => {
     try {
+      console.log('Deleting document:', document.name);
       const { error } = await supabase.storage
         .from('admin-documents')
         .remove([document.name]);
 
       if (error) {
+        console.error('Delete error:', error);
         throw error;
       }
 
@@ -167,6 +244,7 @@ export default function DocumentManagement() {
 
       fetchDocuments();
     } catch (error: any) {
+      console.error('Delete failed:', error);
       toast({
         variant: "destructive",
         title: "Löschen fehlgeschlagen",
@@ -175,13 +253,15 @@ export default function DocumentManagement() {
     }
   };
 
-  const handleDownload = async (document: StorageDocument) => {
+  const handleDownload = async (document: DocumentFile) => {
     try {
+      console.log('Downloading document:', document.name);
       const { data, error } = await supabase.storage
         .from('admin-documents')
         .download(document.name);
 
       if (error) {
+        console.error('Download error:', error);
         throw error;
       }
 
@@ -192,6 +272,7 @@ export default function DocumentManagement() {
       a.click();
       URL.revokeObjectURL(url);
     } catch (error: any) {
+      console.error('Download failed:', error);
       toast({
         variant: "destructive",
         title: "Download fehlgeschlagen",
@@ -361,7 +442,7 @@ export default function DocumentManagement() {
               {filteredDocuments.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                    Keine Dokumente gefunden
+                    {documents.length === 0 ? "Keine Dokumente vorhanden" : "Keine Dokumente gefunden"}
                   </TableCell>
                 </TableRow>
               )}
