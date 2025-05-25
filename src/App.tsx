@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -45,7 +44,7 @@ import DepartmentAssets from "./pages/reports/DepartmentAssets";
 import AssetUtilization from "./pages/reports/AssetUtilization";
 import ReplacementPlanning from "./pages/reports/ReplacementPlanning";
 import CarbonFootprint from "./pages/reports/CarbonFootprint";
-import ROII from "./pages/reports/ROII";
+import ROII from "./pages/ROII";
 import VendorComparison from "./pages/reports/VendorComparison";
 
 // Admin pages
@@ -116,9 +115,6 @@ const App = () => (
                   </AppLayout>
                 </ProtectedRoute>
               } />
-              
-              {/* Add redirect route for /asset/:id to /assets/:id */}
-              <Route path="/asset/:id" element={<Navigate to="/assets/:id" replace />} />
               
               <Route path="/employees" element={
                 <ProtectedRoute>
