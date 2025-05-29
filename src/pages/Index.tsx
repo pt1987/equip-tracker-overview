@@ -2,21 +2,16 @@
 import { useEffect } from "react";
 import PageTransition from "@/components/layout/PageTransition";
 import { useDashboardData } from "@/hooks/useDashboardData";
-import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import AssetDistributionChart from "@/components/dashboard/AssetDistributionChart";
-import AssetStatusCard from "@/components/dashboard/AssetStatusCard";
-import RecentAssetsList from "@/components/dashboard/RecentAssetsList";
-import RecentEmployeesList from "@/components/dashboard/RecentEmployeesList";
-import ExternalAssetsCard from "@/components/dashboard/ExternalAssetsCard";
-import WarrantyExpiryCard from "@/components/dashboard/WarrantyExpiryCard";
-import ExternalReturnsCard from "@/components/dashboard/ExternalReturnsCard";
-import StatusChangesCard from "@/components/dashboard/StatusChangesCard";
-import EmployeeChangesCard from "@/components/dashboard/EmployeeChangesCard";
-import BudgetUsageCard from "@/components/dashboard/BudgetUsageCard";
-import DraggableGrid from "@/components/dashboard/DraggableGrid";
-
-// Track if dashboard has been rendered once to avoid unnecessary rerenders
-let dashboardRendered = false;
+import ModernDashboardLayout from "@/components/dashboard/ModernDashboardLayout";
+import ModernDashboardHeader from "@/components/dashboard/ModernDashboardHeader";
+import ModernWidget from "@/components/dashboard/ModernWidget";
+import ModernStatCard from "@/components/dashboard/ModernStatCard";
+import ModernPieChart from "@/components/dashboard/charts/ModernPieChart";
+import ModernDonutChart from "@/components/dashboard/charts/ModernDonutChart";
+import ModernBarChart from "@/components/dashboard/charts/ModernBarChart";
+import { Package, Users, Coins, AlertTriangle, TrendingUp, DollarSign } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import "@/styles/dashboard-theme.css";
 
 const IndexPage = () => {
   const {
@@ -30,89 +25,225 @@ const IndexPage = () => {
     refetchDashboardData
   } = useDashboardData();
   
-  // Log only on first render
   useEffect(() => {
-    if (!dashboardRendered) {
-      console.log("Dashboard page mounted for the first time");
-      dashboardRendered = true;
-    }
-    
-    // Cleanup function runs when component unmounts
+    console.log("Modern Dashboard mounted");
     return () => {
-      console.log("Dashboard component unmounted");
+      console.log("Modern Dashboard unmounted");
     };
   }, []);
   
   if (loading) {
     return (
       <PageTransition>
-        <div className="flex flex-col gap-4 p-6">
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-          <div className="text-muted-foreground">Lade Dashboard-Daten...</div>
-        </div>
+        <ModernDashboardLayout>
+          <ModernDashboardHeader />
+          <div className="dashboard-grid">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="dashboard-widget animate-pulse">
+                <div className="h-8 bg-gray-200 rounded mb-4"></div>
+                <div className="h-32 bg-gray-200 rounded"></div>
+              </div>
+            ))}
+          </div>
+        </ModernDashboardLayout>
       </PageTransition>
     );
   }
-  
-  const dashboardItems = [
-    {
-      id: "asset-distribution",
-      content: <AssetDistributionChart assetTypeDistribution={assetTypeDistribution} />,
-      defaultSize: { w: 2, h: 1 }
-    },
-    {
-      id: "warranty-expiry",
-      content: <WarrantyExpiryCard />,
-      defaultSize: { w: 1, h: 1 }
-    },
-    {
-      id: "external-returns",
-      content: <ExternalReturnsCard />,
-      defaultSize: { w: 1, h: 1 }
-    },
-    {
-      id: "status-changes",
-      content: <StatusChangesCard />,
-      defaultSize: { w: 1, h: 1 }
-    },
-    {
-      id: "employee-changes",
-      content: <EmployeeChangesCard />,
-      defaultSize: { w: 1, h: 1 }
-    },
-    {
-      id: "asset-status",
-      content: <AssetStatusCard assetStatusDistribution={assetStatusDistribution} />,
-      defaultSize: { w: 1, h: 1 }
-    },
-    {
-      id: "recent-assets",
-      content: <RecentAssetsList recentAssets={recentAssets} />,
-      defaultSize: { w: 1, h: 1 }
-    },
-    {
-      id: "recent-employees",
-      content: <RecentEmployeesList recentEmployees={recentEmployees} />,
-      defaultSize: { w: 1, h: 1 }
-    },
-    {
-      id: "external-assets",
-      content: <ExternalAssetsCard ownerCompanyDistribution={ownerCompanyDistribution} />,
-      defaultSize: { w: 1, h: 1 }
-    },
-    {
-      id: "budget-usage",
-      content: <BudgetUsageCard dashboardStats={dashboardStats} />,
-      defaultSize: { w: 1, h: 1 }
-    }
+
+  // Prepare chart data
+  const assetTypeChartData = assetTypeDistribution.map(item => ({
+    name: item.type === 'laptop' ? 'Laptops' : 
+          item.type === 'smartphone' ? 'Smartphones' : 
+          item.type === 'tablet' ? 'Tablets' : 
+          item.type === 'mouse' ? 'Mäuse' :
+          item.type === 'keyboard' ? 'Tastaturen' : 'Zubehör',
+    value: item.count
+  }));
+
+  const assetStatusChartData = assetStatusDistribution.map(item => ({
+    name: item.status === 'assigned' ? 'Zugewiesen' :
+          item.status === 'pool' ? 'Pool' :
+          item.status === 'defective' ? 'Defekt' : 'Sonstiges',
+    value: item.count
+  }));
+
+  const monthlyData = [
+    { name: 'Jan', assets: 120, employees: 45 },
+    { name: 'Feb', assets: 135, employees: 48 },
+    { name: 'Mar', assets: 148, employees: 52 },
+    { name: 'Apr', assets: 160, employees: 55 },
+    { name: 'Mai', assets: 175, employees: 58 },
+    { name: 'Jun', assets: 190, employees: 62 }
   ];
-  
+
+  const barChartKeys = [
+    { key: 'assets', name: 'Assets', color: '#1a4d3a' },
+    { key: 'employees', name: 'Mitarbeiter', color: '#20b2aa' }
+  ];
+
   return (
     <PageTransition>
-      <div className="flex flex-col gap-6 p-6">
-        <DashboardHeader dashboardStats={dashboardStats} />
-        <DraggableGrid items={dashboardItems} />
-      </div>
+      <ModernDashboardLayout>
+        <ModernDashboardHeader />
+        
+        <div className="dashboard-grid">
+          {/* Stat Cards */}
+          <ModernStatCard
+            title="Gesamt Assets"
+            value={dashboardStats.totalAssets}
+            icon={Package}
+            change={{ value: '+12%', trend: 'up' }}
+          />
+          
+          <ModernStatCard
+            title="Zugewiesene Assets"
+            value={dashboardStats.assignedAssets}
+            icon={Users}
+            change={{ value: '+8%', trend: 'up' }}
+          />
+          
+          <ModernStatCard
+            title="Pool Assets"
+            value={dashboardStats.poolAssets}
+            icon={Coins}
+            change={{ value: '-3%', trend: 'down' }}
+          />
+          
+          <ModernStatCard
+            title="Defekte Assets"
+            value={dashboardStats.defectiveAssets}
+            icon={AlertTriangle}
+            change={{ value: '+2%', trend: 'up' }}
+          />
+
+          {/* Asset Type Distribution */}
+          <ModernWidget 
+            title="Asset-Typen Verteilung"
+            subtitle="Übersicht aller Asset-Kategorien"
+            icon={Package}
+            className="col-span-1"
+            headerAction={
+              <Button variant="outline" size="sm" className="dashboard-button-secondary">
+                Details
+              </Button>
+            }
+          >
+            <ModernPieChart data={assetTypeChartData} />
+          </ModernWidget>
+
+          {/* Asset Status Distribution */}
+          <ModernWidget 
+            title="Asset Status"
+            subtitle="Aktuelle Verteilung nach Status"
+            icon={TrendingUp}
+            className="col-span-1"
+          >
+            <ModernDonutChart 
+              data={assetStatusChartData} 
+              centerLabel="Total"
+              centerValue={dashboardStats.totalAssets.toString()}
+            />
+          </ModernWidget>
+
+          {/* Monthly Trends */}
+          <ModernWidget 
+            title="Monatliche Entwicklung"
+            subtitle="Assets und Mitarbeiter im Zeitverlauf"
+            icon={TrendingUp}
+            className="col-span-2"
+            headerAction={
+              <div className="flex space-x-2">
+                <Button variant="outline" size="sm" className="dashboard-button-secondary">
+                  Export
+                </Button>
+                <Button size="sm" className="dashboard-button">
+                  Bericht
+                </Button>
+              </div>
+            }
+          >
+            <ModernBarChart 
+              data={monthlyData} 
+              dataKeys={barChartKeys}
+              height={350}
+            />
+          </ModernWidget>
+
+          {/* Budget Overview */}
+          <ModernWidget 
+            title="Budget Übersicht"
+            subtitle="Aktuelle Budgetnutzung"
+            icon={DollarSign}
+            className="col-span-1"
+          >
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Gesamtbudget</span>
+                <span className="font-semibold">€{dashboardStats.totalBudget?.toLocaleString() || '0'}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Verwendet</span>
+                <span className="font-semibold text-green-600">€{dashboardStats.totalBudgetUsed?.toLocaleString() || '0'}</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div 
+                  className="bg-gradient-to-r from-green-600 to-teal-500 h-3 rounded-full transition-all duration-1000"
+                  style={{ 
+                    width: `${Math.min(100, (dashboardStats.totalBudgetUsed / dashboardStats.totalBudget) * 100)}%` 
+                  }}
+                ></div>
+              </div>
+              <div className="text-xs text-gray-500 text-center">
+                {Math.round((dashboardStats.totalBudgetUsed / dashboardStats.totalBudget) * 100)}% genutzt
+              </div>
+            </div>
+          </ModernWidget>
+
+          {/* Recent Assets Table */}
+          <ModernWidget 
+            title="Neueste Assets"
+            subtitle="Zuletzt hinzugefügte Assets"
+            icon={Package}
+            className="col-span-2"
+          >
+            <div className="overflow-x-auto">
+              <table className="dashboard-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Typ</th>
+                    <th>Status</th>
+                    <th>Kaufdatum</th>
+                    <th>Preis</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentAssets.slice(0, 5).map((asset) => (
+                    <tr key={asset.id}>
+                      <td className="font-medium">{asset.name}</td>
+                      <td>
+                        <span className="dashboard-status-badge dashboard-status-active">
+                          {asset.type}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={`dashboard-status-badge ${
+                          asset.status === 'assigned' ? 'dashboard-status-active' :
+                          asset.status === 'pool' ? 'dashboard-status-warning' : 'dashboard-status-error'
+                        }`}>
+                          {asset.status}
+                        </span>
+                      </td>
+                      <td>{new Date(asset.purchaseDate).toLocaleDateString('de-DE')}</td>
+                      <td className="font-semibold">€{asset.price.toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </ModernWidget>
+        </div>
+      </ModernDashboardLayout>
     </PageTransition>
   );
 };
