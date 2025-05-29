@@ -47,7 +47,7 @@ export default function ModernDashboardHeader() {
               <p className="text-xs text-gray-500">Administrator</p>
             </div>
             <Avatar className="h-10 w-10">
-              <AvatarImage src={user?.avatar} alt={user?.name || 'User'} />
+              <AvatarImage src="" alt={user?.name || 'User'} />
               <AvatarFallback className="bg-green-600 text-white">
                 {user?.name?.charAt(0) || 'A'}
               </AvatarFallback>

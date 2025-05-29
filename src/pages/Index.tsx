@@ -61,7 +61,7 @@ const IndexPage = () => {
   }));
 
   const assetStatusChartData = assetStatusDistribution.map(item => ({
-    name: item.status === 'assigned' ? 'Zugewiesen' :
+    name: item.status === 'in_use' ? 'Zugewiesen' :
           item.status === 'pool' ? 'Pool' :
           item.status === 'defective' ? 'Defekt' : 'Sonstiges',
     value: item.count
@@ -228,7 +228,7 @@ const IndexPage = () => {
                       </td>
                       <td>
                         <span className={`dashboard-status-badge ${
-                          asset.status === 'assigned' ? 'dashboard-status-active' :
+                          asset.status === 'in_use' ? 'dashboard-status-active' :
                           asset.status === 'pool' ? 'dashboard-status-warning' : 'dashboard-status-error'
                         }`}>
                           {asset.status}
