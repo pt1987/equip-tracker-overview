@@ -23,26 +23,22 @@ export default function ModernWidget({
 }: ModernWidgetProps) {
   return (
     <motion.div 
-      className={cn("bg-white rounded-lg border shadow-sm overflow-hidden", className)}
+      className={cn("bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200", className)}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      whileHover={{ 
-        y: -2,
-        transition: { duration: 0.2 }
-      }}
     >
       {(title || subtitle || Icon || headerAction) && (
-        <div className="flex items-center justify-between p-4 border-b bg-gray-50/50">
-          <div className="flex items-center space-x-3 flex-1 min-w-0">
+        <div className="flex items-center justify-between p-6 border-b border-gray-100">
+          <div className="flex items-center space-x-4 flex-1 min-w-0">
             {Icon && (
-              <div className="p-2 bg-green-100 rounded-lg flex-shrink-0">
-                <Icon className="h-5 w-5 text-green-600" />
+              <div className="p-3 bg-emerald-100 rounded-lg flex-shrink-0">
+                <Icon className="h-6 w-6 text-emerald-600" />
               </div>
             )}
             <div className="min-w-0 flex-1">
-              {title && <h3 className="font-semibold text-gray-900 truncate">{title}</h3>}
-              {subtitle && <p className="text-sm text-gray-500 truncate">{subtitle}</p>}
+              {title && <h3 className="text-lg font-semibold text-gray-900 truncate">{title}</h3>}
+              {subtitle && <p className="text-sm text-gray-500 truncate mt-1">{subtitle}</p>}
             </div>
           </div>
           {headerAction && (
@@ -52,7 +48,7 @@ export default function ModernWidget({
           )}
         </div>
       )}
-      <div className="p-4">
+      <div className="p-6">
         {children}
       </div>
     </motion.div>

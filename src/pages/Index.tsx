@@ -42,10 +42,10 @@ const IndexPage = () => {
       <PageTransition>
         <ModernDashboardLayout>
           <ModernDashboardHeader />
-          <div className="p-4 space-y-4">
+          <div className="p-6 space-y-6">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="bg-white rounded-lg p-4 animate-pulse">
-                <div className="h-6 bg-gray-200 rounded mb-4"></div>
+              <div key={i} className="bg-white rounded-xl p-6 animate-pulse border">
+                <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
                 <div className="h-32 bg-gray-200 rounded"></div>
               </div>
             ))}
@@ -97,174 +97,182 @@ const IndexPage = () => {
       <ModernDashboardLayout>
         <ModernDashboardHeader />
         
-        <div className="p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
-          {/* Stat Cards - Mobile Stack */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <ModernStatCard
-              title="Gesamt Assets"
-              value={dashboardStats.totalAssets}
-              icon={Package}
-              change={{ value: '+12%', trend: 'up' }}
-            />
+        <div className="min-h-screen bg-gray-50 p-4 lg:p-8">
+          <div className="max-w-7xl mx-auto space-y-8">
             
-            <ModernStatCard
-              title="Zugewiesene Assets"
-              value={dashboardStats.assignedAssets}
-              icon={Users}
-              change={{ value: '+8%', trend: 'up' }}
-            />
-            
-            <ModernStatCard
-              title="Pool Assets"
-              value={dashboardStats.poolAssets}
-              icon={Coins}
-              change={{ value: '-3%', trend: 'down' }}
-            />
-            
-            <ModernStatCard
-              title="Defekte Assets"
-              value={dashboardStats.defectiveAssets}
-              icon={AlertTriangle}
-              change={{ value: '+2%', trend: 'up' }}
-            />
-          </div>
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <ModernStatCard
+                title="Gesamt Assets"
+                value={dashboardStats.totalAssets}
+                icon={Package}
+                change={{ value: '+12%', trend: 'up' }}
+              />
+              
+              <ModernStatCard
+                title="Zugewiesene Assets"
+                value={dashboardStats.assignedAssets}
+                icon={Users}
+                change={{ value: '+8%', trend: 'up' }}
+              />
+              
+              <ModernStatCard
+                title="Pool Assets"
+                value={dashboardStats.poolAssets}
+                icon={Coins}
+                change={{ value: '-3%', trend: 'down' }}
+              />
+              
+              <ModernStatCard
+                title="Defekte Assets"
+                value={dashboardStats.defectiveAssets}
+                icon={AlertTriangle}
+                change={{ value: '+2%', trend: 'up' }}
+              />
+            </div>
 
-          {/* Charts Section - Mobile Friendly */}
-          <div className="space-y-4 sm:space-y-6">
-            {/* Asset Type Distribution */}
-            <ModernWidget 
-              title="Asset-Typen"
-              subtitle="Übersicht aller Kategorien"
-              icon={Package}
-              headerAction={
-                !isMobile && (
-                  <Button variant="outline" size="sm" className="text-xs">
-                    Details
-                  </Button>
-                )
-              }
-            >
-              <div className="h-48 sm:h-64">
-                <ModernPieChart data={assetTypeChartData} height={isMobile ? 192 : 240} />
-              </div>
-            </ModernWidget>
+            {/* Charts Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              
+              {/* Asset Type Distribution */}
+              <ModernWidget 
+                title="Asset-Typen"
+                subtitle="Verteilung nach Kategorien"
+                icon={Package}
+                className="lg:col-span-1"
+              >
+                <div className="h-80">
+                  <ModernPieChart data={assetTypeChartData} height={320} />
+                </div>
+              </ModernWidget>
 
-            {/* Asset Status Distribution */}
-            <ModernWidget 
-              title="Asset Status"
-              subtitle="Aktuelle Verteilung"
-              icon={TrendingUp}
-            >
-              <div className="h-48 sm:h-64">
-                <ModernDonutChart 
-                  data={assetStatusChartData} 
-                  centerLabel="Total"
-                  centerValue={actualTotal.toString()}
-                  height={isMobile ? 192 : 240}
-                />
-              </div>
-            </ModernWidget>
+              {/* Asset Status Distribution */}
+              <ModernWidget 
+                title="Asset Status"
+                subtitle="Aktuelle Verteilung"
+                icon={TrendingUp}
+                className="lg:col-span-1"
+              >
+                <div className="h-80">
+                  <ModernDonutChart 
+                    data={assetStatusChartData} 
+                    centerLabel="Total"
+                    centerValue={actualTotal.toString()}
+                    height={320}
+                  />
+                </div>
+              </ModernWidget>
+            </div>
 
-            {/* Budget Overview */}
-            <ModernWidget 
-              title="Budget"
-              subtitle="Aktuelle Nutzung"
-              icon={DollarSign}
-            >
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Gesamtbudget</span>
-                  <span className="font-semibold">€{dashboardStats.totalBudget?.toLocaleString() || '0'}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Verwendet</span>
-                  <span className="font-semibold text-green-600">€{dashboardStats.totalBudgetUsed?.toLocaleString() || '0'}</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-3">
-                  <div 
-                    className="bg-gradient-to-r from-green-600 to-teal-500 h-3 rounded-full transition-all duration-1000"
-                    style={{ 
-                      width: `${Math.min(100, (dashboardStats.totalBudgetUsed / dashboardStats.totalBudget) * 100)}%` 
-                    }}
-                  ></div>
-                </div>
-                <div className="text-sm text-gray-500 text-center">
-                  {Math.round((dashboardStats.totalBudgetUsed / dashboardStats.totalBudget) * 100)}% genutzt
-                </div>
-              </div>
-            </ModernWidget>
-
-            {/* Monthly Trends */}
-            <ModernWidget 
-              title="Monatliche Entwicklung"
-              subtitle="Assets und Mitarbeiter"
-              icon={TrendingUp}
-              headerAction={
-                !isMobile && (
-                  <div className="flex space-x-2">
-                    <Button variant="outline" size="sm" className="text-xs">
-                      Export
-                    </Button>
-                    <Button size="sm" className="text-xs">
-                      Bericht
-                    </Button>
+            {/* Budget and Monthly Trends */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              
+              {/* Budget Overview */}
+              <ModernWidget 
+                title="Budget Übersicht"
+                subtitle="Aktuelle Nutzung"
+                icon={DollarSign}
+                className="lg:col-span-1"
+              >
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Gesamtbudget</span>
+                    <span className="text-lg font-bold">€{dashboardStats.totalBudget?.toLocaleString() || '0'}</span>
                   </div>
-                )
-              }
-            >
-              <div className="h-48 sm:h-64">
-                <ModernBarChart 
-                  data={monthlyData} 
-                  dataKeys={barChartKeys}
-                  height={isMobile ? 192 : 240}
-                />
-              </div>
-            </ModernWidget>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Verwendet</span>
+                    <span className="text-lg font-bold text-emerald-600">€{dashboardStats.totalBudgetUsed?.toLocaleString() || '0'}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-4">
+                    <div 
+                      className="bg-gradient-to-r from-emerald-500 to-teal-600 h-4 rounded-full transition-all duration-1000"
+                      style={{ 
+                        width: `${Math.min(100, (dashboardStats.totalBudgetUsed / dashboardStats.totalBudget) * 100)}%` 
+                      }}
+                    ></div>
+                  </div>
+                  <div className="text-center">
+                    <span className="text-2xl font-bold text-gray-900">
+                      {Math.round((dashboardStats.totalBudgetUsed / dashboardStats.totalBudget) * 100)}%
+                    </span>
+                    <p className="text-sm text-gray-500">Budget genutzt</p>
+                  </div>
+                </div>
+              </ModernWidget>
+
+              {/* Monthly Trends */}
+              <ModernWidget 
+                title="Monatliche Entwicklung"
+                subtitle="Assets und Mitarbeiter Trend"
+                icon={TrendingUp}
+                className="lg:col-span-2"
+              >
+                <div className="h-80">
+                  <ModernBarChart 
+                    data={monthlyData} 
+                    dataKeys={barChartKeys}
+                    height={320}
+                  />
+                </div>
+              </ModernWidget>
+            </div>
 
             {/* Recent Assets Table */}
             <ModernWidget 
               title="Neueste Assets"
-              subtitle="Zuletzt hinzugefügt"
+              subtitle="Zuletzt hinzugefügte Assets"
               icon={Package}
             >
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="text-left p-2 sm:p-3 font-medium text-xs sm:text-sm">Name</th>
-                      <th className="text-left p-2 sm:p-3 font-medium text-xs sm:text-sm">Typ</th>
-                      <th className="text-left p-2 sm:p-3 font-medium text-xs sm:text-sm">Status</th>
-                      <th className="text-left p-2 sm:p-3 font-medium text-xs sm:text-sm hidden sm:table-cell">Kaufdatum</th>
-                      <th className="text-left p-2 sm:p-3 font-medium text-xs sm:text-sm">Preis</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recentAssets.slice(0, 5).map((asset) => (
-                      <tr key={asset.id} className="border-b hover:bg-gray-50">
-                        <td className="p-2 sm:p-3 font-medium text-xs sm:text-sm">{asset.name}</td>
-                        <td className="p-2 sm:p-3 text-xs sm:text-sm">
-                          <span className="inline-block px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
-                            {asset.type}
-                          </span>
-                        </td>
-                        <td className="p-2 sm:p-3 text-xs sm:text-sm">
-                          <span className={`inline-block px-2 py-1 text-xs rounded-full ${
-                            asset.status === 'in_use' ? 'bg-green-100 text-green-800' :
-                            asset.status === 'pool' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
-                          }`}>
-                            {asset.status === 'in_use' ? 'Zugewiesen' :
-                             asset.status === 'pool' ? 'Pool' :
-                             asset.status === 'defective' ? 'Defekt' :
-                             asset.status === 'available' ? 'Verfügbar' :
-                             asset.status === 'maintenance' ? 'Wartung' : asset.status}
-                          </span>
-                        </td>
-                        <td className="p-2 sm:p-3 text-xs sm:text-sm hidden sm:table-cell">{new Date(asset.purchaseDate).toLocaleDateString('de-DE')}</td>
-                        <td className="p-2 sm:p-3 font-semibold text-xs sm:text-sm">€{asset.price.toLocaleString()}</td>
+              <div className="overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="text-left py-4 px-4 font-semibold text-gray-900">Asset Name</th>
+                        <th className="text-left py-4 px-4 font-semibold text-gray-900">Typ</th>
+                        <th className="text-left py-4 px-4 font-semibold text-gray-900">Status</th>
+                        <th className="text-left py-4 px-4 font-semibold text-gray-900 hidden md:table-cell">Kaufdatum</th>
+                        <th className="text-right py-4 px-4 font-semibold text-gray-900">Preis</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {recentAssets.slice(0, 5).map((asset) => (
+                        <tr key={asset.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                          <td className="py-4 px-4">
+                            <div className="font-medium text-gray-900">{asset.name}</div>
+                          </td>
+                          <td className="py-4 px-4">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              {asset.type}
+                            </span>
+                          </td>
+                          <td className="py-4 px-4">
+                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                              asset.status === 'in_use' ? 'bg-green-100 text-green-800' :
+                              asset.status === 'pool' ? 'bg-yellow-100 text-yellow-800' : 
+                              asset.status === 'defective' ? 'bg-red-100 text-red-800' :
+                              asset.status === 'available' ? 'bg-blue-100 text-blue-800' :
+                              asset.status === 'maintenance' ? 'bg-orange-100 text-orange-800' : 
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {asset.status === 'in_use' ? 'Zugewiesen' :
+                               asset.status === 'pool' ? 'Pool' :
+                               asset.status === 'defective' ? 'Defekt' :
+                               asset.status === 'available' ? 'Verfügbar' :
+                               asset.status === 'maintenance' ? 'Wartung' : asset.status}
+                            </span>
+                          </td>
+                          <td className="py-4 px-4 text-gray-500 hidden md:table-cell">
+                            {new Date(asset.purchaseDate).toLocaleDateString('de-DE')}
+                          </td>
+                          <td className="py-4 px-4 text-right font-semibold text-gray-900">
+                            €{asset.price.toLocaleString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </ModernWidget>
           </div>
