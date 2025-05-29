@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -146,6 +147,16 @@ const App = () => (
                   </AppLayout>
                 </ProtectedRoute>
               } />
+              
+              {/* Add the missing /employee/:id route */}
+              <Route path="/employee/:id" element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <EmployeeDetail />
+                  </AppLayout>
+                </ProtectedRoute>
+              } />
+              
               <Route path="/employees/:id/edit" element={
                 <ProtectedRoute>
                   <AppLayout>
