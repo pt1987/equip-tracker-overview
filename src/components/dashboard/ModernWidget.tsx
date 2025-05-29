@@ -23,7 +23,7 @@ export default function ModernWidget({
 }: ModernWidgetProps) {
   return (
     <motion.div 
-      className={cn("dashboard-widget", className)}
+      className={cn("bg-white rounded-lg border shadow-sm overflow-hidden", className)}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
@@ -33,26 +33,26 @@ export default function ModernWidget({
       }}
     >
       {(title || subtitle || Icon || headerAction) && (
-        <div className="dashboard-widget-header">
-          <div className="flex items-start space-x-2 sm:space-x-3 flex-1">
+        <div className="flex items-center justify-between p-4 border-b bg-gray-50/50">
+          <div className="flex items-center space-x-3 flex-1 min-w-0">
             {Icon && (
-              <div className="p-1.5 sm:p-2 bg-green-100 rounded-lg flex-shrink-0">
-                <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
+              <div className="p-2 bg-green-100 rounded-lg flex-shrink-0">
+                <Icon className="h-5 w-5 text-green-600" />
               </div>
             )}
             <div className="min-w-0 flex-1">
-              {title && <h3 className="dashboard-widget-title truncate">{title}</h3>}
-              {subtitle && <p className="dashboard-widget-subtitle">{subtitle}</p>}
+              {title && <h3 className="font-semibold text-gray-900 truncate">{title}</h3>}
+              {subtitle && <p className="text-sm text-gray-500 truncate">{subtitle}</p>}
             </div>
           </div>
           {headerAction && (
-            <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0 ml-2">
+            <div className="flex-shrink-0 ml-4">
               {headerAction}
             </div>
           )}
         </div>
       )}
-      <div className="dashboard-widget-content">
+      <div className="p-4">
         {children}
       </div>
     </motion.div>

@@ -12,26 +12,26 @@ export default function ModernDashboardHeader() {
   const isMobile = useIsMobile();
 
   return (
-    <div className="dashboard-header">
-      <div className="flex items-center justify-between w-full">
-        <div className="flex items-center space-x-2 sm:space-x-4">
+    <div className="bg-white border-b border-gray-200 px-4 py-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
           {isMobile && (
             <Button variant="ghost" size="sm">
               <Menu className="h-5 w-5" />
             </Button>
           )}
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Dashboard</h1>
+          <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>
         </div>
         
-        <div className="flex items-center space-x-2 sm:space-x-4">
-          {/* Search Bar - Hidden on very small screens */}
+        <div className="flex items-center space-x-3">
+          {/* Search Bar - Hidden on mobile */}
           {!isMobile && (
-            <div className="relative hidden sm:block">
+            <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
                 type="text"
                 placeholder="Suchen..."
-                className="pl-10 w-60 lg:w-80 bg-gray-50 border-gray-200 focus:bg-white"
+                className="pl-10 w-64 bg-gray-50 border-gray-200 focus:bg-white"
               />
             </div>
           )}
@@ -45,11 +45,11 @@ export default function ModernDashboardHeader() {
           
           {/* Notifications */}
           <Button variant="ghost" size="sm" className="relative">
-            <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
-            <span className="absolute -top-1 -right-1 h-2 w-2 sm:h-3 sm:w-3 bg-red-500 rounded-full"></span>
+            <Bell className="h-5 w-5" />
+            <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></span>
           </Button>
           
-          {/* Settings - Hidden on very small screens */}
+          {/* Settings - Hidden on mobile */}
           {!isMobile && (
             <Button variant="ghost" size="sm">
               <Settings className="h-5 w-5" />
@@ -57,16 +57,16 @@ export default function ModernDashboardHeader() {
           )}
           
           {/* User Profile */}
-          <div className="flex items-center space-x-2 sm:space-x-3 pl-2 sm:pl-4 border-l border-gray-200">
+          <div className="flex items-center space-x-3 pl-3 border-l border-gray-200">
             {!isMobile && (
-              <div className="text-right hidden sm:block">
+              <div className="text-right">
                 <p className="text-sm font-medium text-gray-900">
                   {user?.name || 'Administrator'}
                 </p>
                 <p className="text-xs text-gray-500">Administrator</p>
               </div>
             )}
-            <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
+            <Avatar className="h-8 w-8">
               <AvatarImage src="" alt={user?.name || 'User'} />
               <AvatarFallback className="bg-green-600 text-white text-sm">
                 {user?.name?.charAt(0) || 'A'}
