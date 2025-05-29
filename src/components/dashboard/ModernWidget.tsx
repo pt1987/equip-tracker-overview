@@ -34,19 +34,19 @@ export default function ModernWidget({
     >
       {(title || subtitle || Icon || headerAction) && (
         <div className="dashboard-widget-header">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-start space-x-2 sm:space-x-3 flex-1">
             {Icon && (
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Icon className="h-5 w-5 text-green-600" />
+              <div className="p-1.5 sm:p-2 bg-green-100 rounded-lg flex-shrink-0">
+                <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
               </div>
             )}
-            <div>
-              {title && <h3 className="dashboard-widget-title">{title}</h3>}
+            <div className="min-w-0 flex-1">
+              {title && <h3 className="dashboard-widget-title truncate">{title}</h3>}
               {subtitle && <p className="dashboard-widget-subtitle">{subtitle}</p>}
             </div>
           </div>
           {headerAction && (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0 ml-2">
               {headerAction}
             </div>
           )}

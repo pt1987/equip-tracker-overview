@@ -11,6 +11,7 @@ import ModernDonutChart from "@/components/dashboard/charts/ModernDonutChart";
 import ModernBarChart from "@/components/dashboard/charts/ModernBarChart";
 import { Package, Users, Coins, AlertTriangle, TrendingUp, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 import "@/styles/dashboard-theme.css";
 
 const IndexPage = () => {
@@ -24,6 +25,8 @@ const IndexPage = () => {
     ownerCompanyDistribution,
     refetchDashboardData
   } = useDashboardData();
+  
+  const isMobile = useIsMobile();
   
   useEffect(() => {
     console.log("Modern Dashboard mounted");
@@ -40,8 +43,8 @@ const IndexPage = () => {
           <div className="dashboard-grid">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="dashboard-widget animate-pulse">
-                <div className="h-8 bg-gray-200 rounded mb-4"></div>
-                <div className="h-32 bg-gray-200 rounded"></div>
+                <div className="h-6 sm:h-8 bg-gray-200 rounded mb-4"></div>
+                <div className="h-24 sm:h-32 bg-gray-200 rounded"></div>
               </div>
             ))}
           </div>
@@ -118,23 +121,23 @@ const IndexPage = () => {
 
           {/* Asset Type Distribution */}
           <ModernWidget 
-            title="Asset-Typen Verteilung"
-            subtitle="Übersicht aller Asset-Kategorien"
+            title="Asset-Typen"
+            subtitle="Übersicht aller Kategorien"
             icon={Package}
             className="col-span-1"
             headerAction={
-              <Button variant="outline" size="sm" className="dashboard-button-secondary">
+              <Button variant="outline" size="sm" className="dashboard-button-secondary text-xs">
                 Details
               </Button>
             }
           >
-            <ModernPieChart data={assetTypeChartData} />
+            <ModernPieChart data={assetTypeChartData} height={isMobile ? 200 : 250} />
           </ModernWidget>
 
           {/* Asset Status Distribution */}
           <ModernWidget 
             title="Asset Status"
-            subtitle="Aktuelle Verteilung nach Status"
+            subtitle="Aktuelle Verteilung"
             icon={TrendingUp}
             className="col-span-1"
           >
@@ -142,21 +145,22 @@ const IndexPage = () => {
               data={assetStatusChartData} 
               centerLabel="Total"
               centerValue={dashboardStats.totalAssets.toString()}
+              height={isMobile ? 200 : 250}
             />
           </ModernWidget>
 
-          {/* Monthly Trends */}
+          {/* Monthly Trends - Takes full width on mobile, 2 columns on larger screens */}
           <ModernWidget 
             title="Monatliche Entwicklung"
-            subtitle="Assets und Mitarbeiter im Zeitverlauf"
+            subtitle="Assets und Mitarbeiter"
             icon={TrendingUp}
             className="col-span-2"
             headerAction={
-              <div className="flex space-x-2">
-                <Button variant="outline" size="sm" className="dashboard-button-secondary">
+              <div className="flex space-x-1 sm:space-x-2">
+                <Button variant="outline" size="sm" className="dashboard-button-secondary text-xs">
                   Export
                 </Button>
-                <Button size="sm" className="dashboard-button">
+                <Button size="sm" className="dashboard-button text-xs">
                   Bericht
                 </Button>
               </div>
@@ -165,29 +169,29 @@ const IndexPage = () => {
             <ModernBarChart 
               data={monthlyData} 
               dataKeys={barChartKeys}
-              height={350}
+              height={isMobile ? 200 : 280}
             />
           </ModernWidget>
 
           {/* Budget Overview */}
           <ModernWidget 
-            title="Budget Übersicht"
-            subtitle="Aktuelle Budgetnutzung"
+            title="Budget"
+            subtitle="Aktuelle Nutzung"
             icon={DollarSign}
             className="col-span-1"
           >
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Gesamtbudget</span>
-                <span className="font-semibold">€{dashboardStats.totalBudget?.toLocaleString() || '0'}</span>
+                <span className="text-xs sm:text-sm text-gray-600">Gesamtbudget</span>
+                <span className="font-semibold text-sm sm:text-base">€{dashboardStats.totalBudget?.toLocaleString() || '0'}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Verwendet</span>
-                <span className="font-semibold text-green-600">€{dashboardStats.totalBudgetUsed?.toLocaleString() || '0'}</span>
+                <span className="text-xs sm:text-sm text-gray-600">Verwendet</span>
+                <span className="font-semibold text-green-600 text-sm sm:text-base">€{dashboardStats.totalBudgetUsed?.toLocaleString() || '0'}</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-3">
+              <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3">
                 <div 
-                  className="bg-gradient-to-r from-green-600 to-teal-500 h-3 rounded-full transition-all duration-1000"
+                  className="bg-gradient-to-r from-green-600 to-teal-500 h-2 sm:h-3 rounded-full transition-all duration-1000"
                   style={{ 
                     width: `${Math.min(100, (dashboardStats.totalBudgetUsed / dashboardStats.totalBudget) * 100)}%` 
                   }}
@@ -202,7 +206,7 @@ const IndexPage = () => {
           {/* Recent Assets Table */}
           <ModernWidget 
             title="Neueste Assets"
-            subtitle="Zuletzt hinzugefügte Assets"
+            subtitle="Zuletzt hinzugefügt"
             icon={Package}
             className="col-span-2"
           >
@@ -220,13 +224,13 @@ const IndexPage = () => {
                 <tbody>
                   {recentAssets.slice(0, 5).map((asset) => (
                     <tr key={asset.id}>
-                      <td className="font-medium">{asset.name}</td>
-                      <td>
+                      <td data-label="Name" className="font-medium">{asset.name}</td>
+                      <td data-label="Typ">
                         <span className="dashboard-status-badge dashboard-status-active">
                           {asset.type}
                         </span>
                       </td>
-                      <td>
+                      <td data-label="Status">
                         <span className={`dashboard-status-badge ${
                           asset.status === 'in_use' ? 'dashboard-status-active' :
                           asset.status === 'pool' ? 'dashboard-status-warning' : 'dashboard-status-error'
@@ -234,8 +238,8 @@ const IndexPage = () => {
                           {asset.status}
                         </span>
                       </td>
-                      <td>{new Date(asset.purchaseDate).toLocaleDateString('de-DE')}</td>
-                      <td className="font-semibold">€{asset.price.toLocaleString()}</td>
+                      <td data-label="Kaufdatum">{new Date(asset.purchaseDate).toLocaleDateString('de-DE')}</td>
+                      <td data-label="Preis" className="font-semibold">€{asset.price.toLocaleString()}</td>
                     </tr>
                   ))}
                 </tbody>
