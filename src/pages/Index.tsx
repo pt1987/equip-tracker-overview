@@ -30,10 +30,12 @@ const IndexPage = () => {
   
   useEffect(() => {
     console.log("Modern Dashboard mounted");
+    console.log("Dashboard stats:", dashboardStats);
+    console.log("Asset status distribution:", assetStatusDistribution);
     return () => {
       console.log("Modern Dashboard unmounted");
     };
-  }, []);
+  }, [dashboardStats, assetStatusDistribution]);
   
   if (loading) {
     return (
@@ -53,7 +55,7 @@ const IndexPage = () => {
     );
   }
 
-  // Prepare chart data
+  // Prepare chart data with proper German labels
   const assetTypeChartData = assetTypeDistribution.map(item => ({
     name: item.type === 'laptop' ? 'Laptops' : 
           item.type === 'smartphone' ? 'Smartphones' : 
@@ -63,12 +65,18 @@ const IndexPage = () => {
     value: item.count
   }));
 
+  // Fixed German labels for asset status
   const assetStatusChartData = assetStatusDistribution.map(item => ({
     name: item.status === 'in_use' ? 'Zugewiesen' :
           item.status === 'pool' ? 'Pool' :
-          item.status === 'defective' ? 'Defekt' : 'Sonstiges',
+          item.status === 'defective' ? 'Defekt' : 
+          item.status === 'available' ? 'Verfügbar' :
+          item.status === 'maintenance' ? 'Wartung' : 'Sonstiges',
     value: item.count
   }));
+
+  // Calculate the actual total from the status distribution
+  const actualTotal = assetStatusDistribution.reduce((sum, item) => sum + item.count, 0);
 
   const monthlyData = [
     { name: 'Jan', assets: 120, employees: 45 },
@@ -89,9 +97,9 @@ const IndexPage = () => {
       <ModernDashboardLayout>
         <ModernDashboardHeader />
         
-        <div className="p-4 space-y-6">
+        <div className="p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
           {/* Stat Cards - Mobile Stack */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <ModernStatCard
               title="Gesamt Assets"
               value={dashboardStats.totalAssets}
@@ -122,7 +130,7 @@ const IndexPage = () => {
           </div>
 
           {/* Charts Section - Mobile Friendly */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Asset Type Distribution */}
             <ModernWidget 
               title="Asset-Typen"
@@ -136,8 +144,8 @@ const IndexPage = () => {
                 )
               }
             >
-              <div className="h-64">
-                <ModernPieChart data={assetTypeChartData} height={240} />
+              <div className="h-48 sm:h-64">
+                <ModernPieChart data={assetTypeChartData} height={isMobile ? 192 : 240} />
               </div>
             </ModernWidget>
 
@@ -147,12 +155,12 @@ const IndexPage = () => {
               subtitle="Aktuelle Verteilung"
               icon={TrendingUp}
             >
-              <div className="h-64">
+              <div className="h-48 sm:h-64">
                 <ModernDonutChart 
                   data={assetStatusChartData} 
                   centerLabel="Total"
-                  centerValue={dashboardStats.totalAssets.toString()}
-                  height={240}
+                  centerValue={actualTotal.toString()}
+                  height={isMobile ? 192 : 240}
                 />
               </div>
             </ModernWidget>
@@ -204,11 +212,11 @@ const IndexPage = () => {
                 )
               }
             >
-              <div className="h-64">
+              <div className="h-48 sm:h-64">
                 <ModernBarChart 
                   data={monthlyData} 
                   dataKeys={barChartKeys}
-                  height={240}
+                  height={isMobile ? 192 : 240}
                 />
               </div>
             </ModernWidget>
@@ -223,32 +231,36 @@ const IndexPage = () => {
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="text-left p-3 font-medium">Name</th>
-                      <th className="text-left p-3 font-medium">Typ</th>
-                      <th className="text-left p-3 font-medium">Status</th>
-                      <th className="text-left p-3 font-medium hidden sm:table-cell">Kaufdatum</th>
-                      <th className="text-left p-3 font-medium">Preis</th>
+                      <th className="text-left p-2 sm:p-3 font-medium text-xs sm:text-sm">Name</th>
+                      <th className="text-left p-2 sm:p-3 font-medium text-xs sm:text-sm">Typ</th>
+                      <th className="text-left p-2 sm:p-3 font-medium text-xs sm:text-sm">Status</th>
+                      <th className="text-left p-2 sm:p-3 font-medium text-xs sm:text-sm hidden sm:table-cell">Kaufdatum</th>
+                      <th className="text-left p-2 sm:p-3 font-medium text-xs sm:text-sm">Preis</th>
                     </tr>
                   </thead>
                   <tbody>
                     {recentAssets.slice(0, 5).map((asset) => (
                       <tr key={asset.id} className="border-b hover:bg-gray-50">
-                        <td className="p-3 font-medium">{asset.name}</td>
-                        <td className="p-3">
+                        <td className="p-2 sm:p-3 font-medium text-xs sm:text-sm">{asset.name}</td>
+                        <td className="p-2 sm:p-3 text-xs sm:text-sm">
                           <span className="inline-block px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
                             {asset.type}
                           </span>
                         </td>
-                        <td className="p-3">
+                        <td className="p-2 sm:p-3 text-xs sm:text-sm">
                           <span className={`inline-block px-2 py-1 text-xs rounded-full ${
                             asset.status === 'in_use' ? 'bg-green-100 text-green-800' :
                             asset.status === 'pool' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
                           }`}>
-                            {asset.status}
+                            {asset.status === 'in_use' ? 'Zugewiesen' :
+                             asset.status === 'pool' ? 'Pool' :
+                             asset.status === 'defective' ? 'Defekt' :
+                             asset.status === 'available' ? 'Verfügbar' :
+                             asset.status === 'maintenance' ? 'Wartung' : asset.status}
                           </span>
                         </td>
-                        <td className="p-3 hidden sm:table-cell">{new Date(asset.purchaseDate).toLocaleDateString('de-DE')}</td>
-                        <td className="p-3 font-semibold">€{asset.price.toLocaleString()}</td>
+                        <td className="p-2 sm:p-3 text-xs sm:text-sm hidden sm:table-cell">{new Date(asset.purchaseDate).toLocaleDateString('de-DE')}</td>
+                        <td className="p-2 sm:p-3 font-semibold text-xs sm:text-sm">€{asset.price.toLocaleString()}</td>
                       </tr>
                     ))}
                   </tbody>
