@@ -6,7 +6,9 @@ export type AssetStatus =
   | 'repair' 
   | 'pool'
   | 'disposed' 
-  | 'sold';
+  | 'sold'
+  | 'available'
+  | 'maintenance';
 
 export type AssetType = 
   | 'laptop' 
