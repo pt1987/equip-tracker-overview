@@ -2,9 +2,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Asset } from "@/lib/types";
-import {
-  Form,
-} from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import AssetImageUpload from "./details/AssetImageUpload";
@@ -13,7 +11,7 @@ import { Button } from "@/components/ui/button";
 
 interface AssetDetailEditProps {
   asset: Asset;
-  onSave: (data: any) => void;
+  onSave: (data: AssetFormValues) => Promise<void>;
   onCancel: () => void;
   disabled?: boolean;
 }
@@ -58,18 +56,18 @@ export default function AssetDetailEdit({
     try {
       console.log("Form submission data:", data);
       
-      // Validate that we have all required data
+      // Validate required fields
       if (!data.name || !data.manufacturer || !data.model) {
         throw new Error("Name, Hersteller und Modell sind erforderlich");
       }
       
-      // If employeeId is "not_assigned", set it to null
-      if (data.employeeId === "not_assigned") {
-        data.employeeId = null;
-      }
+      // Handle employeeId conversion
+      const processedData = {
+        ...data,
+        employeeId: data.employeeId === "not_assigned" ? null : data.employeeId,
+      };
       
-      // Pass the form data to the parent component's onSave function
-      await onSave(data);
+      await onSave(processedData);
     } catch (error) {
       console.error("Error saving asset:", error);
       toast({

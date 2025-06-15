@@ -50,18 +50,18 @@ export type DbAsset = {
   updated_at?: string;
 };
 
-// Database insert type - all required fields must be present
-export type DbAssetInsert = {
+// Database update type - for UPDATE operations, all fields are optional except ID
+export type DbAssetUpdate = {
   id?: string;
-  name: string;
-  type: string;
-  manufacturer: string;
-  model: string;
-  vendor: string;
-  status: string;
-  purchase_date: string;
-  price: number;
-  category: string;
+  name?: string;
+  type?: string;
+  manufacturer?: string;
+  model?: string;
+  vendor?: string;
+  status?: string;
+  purchase_date?: string;
+  price?: number;
+  category?: string;
   employee_id?: string | null;
   serial_number?: string | null;
   inventory_number?: string | null;
@@ -95,7 +95,6 @@ export type DbAssetInsert = {
   contract_duration?: string | null;
   connected_asset_id?: string | null;
   related_asset_id?: string | null;
-  created_at?: string;
   updated_at?: string;
 };
 
@@ -147,21 +146,12 @@ export const mapDbAssetToAsset = (dbAsset: DbAsset): Asset => {
     relatedAssetId: dbAsset.related_asset_id,
   };
 
-  console.log("Mapped DB asset to frontend asset:", {
-    id: asset.id,
-    name: asset.name,
-    status: asset.status,
-    employeeId: asset.employeeId,
-    isPoolDevice: asset.isPoolDevice
-  });
-
   return asset;
 };
 
-// Map frontend Asset to database format for INSERT operations
-export const mapAssetToDbAssetInsert = (asset: Asset): DbAssetInsert => {
-  const dbAsset: DbAssetInsert = {
-    id: asset.id,
+// Map frontend Asset to database format for UPDATE operations
+export const mapAssetToDbAssetUpdate = (asset: Asset): DbAssetUpdate => {
+  return {
     name: asset.name,
     type: asset.type,
     manufacturer: asset.manufacturer,
@@ -170,7 +160,7 @@ export const mapAssetToDbAssetInsert = (asset: Asset): DbAssetInsert => {
     status: asset.status,
     purchase_date: asset.purchaseDate,
     price: asset.price,
-    category: asset.category, // Ensure category is always present
+    category: asset.category,
     employee_id: asset.employeeId || null,
     serial_number: asset.serialNumber || null,
     inventory_number: asset.inventoryNumber || null,
@@ -204,16 +194,6 @@ export const mapAssetToDbAssetInsert = (asset: Asset): DbAssetInsert => {
     contract_duration: asset.contractDuration || null,
     connected_asset_id: asset.connectedAssetId || null,
     related_asset_id: asset.relatedAssetId || null,
+    updated_at: new Date().toISOString()
   };
-
-  console.log("Mapped frontend asset to DB insert format:", {
-    id: dbAsset.id,
-    name: dbAsset.name,
-    category: dbAsset.category,
-    status: dbAsset.status,
-    employee_id: dbAsset.employee_id,
-    is_pool_device: dbAsset.is_pool_device
-  });
-
-  return dbAsset;
 };

@@ -16,6 +16,7 @@ import HistorySection from "@/components/assets/details/HistorySection";
 import DepreciationSection from "@/components/assets/details/DepreciationSection";
 import AssetBookingSection from "@/components/bookings/AssetBookingSection";
 import { useAssetDocuments } from "@/hooks/useAssetDocuments";
+import { AssetFormValues } from "./AssetFormFields";
 
 interface AssetDetailContentProps {
   asset: Asset;
@@ -58,7 +59,7 @@ export default function AssetDetailContent({
     setIsEditing(false);
   };
 
-  const handleSave = async (formData: any) => {
+  const handleSave = async (formData: AssetFormValues) => {
     try {
       setIsSaving(true);
       console.log("=== Asset Save Debug ===");
@@ -69,14 +70,9 @@ export default function AssetDetailContent({
         throw new Error("No asset to update");
       }
       
-      // Convert date objects to ISO strings for database storage
-      const warrantyExpiryDate = formData.hasWarranty && formData.warrantyExpiryDate 
-        ? formData.warrantyExpiryDate.toISOString().split('T')[0] 
-        : null;
-      
-      // Create the updated asset object with all fields properly mapped
+      // Create the updated asset object
       const updatedAsset: Asset = {
-        ...asset, // Start with existing asset data to preserve all fields
+        ...asset, // Keep all existing fields
         name: formData.name,
         manufacturer: formData.manufacturer,
         model: formData.model,
@@ -89,20 +85,22 @@ export default function AssetDetailContent({
         inventoryNumber: formData.inventoryNumber || null,
         hasWarranty: formData.hasWarranty || false,
         additionalWarranty: formData.additionalWarranty || false,
-        warrantyExpiryDate: warrantyExpiryDate,
+        warrantyExpiryDate: formData.hasWarranty && formData.warrantyExpiryDate 
+          ? formData.warrantyExpiryDate.toISOString().split('T')[0] 
+          : null,
         warrantyInfo: formData.hasWarranty ? formData.warrantyInfo || null : null,
         imageUrl: formData.imageUrl || null,
-        employeeId: formData.employeeId === "not_assigned" ? null : formData.employeeId,
+        employeeId: formData.employeeId || null,
         isPoolDevice: formData.isPoolDevice || false
       };
       
       console.log("Updated asset object to save:", updatedAsset);
       
-      // Pass the original asset as the second parameter for change tracking
+      // Save the asset
       const result = await updateAsset(updatedAsset, asset);
       console.log("Update result:", result);
       
-      // Force refresh all queries and wait for them to complete
+      // Invalidate and refetch all relevant queries
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["asset", asset.id] }),
         queryClient.invalidateQueries({ queryKey: ["assets"] }),
@@ -111,15 +109,13 @@ export default function AssetDetailContent({
         queryClient.invalidateQueries({ queryKey: ["employees"] })
       ]);
       
-      // Wait a moment for queries to refetch
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      console.log("All queries invalidated and refetched");
+      // Force a refetch to ensure we have the latest data
+      await queryClient.refetchQueries({ queryKey: ["asset", asset.id] });
       
       setIsEditing(false);
       toast({
         title: "Asset erfolgreich aktualisiert",
-        description: "Alle Änderungen wurden dauerhaft in der Datenbank gespeichert."
+        description: "Alle Änderungen wurden gespeichert und sind in der Datenbank verfügbar."
       });
       
     } catch (error) {

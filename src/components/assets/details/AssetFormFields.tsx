@@ -10,19 +10,19 @@ import { getEmployees } from "@/data/employees";
 import { Employee } from "@/lib/types";
 
 export const assetFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  manufacturer: z.string().min(1, "Manufacturer is required"),
-  model: z.string().min(1, "Model is required"),
-  type: z.string().min(1, "Asset type is required"),
-  vendor: z.string().min(1, "Vendor is required"),
-  status: z.string().min(1, "Status is required"),
-  purchaseDate: z.date(),
-  price: z.number().nonnegative("Price cannot be negative"),
+  name: z.string().min(1, "Name ist erforderlich"),
+  manufacturer: z.string().min(1, "Hersteller ist erforderlich"),
+  model: z.string().min(1, "Modell ist erforderlich"),
+  type: z.string().min(1, "Asset-Typ ist erforderlich"),
+  vendor: z.string().min(1, "Verkäufer ist erforderlich"),
+  status: z.string().min(1, "Status ist erforderlich"),
+  purchaseDate: z.date({ required_error: "Kaufdatum ist erforderlich" }),
+  price: z.number().nonnegative("Preis darf nicht negativ sein"),
   serialNumber: z.string().optional(),
   inventoryNumber: z.string().optional(),
   hasWarranty: z.boolean().default(false),
   additionalWarranty: z.boolean().default(false),
-  warrantyExpiryDate: z.date().nullable(),
+  warrantyExpiryDate: z.date().nullable().optional(),
   warrantyInfo: z.string().optional(),
   imageUrl: z.string().optional(),
   employeeId: z.string().nullable().optional(),
@@ -36,7 +36,6 @@ export default function AssetFormFields() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const hasWarranty = form.watch("hasWarranty");
 
-  // Load employees when component mounts
   useEffect(() => {
     const loadEmployees = async () => {
       try {
@@ -59,7 +58,7 @@ export default function AssetFormFields() {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>Name *</FormLabel>
               <FormControl>
                 <Input placeholder="Asset Name" {...field} />
               </FormControl>
@@ -73,8 +72,8 @@ export default function AssetFormFields() {
           name="type"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Typ</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormLabel>Typ *</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Typ auswählen" />
@@ -99,7 +98,7 @@ export default function AssetFormFields() {
           name="manufacturer"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Hersteller</FormLabel>
+              <FormLabel>Hersteller *</FormLabel>
               <FormControl>
                 <Input placeholder="z.B. Apple, Dell" {...field} />
               </FormControl>
@@ -113,7 +112,7 @@ export default function AssetFormFields() {
           name="model"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Modell</FormLabel>
+              <FormLabel>Modell *</FormLabel>
               <FormControl>
                 <Input placeholder="z.B. MacBook Pro" {...field} />
               </FormControl>
@@ -127,7 +126,7 @@ export default function AssetFormFields() {
           name="vendor"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Verkäufer</FormLabel>
+              <FormLabel>Verkäufer *</FormLabel>
               <FormControl>
                 <Input placeholder="z.B. Amazon" {...field} />
               </FormControl>
@@ -141,8 +140,8 @@ export default function AssetFormFields() {
           name="status"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Status</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormLabel>Status *</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Status auswählen" />
@@ -167,7 +166,7 @@ export default function AssetFormFields() {
           name="purchaseDate"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Kaufdatum</FormLabel>
+              <FormLabel>Kaufdatum *</FormLabel>
               <FormControl>
                 <Input 
                   type="date" 
@@ -185,13 +184,13 @@ export default function AssetFormFields() {
           name="price"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Preis (€)</FormLabel>
+              <FormLabel>Preis (€) *</FormLabel>
               <FormControl>
                 <Input 
                   type="number" 
                   placeholder="0.00" 
-                  {...field}
-                  onChange={(e) => field.onChange(parseFloat(e.target.value))} 
+                  value={field.value || ''}
+                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} 
                 />
               </FormControl>
               <FormMessage />
@@ -199,7 +198,6 @@ export default function AssetFormFields() {
           )}
         />
 
-        {/* Mitarbeiterzuweisung */}
         <FormField
           control={form.control}
           name="employeeId"
@@ -208,7 +206,6 @@ export default function AssetFormFields() {
               <FormLabel>Zugewiesen an</FormLabel>
               <Select 
                 onValueChange={field.onChange} 
-                defaultValue={field.value || 'not_assigned'}
                 value={field.value || 'not_assigned'}
               >
                 <FormControl>
@@ -263,7 +260,7 @@ export default function AssetFormFields() {
           control={form.control}
           name="isPoolDevice"
           render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 col-span-1 md:col-span-2">
               <FormControl>
                 <Checkbox
                   checked={field.value}
@@ -272,6 +269,9 @@ export default function AssetFormFields() {
               </FormControl>
               <div className="space-y-1 leading-none">
                 <FormLabel>Pool-Gerät</FormLabel>
+                <p className="text-sm text-muted-foreground">
+                  Dieses Gerät kann von verschiedenen Mitarbeitern temporär gebucht werden
+                </p>
               </div>
             </FormItem>
           )}
@@ -344,7 +344,7 @@ export default function AssetFormFields() {
                     <FormItem>
                       <FormLabel>Garantie-Informationen</FormLabel>
                       <FormControl>
-                        <Input placeholder="Garantie-Informationen" {...field} />
+                        <Input placeholder="Garantie-Details" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
