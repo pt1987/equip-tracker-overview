@@ -37,19 +37,22 @@ export default function BookingHeader({
       poolAssetIds.includes(booking.assetId)
     );
     
-    console.log("Pool assets:", poolAssetIds.length);
-    console.log("Pool bookings:", poolBookings.length);
-    console.log("All bookings:", poolBookings);
+    console.log("BookingHeader - Pool assets:", poolAssetIds.length);
+    console.log("BookingHeader - All bookings:", bookings.length);
+    console.log("BookingHeader - Pool bookings:", poolBookings.length);
+    console.log("BookingHeader - Pool bookings data:", poolBookings);
     
+    // Check each booking's current status based on time and database status
     const activeBookings = poolBookings.filter(booking => {
       const startDate = new Date(booking.startDate);
       const endDate = new Date(booking.endDate);
       const isTimeActive = startDate <= now && now <= endDate;
       const isStatusActive = booking.status === 'active';
       
-      console.log(`Booking ${booking.id}: status=${booking.status}, time active=${isTimeActive}, status active=${isStatusActive}`);
+      console.log(`Booking ${booking.id} (${booking.assetId}): status=${booking.status}, time active=${isTimeActive}, status active=${isStatusActive}`);
       
-      return isStatusActive || isTimeActive;
+      // A booking is considered active if it has active status OR if it's currently in its time range
+      return isStatusActive || (isTimeActive && booking.status !== 'canceled' && booking.status !== 'completed');
     });
     
     const reservedBookings = poolBookings.filter(booking => {
@@ -63,7 +66,7 @@ export default function BookingHeader({
     const totalPoolDevices = poolAssetIds.length;
     const availableCount = Math.max(0, totalPoolDevices - activeBookings.length);
     
-    console.log("Booking stats:", {
+    console.log("BookingHeader - Final stats:", {
       totalPoolDevices,
       activeBookings: activeBookings.length,
       reservedBookings: reservedBookings.length,

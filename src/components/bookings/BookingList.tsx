@@ -60,6 +60,22 @@ export default function BookingList({
     return employees.find(e => e.id === employeeId);
   };
 
+  // Get pool asset IDs to filter bookings
+  const poolAssetIds = assets
+    .filter(asset => asset.isPoolDevice === true || asset.status === 'pool')
+    .map(asset => asset.id);
+
+  console.log("BookingList - Pool assets:", poolAssetIds.length);
+  console.log("BookingList - All bookings:", bookings.length);
+
+  // Filter bookings to only show pool device bookings
+  const poolBookings = bookings.filter(booking => 
+    poolAssetIds.includes(booking.assetId)
+  );
+
+  console.log("BookingList - Pool bookings:", poolBookings.length);
+  console.log("BookingList - Pool bookings data:", poolBookings);
+
   // Handle booking cancellation
   const handleCancelBooking = async () => {
     if (!bookingToCancel) return;
@@ -137,95 +153,39 @@ export default function BookingList({
     }
   };
 
-  // Filtered and sorted bookings
-  const filteredBookings = bookings
-    .filter(booking => assets.some(asset => asset.id === booking.assetId))
-    .sort((a, b) => {
-      // Sort by status and then by date
-      if (a.status === 'active' && b.status !== 'active') return -1;
-      if (a.status !== 'active' && b.status === 'active') return 1;
-      if (a.status === 'reserved' && b.status !== 'reserved') return -1;
-      if (a.status !== 'reserved' && b.status === 'reserved') return 1;
-      
-      return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
-    });
+  // Sorted bookings - prioritize active and reserved bookings
+  const sortedBookings = poolBookings.sort((a, b) => {
+    // Sort by status priority first
+    const statusPriority = { 'active': 1, 'reserved': 2, 'completed': 3, 'canceled': 4 };
+    const aPriority = statusPriority[a.status as keyof typeof statusPriority] || 5;
+    const bPriority = statusPriority[b.status as keyof typeof statusPriority] || 5;
+    
+    if (aPriority !== bPriority) {
+      return aPriority - bPriority;
+    }
+    
+    // Then sort by start date
+    return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
+  });
     
   // Calculate pagination values
-  const totalBookings = filteredBookings.length;
+  const totalBookings = sortedBookings.length;
   const totalPages = Math.ceil(totalBookings / bookingsPerPage);
   const startIndex = (currentPage - 1) * bookingsPerPage;
-  const paginatedBookings = filteredBookings.slice(startIndex, startIndex + bookingsPerPage);
+  const paginatedBookings = sortedBookings.slice(startIndex, startIndex + bookingsPerPage);
 
-  // Generate pagination items
-  const generatePaginationItems = () => {
-    const items = [];
-    
-    // Always show first page
-    items.push(
-      <PaginationItem key="first">
-        <PaginationLink 
-          isActive={currentPage === 1} 
-          onClick={() => setCurrentPage(1)}
-        >
-          1
-        </PaginationLink>
-      </PaginationItem>
-    );
-    
-    // Show ellipsis if needed
-    if (currentPage > 3) {
-      items.push(
-        <PaginationItem key="ellipsis-start">
-          <PaginationEllipsis />
-        </PaginationItem>
-      );
-    }
-    
-    // Show pages around current page
-    for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
-      if (i <= 1 || i >= totalPages) continue;
-      items.push(
-        <PaginationItem key={i}>
-          <PaginationLink 
-            isActive={currentPage === i} 
-            onClick={() => setCurrentPage(i)}
-          >
-            {i}
-          </PaginationLink>
-        </PaginationItem>
-      );
-    }
-    
-    // Show ellipsis if needed
-    if (currentPage < totalPages - 2) {
-      items.push(
-        <PaginationItem key="ellipsis-end">
-          <PaginationEllipsis />
-        </PaginationItem>
-      );
-    }
-    
-    // Always show last page if there are more than 1 page
-    if (totalPages > 1) {
-      items.push(
-        <PaginationItem key="last">
-          <PaginationLink 
-            isActive={currentPage === totalPages} 
-            onClick={() => setCurrentPage(totalPages)}
-          >
-            {totalPages}
-          </PaginationLink>
-        </PaginationItem>
-      );
-    }
-    
-    return items;
-  };
+  console.log("BookingList - Displaying bookings:", paginatedBookings.length);
 
   return (
     <div>
-      {assets.length > 0 && bookings.length > 0 ? (
+      {poolBookings.length > 0 ? (
         <>
+          <div className="mb-4">
+            <p className="text-sm text-muted-foreground">
+              Zeige {poolBookings.length} Buchung(en) für Poolgeräte
+            </p>
+          </div>
+          
           <Table>
             <TableHeader>
               <TableRow>
@@ -241,10 +201,16 @@ export default function BookingList({
                 const asset = getAsset(booking.assetId);
                 const employee = getEmployee(booking.employeeId);
                 
+                console.log(`Rendering booking ${booking.id}:`, {
+                  asset: asset?.name,
+                  employee: `${employee?.firstName} ${employee?.lastName}`,
+                  status: booking.status
+                });
+                
                 return (
                   <TableRow key={booking.id}>
                     <TableCell>
-                      <div className="font-medium">{asset?.name}</div>
+                      <div className="font-medium">{asset?.name || 'Unbekanntes Gerät'}</div>
                       <div className="text-sm text-muted-foreground">
                         {asset?.manufacturer} {asset?.model}
                       </div>
@@ -265,10 +231,8 @@ export default function BookingList({
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">
-                        {format(parseISO(booking.startDate), "dd.MM.yyyy HH:mm")}
-                      </div>
-                      <div className="text-sm">
-                        {format(parseISO(booking.endDate), "dd.MM.yyyy HH:mm")}
+                        <div>Start: {format(parseISO(booking.startDate), "dd.MM.yyyy HH:mm")}</div>
+                        <div>Ende: {format(parseISO(booking.endDate), "dd.MM.yyyy HH:mm")}</div>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -289,6 +253,7 @@ export default function BookingList({
                           variant="ghost"
                           size="icon"
                           onClick={() => setSelectedBooking(booking)}
+                          title="Details anzeigen"
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
@@ -301,6 +266,7 @@ export default function BookingList({
                               setSelectedBooking(booking);
                               setShowReturnDialog(true);
                             }}
+                            title="Gerät zurückgeben"
                           >
                             <Check className="h-4 w-4" />
                           </Button>
@@ -311,6 +277,7 @@ export default function BookingList({
                             variant="ghost"
                             size="icon"
                             onClick={() => setBookingToCancel(booking)}
+                            title="Buchung stornieren"
                           >
                             <X className="h-4 w-4" />
                           </Button>
@@ -323,7 +290,7 @@ export default function BookingList({
             </TableBody>
           </Table>
           
-          {/* Add pagination */}
+          {/* Add pagination if needed */}
           {totalPages > 1 && (
             <div className="mt-4 flex justify-center">
               <Pagination>
@@ -331,16 +298,26 @@ export default function BookingList({
                   <PaginationItem>
                     <PaginationPrevious 
                       onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                      className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                      className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
                     />
                   </PaginationItem>
                   
-                  {generatePaginationItems()}
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    <PaginationItem key={page}>
+                      <PaginationLink 
+                        isActive={currentPage === page} 
+                        onClick={() => setCurrentPage(page)}
+                        className="cursor-pointer"
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
                   
                   <PaginationItem>
                     <PaginationNext 
                       onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
                     />
                   </PaginationItem>
                 </PaginationContent>
@@ -357,9 +334,10 @@ export default function BookingList({
         </>
       ) : (
         <div className="text-center py-8 text-muted-foreground">
-          {assets.length === 0 
-            ? "Keine Poolgeräte gefunden" 
-            : "Keine Buchungen gefunden"}
+          <div className="p-4 bg-n26-secondary/20 rounded-lg">
+            <h3 className="font-semibold mb-2">Keine Buchungen gefunden</h3>
+            <p>Es wurden noch keine Buchungen für Poolgeräte erstellt.</p>
+          </div>
         </div>
       )}
 

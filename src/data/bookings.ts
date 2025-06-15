@@ -450,20 +450,36 @@ export const updateBookingStatuses = async (): Promise<void> => {
   try {
     const now = new Date().toISOString();
     
-    // Update reserved -> active
-    await supabase
+    console.log("Updating booking statuses at:", now);
+    
+    // Update reserved -> active (bookings that have started)
+    const { data: activatedBookings, error: activatedError } = await supabase
       .from('asset_bookings')
       .update({ status: 'active' })
       .eq('status', 'reserved')
       .lte('start_date', now)
-      .gt('end_date', now);
+      .gt('end_date', now)
+      .select();
     
-    // Update active -> completed
-    await supabase
+    if (activatedError) {
+      console.error("Error updating reserved to active:", activatedError);
+    } else if (activatedBookings && activatedBookings.length > 0) {
+      console.log("Updated bookings to active:", activatedBookings.length);
+    }
+    
+    // Update active -> completed (bookings that have ended)
+    const { data: completedBookings, error: completedError } = await supabase
       .from('asset_bookings')
       .update({ status: 'completed' })
       .eq('status', 'active')
-      .lte('end_date', now);
+      .lte('end_date', now)
+      .select();
+
+    if (completedError) {
+      console.error("Error updating active to completed:", completedError);
+    } else if (completedBookings && completedBookings.length > 0) {
+      console.log("Updated bookings to completed:", completedBookings.length);
+    }
 
   } catch (error) {
     console.error("Error in updateBookingStatuses:", error);
