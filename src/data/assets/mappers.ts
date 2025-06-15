@@ -50,6 +50,55 @@ export type DbAsset = {
   updated_at?: string;
 };
 
+// Database insert type - for INSERT operations, include required fields and timestamps
+export type DbAssetInsert = {
+  id?: string;
+  name: string;
+  type: string;
+  manufacturer: string;
+  model: string;
+  vendor: string;
+  status: string;
+  purchase_date: string;
+  price: number;
+  category: string;
+  employee_id?: string | null;
+  serial_number?: string | null;
+  inventory_number?: string | null;
+  has_warranty?: boolean | null;
+  additional_warranty?: boolean | null;
+  warranty_expiry_date?: string | null;
+  warranty_info?: string | null;
+  image_url?: string | null;
+  is_pool_device?: boolean | null;
+  is_external?: boolean | null;
+  owner_company?: string | null;
+  project_id?: string | null;
+  responsible_employee_id?: string | null;
+  handover_to_employee_date?: string | null;
+  planned_return_date?: string | null;
+  actual_return_date?: string | null;
+  classification?: string | null;
+  asset_owner_id?: string | null;
+  last_review_date?: string | null;
+  next_review_date?: string | null;
+  risk_level?: string | null;
+  is_personal_data?: boolean | null;
+  disposal_method?: string | null;
+  lifecycle_stage?: string | null;
+  notes?: string | null;
+  imei?: string | null;
+  phone_number?: string | null;
+  provider?: string | null;
+  contract_end_date?: string | null;
+  contract_name?: string | null;
+  contract_duration?: string | null;
+  connected_asset_id?: string | null;
+  related_asset_id?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
 // Database update type - for UPDATE operations, all fields are optional except ID
 export type DbAssetUpdate = {
   id?: string;
@@ -147,6 +196,55 @@ export const mapDbAssetToAsset = (dbAsset: DbAsset): Asset => {
   };
 
   return asset;
+};
+
+// Map frontend Asset to database format for INSERT operations
+export const mapAssetToDbAssetInsert = (asset: Asset): DbAssetInsert => {
+  return {
+    id: asset.id,
+    name: asset.name,
+    type: asset.type,
+    manufacturer: asset.manufacturer,
+    model: asset.model,
+    vendor: asset.vendor,
+    status: asset.status,
+    purchase_date: asset.purchaseDate,
+    price: asset.price,
+    category: asset.category,
+    employee_id: asset.employeeId || null,
+    serial_number: asset.serialNumber || null,
+    inventory_number: asset.inventoryNumber || null,
+    has_warranty: asset.hasWarranty || false,
+    additional_warranty: asset.additionalWarranty || false,
+    warranty_expiry_date: asset.warrantyExpiryDate || null,
+    warranty_info: asset.warrantyInfo || null,
+    image_url: asset.imageUrl || null,
+    is_pool_device: asset.isPoolDevice || false,
+    is_external: asset.isExternal || false,
+    owner_company: asset.ownerCompany || 'PHAT Consulting GmbH',
+    project_id: asset.projectId || null,
+    responsible_employee_id: asset.responsibleEmployeeId || null,
+    handover_to_employee_date: asset.handoverToEmployeeDate || null,
+    planned_return_date: asset.plannedReturnDate || null,
+    actual_return_date: asset.actualReturnDate || null,
+    classification: asset.classification || 'internal',
+    asset_owner_id: asset.assetOwnerId || null,
+    last_review_date: asset.lastReviewDate || null,
+    next_review_date: asset.nextReviewDate || null,
+    risk_level: asset.riskLevel || 'low',
+    is_personal_data: asset.isPersonalData || false,
+    disposal_method: asset.disposalMethod || null,
+    lifecycle_stage: asset.lifecycleStage || 'operation',
+    notes: asset.notes || null,
+    imei: asset.imei || null,
+    phone_number: asset.phoneNumber || null,
+    provider: asset.provider || null,
+    contract_end_date: asset.contractEndDate || null,
+    contract_name: asset.contractName || null,
+    contract_duration: asset.contractDuration || null,
+    connected_asset_id: asset.connectedAssetId || null,
+    related_asset_id: asset.relatedAssetId || null,
+  };
 };
 
 // Map frontend Asset to database format for UPDATE operations

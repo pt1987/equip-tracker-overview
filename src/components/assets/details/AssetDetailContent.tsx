@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, QueryClient } from "@tanstack/react-query";
-import { Asset, AssetHistoryEntry } from "@/lib/types";
+import { Asset, AssetHistoryEntry, AssetType, AssetStatus } from "@/lib/types";
 import { updateAsset } from "@/data/assets";
 import { Card, CardContent } from "@/components/ui/card";
 import { getEmployees } from "@/data/employees";
@@ -70,15 +70,15 @@ export default function AssetDetailContent({
         throw new Error("No asset to update");
       }
       
-      // Create the updated asset object
+      // Create the updated asset object with proper type casting
       const updatedAsset: Asset = {
         ...asset, // Keep all existing fields
         name: formData.name,
         manufacturer: formData.manufacturer,
         model: formData.model,
-        type: formData.type,
+        type: formData.type as AssetType,
         vendor: formData.vendor,
-        status: formData.status,
+        status: formData.status as AssetStatus,
         purchaseDate: formData.purchaseDate.toISOString().split('T')[0],
         price: formData.price,
         serialNumber: formData.serialNumber || null,
