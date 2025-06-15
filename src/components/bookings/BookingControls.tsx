@@ -48,34 +48,37 @@ export default function BookingControls({
           />
         </div>
         
-        {/* View Toggle */}
-        <div className="flex border border-n26-secondary/30 rounded-md overflow-hidden bg-white/30">
-          <Button
-            variant={view === "calendar" ? "default" : "ghost"}
-            size="sm"
-            className={`rounded-none ${
-              view === "calendar" 
-                ? "bg-gradient-to-r from-n26-primary to-n26-accent text-white" 
-                : "text-n26-primary hover:bg-n26-secondary/20"
-            }`}
-            onClick={() => setView("calendar")}
-          >
-            <CalendarIcon className="h-4 w-4 mr-1" />
-            Kalender
-          </Button>
-          <Button
-            variant={view === "list" ? "default" : "ghost"}
-            size="sm"
-            className={`rounded-none ${
-              view === "list" 
-                ? "bg-gradient-to-r from-n26-primary to-n26-accent text-white" 
-                : "text-n26-primary hover:bg-n26-secondary/20"
-            }`}
-            onClick={() => setView("list")}
-          >
-            <List className="h-4 w-4 mr-1" />
-            Liste
-          </Button>
+        {/* View Toggle with better indication */}
+        <div className="flex flex-col gap-2">
+          <span className="text-xs text-n26-primary/60 text-center">Ansicht wählen:</span>
+          <div className="flex border border-n26-secondary/30 rounded-md overflow-hidden bg-white/30">
+            <Button
+              variant={view === "calendar" ? "default" : "ghost"}
+              size="sm"
+              className={`rounded-none ${
+                view === "calendar" 
+                  ? "bg-gradient-to-r from-n26-primary to-n26-accent text-white" 
+                  : "text-n26-primary hover:bg-n26-secondary/20"
+              }`}
+              onClick={() => setView("calendar")}
+            >
+              <CalendarIcon className="h-4 w-4 mr-1" />
+              Kalender
+            </Button>
+            <Button
+              variant={view === "list" ? "default" : "ghost"}
+              size="sm"
+              className={`rounded-none ${
+                view === "list" 
+                  ? "bg-gradient-to-r from-n26-primary to-n26-accent text-white" 
+                  : "text-n26-primary hover:bg-n26-secondary/20"
+              }`}
+              onClick={() => setView("list")}
+            >
+              <List className="h-4 w-4 mr-1" />
+              Buchungsübersicht
+            </Button>
+          </div>
         </div>
       </div>
     </div>

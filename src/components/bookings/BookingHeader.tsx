@@ -37,27 +37,46 @@ export default function BookingHeader({
       poolAssetIds.includes(booking.assetId)
     );
     
+    console.log("Pool assets:", poolAssetIds.length);
+    console.log("Pool bookings:", poolBookings.length);
+    console.log("All bookings:", poolBookings);
+    
     const activeBookings = poolBookings.filter(booking => {
       const startDate = new Date(booking.startDate);
       const endDate = new Date(booking.endDate);
-      return booking.status === 'active' || (startDate <= now && now <= endDate);
+      const isTimeActive = startDate <= now && now <= endDate;
+      const isStatusActive = booking.status === 'active';
+      
+      console.log(`Booking ${booking.id}: status=${booking.status}, time active=${isTimeActive}, status active=${isStatusActive}`);
+      
+      return isStatusActive || isTimeActive;
     });
     
     const reservedBookings = poolBookings.filter(booking => {
       const startDate = new Date(booking.startDate);
-      return booking.status === 'reserved' && startDate > now;
+      const isStatusReserved = booking.status === 'reserved';
+      const isFutureBooking = startDate > now;
+      
+      return isStatusReserved && isFutureBooking;
     });
     
-    const availableCount = filteredAssetsCount - activeBookings.length;
     const totalPoolDevices = poolAssetIds.length;
+    const availableCount = Math.max(0, totalPoolDevices - activeBookings.length);
+    
+    console.log("Booking stats:", {
+      totalPoolDevices,
+      activeBookings: activeBookings.length,
+      reservedBookings: reservedBookings.length,
+      availableCount
+    });
     
     return {
-      available: Math.max(0, availableCount),
+      available: availableCount,
       active: activeBookings.length,
       reserved: reservedBookings.length,
       total: totalPoolDevices
     };
-  }, [bookings, assets, filteredAssetsCount]);
+  }, [bookings, assets]);
 
   return (
     <div className="flex flex-col gap-4">
