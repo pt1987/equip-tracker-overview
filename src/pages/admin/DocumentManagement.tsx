@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,7 +33,7 @@ interface DocumentFile {
   created_at: string;
   updated_at: string;
   assetId: string;
-  assetName?: string; // Add asset name field
+  assetName?: string;
   fullPath: string;
   metadata: {
     size: number;
@@ -54,6 +55,7 @@ export default function DocumentManagement() {
   const [previewDocument, setPreviewDocument] = useState<DocumentFile | null>(null);
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
 
   // Upload form state
   const [uploadFile, setUploadFile] = useState<File | null>(null);
@@ -76,7 +78,7 @@ export default function DocumentManagement() {
 
       if (error) {
         console.error('Error fetching asset name:', error);
-        return assetId; // Fallback to asset ID if name can't be fetched
+        return assetId;
       }
 
       return data?.name || assetId;
@@ -84,6 +86,10 @@ export default function DocumentManagement() {
       console.error('Error fetching asset name:', error);
       return assetId;
     }
+  };
+
+  const navigateToAsset = (assetId: string) => {
+    navigate(`/assets/${assetId}`);
   };
 
   const fetchDocuments = async () => {
@@ -110,26 +116,21 @@ export default function DocumentManagement() {
       } else {
         console.log('Raw storage files:', data);
         
-        // Process all files and organize by asset
         const allDocuments: DocumentFile[] = [];
         
         for (const folder of data || []) {
           if (folder.name && !folder.name.includes('.')) {
-            // This is likely a folder (asset ID)
             const assetId = folder.name;
             
-            // Get files in this asset folder
             const { data: assetFiles, error: assetError } = await supabase.storage
               .from('asset-documents')
               .list(assetId);
             
             if (!assetError && assetFiles) {
-              // Fetch asset name for this asset ID
               const assetName = await fetchAssetName(assetId);
               
               for (const file of assetFiles) {
                 if (file.name && file.id) {
-                  // Parse filename for category and metadata
                   const fileNameParts = file.name.split('_');
                   let category = "other";
                   let originalName = file.name;
@@ -138,7 +139,6 @@ export default function DocumentManagement() {
                     category = fileNameParts[0];
                     originalName = fileNameParts.slice(1).join('_');
                     
-                    // Remove version info if present
                     if (fileNameParts.length > 2 && fileNameParts[1].startsWith('v')) {
                       originalName = fileNameParts.slice(2).join('_');
                     }
@@ -150,7 +150,7 @@ export default function DocumentManagement() {
                     created_at: file.created_at || new Date().toISOString(),
                     updated_at: file.updated_at || new Date().toISOString(),
                     assetId: assetId,
-                    assetName: assetName, // Add asset name
+                    assetName: assetName,
                     fullPath: `${assetId}/${file.name}`,
                     metadata: {
                       size: file.metadata?.size || 0,
@@ -200,7 +200,6 @@ export default function DocumentManagement() {
       const fileName = `${uploadCategory}_${Date.now()}_${uploadFile.name}`;
       const filePath = `${selectedAssetId}/${fileName}`;
       
-      // Create metadata
       const metadata = {
         description: uploadDescription || undefined,
         tags: uploadTags ? uploadTags.split(',').map(tag => tag.trim()) : [],
@@ -209,7 +208,6 @@ export default function DocumentManagement() {
 
       console.log('Uploading file with metadata:', { filePath, metadata });
 
-      // Upload to storage with metadata
       const { error: uploadError } = await supabase.storage
         .from('asset-documents')
         .upload(filePath, uploadFile, {
@@ -403,7 +401,6 @@ export default function DocumentManagement() {
         </CardHeader>
         <CardContent className={isMobile ? 'p-0' : ''}>
           {isMobile ? (
-            // Mobile view - Card layout
             <div className="space-y-3 px-4 pb-4">
               {filteredDocuments.map((doc) => (
                 <div key={doc.id} className="border rounded-lg p-4 bg-white">
@@ -415,9 +412,12 @@ export default function DocumentManagement() {
                           {doc.metadata.original_name || doc.name}
                         </h4>
                       </div>
-                      <p className="text-xs text-muted-foreground mb-2">
+                      <button
+                        onClick={() => navigateToAsset(doc.assetId)}
+                        className="text-xs text-blue-600 hover:text-blue-800 hover:underline mb-2 block"
+                      >
                         Asset: {doc.assetName || doc.assetId}
-                      </p>
+                      </button>
                       {doc.metadata.description && (
                         <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
                           {doc.metadata.description}
@@ -459,8 +459,7 @@ export default function DocumentManagement() {
                           onClick={() => handleDelete(doc)}
                           className="text-destructive hover:text-destructive/80 text-xs"
                         >
-                          <Trash2 className="h-3 w-3 mr-1" />
-                          Löschen
+                          <Trash2 className="h-3 w-3" />
                         </Button>
                       </div>
                     </div>
@@ -474,7 +473,6 @@ export default function DocumentManagement() {
               )}
             </div>
           ) : (
-            // Desktop view - Table layout
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
@@ -503,7 +501,12 @@ export default function DocumentManagement() {
                       </TableCell>
                       <TableCell>
                         <div>
-                          <div className="font-medium">{doc.assetName || doc.assetId}</div>
+                          <button
+                            onClick={() => navigateToAsset(doc.assetId)}
+                            className="font-medium text-blue-600 hover:text-blue-800 hover:underline"
+                          >
+                            {doc.assetName || doc.assetId}
+                          </button>
                           {doc.assetName && (
                             <div className="text-xs text-muted-foreground">{doc.assetId}</div>
                           )}
@@ -639,7 +642,13 @@ export default function DocumentManagement() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <strong>Asset:</strong> {previewDocument.assetName || previewDocument.assetId}
+                  <strong>Asset:</strong> 
+                  <button
+                    onClick={() => navigateToAsset(previewDocument.assetId)}
+                    className="ml-1 text-blue-600 hover:text-blue-800 hover:underline"
+                  >
+                    {previewDocument.assetName || previewDocument.assetId}
+                  </button>
                 </div>
                 <div>
                   <strong>Kategorie:</strong> {getCategoryLabel(previewDocument.metadata.category || 'other')}
