@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { AssetBooking } from "@/lib/types";
 import { getAllBookings } from "@/data/bookings";
 
@@ -8,7 +8,7 @@ export function useBookingData() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadBookings = async () => {
+  const loadBookings = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -20,16 +20,20 @@ export function useBookingData() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadBookings();
-  }, []);
+  }, [loadBookings]);
+
+  const refetch = useCallback(() => {
+    loadBookings();
+  }, [loadBookings]);
 
   return {
     bookings,
     isLoading,
     error,
-    refetch: loadBookings
+    refetch
   };
 }
