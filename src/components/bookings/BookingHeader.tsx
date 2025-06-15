@@ -2,19 +2,62 @@
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Calendar, Plus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { AssetBooking, Asset } from "@/lib/types";
+import { useMemo } from "react";
 
 interface BookingHeaderProps {
   filteredAssetsCount: number;
   onRefresh: () => void;
   isLoading: boolean;
+  bookings: AssetBooking[];
+  assets: Asset[];
+  onCreateBooking: () => void;
 }
 
 export default function BookingHeader({ 
   filteredAssetsCount, 
   onRefresh, 
-  isLoading 
+  isLoading,
+  bookings,
+  assets,
+  onCreateBooking
 }: BookingHeaderProps) {
   const isMobile = useIsMobile();
+
+  // Calculate real booking statistics
+  const bookingStats = useMemo(() => {
+    const now = new Date();
+    
+    // Filter bookings for pool devices only
+    const poolAssetIds = assets
+      .filter(asset => asset.isPoolDevice === true || asset.status === 'pool')
+      .map(asset => asset.id);
+    
+    const poolBookings = bookings.filter(booking => 
+      poolAssetIds.includes(booking.assetId)
+    );
+    
+    const activeBookings = poolBookings.filter(booking => {
+      const startDate = new Date(booking.startDate);
+      const endDate = new Date(booking.endDate);
+      return booking.status === 'active' || (startDate <= now && now <= endDate);
+    });
+    
+    const reservedBookings = poolBookings.filter(booking => {
+      const startDate = new Date(booking.startDate);
+      return booking.status === 'reserved' && startDate > now;
+    });
+    
+    const availableCount = filteredAssetsCount - activeBookings.length;
+    const totalPoolDevices = poolAssetIds.length;
+    
+    return {
+      available: Math.max(0, availableCount),
+      active: activeBookings.length,
+      reserved: reservedBookings.length,
+      total: totalPoolDevices
+    };
+  }, [bookings, assets, filteredAssetsCount]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -43,6 +86,7 @@ export default function BookingHeader({
           <Button 
             size={isMobile ? "sm" : "default"}
             className="bg-gradient-to-r from-n26-primary to-n26-accent hover:from-n26-primary/90 hover:to-n26-accent/90"
+            onClick={onCreateBooking}
           >
             <Plus className={`h-4 w-4 ${isMobile ? '' : 'mr-2'}`} />
             {!isMobile && "Neue Buchung"}
@@ -50,14 +94,14 @@ export default function BookingHeader({
         </div>
       </div>
       
-      {/* Stats Cards */}
+      {/* Stats Cards with real data */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white/50 backdrop-blur-sm border border-n26-secondary/30 rounded-lg p-4">
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4 text-n26-accent" />
             <span className="text-sm font-medium text-n26-primary">Verfügbar</span>
           </div>
-          <p className="text-2xl font-bold text-n26-primary mt-1">{filteredAssetsCount}</p>
+          <p className="text-2xl font-bold text-n26-primary mt-1">{bookingStats.available}</p>
         </div>
         
         <div className="bg-white/50 backdrop-blur-sm border border-n26-secondary/30 rounded-lg p-4">
@@ -65,7 +109,7 @@ export default function BookingHeader({
             <div className="h-2 w-2 bg-green-500 rounded-full" />
             <span className="text-sm font-medium text-n26-primary">Aktiv</span>
           </div>
-          <p className="text-2xl font-bold text-n26-primary mt-1">3</p>
+          <p className="text-2xl font-bold text-n26-primary mt-1">{bookingStats.active}</p>
         </div>
         
         <div className="bg-white/50 backdrop-blur-sm border border-n26-secondary/30 rounded-lg p-4">
@@ -73,7 +117,7 @@ export default function BookingHeader({
             <div className="h-2 w-2 bg-blue-500 rounded-full" />
             <span className="text-sm font-medium text-n26-primary">Reserviert</span>
           </div>
-          <p className="text-2xl font-bold text-n26-primary mt-1">2</p>
+          <p className="text-2xl font-bold text-n26-primary mt-1">{bookingStats.reserved}</p>
         </div>
         
         <div className="bg-white/50 backdrop-blur-sm border border-n26-secondary/30 rounded-lg p-4">
@@ -81,7 +125,7 @@ export default function BookingHeader({
             <div className="h-2 w-2 bg-gray-400 rounded-full" />
             <span className="text-sm font-medium text-n26-primary">Gesamt</span>
           </div>
-          <p className="text-2xl font-bold text-n26-primary mt-1">{filteredAssetsCount + 5}</p>
+          <p className="text-2xl font-bold text-n26-primary mt-1">{bookingStats.total}</p>
         </div>
       </div>
     </div>

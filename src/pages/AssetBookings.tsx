@@ -87,6 +87,14 @@ export default function AssetBookings() {
     }
     setShowBookingDialog(true);
   };
+
+  const handleCreateBooking = () => {
+    // If there are available assets, pre-select the first one
+    if (filteredAssets.length > 0) {
+      setSelectedAsset(filteredAssets[0]);
+    }
+    setShowBookingDialog(true);
+  };
   
   const handleCloseDialog = () => {
     setSelectedAsset(null);
@@ -104,6 +112,9 @@ export default function AssetBookings() {
             filteredAssetsCount={filteredAssets.length}
             onRefresh={handleRefresh}
             isLoading={isLoading}
+            bookings={bookings || []}
+            assets={assets}
+            onCreateBooking={handleCreateBooking}
           />
           
           <BookingControls
@@ -126,7 +137,7 @@ export default function AssetBookings() {
                 filteredAssetsCount={filteredAssets.length}
                 selectedAssetType={selectedAssetType}
                 searchTerm={searchTerm}
-                onCreateBooking={() => setShowBookingDialog(true)}
+                onCreateBooking={handleCreateBooking}
               />
             ) : view === "calendar" ? (
               <BookingCalendarView
@@ -147,7 +158,7 @@ export default function AssetBookings() {
         </div>
       </div>
       
-      {showBookingDialog && selectedAsset && (
+      {showBookingDialog && (
         <BookingDialog
           asset={selectedAsset}
           initialDate={selectedDate}

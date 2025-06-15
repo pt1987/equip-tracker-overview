@@ -7,7 +7,7 @@ interface BookingEmptyStateProps {
   filteredAssetsCount: number;
   selectedAssetType: AssetType | "all";
   searchTerm: string;
-  onCreateBooking?: () => void;
+  onCreateBooking: () => void;
 }
 
 export default function BookingEmptyState({ 
@@ -42,7 +42,7 @@ export default function BookingEmptyState({
           : "Beginnen Sie mit der ersten Buchung eines Poolgeräts."}
       </p>
       
-      {onCreateBooking && (
+      {filteredAssetsCount > 0 && (
         <Button 
           onClick={onCreateBooking}
           className="bg-gradient-to-r from-n26-primary to-n26-accent hover:from-n26-primary/90 hover:to-n26-accent/90"
