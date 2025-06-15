@@ -4,6 +4,7 @@ import { RefreshCw, Calendar, Plus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { AssetBooking, Asset } from "@/lib/types";
 import { useMemo } from "react";
+import { calculateBookingStats } from "@/data/bookings";
 
 interface BookingHeaderProps {
   filteredAssetsCount: number;
@@ -24,59 +25,31 @@ export default function BookingHeader({
 }: BookingHeaderProps) {
   const isMobile = useIsMobile();
 
-  // Calculate real booking statistics
+  // Calculate real booking statistics using centralized utility
   const bookingStats = useMemo(() => {
-    const now = new Date();
-    
-    // Filter bookings for pool devices only
+    // Filter assets for pool devices only
     const poolAssetIds = assets
       .filter(asset => asset.isPoolDevice === true || asset.status === 'pool')
       .map(asset => asset.id);
     
-    const poolBookings = bookings.filter(booking => 
-      poolAssetIds.includes(booking.assetId)
-    );
-    
     console.log("BookingHeader - Pool assets:", poolAssetIds.length);
     console.log("BookingHeader - All bookings:", bookings.length);
-    console.log("BookingHeader - Pool bookings:", poolBookings.length);
-    console.log("BookingHeader - Pool bookings data:", poolBookings);
     
-    // Check each booking's current status based on time and database status
-    const activeBookings = poolBookings.filter(booking => {
-      const startDate = new Date(booking.startDate);
-      const endDate = new Date(booking.endDate);
-      const isTimeActive = startDate <= now && now <= endDate;
-      const isStatusActive = booking.status === 'active';
-      
-      console.log(`Booking ${booking.id} (${booking.assetId}): status=${booking.status}, time active=${isTimeActive}, status active=${isStatusActive}`);
-      
-      // A booking is considered active if it has active status OR if it's currently in its time range
-      return isStatusActive || (isTimeActive && booking.status !== 'canceled' && booking.status !== 'completed');
-    });
-    
-    const reservedBookings = poolBookings.filter(booking => {
-      const startDate = new Date(booking.startDate);
-      const isStatusReserved = booking.status === 'reserved';
-      const isFutureBooking = startDate > now;
-      
-      return isStatusReserved && isFutureBooking;
-    });
-    
+    const stats = calculateBookingStats(bookings, poolAssetIds);
     const totalPoolDevices = poolAssetIds.length;
-    const availableCount = Math.max(0, totalPoolDevices - activeBookings.length);
+    const availableCount = Math.max(0, totalPoolDevices - stats.active);
     
     console.log("BookingHeader - Final stats:", {
       totalPoolDevices,
-      activeBookings: activeBookings.length,
-      reservedBookings: reservedBookings.length,
+      activeBookings: stats.active,
+      reservedBookings: stats.reserved,
       availableCount
     });
     
     return {
       available: availableCount,
-      active: activeBookings.length,
-      reserved: reservedBookings.length,
+      active: stats.active,
+      reserved: stats.reserved,
       total: totalPoolDevices
     };
   }, [bookings, assets]);

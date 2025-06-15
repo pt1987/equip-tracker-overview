@@ -2,9 +2,9 @@
 import { format, parseISO } from "date-fns";
 import { TableRow, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Check, X } from "lucide-react";
-import { Asset, AssetBooking, BookingStatus, Employee } from "@/lib/types";
+import { Asset, AssetBooking, Employee } from "@/lib/types";
 import BookingStatusActions from "./BookingStatusActions";
+import { getStatusLabel, getStatusBadgeVariant } from "@/data/bookings";
 
 interface BookingTableRowProps {
   booking: AssetBooking;
@@ -23,38 +23,6 @@ export default function BookingTableRow({
   onReturn,
   onCancel
 }: BookingTableRowProps) {
-  // Get status badge variant
-  const getStatusBadgeVariant = (status: BookingStatus) => {
-    switch (status) {
-      case 'active':
-        return 'default';
-      case 'reserved':
-        return 'secondary';
-      case 'completed':
-        return 'outline';
-      case 'canceled':
-        return 'destructive';
-      default:
-        return 'default';
-    }
-  };
-
-  // Get status label
-  const getStatusLabel = (status: BookingStatus) => {
-    switch (status) {
-      case 'active':
-        return 'Aktiv';
-      case 'reserved':
-        return 'Reserviert';
-      case 'completed':
-        return 'Abgeschlossen';
-      case 'canceled':
-        return 'Storniert';
-      default:
-        return status;
-    }
-  };
-
   console.log(`Rendering booking ${booking.id}:`, {
     asset: asset.name,
     employee: `${employee?.firstName} ${employee?.lastName}`,

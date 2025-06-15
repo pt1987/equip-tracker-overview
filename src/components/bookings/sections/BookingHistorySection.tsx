@@ -7,20 +7,15 @@ import { addAssetHistoryEntry } from '@/data/assets/history';
 import { getUserId } from "@/hooks/use-auth";
 import { useEffect, useState } from "react";
 import { getEmployeeById } from "@/data/employees/fetch";
+import { getBookingDisplayStatus, getStatusLabel, getStatusBadgeVariant } from "@/data/bookings";
 
 interface BookingHistorySectionProps {
   bookings: AssetBooking[];
-  getBookingDisplayStatus: (booking: AssetBooking) => string;
-  getStatusLabel: (status: string) => string;
-  getStatusBadgeVariant: (status: string) => "default" | "secondary" | "destructive" | "outline";
-  assetId: string; // Required prop
+  assetId: string;
 }
 
 export default function BookingHistorySection({
   bookings,
-  getBookingDisplayStatus,
-  getStatusLabel,
-  getStatusBadgeVariant,
   assetId
 }: BookingHistorySectionProps) {
   const isMobile = useIsMobile();

@@ -1,8 +1,16 @@
 
 import { useState, useEffect } from "react";
-import { isAfter, isBefore } from "date-fns";
-import { Asset, AssetBooking, Employee, BookingStatus } from "@/lib/types";
-import { getCurrentOrUpcomingBooking, getBookingsByAssetId } from "@/data/bookings";
+import { Asset, AssetBooking, Employee } from "@/lib/types";
+import { 
+  getCurrentOrUpcomingBooking, 
+  getBookingsByAssetId,
+  isBookingExpired,
+  getAvailabilityStatus,
+  countUpcomingBookings,
+  getBookingDisplayStatus,
+  getStatusLabel,
+  getStatusBadgeVariant
+} from "@/data/bookings";
 import { getEmployeeById } from "@/data/employees";
 
 export function useAssetBookings(asset: Asset) {
@@ -41,61 +49,6 @@ export function useAssetBookings(asset: Asset) {
     }
   }, [asset?.id]);
   
-  // Check if a booking should be marked as expired
-  const isBookingExpired = (booking: AssetBooking): boolean => {
-    const now = new Date();
-    const endDate = new Date(booking.endDate);
-    return isBefore(endDate, now);
-  };
-  
-  // Determine the availability status
-  const getAvailabilityStatus = () => {
-    if (currentBooking && currentBooking.status === 'active' && !isBookingExpired(currentBooking)) {
-      return "booked";
-    } else if (bookings.length > 0 && bookings.some(b => b.status === 'reserved' && !isBookingExpired(b))) {
-      return "available-partial";
-    } else {
-      return "available";
-    }
-  };
-  
-  // Count upcoming bookings (not expired)
-  const countUpcomingBookings = () => {
-    return bookings.filter(b => b.status === 'reserved' && !isBookingExpired(b)).length;
-  };
-
-  // Get display status for a booking
-  const getBookingDisplayStatus = (booking: AssetBooking) => {
-    if (isBookingExpired(booking)) {
-      return "expired";
-    }
-    return booking.status;
-  };
-
-  // Get label for booking status
-  const getStatusLabel = (status: string): string => {
-    switch (status) {
-      case "active": return "Aktiv";
-      case "reserved": return "Reserviert";
-      case "completed": return "Abgeschlossen";
-      case "canceled": return "Storniert";
-      case "expired": return "Abgelaufen";
-      default: return status;
-    }
-  };
-
-  // Get badge variant for booking status
-  const getStatusBadgeVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
-    switch (status) {
-      case "active": return "default";
-      case "reserved": return "secondary";
-      case "completed": return "outline";
-      case "canceled": return "destructive";
-      case "expired": return "outline";
-      default: return "outline";
-    }
-  };
-  
   return {
     currentBooking,
     bookings,
@@ -103,8 +56,8 @@ export function useAssetBookings(asset: Asset) {
     bookedEmployee,
     loadBookings,
     isBookingExpired,
-    getAvailabilityStatus,
-    countUpcomingBookings,
+    getAvailabilityStatus: () => getAvailabilityStatus(currentBooking, bookings),
+    countUpcomingBookings: () => countUpcomingBookings(bookings),
     getBookingDisplayStatus,
     getStatusLabel,
     getStatusBadgeVariant
