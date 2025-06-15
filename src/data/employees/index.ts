@@ -1,8 +1,8 @@
 
 // Export all employee-related functions
-export * from './fetch';
-export * from './create';
-export * from './update';
-export * from './exists';
-export * from './storage';
-export * from './assets';
+export { getEmployees, getEmployeeById } from './fetch';
+export { createEmployee } from './create';
+export { updateEmployee } from './update';
+export { employeeExists } from './exists';
+export { uploadEmployeeImage } from './storage';
+export { getAssetsByEmployeeId } from './assets';
