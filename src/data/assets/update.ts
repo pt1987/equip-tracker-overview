@@ -1,13 +1,14 @@
 
 import { Asset, AssetStatus } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
-import { mapAssetToDbAsset, mapDbAssetToAsset } from "./mappers";
+import { mapDbAssetToAsset } from "./mappers";
 import { 
   addAssetHistoryEntry, 
   generateStatusChangeNote, 
   getActionTypeForStatusChange,
   generateFieldChangeNotes
 } from "./history";
+import { getUserId } from "@/hooks/use-auth";
 
 // Function to update an asset in the database
 export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<Asset> => {
@@ -36,11 +37,10 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
       console.log("Current asset state:", currentAsset);
     }
     
-    // Map the asset to database format
-    const dbAsset = mapAssetToDbAsset(asset);
-    console.log("Mapped asset for database:", dbAsset);
+    // Store a copy of the current asset before updating for comparison
+    const originalAsset = currentAsset ? {...currentAsset} : null;
     
-    // Prepare the update data with explicit field mapping
+    // Prepare the complete update data with explicit field mapping
     const updateData = {
       name: asset.name,
       type: asset.type,
@@ -89,20 +89,17 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
     
     console.log("Final update data:", updateData);
     
-    // Store a copy of the current asset before updating for comparison
-    const originalAsset = currentAsset ? {...currentAsset} : null;
-    
-    // Perform the database update
+    // Perform the database update with error handling
     const { data, error } = await supabase
       .from('assets')
       .update(updateData)
       .eq('id', asset.id)
-      .select()
+      .select('*')
       .single();
     
     if (error) {
       console.error("Database update error:", error);
-      throw error;
+      throw new Error(`Failed to update asset in database: ${error.message}`);
     }
     
     if (!data) {
@@ -110,6 +107,17 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
     }
     
     console.log("Asset updated successfully in database:", data);
+    
+    // Verify the update was successful by checking key fields
+    if (data.status !== asset.status) {
+      console.warn("Status mismatch after update:", { expected: asset.status, actual: data.status });
+    }
+    if (data.employee_id !== (asset.employeeId || null)) {
+      console.warn("Employee ID mismatch after update:", { expected: asset.employeeId, actual: data.employee_id });
+    }
+    if (data.is_pool_device !== (asset.isPoolDevice || false)) {
+      console.warn("Pool device mismatch after update:", { expected: asset.isPoolDevice, actual: data.is_pool_device });
+    }
     
     // Convert the updated data back to our Asset type
     const updatedAsset = mapDbAssetToAsset(data);
@@ -121,6 +129,8 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
         console.warn("No original asset data available for history comparison");
         return updatedAsset;
       }
+      
+      const userId = await getUserId();
       
       // Check if status has changed and add history entry if needed
       if (originalAsset.status !== asset.status) {
@@ -139,7 +149,8 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
           asset.id,
           actionType,
           null,
-          notes
+          notes,
+          userId
         );
         
         console.log(`Added status change history entry: ${originalAsset.status} -> ${asset.status}`);
@@ -154,7 +165,8 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
             asset.id,
             "assign",
             asset.employeeId,
-            `Asset einem Mitarbeiter zugewiesen`
+            `Asset einem Mitarbeiter zugewiesen`,
+            userId
           );
           console.log(`Added assignment history entry: Employee ${asset.employeeId}`);
         } else if (originalAsset.employeeId) {
@@ -163,7 +175,8 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
             asset.id,
             "return",
             null,
-            `Asset in den Pool zurückgegeben`
+            `Asset in den Pool zurückgegeben`,
+            userId
           );
           console.log("Added return to pool history entry");
         }
@@ -176,20 +189,21 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
           asset.id,
           "edit",
           asset.employeeId,
-          `Pool-Gerät Status geändert: ${asset.isPoolDevice ? 'aktiviert' : 'deaktiviert'}`
+          `Pool-Gerät Status geändert: ${asset.isPoolDevice ? 'aktiviert' : 'deaktiviert'}`,
+          userId
         );
       }
       
-      // Record general field changes
-      const changeNotes = generateFieldChangeNotes(updateData, mapAssetToDbAsset(originalAsset));
-      
-      if (changeNotes !== 'Allgemeine Aktualisierung') {
+      // Add general edit history entry for other changes
+      const changeNotes = generateFieldChangeNotes(updateData, originalAsset);
+      if (changeNotes && changeNotes !== 'Allgemeine Aktualisierung') {
         console.log("Field changes detected, adding history entry");
         await addAssetHistoryEntry(
           asset.id,
           "edit",
           asset.employeeId,
-          changeNotes
+          changeNotes,
+          userId
         );
         console.log("Added field changes history entry");
       }
@@ -198,7 +212,7 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
       // Continue returning the asset even if history entries fail
     }
     
-    console.log("Asset update completed successfully");
+    console.log("Asset update completed successfully, returning:", updatedAsset);
     return updatedAsset;
   } catch (error) {
     console.error(`Critical error in updateAsset for ${asset.id}:`, error);

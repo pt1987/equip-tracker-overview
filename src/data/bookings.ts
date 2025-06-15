@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { AssetBooking, BookingReturnCondition, BookingStatus } from "@/lib/types";
 import { getEmployeeById } from "./employees";
@@ -241,7 +242,7 @@ export const createBooking = async (
 
     // Update asset status if booking is active and it's a pool device
     if (status === 'active' && (assetData.is_pool_device || assetData.status === 'pool')) {
-      console.log("Updating asset to in_use status");
+      console.log("Updating asset to in_use status and assigning to employee");
       
       const { error: updateError } = await supabase
         .from('assets')
@@ -256,7 +257,7 @@ export const createBooking = async (
         console.error("Error updating asset status:", updateError);
         // Don't throw - booking was created successfully
       } else {
-        console.log("Asset status updated to in_use");
+        console.log("Asset status updated to in_use and assigned to employee");
       }
     }
     
@@ -314,18 +315,27 @@ export const updateBookingStatus = async (
     
     const booking = mapDbBookingToBooking(data);
     
-    // If changing to completed, we might need to update the asset status
+    // If changing to completed or canceled, update the asset status accordingly
     if (status === 'completed' || status === 'canceled') {
       const asset = await getAssetById(booking.assetId);
       
-      if (asset && (asset.isPoolDevice || asset.status === 'pool')) {
-        await supabase
+      if (asset && (asset.isPoolDevice || asset.status === 'pool' || asset.status === 'in_use')) {
+        console.log("Updating asset back to pool status after booking completion/cancellation");
+        
+        const { error: updateError } = await supabase
           .from('assets')
           .update({ 
             status: 'pool', 
-            employee_id: null 
+            employee_id: null,
+            updated_at: new Date().toISOString()
           })
           .eq('id', booking.assetId);
+          
+        if (updateError) {
+          console.error("Error updating asset status back to pool:", updateError);
+        } else {
+          console.log("Asset status updated back to pool");
+        }
       }
       
       // Add history entry for booking status change

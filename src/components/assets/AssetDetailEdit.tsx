@@ -15,12 +15,14 @@ interface AssetDetailEditProps {
   asset: Asset;
   onSave: (data: any) => void;
   onCancel: () => void;
+  disabled?: boolean;
 }
 
 export default function AssetDetailEdit({
   asset,
   onSave,
   onCancel,
+  disabled = false
 }: AssetDetailEditProps) {
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
@@ -43,7 +45,8 @@ export default function AssetDetailEdit({
       warrantyExpiryDate: asset.warrantyExpiryDate ? new Date(asset.warrantyExpiryDate) : null,
       warrantyInfo: asset.warrantyInfo || "",
       imageUrl: asset.imageUrl || "",
-      employeeId: asset.employeeId || "not_assigned", // Changed from empty string to "not_assigned"
+      employeeId: asset.employeeId || "not_assigned",
+      isPoolDevice: asset.isPoolDevice || false,
     },
   });
   
@@ -53,19 +56,26 @@ export default function AssetDetailEdit({
   
   const handleSubmit = async (data: AssetFormValues) => {
     try {
+      console.log("Form submission data:", data);
+      
+      // Validate that we have all required data
+      if (!data.name || !data.manufacturer || !data.model) {
+        throw new Error("Name, Hersteller und Modell sind erforderlich");
+      }
+      
       // If employeeId is "not_assigned", set it to null
       if (data.employeeId === "not_assigned") {
         data.employeeId = null;
       }
       
       // Pass the form data to the parent component's onSave function
-      onSave(data);
+      await onSave(data);
     } catch (error) {
       console.error("Error saving asset:", error);
       toast({
         variant: "destructive",
         title: "Fehler beim Speichern",
-        description: "Das Asset konnte nicht gespeichert werden.",
+        description: error instanceof Error ? error.message : "Das Asset konnte nicht gespeichert werden.",
       });
     }
   };
@@ -90,14 +100,15 @@ export default function AssetDetailEdit({
                 type="button" 
                 variant="outline" 
                 onClick={onCancel}
+                disabled={disabled || isUploading}
               >
                 Abbrechen
               </Button>
               <Button 
                 type="submit" 
-                disabled={isUploading}
+                disabled={disabled || isUploading}
               >
-                Speichern
+                {disabled ? "Speichere..." : "Speichern"}
               </Button>
             </div>
           </div>

@@ -76,7 +76,7 @@ export default function AssetDetailContent({
       
       // Create the updated asset object with all fields properly mapped
       const updatedAsset: Asset = {
-        ...asset, // Start with existing asset data
+        ...asset, // Start with existing asset data to preserve all fields
         name: formData.name,
         manufacturer: formData.manufacturer,
         model: formData.model,
@@ -96,18 +96,13 @@ export default function AssetDetailContent({
         isPoolDevice: formData.isPoolDevice || false
       };
       
-      console.log("Updated asset object:", updatedAsset);
-      console.log("Key changes:", {
-        statusChange: asset.status !== updatedAsset.status,
-        employeeChange: asset.employeeId !== updatedAsset.employeeId,
-        poolDeviceChange: asset.isPoolDevice !== updatedAsset.isPoolDevice
-      });
+      console.log("Updated asset object to save:", updatedAsset);
       
       // Pass the original asset as the second parameter for change tracking
       const result = await updateAsset(updatedAsset, asset);
       console.log("Update result:", result);
       
-      // Invalidate all relevant queries to ensure UI updates
+      // Force refresh all queries and wait for them to complete
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["asset", asset.id] }),
         queryClient.invalidateQueries({ queryKey: ["assets"] }),
@@ -116,18 +111,16 @@ export default function AssetDetailContent({
         queryClient.invalidateQueries({ queryKey: ["employees"] })
       ]);
       
-      console.log("All queries invalidated");
+      // Wait a moment for queries to refetch
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      console.log("All queries invalidated and refetched");
       
       setIsEditing(false);
       toast({
         title: "Asset erfolgreich aktualisiert",
-        description: "Alle Änderungen wurden dauerhaft gespeichert."
+        description: "Alle Änderungen wurden dauerhaft in der Datenbank gespeichert."
       });
-      
-      // Force a page refresh to ensure all data is current
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
       
     } catch (error) {
       console.error("Error saving asset:", error);
@@ -156,6 +149,7 @@ export default function AssetDetailContent({
               asset={asset} 
               onSave={handleSave} 
               onCancel={handleCancelEdit} 
+              disabled={isSaving}
             />
           </CardContent>
         ) : (
@@ -171,7 +165,6 @@ export default function AssetDetailContent({
 
       {!isEditing && (
         <>
-          {/* Show booking section for pool devices */}
           {(asset.isPoolDevice || asset.status === 'pool') && (
             <AssetBookingSection 
               asset={asset}
