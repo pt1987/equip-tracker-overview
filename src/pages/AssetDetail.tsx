@@ -100,7 +100,7 @@ export default function AssetDetail() {
   return (
     <PageTransition>
       <div className="container mx-auto py-4 md:py-6 max-w-7xl">
-        <div className="flex flex-col gap-4 md:gap-6 px-3 md:px-6">
+        <div className="flex flex-col gap-4 md:gap-6 px-3">
           <div className="mb-2">
             <Button 
               variant="ghost" 
