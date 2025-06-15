@@ -34,9 +34,9 @@ export default function ModernDonutChart({
             data={dataWithColors}
             cx="50%"
             cy="50%"
-            innerRadius="40%"
-            outerRadius="70%"
-            paddingAngle={3}
+            innerRadius="45%"
+            outerRadius="75%"
+            paddingAngle={2}
             dataKey="value"
           >
             {dataWithColors.map((entry, index) => (
@@ -57,16 +57,16 @@ export default function ModernDonutChart({
       
       {(centerLabel || centerValue) && (
         <div 
-          className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
         >
           <div className="text-center">
             {centerValue && (
-              <div className="text-3xl font-bold text-gray-900 mb-1">
+              <div className="text-2xl font-bold text-gray-900 leading-none">
                 {centerValue}
               </div>
             )}
             {centerLabel && (
-              <div className="text-sm text-gray-600 uppercase tracking-wide">
+              <div className="text-xs text-gray-600 uppercase tracking-wide mt-1">
                 {centerLabel}
               </div>
             )}
