@@ -36,6 +36,7 @@ export default function AssetDetailContent({
 }: AssetDetailContentProps) {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const isMobile = useIsMobile();
   
   const { 
@@ -59,15 +60,23 @@ export default function AssetDetailContent({
 
   const handleSave = async (formData: any) => {
     try {
-      if (!asset) return;
+      setIsSaving(true);
+      console.log("=== Asset Save Debug ===");
+      console.log("Original asset:", asset);
+      console.log("Form data received:", formData);
+      
+      if (!asset) {
+        throw new Error("No asset to update");
+      }
       
       // Convert date objects to ISO strings for database storage
       const warrantyExpiryDate = formData.hasWarranty && formData.warrantyExpiryDate 
         ? formData.warrantyExpiryDate.toISOString().split('T')[0] 
         : null;
       
+      // Create the updated asset object with all fields properly mapped
       const updatedAsset: Asset = {
-        ...asset,
+        ...asset, // Start with existing asset data
         name: formData.name,
         manufacturer: formData.manufacturer,
         model: formData.model,
@@ -83,34 +92,52 @@ export default function AssetDetailContent({
         warrantyExpiryDate: warrantyExpiryDate,
         warrantyInfo: formData.hasWarranty ? formData.warrantyInfo || null : null,
         imageUrl: formData.imageUrl || null,
-        employeeId: formData.employeeId || null,
+        employeeId: formData.employeeId === "not_assigned" ? null : formData.employeeId,
         isPoolDevice: formData.isPoolDevice || false
       };
       
-      await updateAsset(updatedAsset);
+      console.log("Updated asset object:", updatedAsset);
+      console.log("Key changes:", {
+        statusChange: asset.status !== updatedAsset.status,
+        employeeChange: asset.employeeId !== updatedAsset.employeeId,
+        poolDeviceChange: asset.isPoolDevice !== updatedAsset.isPoolDevice
+      });
       
-      queryClient.invalidateQueries({
-        queryKey: ["asset", asset.id]
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["assets"]
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["assetHistory", asset.id]
-      });
+      // Pass the original asset as the second parameter for change tracking
+      const result = await updateAsset(updatedAsset, asset);
+      console.log("Update result:", result);
+      
+      // Invalidate all relevant queries to ensure UI updates
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["asset", asset.id] }),
+        queryClient.invalidateQueries({ queryKey: ["assets"] }),
+        queryClient.invalidateQueries({ queryKey: ["assetHistory", asset.id] }),
+        queryClient.invalidateQueries({ queryKey: ["bookings"] }),
+        queryClient.invalidateQueries({ queryKey: ["employees"] })
+      ]);
+      
+      console.log("All queries invalidated");
       
       setIsEditing(false);
       toast({
-        title: "Asset aktualisiert",
-        description: "Die Änderungen wurden erfolgreich gespeichert."
+        title: "Asset erfolgreich aktualisiert",
+        description: "Alle Änderungen wurden dauerhaft gespeichert."
       });
+      
+      // Force a page refresh to ensure all data is current
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+      
     } catch (error) {
       console.error("Error saving asset:", error);
       toast({
         variant: "destructive",
         title: "Fehler beim Speichern",
-        description: "Die Änderungen konnten nicht gespeichert werden."
+        description: error instanceof Error ? error.message : "Die Änderungen konnten nicht gespeichert werden."
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -144,7 +171,7 @@ export default function AssetDetailContent({
 
       {!isEditing && (
         <>
-          {/* Immer die Buchungssektion für Pool-Geräte anzeigen oder wenn asset.status === 'pool' */}
+          {/* Show booking section for pool devices */}
           {(asset.isPoolDevice || asset.status === 'pool') && (
             <AssetBookingSection 
               asset={asset}

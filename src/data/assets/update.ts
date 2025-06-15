@@ -11,14 +11,16 @@ import {
 
 // Function to update an asset in the database
 export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<Asset> => {
-  console.log("Updating asset in Supabase:", asset.id);
+  console.log("=== updateAsset Debug ===");
+  console.log("Updating asset:", asset.id);
+  console.log("Asset data to update:", asset);
   
   try {
-    // Fetch the current asset to check for changes if previous version is not provided
+    // Fetch the current asset from database if previous version is not provided
     let currentAsset = previousAsset;
     
     if (!currentAsset) {
-      console.log("No previous asset provided, fetching current state from database");
+      console.log("Fetching current asset state from database");
       const { data: fetchedAsset, error: fetchError } = await supabase
         .from('assets')
         .select('*')
@@ -31,29 +33,75 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
       }
       
       currentAsset = mapDbAssetToAsset(fetchedAsset);
-      console.log("Current asset state fetched:", currentAsset);
+      console.log("Current asset state:", currentAsset);
     }
     
+    // Map the asset to database format
     const dbAsset = mapAssetToDbAsset(asset);
+    console.log("Mapped asset for database:", dbAsset);
     
-    // Add updated_at timestamp
-    const dbAssetWithTimestamp = {
-      ...dbAsset,
+    // Prepare the update data with explicit field mapping
+    const updateData = {
+      name: asset.name,
+      type: asset.type,
+      manufacturer: asset.manufacturer,
+      model: asset.model,
+      vendor: asset.vendor,
+      status: asset.status,
+      purchase_date: asset.purchaseDate,
+      price: asset.price,
+      employee_id: asset.employeeId || null,
+      category: asset.category,
+      serial_number: asset.serialNumber || null,
+      inventory_number: asset.inventoryNumber || null,
+      has_warranty: asset.hasWarranty || false,
+      additional_warranty: asset.additionalWarranty || false,
+      warranty_expiry_date: asset.warrantyExpiryDate || null,
+      warranty_info: asset.warrantyInfo || null,
+      image_url: asset.imageUrl || null,
+      is_pool_device: asset.isPoolDevice || false,
+      is_external: asset.isExternal || false,
+      owner_company: asset.ownerCompany || 'PHAT Consulting GmbH',
+      project_id: asset.projectId || null,
+      responsible_employee_id: asset.responsibleEmployeeId || null,
+      handover_to_employee_date: asset.handoverToEmployeeDate || null,
+      planned_return_date: asset.plannedReturnDate || null,
+      actual_return_date: asset.actualReturnDate || null,
+      classification: asset.classification || 'internal',
+      asset_owner_id: asset.assetOwnerId || null,
+      last_review_date: asset.lastReviewDate || null,
+      next_review_date: asset.nextReviewDate || null,
+      risk_level: asset.riskLevel || 'low',
+      is_personal_data: asset.isPersonalData || false,
+      disposal_method: asset.disposalMethod || null,
+      lifecycle_stage: asset.lifecycleStage || 'operation',
+      notes: asset.notes || null,
+      imei: asset.imei || null,
+      phone_number: asset.phoneNumber || null,
+      provider: asset.provider || null,
+      contract_end_date: asset.contractEndDate || null,
+      contract_name: asset.contractName || null,
+      contract_duration: asset.contractDuration || null,
+      connected_asset_id: asset.connectedAssetId || null,
+      related_asset_id: asset.relatedAssetId || null,
       updated_at: new Date().toISOString()
     };
+    
+    console.log("Final update data:", updateData);
     
     // Store a copy of the current asset before updating for comparison
     const originalAsset = currentAsset ? {...currentAsset} : null;
     
+    // Perform the database update
     const { data, error } = await supabase
       .from('assets')
-      .update(dbAssetWithTimestamp)
+      .update(updateData)
       .eq('id', asset.id)
       .select()
       .single();
     
     if (error) {
-      console.error("Error updating asset:", error);
+      console.error("Database update error:", error);
       throw error;
     }
     
@@ -61,15 +109,20 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
       throw new Error(`No asset returned after update for ID: ${asset.id}`);
     }
     
-    console.log("Asset updated successfully in database:", data.id);
+    console.log("Asset updated successfully in database:", data);
     
+    // Convert the updated data back to our Asset type
+    const updatedAsset = mapDbAssetToAsset(data);
+    console.log("Mapped updated asset:", updatedAsset);
+    
+    // Add history entries for significant changes
     try {
       if (!originalAsset) {
         console.warn("No original asset data available for history comparison");
-        return mapDbAssetToAsset(data);
+        return updatedAsset;
       }
       
-      // First, check if status has changed and add history entry if needed
+      // Check if status has changed and add history entry if needed
       if (originalAsset.status !== asset.status) {
         console.log(`Status changed: ${originalAsset.status} -> ${asset.status}`);
         const actionType = getActionTypeForStatusChange(
@@ -85,7 +138,7 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
         await addAssetHistoryEntry(
           asset.id,
           actionType,
-          null, // Status changes don't need employee association
+          null,
           notes
         );
         
@@ -116,27 +169,39 @@ export const updateAsset = async (asset: Asset, previousAsset?: Asset): Promise<
         }
       }
       
-      // Record general field changes
-      const changeNotes = generateFieldChangeNotes(dbAsset, mapAssetToDbAsset(originalAsset));
-      
-      if (changeNotes !== 'Allgemeine Aktualisierung') {
-        console.log("Field changes detected, adding history entry with details");
+      // Check if pool device status changed
+      if (originalAsset.isPoolDevice !== asset.isPoolDevice) {
+        console.log(`Pool device status changed: ${originalAsset.isPoolDevice} -> ${asset.isPoolDevice}`);
         await addAssetHistoryEntry(
           asset.id,
           "edit",
-          asset.employeeId, // Include the employee if this asset is assigned
+          asset.employeeId,
+          `Pool-Gerät Status geändert: ${asset.isPoolDevice ? 'aktiviert' : 'deaktiviert'}`
+        );
+      }
+      
+      // Record general field changes
+      const changeNotes = generateFieldChangeNotes(updateData, mapAssetToDbAsset(originalAsset));
+      
+      if (changeNotes !== 'Allgemeine Aktualisierung') {
+        console.log("Field changes detected, adding history entry");
+        await addAssetHistoryEntry(
+          asset.id,
+          "edit",
+          asset.employeeId,
           changeNotes
         );
-        console.log("Added field changes history entry with notes:", changeNotes);
+        console.log("Added field changes history entry");
       }
     } catch (historyError) {
       console.error("Error updating asset history entries:", historyError);
       // Continue returning the asset even if history entries fail
     }
     
-    return mapDbAssetToAsset(data);
+    console.log("Asset update completed successfully");
+    return updatedAsset;
   } catch (error) {
-    console.error(`Error in updateAsset for ${asset.id}:`, error);
+    console.error(`Critical error in updateAsset for ${asset.id}:`, error);
     throw error;
   }
 };

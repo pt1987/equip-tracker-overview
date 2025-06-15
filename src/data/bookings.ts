@@ -43,11 +43,10 @@ export const getAllBookings = async (): Promise<AssetBooking[]> => {
       return [];
     }
 
-    // Simply map all bookings - don't filter here, let the UI decide what to show
+    // Map all bookings without filtering - let the UI decide what to show
     const allBookings = data.map(mapDbBookingToBooking);
     
     console.log("All mapped bookings:", allBookings.length);
-    console.log("Mapped bookings data:", allBookings);
     
     return allBookings;
   } catch (error) {
@@ -169,17 +168,29 @@ export const createBooking = async (
   purpose?: string
 ): Promise<AssetBooking | null> => {
   try {
+    console.log("=== createBooking Debug ===");
     console.log("Creating booking with params:", {
       assetId, employeeId, startDate, endDate, purpose
     });
     
-    // Verify asset exists
-    const asset = await getAssetById(assetId);
-    if (!asset) {
+    // Verify asset exists and get current state
+    const { data: assetData, error: assetError } = await supabase
+      .from('assets')
+      .select('*')
+      .eq('id', assetId)
+      .single();
+    
+    if (assetError || !assetData) {
+      console.error("Asset not found:", assetError);
       throw new Error("Asset nicht gefunden");
     }
     
-    console.log("Asset found for booking:", asset.name, "Status:", asset.status, "isPoolDevice:", asset.isPoolDevice);
+    console.log("Asset found for booking:", {
+      name: assetData.name,
+      status: assetData.status,
+      isPoolDevice: assetData.is_pool_device,
+      currentEmployee: assetData.employee_id
+    });
     
     // Check if asset is available for this period
     const isAvailable = await isAssetAvailableForBooking(assetId, startDate, endDate);
@@ -215,7 +226,7 @@ export const createBooking = async (
       .from('asset_bookings')
       .insert(bookingData)
       .select()
-      .maybeSingle();
+      .single();
 
     if (error) {
       console.error("Error creating booking:", error);
@@ -229,13 +240,24 @@ export const createBooking = async (
     console.log("Booking created successfully:", data);
 
     // Update asset status if booking is active and it's a pool device
-    if (status === 'active' && (asset.isPoolDevice || asset.status === 'pool')) {
-      await supabase
+    if (status === 'active' && (assetData.is_pool_device || assetData.status === 'pool')) {
+      console.log("Updating asset to in_use status");
+      
+      const { error: updateError } = await supabase
         .from('assets')
-        .update({ status: 'in_use', employee_id: employeeId })
+        .update({ 
+          status: 'in_use', 
+          employee_id: employeeId,
+          updated_at: new Date().toISOString()
+        })
         .eq('id', assetId);
       
-      console.log("Updated asset status to in_use");
+      if (updateError) {
+        console.error("Error updating asset status:", updateError);
+        // Don't throw - booking was created successfully
+      } else {
+        console.log("Asset status updated to in_use");
+      }
     }
     
     // Add entry to asset history for ISO 27001 compliance
