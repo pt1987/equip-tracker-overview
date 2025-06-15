@@ -58,3 +58,6 @@ export const mapAssetToDbAsset = (asset: Asset): DbAsset => {
   console.log("Mapped DB asset:", dbAsset);
   return dbAsset;
 };
+
+// Export with the exact name that's being imported
+export const mapAssetToDbAssetInsert = mapAssetToDbAsset;
