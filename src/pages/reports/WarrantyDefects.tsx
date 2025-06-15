@@ -2,7 +2,6 @@
 import React from "react";
 import { FileBarChart, FileLineChart } from "lucide-react";
 import PageTransition from "@/components/layout/PageTransition";
-import ReportsNavigation from "@/components/layout/ReportsNavigation";
 import WarrantyDefectsReport from "@/components/reports/WarrantyDefectsReport";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -69,8 +68,6 @@ export default function WarrantyDefects() {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          
-          <ReportsNavigation />
           
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">

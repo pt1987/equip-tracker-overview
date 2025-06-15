@@ -2,7 +2,6 @@
 import React from "react";
 import { FileBarChart, CircleDollarSign } from "lucide-react";
 import PageTransition from "@/components/layout/PageTransition";
-import ReportsNavigation from "@/components/layout/ReportsNavigation";
 import MaintenanceCostReport from "@/components/reports/MaintenanceCostReport";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -67,8 +66,6 @@ export default function MaintenanceCost() {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          
-          <ReportsNavigation />
           
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">

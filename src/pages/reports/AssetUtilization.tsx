@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { Activity } from "lucide-react";
 import PageTransition from "@/components/layout/PageTransition";
-import ReportsNavigation from "@/components/layout/ReportsNavigation";
 import AssetUtilizationReport from "@/components/reports/AssetUtilizationReport";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
@@ -47,8 +46,6 @@ export default function AssetUtilization() {
             
             <ReportExportButton reportName="Asset-Auslastung" data={reportData} />
           </div>
-          
-          <ReportsNavigation />
           
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">

@@ -2,7 +2,6 @@
 import React from "react";
 import { TrendingUp } from "lucide-react";
 import PageTransition from "@/components/layout/PageTransition";
-import ReportsNavigation from "@/components/layout/ReportsNavigation";
 import ROIIReport from "@/components/reports/ROIIReport";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
@@ -40,8 +39,6 @@ export default function ROII() {
             
             <ReportExportButton reportName="IT-Investitionsrendite" data={reportData} />
           </div>
-          
-          <ReportsNavigation />
           
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">

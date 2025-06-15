@@ -2,7 +2,6 @@
 import React from "react";
 import { Building2 } from "lucide-react";
 import PageTransition from "@/components/layout/PageTransition";
-import ReportsNavigation from "@/components/layout/ReportsNavigation";
 import DepartmentAssetsReport from "@/components/reports/department/DepartmentAssetsReport";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
@@ -141,8 +140,6 @@ export default function DepartmentAssets() {
             
             <ReportExportButton reportName="Abteilungsübersicht" data={reportData} />
           </div>
-          
-          <ReportsNavigation />
           
           <Card className="shadow-sm border">
             <CardHeader className="pb-3">
