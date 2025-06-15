@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useToast } from "@/hooks/use-toast";
 import { Trash2, Download, Upload, Search, Eye, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Table,
   TableBody,
@@ -50,6 +51,7 @@ export default function DocumentManagement() {
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [previewDocument, setPreviewDocument] = useState<DocumentFile | null>(null);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   // Upload form state
   const [uploadFile, setUploadFile] = useState<File | null>(null);
@@ -271,24 +273,27 @@ export default function DocumentManagement() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className={`space-y-6 ${isMobile ? 'px-4 py-4' : 'px-6 py-6'}`}>
+      <div className={`flex ${isMobile ? 'flex-col gap-4' : 'justify-between items-start'}`}>
         <div>
-          <h1 className="text-3xl font-bold">Dokument-Management</h1>
-          <p className="text-muted-foreground">Verwalten Sie alle hochgeladenen Dokumente zentral</p>
+          <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold`}>Dokument-Management</h1>
+          <p className="text-muted-foreground mt-1">Verwalten Sie alle hochgeladenen Dokumente zentral</p>
         </div>
-        <Button onClick={() => setUploadDialogOpen(true)}>
+        <Button 
+          onClick={() => setUploadDialogOpen(true)}
+          className={isMobile ? 'w-full' : ''}
+        >
           <Upload className="h-4 w-4 mr-2" />
           Dokument hochladen
         </Button>
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Filter & Suche</CardTitle>
+        <CardHeader className={isMobile ? 'pb-3' : ''}>
+          <CardTitle className={isMobile ? 'text-lg' : ''}>Filter & Suche</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-4">
+          <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'} gap-4`}>
             <div className="flex-1">
               <Label htmlFor="search">Suche</Label>
               <div className="relative">
@@ -302,10 +307,10 @@ export default function DocumentManagement() {
                 />
               </div>
             </div>
-            <div>
+            <div className={isMobile ? 'w-full' : 'w-48'}>
               <Label htmlFor="category">Kategorie</Label>
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -325,78 +330,152 @@ export default function DocumentManagement() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Dokumente ({filteredDocuments.length})</CardTitle>
+          <CardTitle className={isMobile ? 'text-lg' : ''}>
+            Dokumente ({filteredDocuments.length})
+          </CardTitle>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Kategorie</TableHead>
-                <TableHead>Größe</TableHead>
-                <TableHead>Hochgeladen am</TableHead>
-                <TableHead>Aktionen</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+        <CardContent className={isMobile ? 'p-0' : ''}>
+          {isMobile ? (
+            // Mobile view - Card layout
+            <div className="space-y-3 px-4 pb-4">
               {filteredDocuments.map((doc) => (
-                <TableRow key={doc.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4" />
-                      <div>
-                        <div className="font-medium">{doc.metadata.original_name || doc.name}</div>
+                <div key={doc.id} className="border rounded-lg p-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                      <FileText className="h-5 w-5 mt-0.5 text-muted-foreground flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-medium text-sm truncate">
+                          {doc.metadata.original_name || doc.name}
+                        </h4>
                         {doc.metadata.description && (
-                          <div className="text-sm text-muted-foreground">{doc.metadata.description}</div>
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                            {doc.metadata.description}
+                          </p>
                         )}
+                        <div className="flex flex-wrap items-center gap-2 mt-2">
+                          <Badge variant="outline" className="text-xs">
+                            {getCategoryLabel(doc.metadata.category || 'general')}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {formatFileSize(doc.metadata.size)}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(doc.created_at).toLocaleDateString('de-DE')}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">
-                      {getCategoryLabel(doc.metadata.category || 'general')}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{formatFileSize(doc.metadata.size)}</TableCell>
-                  <TableCell>
-                    {new Date(doc.created_at).toLocaleDateString('de-DE')}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setPreviewDocument(doc)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDownload(doc)}
-                      >
-                        <Download className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(doc)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
+                  </div>
+                  <div className="flex gap-2 mt-3 pt-3 border-t">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setPreviewDocument(doc)}
+                      className="flex-1"
+                    >
+                      <Eye className="h-4 w-4 mr-1" />
+                      Anzeigen
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDownload(doc)}
+                      className="flex-1"
+                    >
+                      <Download className="h-4 w-4 mr-1" />
+                      Download
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDelete(doc)}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
               ))}
               {filteredDocuments.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                    {documents.length === 0 ? "Keine Dokumente vorhanden" : "Keine Dokumente gefunden"}
-                  </TableCell>
-                </TableRow>
+                <div className="text-center py-8 text-muted-foreground">
+                  {documents.length === 0 ? "Keine Dokumente vorhanden" : "Keine Dokumente gefunden"}
+                </div>
               )}
-            </TableBody>
-          </Table>
+            </div>
+          ) : (
+            // Desktop view - Table layout
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Kategorie</TableHead>
+                    <TableHead>Größe</TableHead>
+                    <TableHead>Hochgeladen am</TableHead>
+                    <TableHead>Aktionen</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredDocuments.map((doc) => (
+                    <TableRow key={doc.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4" />
+                          <div>
+                            <div className="font-medium">{doc.metadata.original_name || doc.name}</div>
+                            {doc.metadata.description && (
+                              <div className="text-sm text-muted-foreground">{doc.metadata.description}</div>
+                            )}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {getCategoryLabel(doc.metadata.category || 'general')}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{formatFileSize(doc.metadata.size)}</TableCell>
+                      <TableCell>
+                        {new Date(doc.created_at).toLocaleDateString('de-DE')}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setPreviewDocument(doc)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDownload(doc)}
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(doc)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {filteredDocuments.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                        {documents.length === 0 ? "Keine Dokumente vorhanden" : "Keine Dokumente gefunden"}
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
 
