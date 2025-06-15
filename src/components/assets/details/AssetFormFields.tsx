@@ -1,3 +1,4 @@
+
 import { useFormContext } from "react-hook-form";
 import { useState, useEffect } from "react";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
@@ -25,6 +26,7 @@ export const assetFormSchema = z.object({
   warrantyInfo: z.string().optional(),
   imageUrl: z.string().optional(),
   employeeId: z.string().nullable().optional(),
+  isPoolDevice: z.boolean().default(false),
 });
 
 export type AssetFormValues = z.infer<typeof assetFormSchema>;
@@ -252,6 +254,25 @@ export default function AssetFormFields() {
                 <Input placeholder="Inventarnummer" {...field} />
               </FormControl>
               <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Pool Device Checkbox */}
+        <FormField
+          control={form.control}
+          name="isPoolDevice"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel>Pool-Gerät</FormLabel>
+              </div>
             </FormItem>
           )}
         />
