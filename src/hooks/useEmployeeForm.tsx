@@ -5,7 +5,8 @@ import { uploadEmployeeImage } from "@/data/employees/storage";
 import { toast } from "@/hooks/use-toast";
 import { EmployeeFormValues } from "@/components/employees/EmployeeFormTypes";
 import { useQueryClient } from "@tanstack/react-query";
-import { createEmployee, updateEmployee } from "@/data/employees/create";
+import { createEmployee } from "@/data/employees/create";
+import { updateEmployee } from "@/data/employees/update";
 import { useNavigate } from "react-router-dom";
 
 export function useEmployeeForm(id: string | undefined) {
