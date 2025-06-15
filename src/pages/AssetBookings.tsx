@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getAllBookings, updateBookingStatuses } from "@/data/bookings";
-import { getAssets } from "@/data/assets";
-import { getEmployees } from "@/data/employees";
+import { getAssets } from "@/data/assets/fetch";
+import { getEmployees } from "@/data/employees/fetch";
 import { useToast } from "@/hooks/use-toast";
 import { AssetType } from "@/lib/types";
 import PageTransition from "@/components/layout/PageTransition";

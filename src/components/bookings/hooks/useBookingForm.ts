@@ -5,7 +5,7 @@ import { Asset, Employee } from "@/lib/types";
 import { createBooking } from "@/data/bookings";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
-import { getAssets } from "@/data/assets";
+import { getAssets } from "@/data/assets/fetch";
 
 interface UseBookingFormProps {
   initialAsset?: Asset | null;

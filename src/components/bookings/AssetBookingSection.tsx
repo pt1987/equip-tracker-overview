@@ -101,7 +101,7 @@ export default function AssetBookingSection({ asset, employees, refetchAsset }: 
                 getBookingDisplayStatus={getBookingDisplayStatus}
                 getStatusLabel={getStatusLabel}
                 getStatusBadgeVariant={getStatusBadgeVariant}
-                assetId={asset.id} // Added the missing assetId prop
+                assetId={asset.id}
               />
             )}
           </div>
