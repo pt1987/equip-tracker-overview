@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getAllBookings, updateBookingStatuses } from "@/data/bookings";
+import { updateBookingStatuses } from "@/data/bookings";
 import { getAssets } from "@/data/assets/fetch";
 import { getEmployees } from "@/data/employees/fetch";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +13,7 @@ import BookingEmptyState from "@/components/bookings/BookingEmptyState";
 import BookingList from "@/components/bookings/BookingList";
 import BookingCalendarView from "@/components/bookings/BookingCalendarView";
 import BookingDialog from "@/components/bookings/BookingDialog";
+import { useBookingData } from "@/components/bookings/hooks/useBookingData";
 
 export default function AssetBookings() {
   const [view, setView] = useState<"calendar" | "list">("calendar");
@@ -23,12 +24,8 @@ export default function AssetBookings() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const { toast } = useToast();
   
-  // Fetch data
-  const { data: bookings, isLoading: isLoadingBookings, refetch: refetchBookings } = 
-    useQuery({
-      queryKey: ["bookings"],
-      queryFn: getAllBookings
-    });
+  // Use the consolidated booking data hook
+  const { bookings, isLoading: isLoadingBookings, refetch: refetchBookings } = useBookingData();
   
   const { data: assets = [], isLoading: isLoadingAssets } = 
     useQuery({

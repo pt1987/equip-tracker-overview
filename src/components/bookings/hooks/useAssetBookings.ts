@@ -6,10 +6,7 @@ import {
   getBookingsByAssetId,
   isBookingExpired,
   getAvailabilityStatus,
-  countUpcomingBookings,
-  getBookingDisplayStatus,
-  getStatusLabel,
-  getStatusBadgeVariant
+  countUpcomingBookings
 } from "@/data/bookings";
 import { getEmployeeById } from "@/data/employees";
 
@@ -57,9 +54,6 @@ export function useAssetBookings(asset: Asset) {
     loadBookings,
     isBookingExpired,
     getAvailabilityStatus: () => getAvailabilityStatus(currentBooking, bookings),
-    countUpcomingBookings: () => countUpcomingBookings(bookings),
-    getBookingDisplayStatus,
-    getStatusLabel,
-    getStatusBadgeVariant
+    countUpcomingBookings: () => countUpcomingBookings(bookings)
   };
 }
