@@ -1,15 +1,17 @@
 
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
-import { Menu, LogIn, LogOut } from "lucide-react";
+import { Menu, LogIn, LogOut, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { MobileSidebar } from "./MobileSidebar";
 import { useAuth } from "@/hooks/use-auth";
+import { GlobalSearch } from "./GlobalSearch";
 
 export function MobileNavbar() {
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { isAuthenticated, logout } = useAuth();
 
   useEffect(() => {
@@ -33,36 +35,49 @@ export function MobileNavbar() {
           <MobileSidebar />
         </SheetContent>
       </Sheet>
+      
       <div className="flex items-center">
         <Link to="/" className="font-semibold text-n26-primary">
           Asset Tracker
         </Link>
       </div>
       
-      {!isAuthenticated && (
-        <Link to="/login">
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="border-n26-primary text-n26-primary hover:bg-n26-primary hover:text-white"
-          >
-            <LogIn className="h-4 w-4 mr-2" />
-            Anmelden
-          </Button>
-        </Link>
-      )}
-      
-      {isAuthenticated && (
-        <Button 
-          variant="outline" 
-          size="sm"
-          className="border-n26-primary text-n26-primary hover:bg-n26-primary hover:text-white"
-          onClick={() => logout()}
+      <div className="flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-n26-primary hover:bg-n26-secondary/20"
+          onClick={() => setIsSearchOpen(true)}
         >
-          <LogOut className="h-4 w-4 mr-2" />
-          Abmelden
+          <Search className="h-4 w-4" />
         </Button>
-      )}
+        
+        {!isAuthenticated && (
+          <Link to="/login">
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="border-n26-primary text-n26-primary hover:bg-n26-primary hover:text-white"
+            >
+              <LogIn className="h-4 w-4 mr-2" />
+              Anmelden
+            </Button>
+          </Link>
+        )}
+        
+        {isAuthenticated && (
+          <Button 
+            variant="ghost" 
+            size="icon"
+            className="text-n26-primary hover:bg-n26-secondary/20"
+            onClick={() => logout()}
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+      
+      <GlobalSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </div>
   );
 }

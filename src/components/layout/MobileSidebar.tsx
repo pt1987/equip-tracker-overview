@@ -162,11 +162,11 @@ export function MobileSidebar() {
             <li>
               <Button
                 variant="ghost" 
-                className="w-full justify-start text-left px-4 py-2 rounded-md hover:bg-n26-secondary/20 text-n26-primary"
+                size="icon"
+                className="w-full justify-center px-4 py-2 rounded-md hover:bg-n26-secondary/20 text-n26-primary"
                 onClick={() => logout()}
               >
-                <LogOut size={20} className="mr-3" />
-                <span>Abmelden</span>
+                <LogOut size={20} />
               </Button>
             </li>
           ) : (
