@@ -35,9 +35,14 @@ export default function LicenseManagementTable() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="p-6 space-y-4">
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:justify-between sm:items-center">
-        <h2 className="text-xl sm:text-2xl font-bold">Softwarelizenzen</h2>
+        <div>
+          <h2 className="text-xl font-semibold">Software-Lizenzen</h2>
+          <p className="text-sm text-muted-foreground">
+            Erstellen und verwalten Sie Software-Lizenzen für Ihr Unternehmen
+          </p>
+        </div>
         <Button 
           onClick={() => setIsDialogOpen(true)}
           className={`${isMobile ? 'w-full' : 'flex-shrink-0'} flex items-center gap-2`}

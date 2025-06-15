@@ -3,7 +3,6 @@ import React from "react";
 import { KeyRound } from "lucide-react";
 import PageTransition from "@/components/layout/PageTransition";
 import LicenseManagementTable from "@/components/license-management/LicenseManagementTable";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function LicenseManagement() {
@@ -25,19 +24,9 @@ export default function LicenseManagement() {
             </div>
           </div>
           
-          <Card className="shadow-sm border">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Software-Lizenzverwaltung</CardTitle>
-                  <CardDescription>Erstellen und Verwalten Sie Software-Lizenzen für Ihr Unternehmen</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <LicenseManagementTable />
-            </CardContent>
-          </Card>
+          <div className="shadow-sm border rounded-lg">
+            <LicenseManagementTable />
+          </div>
         </div>
       </div>
     </PageTransition>
