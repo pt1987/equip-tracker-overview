@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -73,11 +72,23 @@ export default function BookingList({
     return employees.find(e => e.id === employeeId);
   };
 
-  // FIXED: Show ALL bookings - don't filter by asset existence
-  // This way we can see bookings even if the asset was deleted or changed
+  // Filter bookings to only show those with existing assets
   const relevantBookings = bookings.filter(booking => {
-    // Show all bookings - we'll handle missing assets in the display
-    console.log(`Including booking ${booking.id}: assetId=${booking.assetId}`);
+    const asset = getAsset(booking.assetId);
+    const hasValidAsset = !!asset;
+    
+    if (!hasValidAsset) {
+      console.log(`Excluding booking ${booking.id}: asset ${booking.assetId} not found`);
+      return false;
+    }
+    
+    // Only show bookings for pool devices
+    if (!asset.isPoolDevice && asset.status !== 'pool') {
+      console.log(`Excluding booking ${booking.id}: asset ${asset.name} is not a pool device`);
+      return false;
+    }
+    
+    console.log(`Including booking ${booking.id} for asset ${asset.name}`);
     return true;
   });
 
@@ -190,7 +201,7 @@ export default function BookingList({
         <>
           <div className="mb-4">
             <p className="text-sm text-muted-foreground">
-              Zeige {sortedBookings.length} Buchung(en)
+              Zeige {sortedBookings.length} Buchung(en) für Poolgeräte
             </p>
           </div>
           
@@ -209,8 +220,14 @@ export default function BookingList({
                 const asset = getAsset(booking.assetId);
                 const employee = getEmployee(booking.employeeId);
                 
+                // This should not happen anymore due to filtering, but keep as safety
+                if (!asset) {
+                  console.warn(`Asset ${booking.assetId} not found for booking ${booking.id}`);
+                  return null;
+                }
+                
                 console.log(`Rendering booking ${booking.id}:`, {
-                  asset: asset?.name || 'Asset nicht gefunden',
+                  asset: asset.name,
                   employee: `${employee?.firstName} ${employee?.lastName}`,
                   status: booking.status
                 });
@@ -218,17 +235,10 @@ export default function BookingList({
                 return (
                   <TableRow key={booking.id}>
                     <TableCell>
-                      <div className="font-medium">
-                        {asset?.name || `Asset nicht gefunden (${booking.assetId.slice(0, 8)}...)`}
-                      </div>
+                      <div className="font-medium">{asset.name}</div>
                       <div className="text-sm text-muted-foreground">
-                        {asset ? `${asset.manufacturer} ${asset.model}` : 'Details nicht verfügbar'}
+                        {asset.manufacturer} {asset.model}
                       </div>
-                      {!asset && (
-                        <Badge variant="outline" className="text-xs mt-1">
-                          Asset gelöscht/nicht verfügbar
-                        </Badge>
-                      )}
                     </TableCell>
                     <TableCell>
                       {employee ? (
@@ -273,7 +283,7 @@ export default function BookingList({
                           <Eye className="h-4 w-4" />
                         </Button>
                         
-                        {booking.status === 'active' && !booking.returnInfo?.returned && asset && (
+                        {booking.status === 'active' && !booking.returnInfo?.returned && (
                           <Button
                             variant="ghost"
                             size="icon"
@@ -351,7 +361,7 @@ export default function BookingList({
         <div className="text-center py-8 text-muted-foreground">
           <div className="p-4 bg-n26-secondary/20 rounded-lg">
             <h3 className="font-semibold mb-2">Keine Buchungen gefunden</h3>
-            <p>Es wurden noch keine Buchungen erstellt.</p>
+            <p>Es wurden noch keine Buchungen für Poolgeräte erstellt.</p>
           </div>
         </div>
       )}

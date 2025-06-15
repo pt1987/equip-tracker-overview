@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { AssetBooking, BookingReturnCondition, BookingStatus } from "@/lib/types";
 import { getEmployeeById } from "./employees";
@@ -20,7 +21,7 @@ type RawBooking = {
   return_info: Json | null;
 };
 
-// Get all bookings
+// Get all bookings with proper error handling and validation
 export const getAllBookings = async (): Promise<AssetBooking[]> => {
   try {
     console.log("=== getAllBookings Debug ===");
@@ -28,7 +29,7 @@ export const getAllBookings = async (): Promise<AssetBooking[]> => {
     const { data, error } = await supabase
       .from('asset_bookings')
       .select('*')
-      .order('start_date', { ascending: false }); // Changed to descending to show recent first
+      .order('start_date', { ascending: false });
 
     if (error) {
       console.error("Error fetching bookings:", error);
@@ -38,10 +39,40 @@ export const getAllBookings = async (): Promise<AssetBooking[]> => {
     console.log("Raw booking data from database:", data);
     console.log("Number of bookings found:", data?.length || 0);
 
-    const mappedBookings = (data || []).map(mapDbBookingToBooking);
-    console.log("Mapped bookings:", mappedBookings);
+    if (!data || data.length === 0) {
+      console.log("No bookings found in database");
+      return [];
+    }
 
-    return mappedBookings;
+    // Validate and map bookings, filtering out invalid ones
+    const validBookings = [];
+    for (const rawBooking of data) {
+      try {
+        // Check if the asset still exists
+        const asset = await getAssetById(rawBooking.asset_id);
+        if (!asset) {
+          console.log(`Skipping booking ${rawBooking.id} - asset ${rawBooking.asset_id} not found`);
+          continue;
+        }
+
+        // Only include bookings for pool devices
+        if (!asset.isPoolDevice && asset.status !== 'pool') {
+          console.log(`Skipping booking ${rawBooking.id} - asset ${asset.name} is not a pool device`);
+          continue;
+        }
+
+        const mappedBooking = mapDbBookingToBooking(rawBooking);
+        validBookings.push(mappedBooking);
+        console.log(`Added valid booking ${mappedBooking.id} for asset ${asset.name}`);
+      } catch (error) {
+        console.error(`Error processing booking ${rawBooking.id}:`, error);
+        // Skip invalid bookings
+        continue;
+      }
+    }
+
+    console.log("Valid bookings:", validBookings.length);
+    return validBookings;
   } catch (error) {
     console.error("Error in getAllBookings:", error);
     return [];
@@ -129,7 +160,6 @@ export const isAssetAvailableForBooking = async (
       .neq('status', 'canceled');
     
     // Check for date range overlap using individual conditions
-    // This is more compatible than using the PostgreSQL-specific overlaps operator
     query = query
       .or(`and(end_date.gte.${startDate},start_date.lte.${endDate})`);
     
@@ -145,10 +175,7 @@ export const isAssetAvailableForBooking = async (
       throw error;
     }
 
-    // Log the results for debugging
     console.log("Overlapping bookings found:", data?.length || 0, data);
-
-    // If there are no overlapping bookings, the asset is available
     return (data || []).length === 0;
   } catch (error) {
     console.error(`Error in isAssetAvailableForBooking for ${assetId}:`, error);
@@ -168,6 +195,16 @@ export const createBooking = async (
     console.log("Creating booking with params:", {
       assetId, employeeId, startDate, endDate, purpose
     });
+    
+    // Verify asset exists and is a pool device
+    const asset = await getAssetById(assetId);
+    if (!asset) {
+      throw new Error("Asset nicht gefunden");
+    }
+    
+    if (!asset.isPoolDevice && asset.status !== 'pool') {
+      throw new Error("Asset ist kein Poolgerät");
+    }
     
     // Check if asset is available for this period
     const isAvailable = await isAssetAvailableForBooking(assetId, startDate, endDate);
@@ -218,8 +255,7 @@ export const createBooking = async (
 
     // Update asset status if booking is active
     if (status === 'active') {
-      const asset = await getAssetById(assetId);
-      if (asset && asset.status === 'pool') {
+      if (asset.status === 'pool') {
         await supabase
           .from('assets')
           .update({ status: 'in_use', employee_id: employeeId })
@@ -253,7 +289,7 @@ export const createBooking = async (
     return mapDbBookingToBooking(data);
   } catch (error) {
     console.error("Error in createBooking:", error);
-    throw error; // Re-throw to allow proper error handling in UI
+    throw error;
   }
 };
 
@@ -453,7 +489,7 @@ export const updateBookingDates = async (
   }
 };
 
-// CORRECTED: Check for bookings that need status updates
+// Update booking statuses based on current time
 export const updateBookingStatuses = async (): Promise<void> => {
   try {
     const now = new Date().toISOString();
@@ -461,7 +497,7 @@ export const updateBookingStatuses = async (): Promise<void> => {
     console.log("=== updateBookingStatuses Debug ===");
     console.log("Updating booking statuses at:", now);
     
-    // First, get all non-canceled/completed bookings to check
+    // Get all non-canceled/completed bookings to check
     const { data: allBookings, error: fetchError } = await supabase
       .from('asset_bookings')
       .select('*')
