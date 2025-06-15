@@ -73,25 +73,12 @@ export default function BookingList({
     return employees.find(e => e.id === employeeId);
   };
 
-  // CORRECTED: Get pool asset IDs - check for pool devices OR assets with status 'pool'
-  const poolAssetIds = assets
-    .filter(asset => {
-      const isPool = asset.isPoolDevice === true || asset.status === 'pool';
-      console.log(`Asset ${asset.name} (${asset.id}): isPoolDevice=${asset.isPoolDevice}, status=${asset.status}, isPool=${isPool}`);
-      return isPool;
-    })
-    .map(asset => asset.id);
-
-  console.log("Pool asset IDs:", poolAssetIds);
-
-  // CORRECTED: Show ALL bookings, not just pool device bookings
-  // The booking overview should show all bookings regardless of pool status
+  // FIXED: Show ALL bookings - don't filter by asset existence
+  // This way we can see bookings even if the asset was deleted or changed
   const relevantBookings = bookings.filter(booking => {
-    // Show all bookings that have valid asset references
-    const asset = getAsset(booking.assetId);
-    const hasAsset = !!asset;
-    console.log(`Booking ${booking.id}: assetId=${booking.assetId}, hasAsset=${hasAsset}, asset=${asset?.name}`);
-    return hasAsset;
+    // Show all bookings - we'll handle missing assets in the display
+    console.log(`Including booking ${booking.id}: assetId=${booking.assetId}`);
+    return true;
   });
 
   console.log("Relevant bookings to display:", relevantBookings.length);
@@ -223,7 +210,7 @@ export default function BookingList({
                 const employee = getEmployee(booking.employeeId);
                 
                 console.log(`Rendering booking ${booking.id}:`, {
-                  asset: asset?.name,
+                  asset: asset?.name || 'Asset nicht gefunden',
                   employee: `${employee?.firstName} ${employee?.lastName}`,
                   status: booking.status
                 });
@@ -231,10 +218,17 @@ export default function BookingList({
                 return (
                   <TableRow key={booking.id}>
                     <TableCell>
-                      <div className="font-medium">{asset?.name || 'Unbekanntes Gerät'}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {asset?.manufacturer} {asset?.model}
+                      <div className="font-medium">
+                        {asset?.name || `Asset nicht gefunden (${booking.assetId.slice(0, 8)}...)`}
                       </div>
+                      <div className="text-sm text-muted-foreground">
+                        {asset ? `${asset.manufacturer} ${asset.model}` : 'Details nicht verfügbar'}
+                      </div>
+                      {!asset && (
+                        <Badge variant="outline" className="text-xs mt-1">
+                          Asset gelöscht/nicht verfügbar
+                        </Badge>
+                      )}
                     </TableCell>
                     <TableCell>
                       {employee ? (
@@ -279,7 +273,7 @@ export default function BookingList({
                           <Eye className="h-4 w-4" />
                         </Button>
                         
-                        {booking.status === 'active' && !booking.returnInfo?.returned && (
+                        {booking.status === 'active' && !booking.returnInfo?.returned && asset && (
                           <Button
                             variant="ghost"
                             size="icon"
