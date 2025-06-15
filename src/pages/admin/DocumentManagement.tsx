@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -33,6 +32,7 @@ interface DocumentFile {
   created_at: string;
   updated_at: string;
   assetId: string;
+  assetName?: string; // Add asset name field
   fullPath: string;
   metadata: {
     size: number;
@@ -65,6 +65,26 @@ export default function DocumentManagement() {
   useEffect(() => {
     fetchDocuments();
   }, []);
+
+  const fetchAssetName = async (assetId: string): Promise<string> => {
+    try {
+      const { data, error } = await supabase
+        .from('assets')
+        .select('name')
+        .eq('id', assetId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching asset name:', error);
+        return assetId; // Fallback to asset ID if name can't be fetched
+      }
+
+      return data?.name || assetId;
+    } catch (error) {
+      console.error('Error fetching asset name:', error);
+      return assetId;
+    }
+  };
 
   const fetchDocuments = async () => {
     try {
@@ -104,6 +124,9 @@ export default function DocumentManagement() {
               .list(assetId);
             
             if (!assetError && assetFiles) {
+              // Fetch asset name for this asset ID
+              const assetName = await fetchAssetName(assetId);
+              
               for (const file of assetFiles) {
                 if (file.name && file.id) {
                   // Parse filename for category and metadata
@@ -127,6 +150,7 @@ export default function DocumentManagement() {
                     created_at: file.created_at || new Date().toISOString(),
                     updated_at: file.updated_at || new Date().toISOString(),
                     assetId: assetId,
+                    assetName: assetName, // Add asset name
                     fullPath: `${assetId}/${file.name}`,
                     metadata: {
                       size: file.metadata?.size || 0,
@@ -285,6 +309,7 @@ export default function DocumentManagement() {
   const filteredDocuments = documents.filter(doc => {
     const matchesSearch = doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          (doc.metadata.description && doc.metadata.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                         (doc.assetName && doc.assetName.toLowerCase().includes(searchQuery.toLowerCase())) ||
                          doc.assetId.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = categoryFilter === "all" || doc.metadata.category === categoryFilter;
     return matchesSearch && matchesCategory;
@@ -343,7 +368,7 @@ export default function DocumentManagement() {
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="search"
-                  placeholder="Nach Dokumentname, Asset-ID oder Beschreibung suchen..."
+                  placeholder="Nach Dokumentname, Asset-Name oder Beschreibung suchen..."
                   className="pl-8"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -389,17 +414,9 @@ export default function DocumentManagement() {
                         <h4 className="font-medium text-sm truncate flex-1">
                           {doc.metadata.original_name || doc.name}
                         </h4>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(doc)}
-                          className="text-destructive hover:text-destructive/80 h-8 w-8 p-0 flex-shrink-0"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
                       </div>
                       <p className="text-xs text-muted-foreground mb-2">
-                        Asset: {doc.assetId}
+                        Asset: {doc.assetName || doc.assetId}
                       </p>
                       {doc.metadata.description && (
                         <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
@@ -435,6 +452,15 @@ export default function DocumentManagement() {
                         >
                           <Download className="h-3 w-3 mr-1" />
                           Download
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(doc)}
+                          className="text-destructive hover:text-destructive/80 text-xs"
+                        >
+                          <Trash2 className="h-3 w-3 mr-1" />
+                          Löschen
                         </Button>
                       </div>
                     </div>
@@ -476,7 +502,12 @@ export default function DocumentManagement() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="secondary">{doc.assetId}</Badge>
+                        <div>
+                          <div className="font-medium">{doc.assetName || doc.assetId}</div>
+                          {doc.assetName && (
+                            <div className="text-xs text-muted-foreground">{doc.assetId}</div>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline">
@@ -608,7 +639,7 @@ export default function DocumentManagement() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <strong>Asset:</strong> {previewDocument.assetId}
+                  <strong>Asset:</strong> {previewDocument.assetName || previewDocument.assetId}
                 </div>
                 <div>
                   <strong>Kategorie:</strong> {getCategoryLabel(previewDocument.metadata.category || 'other')}
