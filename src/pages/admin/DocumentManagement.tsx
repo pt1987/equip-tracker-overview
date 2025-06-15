@@ -32,6 +32,8 @@ interface DocumentFile {
   name: string;
   created_at: string;
   updated_at: string;
+  assetId: string;
+  fullPath: string;
   metadata: {
     size: number;
     mimetype: string;
@@ -55,9 +57,10 @@ export default function DocumentManagement() {
 
   // Upload form state
   const [uploadFile, setUploadFile] = useState<File | null>(null);
-  const [uploadCategory, setUploadCategory] = useState("general");
+  const [uploadCategory, setUploadCategory] = useState("other");
   const [uploadDescription, setUploadDescription] = useState("");
   const [uploadTags, setUploadTags] = useState("");
+  const [selectedAssetId, setSelectedAssetId] = useState("");
 
   useEffect(() => {
     fetchDocuments();
@@ -65,12 +68,12 @@ export default function DocumentManagement() {
 
   const fetchDocuments = async () => {
     try {
-      console.log('Fetching documents from admin-documents bucket...');
+      console.log('Fetching documents from asset-documents bucket...');
       
       const { data, error } = await supabase.storage
-        .from('admin-documents')
+        .from('asset-documents')
         .list('', {
-          limit: 100,
+          limit: 1000,
           offset: 0,
         });
 
@@ -86,25 +89,64 @@ export default function DocumentManagement() {
         setDocuments([]);
       } else {
         console.log('Raw storage files:', data);
-        const formattedDocs: DocumentFile[] = (data || [])
-          .filter(file => file.name && !file.name.endsWith('/'))
-          .map(file => ({
-            id: file.id || file.name,
-            name: file.name,
-            created_at: file.created_at || new Date().toISOString(),
-            updated_at: file.updated_at || new Date().toISOString(),
-            metadata: {
-              size: file.metadata?.size || 0,
-              mimetype: file.metadata?.mimetype || 'application/octet-stream',
-              category: file.metadata?.category || 'general',
-              description: file.metadata?.description,
-              tags: file.metadata?.tags || [],
-              original_name: file.metadata?.original_name || file.name
-            }
-          }));
         
-        console.log('Formatted documents:', formattedDocs);
-        setDocuments(formattedDocs);
+        // Process all files and organize by asset
+        const allDocuments: DocumentFile[] = [];
+        
+        for (const folder of data || []) {
+          if (folder.name && !folder.name.includes('.')) {
+            // This is likely a folder (asset ID)
+            const assetId = folder.name;
+            
+            // Get files in this asset folder
+            const { data: assetFiles, error: assetError } = await supabase.storage
+              .from('asset-documents')
+              .list(assetId);
+            
+            if (!assetError && assetFiles) {
+              for (const file of assetFiles) {
+                if (file.name && file.id) {
+                  // Parse filename for category and metadata
+                  const fileNameParts = file.name.split('_');
+                  let category = "other";
+                  let originalName = file.name;
+                  
+                  if (fileNameParts.length > 1) {
+                    category = fileNameParts[0];
+                    originalName = fileNameParts.slice(1).join('_');
+                    
+                    // Remove version info if present
+                    if (fileNameParts.length > 2 && fileNameParts[1].startsWith('v')) {
+                      originalName = fileNameParts.slice(2).join('_');
+                    }
+                  }
+
+                  const doc: DocumentFile = {
+                    id: file.id,
+                    name: originalName,
+                    created_at: file.created_at || new Date().toISOString(),
+                    updated_at: file.updated_at || new Date().toISOString(),
+                    assetId: assetId,
+                    fullPath: `${assetId}/${file.name}`,
+                    metadata: {
+                      size: file.metadata?.size || 0,
+                      mimetype: file.metadata?.mimetype || 'application/octet-stream',
+                      category: category,
+                      description: file.metadata?.description,
+                      tags: file.metadata?.tags || [],
+                      original_name: originalName
+                    }
+                  };
+                  
+                  allDocuments.push(doc);
+                }
+              }
+            }
+          }
+        }
+        
+        console.log('Processed documents:', allDocuments);
+        setDocuments(allDocuments);
       }
     } catch (error) {
       console.error('Unexpected error fetching documents:', error);
@@ -120,33 +162,33 @@ export default function DocumentManagement() {
   };
 
   const handleUpload = async () => {
-    if (!uploadFile) {
+    if (!uploadFile || !selectedAssetId) {
       toast({
         variant: "destructive",
         title: "Fehler",
-        description: "Bitte wählen Sie eine Datei aus."
+        description: "Bitte wählen Sie eine Datei und ein Asset aus."
       });
       return;
     }
 
     setUploading(true);
     try {
-      const fileName = `${Date.now()}-${uploadFile.name}`;
+      const fileName = `${uploadCategory}_${Date.now()}_${uploadFile.name}`;
+      const filePath = `${selectedAssetId}/${fileName}`;
       
       // Create metadata
       const metadata = {
-        category: uploadCategory,
         description: uploadDescription || undefined,
         tags: uploadTags ? uploadTags.split(',').map(tag => tag.trim()) : [],
         original_name: uploadFile.name
       };
 
-      console.log('Uploading file with metadata:', { fileName, metadata });
+      console.log('Uploading file with metadata:', { filePath, metadata });
 
       // Upload to storage with metadata
       const { error: uploadError } = await supabase.storage
-        .from('admin-documents')
-        .upload(fileName, uploadFile, {
+        .from('asset-documents')
+        .upload(filePath, uploadFile, {
           metadata
         });
 
@@ -178,10 +220,10 @@ export default function DocumentManagement() {
 
   const handleDelete = async (document: DocumentFile) => {
     try {
-      console.log('Deleting document:', document.name);
+      console.log('Deleting document:', document.fullPath);
       const { error } = await supabase.storage
-        .from('admin-documents')
-        .remove([document.name]);
+        .from('asset-documents')
+        .remove([document.fullPath]);
 
       if (error) {
         console.error('Delete error:', error);
@@ -206,10 +248,10 @@ export default function DocumentManagement() {
 
   const handleDownload = async (document: DocumentFile) => {
     try {
-      console.log('Downloading document:', document.name);
+      console.log('Downloading document:', document.fullPath);
       const { data, error } = await supabase.storage
-        .from('admin-documents')
-        .download(document.name);
+        .from('asset-documents')
+        .download(document.fullPath);
 
       if (error) {
         console.error('Download error:', error);
@@ -234,14 +276,16 @@ export default function DocumentManagement() {
 
   const resetUploadForm = () => {
     setUploadFile(null);
-    setUploadCategory("general");
+    setUploadCategory("other");
     setUploadDescription("");
     setUploadTags("");
+    setSelectedAssetId("");
   };
 
   const filteredDocuments = documents.filter(doc => {
     const matchesSearch = doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         (doc.metadata.description && doc.metadata.description.toLowerCase().includes(searchQuery.toLowerCase()));
+                         (doc.metadata.description && doc.metadata.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                         doc.assetId.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = categoryFilter === "all" || doc.metadata.category === categoryFilter;
     return matchesSearch && matchesCategory;
   });
@@ -254,12 +298,11 @@ export default function DocumentManagement() {
 
   const getCategoryLabel = (category: string) => {
     const labels: Record<string, string> = {
-      general: "Allgemein",
-      contract: "Verträge",
-      invoice: "Rechnungen",
-      manual: "Handbücher",
-      compliance: "Compliance",
-      hr: "Personal"
+      invoice: "Rechnung",
+      warranty: "Garantie", 
+      repair: "Reparatur",
+      manual: "Handbuch",
+      other: "Sonstiges"
     };
     return labels[category] || category;
   };
@@ -277,7 +320,7 @@ export default function DocumentManagement() {
       <div className={`flex ${isMobile ? 'flex-col gap-4' : 'justify-between items-start'}`}>
         <div>
           <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold`}>Dokument-Management</h1>
-          <p className="text-muted-foreground mt-1">Verwalten Sie alle hochgeladenen Dokumente zentral</p>
+          <p className="text-muted-foreground mt-1">Verwalten Sie alle Asset-Dokumente zentral</p>
         </div>
         <Button 
           onClick={() => setUploadDialogOpen(true)}
@@ -300,7 +343,7 @@ export default function DocumentManagement() {
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="search"
-                  placeholder="Nach Dokumentname oder Beschreibung suchen..."
+                  placeholder="Nach Dokumentname, Asset-ID oder Beschreibung suchen..."
                   className="pl-8"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -315,12 +358,11 @@ export default function DocumentManagement() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Alle Kategorien</SelectItem>
-                  <SelectItem value="general">Allgemein</SelectItem>
-                  <SelectItem value="contract">Verträge</SelectItem>
-                  <SelectItem value="invoice">Rechnungen</SelectItem>
-                  <SelectItem value="manual">Handbücher</SelectItem>
-                  <SelectItem value="compliance">Compliance</SelectItem>
-                  <SelectItem value="hr">Personal</SelectItem>
+                  <SelectItem value="invoice">Rechnung</SelectItem>
+                  <SelectItem value="warranty">Garantie</SelectItem>
+                  <SelectItem value="repair">Reparatur</SelectItem>
+                  <SelectItem value="manual">Handbuch</SelectItem>
+                  <SelectItem value="other">Sonstiges</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -347,6 +389,9 @@ export default function DocumentManagement() {
                         <h4 className="font-medium text-sm truncate">
                           {doc.metadata.original_name || doc.name}
                         </h4>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Asset: {doc.assetId}
+                        </p>
                         {doc.metadata.description && (
                           <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                             {doc.metadata.description}
@@ -354,7 +399,7 @@ export default function DocumentManagement() {
                         )}
                         <div className="flex flex-wrap items-center gap-2 mt-2">
                           <Badge variant="outline" className="text-xs">
-                            {getCategoryLabel(doc.metadata.category || 'general')}
+                            {getCategoryLabel(doc.metadata.category || 'other')}
                           </Badge>
                           <span className="text-xs text-muted-foreground">
                             {formatFileSize(doc.metadata.size)}
@@ -409,6 +454,7 @@ export default function DocumentManagement() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
+                    <TableHead>Asset</TableHead>
                     <TableHead>Kategorie</TableHead>
                     <TableHead>Größe</TableHead>
                     <TableHead>Hochgeladen am</TableHead>
@@ -430,8 +476,11 @@ export default function DocumentManagement() {
                         </div>
                       </TableCell>
                       <TableCell>
+                        <Badge variant="secondary">{doc.assetId}</Badge>
+                      </TableCell>
+                      <TableCell>
                         <Badge variant="outline">
-                          {getCategoryLabel(doc.metadata.category || 'general')}
+                          {getCategoryLabel(doc.metadata.category || 'other')}
                         </Badge>
                       </TableCell>
                       <TableCell>{formatFileSize(doc.metadata.size)}</TableCell>
@@ -467,7 +516,7 @@ export default function DocumentManagement() {
                   ))}
                   {filteredDocuments.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                         {documents.length === 0 ? "Keine Dokumente vorhanden" : "Keine Dokumente gefunden"}
                       </TableCell>
                     </TableRow>
@@ -487,6 +536,15 @@ export default function DocumentManagement() {
           </DialogHeader>
           <div className="space-y-4">
             <div>
+              <Label htmlFor="asset-id">Asset ID</Label>
+              <Input
+                id="asset-id"
+                placeholder="Asset ID eingeben"
+                value={selectedAssetId}
+                onChange={(e) => setSelectedAssetId(e.target.value)}
+              />
+            </div>
+            <div>
               <Label htmlFor="file">Datei</Label>
               <Input
                 id="file"
@@ -502,12 +560,11 @@ export default function DocumentManagement() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="general">Allgemein</SelectItem>
-                  <SelectItem value="contract">Verträge</SelectItem>
-                  <SelectItem value="invoice">Rechnungen</SelectItem>
-                  <SelectItem value="manual">Handbücher</SelectItem>
-                  <SelectItem value="compliance">Compliance</SelectItem>
-                  <SelectItem value="hr">Personal</SelectItem>
+                  <SelectItem value="invoice">Rechnung</SelectItem>
+                  <SelectItem value="warranty">Garantie</SelectItem>
+                  <SelectItem value="repair">Reparatur</SelectItem>
+                  <SelectItem value="manual">Handbuch</SelectItem>
+                  <SelectItem value="other">Sonstiges</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -533,7 +590,7 @@ export default function DocumentManagement() {
               <Button variant="outline" onClick={() => setUploadDialogOpen(false)}>
                 Abbrechen
               </Button>
-              <Button onClick={handleUpload} disabled={!uploadFile || uploading}>
+              <Button onClick={handleUpload} disabled={!uploadFile || !selectedAssetId || uploading}>
                 {uploading ? "Wird hochgeladen..." : "Hochladen"}
               </Button>
             </div>
@@ -551,7 +608,10 @@ export default function DocumentManagement() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <strong>Kategorie:</strong> {getCategoryLabel(previewDocument.metadata.category || 'general')}
+                  <strong>Asset:</strong> {previewDocument.assetId}
+                </div>
+                <div>
+                  <strong>Kategorie:</strong> {getCategoryLabel(previewDocument.metadata.category || 'other')}
                 </div>
                 <div>
                   <strong>Größe:</strong> {formatFileSize(previewDocument.metadata.size)}
