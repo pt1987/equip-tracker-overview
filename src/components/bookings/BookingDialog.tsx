@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { format, addHours } from "date-fns";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -14,20 +15,23 @@ import { createBooking } from "@/data/bookings";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { getUserId } from "@/hooks/use-auth";
+import { useQuery } from "@tanstack/react-query";
+import { getAssets } from "@/data/assets";
 
 interface BookingDialogProps {
-  asset: Asset;
+  asset?: Asset | null;
   initialDate?: Date;
   employees: Employee[];
   onClose: () => void;
 }
 
 export default function BookingDialog({
-  asset,
+  asset: initialAsset,
   initialDate,
   employees,
   onClose
 }: BookingDialogProps) {
+  const [selectedAssetId, setSelectedAssetId] = useState(initialAsset?.id || "");
   const [startDate, setStartDate] = useState<Date | undefined>(initialDate);
   const [endDate, setEndDate] = useState<Date | undefined>(
     initialDate ? addHours(initialDate, 8) : undefined
@@ -42,12 +46,30 @@ export default function BookingDialog({
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
+  // Fetch all assets for selection
+  const { data: allAssets = [] } = useQuery({
+    queryKey: ["assets"],
+    queryFn: getAssets
+  });
+
+  // Filter only pool devices
+  const poolAssets = allAssets.filter(asset => 
+    asset.isPoolDevice === true || asset.status === 'pool'
+  );
+
   useEffect(() => {
     // Set employee ID to the first employee in the list
     if (employees.length > 0 && !employeeId) {
       setEmployeeId(employees[0].id);
     }
   }, [employees, employeeId]);
+
+  useEffect(() => {
+    // Set asset ID to the first pool asset if none selected and no initial asset
+    if (poolAssets.length > 0 && !selectedAssetId) {
+      setSelectedAssetId(poolAssets[0].id);
+    }
+  }, [poolAssets, selectedAssetId]);
 
   // Handle date selection and close popover
   const handleStartDateSelect = (date: Date | undefined) => {
@@ -61,7 +83,7 @@ export default function BookingDialog({
   };
 
   const handleBook = async () => {
-    if (!startDate || !endDate || !employeeId) {
+    if (!startDate || !endDate || !employeeId || !selectedAssetId) {
       toast({
         variant: "destructive",
         title: "Fehlende Informationen",
@@ -96,7 +118,7 @@ export default function BookingDialog({
       const endDateISO = endDateTime.toISOString();
 
       console.log("Booking asset with dates:", {
-        assetId: asset.id,
+        assetId: selectedAssetId,
         employeeId,
         startDate: startDateISO,
         endDate: endDateISO,
@@ -104,7 +126,7 @@ export default function BookingDialog({
       });
 
       const booking = await createBooking(
-        asset.id,
+        selectedAssetId,
         employeeId,
         startDateISO,
         endDateISO,
@@ -112,9 +134,10 @@ export default function BookingDialog({
       );
 
       if (booking) {
+        const selectedAsset = poolAssets.find(a => a.id === selectedAssetId);
         toast({
           title: "Buchung erfolgreich",
-          description: `${asset.name} wurde erfolgreich für den angegebenen Zeitraum gebucht.`,
+          description: `${selectedAsset?.name || 'Gerät'} wurde erfolgreich für den angegebenen Zeitraum gebucht.`,
         });
         onClose();
       } else {
@@ -142,6 +165,22 @@ export default function BookingDialog({
   // Content for both mobile and desktop views
   const FormContent = () => (
     <div className="grid gap-4 py-4 overflow-y-auto max-h-[calc(100vh-200px)]">
+      <div className="grid gap-2">
+        <Label htmlFor="asset">Poolgerät</Label>
+        <Select value={selectedAssetId} onValueChange={setSelectedAssetId}>
+          <SelectTrigger id="asset">
+            <SelectValue placeholder="Poolgerät auswählen" />
+          </SelectTrigger>
+          <SelectContent>
+            {poolAssets.map((asset) => (
+              <SelectItem key={asset.id} value={asset.id}>
+                {asset.name} ({asset.manufacturer} {asset.model})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <div className="grid gap-2">
         <Label htmlFor="employee">Mitarbeiter</Label>
         <Select value={employeeId} onValueChange={setEmployeeId}>
@@ -270,7 +309,7 @@ export default function BookingDialog({
           <DrawerHeader className="text-left">
             <DrawerTitle>Poolgerät buchen</DrawerTitle>
             <DrawerDescription>
-              Buchen Sie {asset.name} ({asset.manufacturer} {asset.model})
+              Wählen Sie ein Poolgerät und einen Zeitraum für die Buchung aus.
             </DrawerDescription>
           </DrawerHeader>
           <div className="px-4">
@@ -290,7 +329,7 @@ export default function BookingDialog({
         <DialogHeader>
           <DialogTitle>Poolgerät buchen</DialogTitle>
           <DialogDescription>
-            Buchen Sie {asset.name} ({asset.manufacturer} {asset.model}) für einen bestimmten Zeitraum.
+            Wählen Sie ein Poolgerät und einen Zeitraum für die Buchung aus.
           </DialogDescription>
         </DialogHeader>
         <FormContent />

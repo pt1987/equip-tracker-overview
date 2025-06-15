@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getAllBookings, updateBookingStatuses } from "@/data/bookings";
@@ -89,10 +88,8 @@ export default function AssetBookings() {
   };
 
   const handleCreateBooking = () => {
-    // If there are available assets, pre-select the first one
-    if (filteredAssets.length > 0) {
-      setSelectedAsset(filteredAssets[0]);
-    }
+    // Reset selected asset to allow free selection
+    setSelectedAsset(null);
     setShowBookingDialog(true);
   };
   
