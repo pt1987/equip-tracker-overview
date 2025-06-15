@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
@@ -43,7 +44,7 @@ export function MobileSidebar() {
   return (
     <div className="flex flex-col h-full">
       <div className="px-4 pb-4 flex justify-between items-center">
-        <Link to="/" className="flex items-center font-semibold">
+        <Link to="/" className="flex items-center font-semibold text-n26-primary">
           Asset Tracker
         </Link>
       </div>
@@ -59,9 +60,9 @@ export function MobileSidebar() {
                   <button
                     onClick={() => toggleMenu(item.title)}
                     className={cn(
-                      "w-full flex items-center justify-between gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
+                      "w-full flex items-center justify-between gap-3 px-4 py-2 rounded-md hover:bg-n26-secondary/20 transition-colors text-n26-primary",
                       (location.pathname === item.href || isInSubPath(item) || expandedMenus[item.title])
-                        ? "font-medium bg-secondary"
+                        ? "font-medium bg-n26-secondary/30"
                         : ""
                     )}
                   >
@@ -83,9 +84,9 @@ export function MobileSidebar() {
                           <Link
                             to={subItem.href}
                             className={cn(
-                              "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
+                              "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-n26-secondary/20 transition-colors text-n26-primary",
                               location.pathname === subItem.href
-                                ? "font-medium bg-secondary"
+                                ? "font-medium bg-n26-secondary/30"
                                 : ""
                             )}
                           >
@@ -101,8 +102,8 @@ export function MobileSidebar() {
                 <Link
                   to={item.href}
                   className={cn(
-                    "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
-                    location.pathname === item.href ? "font-medium bg-secondary" : ""
+                    "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-n26-secondary/20 transition-colors text-n26-primary",
+                    location.pathname === item.href ? "font-medium bg-n26-secondary/30" : ""
                   )}
                 >
                   <item.icon size={20} />
@@ -115,7 +116,7 @@ export function MobileSidebar() {
           {adminLinks.length > 0 && (
             <>
               <li className="pt-4">
-                <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
+                <div className="px-4 py-2 text-xs font-semibold text-n26-primary/70 uppercase">
                   Admin
                 </div>
               </li>
@@ -124,8 +125,8 @@ export function MobileSidebar() {
                   <Link
                     to={item.to}
                     className={cn(
-                      "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
-                      location.pathname === item.to ? "font-medium bg-secondary" : ""
+                      "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-n26-secondary/20 transition-colors text-n26-primary",
+                      location.pathname === item.to ? "font-medium bg-n26-secondary/30" : ""
                     )}
                   >
                     <NavigationItems.Icon name={item.icon} />
@@ -139,7 +140,7 @@ export function MobileSidebar() {
           {createLinks.length > 0 && (
             <>
               <li className="pt-4">
-                <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
+                <div className="px-4 py-2 text-xs font-semibold text-n26-primary/70 uppercase">
                   Erstellen
                 </div>
               </li>
@@ -148,8 +149,8 @@ export function MobileSidebar() {
                   <Link
                     to={item.to}
                     className={cn(
-                      "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
-                      location.pathname === item.to ? "font-medium bg-secondary" : ""
+                      "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-n26-secondary/20 transition-colors text-n26-primary",
+                      location.pathname === item.to ? "font-medium bg-n26-secondary/30" : ""
                     )}
                   >
                     <NavigationItems.Icon name={item.icon} />
@@ -161,7 +162,7 @@ export function MobileSidebar() {
           )}
           
           <li className="pt-4">
-            <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
+            <div className="px-4 py-2 text-xs font-semibold text-n26-primary/70 uppercase">
               Konto
             </div>
           </li>
@@ -169,7 +170,7 @@ export function MobileSidebar() {
             <li>
               <Button
                 variant="ghost" 
-                className="w-full justify-start text-left px-4 py-2 rounded-md hover:bg-secondary"
+                className="w-full justify-start text-left px-4 py-2 rounded-md hover:bg-n26-secondary/20 text-n26-primary"
                 onClick={() => logout()}
               >
                 <LogOut size={20} className="mr-3" />
@@ -181,8 +182,8 @@ export function MobileSidebar() {
               <Link
                 to="/login"
                 className={cn(
-                  "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
-                  location.pathname === "/login" ? "font-medium bg-secondary" : ""
+                  "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-n26-secondary/20 transition-colors text-n26-primary",
+                  location.pathname === "/login" ? "font-medium bg-n26-secondary/30" : ""
                 )}
               >
                 <LogIn size={20} />

@@ -23,7 +23,7 @@ export function MobileNavbar() {
           <Button
             variant="ghost"
             size="sm"
-            className="flex items-center"
+            className="flex items-center bg-gradient-to-r from-n26-primary to-n26-accent hover:from-n26-primary/90 hover:to-n26-accent/90 text-white"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
           >
             <Menu className="h-4 w-4" />
@@ -34,14 +34,18 @@ export function MobileNavbar() {
         </SheetContent>
       </Sheet>
       <div className="flex items-center">
-        <Link to="/" className="font-semibold">
+        <Link to="/" className="font-semibold text-n26-primary">
           Asset Tracker
         </Link>
       </div>
       
       {!isAuthenticated && (
         <Link to="/login">
-          <Button variant="outline" size="sm">
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="border-n26-primary text-n26-primary hover:bg-n26-primary hover:text-white"
+          >
             <LogIn className="h-4 w-4 mr-2" />
             Anmelden
           </Button>
@@ -52,6 +56,7 @@ export function MobileNavbar() {
         <Button 
           variant="outline" 
           size="sm"
+          className="border-n26-primary text-n26-primary hover:bg-n26-primary hover:text-white"
           onClick={() => logout()}
         >
           <LogOut className="h-4 w-4 mr-2" />

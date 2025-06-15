@@ -42,7 +42,7 @@ export function DesktopSidebar() {
 
   return (
     <aside className="fixed left-0 top-0 z-40 h-full flex-col bg-background border-r border-r-border flex w-64 overflow-hidden">
-      <Link to="/" className="flex items-center h-16 px-4 font-semibold">
+      <Link to="/" className="flex items-center h-16 px-4 font-semibold text-n26-primary">
         Asset Tracker
       </Link>
       <div className="px-4 py-2 border-t border-b">
@@ -57,9 +57,9 @@ export function DesktopSidebar() {
                   <button
                     onClick={() => toggleMenu(item.title)}
                     className={cn(
-                      "w-full flex items-center justify-between gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
+                      "w-full flex items-center justify-between gap-3 px-4 py-2 rounded-md hover:bg-n26-secondary/20 transition-colors text-n26-primary",
                       (location.pathname === item.href || isInSubPath(item) || expandedMenus[item.title])
-                        ? "font-medium bg-secondary"
+                        ? "font-medium bg-n26-secondary/30"
                         : ""
                     )}
                   >
@@ -81,9 +81,9 @@ export function DesktopSidebar() {
                           <Link
                             to={subItem.href}
                             className={cn(
-                              "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors text-sm",
+                              "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-n26-secondary/20 transition-colors text-sm text-n26-primary",
                               location.pathname === subItem.href
-                                ? "font-medium bg-secondary"
+                                ? "font-medium bg-n26-secondary/30"
                                 : ""
                             )}
                           >
@@ -99,8 +99,8 @@ export function DesktopSidebar() {
                 <Link
                   to={item.href}
                   className={cn(
-                    "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
-                    location.pathname === item.href ? "font-medium bg-secondary" : ""
+                    "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-n26-secondary/20 transition-colors text-n26-primary",
+                    location.pathname === item.href ? "font-medium bg-n26-secondary/30" : ""
                   )}
                 >
                   <item.icon size={20} />
@@ -113,7 +113,7 @@ export function DesktopSidebar() {
           {adminLinks.length > 0 && (
             <>
               <li className="pt-4">
-                <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
+                <div className="px-4 py-2 text-xs font-semibold text-n26-primary/70 uppercase">
                   Admin
                 </div>
               </li>
@@ -122,8 +122,8 @@ export function DesktopSidebar() {
                   <Link
                     to={item.to}
                     className={cn(
-                      "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
-                      location.pathname.includes(item.to) ? "font-medium bg-secondary" : ""
+                      "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-n26-secondary/20 transition-colors text-n26-primary",
+                      location.pathname.includes(item.to) ? "font-medium bg-n26-secondary/30" : ""
                     )}
                   >
                     <NavigationItems.Icon name={item.icon} />
@@ -137,7 +137,7 @@ export function DesktopSidebar() {
           {createLinks.length > 0 && (
             <>
               <li className="pt-4">
-                <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
+                <div className="px-4 py-2 text-xs font-semibold text-n26-primary/70 uppercase">
                   Erstellen
                 </div>
               </li>
@@ -146,8 +146,8 @@ export function DesktopSidebar() {
                   <Link
                     to={item.to}
                     className={cn(
-                      "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
-                      location.pathname === item.to ? "font-medium bg-secondary" : ""
+                      "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-n26-secondary/20 transition-colors text-n26-primary",
+                      location.pathname === item.to ? "font-medium bg-n26-secondary/30" : ""
                     )}
                   >
                     <NavigationItems.Icon name={item.icon} />
@@ -159,7 +159,7 @@ export function DesktopSidebar() {
           )}
           
           <li className="pt-4">
-            <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
+            <div className="px-4 py-2 text-xs font-semibold text-n26-primary/70 uppercase">
               Konto
             </div>
           </li>
@@ -167,7 +167,7 @@ export function DesktopSidebar() {
             <li>
               <Button
                 variant="ghost" 
-                className="w-full justify-start text-left px-4 py-2 rounded-md hover:bg-secondary"
+                className="w-full justify-start text-left px-4 py-2 rounded-md hover:bg-n26-secondary/20 text-n26-primary"
                 onClick={() => logout()}
               >
                 <LogOut size={20} className="mr-3" />
@@ -179,8 +179,8 @@ export function DesktopSidebar() {
               <Link
                 to="/login"
                 className={cn(
-                  "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary transition-colors",
-                  location.pathname === "/login" ? "font-medium bg-secondary" : ""
+                  "flex items-center gap-3 px-4 py-2 rounded-md hover:bg-n26-secondary/20 transition-colors text-n26-primary",
+                  location.pathname === "/login" ? "font-medium bg-n26-secondary/30" : ""
                 )}
               >
                 <LogIn size={20} />

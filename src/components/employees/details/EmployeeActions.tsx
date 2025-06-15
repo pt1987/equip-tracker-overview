@@ -27,7 +27,7 @@ export default function EmployeeActions({ onEdit, onDelete }: EmployeeActionsPro
       {/* Desktop view - show all buttons */}
       <div className="hidden md:flex items-center gap-2">
         <Button variant="outline" size="icon" className="h-8 w-8" onClick={onEdit}>
-          <Pencil className="h-4 w-4 text-gray-700" />
+          <Pencil className="h-4 w-4 text-n26-primary" />
           <span className="sr-only">Bearbeiten</span>
         </Button>
         
@@ -41,7 +41,7 @@ export default function EmployeeActions({ onEdit, onDelete }: EmployeeActionsPro
           <span className="sr-only">QR-Code anzeigen</span>
         </Button>
         
-        <Button variant="outline" size="icon" className="h-8 w-8 text-destructive" onClick={onDelete}>
+        <Button variant="outline" size="icon" className="h-8 w-8 text-destructive border-destructive hover:bg-destructive hover:text-white" onClick={onDelete}>
           <Trash2 className="h-4 w-4" />
           <span className="sr-only">Löschen</span>
         </Button>
@@ -52,7 +52,7 @@ export default function EmployeeActions({ onEdit, onDelete }: EmployeeActionsPro
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8">
-              <EllipsisVertical className="h-4 w-4 text-gray-700" />
+              <EllipsisVertical className="h-4 w-4 text-n26-primary" />
               <span className="sr-only">Mehr</span>
             </Button>
           </DropdownMenuTrigger>

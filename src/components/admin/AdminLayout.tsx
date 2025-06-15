@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { 
@@ -32,8 +33,10 @@ interface NavItemProps {
 const NavItem = ({ to, icon, label, active, onClick }: NavItemProps) => (
   <Link 
     to={to} 
-    className={`flex items-center gap-3 px-4 py-2 rounded-md ${
-      active ? "bg-primary text-primary-foreground" : "hover:bg-secondary"
+    className={`flex items-center gap-3 px-4 py-2 rounded-md transition-colors ${
+      active 
+        ? "bg-gradient-to-r from-n26-primary to-n26-accent text-white shadow-lg" 
+        : "hover:bg-n26-secondary/20 text-n26-primary"
     }`}
     onClick={onClick}
   >
@@ -121,8 +124,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="flex flex-col flex-grow border-r border-border bg-card h-full">
           {/* Sidebar header */}
           <div className="flex items-center h-16 px-6 border-b border-border">
-            <span className="flex items-center gap-2 font-semibold text-lg">
-              <Shield className="h-5 w-5 text-primary" />
+            <span className="flex items-center gap-2 font-semibold text-lg text-n26-primary">
+              <Shield className="h-5 w-5" />
               Admin Portal
             </span>
           </div>
@@ -145,7 +148,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Separator className="my-4" />
                 <Link 
                   to="/" 
-                  className="flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary"
+                  className="flex items-center gap-3 px-4 py-2 rounded-md hover:bg-n26-secondary/20 text-n26-primary"
                 >
                   <Home className="h-5 w-5" />
                   <span>Zurück zur Hauptseite</span>
@@ -156,9 +159,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {/* Sidebar footer with user info */}
             <div className="space-y-4 mt-4">
               <Separator />
-              <div className="px-3 text-sm text-muted-foreground">
+              <div className="px-3 text-sm text-n26-primary/70">
                 <p>Angemeldet als:</p>
-                <p className="font-medium text-foreground">{user?.name}</p>
+                <p className="font-medium text-n26-primary">{user?.name}</p>
                 <p className="text-xs">{user?.email}</p>
               </div>
               <div className="px-3">
@@ -167,7 +170,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <div className="px-3 pb-4">
                 <Button 
                   variant="outline" 
-                  className="w-full justify-start" 
+                  className="w-full justify-start border-n26-primary text-n26-primary hover:bg-n26-primary hover:text-white" 
                   onClick={() => handleLogout()}
                 >
                   <LogOut className="h-4 w-4 mr-2" />
@@ -182,30 +185,30 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Mobile header */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-20 bg-background border-b">
         <div className="flex justify-between items-center h-16 px-4">
-          <span className="flex items-center gap-2 font-semibold text-base">
-            <Shield className="h-5 w-5 text-primary" />
+          <span className="flex items-center gap-2 font-semibold text-base text-n26-primary">
+            <Shield className="h-5 w-5" />
             Admin Portal
           </span>
           <div className="flex items-center gap-2">
             <Link to="/">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className="text-n26-primary hover:bg-n26-secondary/20">
                 <Home className="h-5 w-5" />
               </Button>
             </Link>
             <Sheet open={isMobileNavOpen} onOpenChange={setIsMobileNavOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" size="icon">
+                <Button variant="outline" size="icon" className="border-n26-primary text-n26-primary hover:bg-n26-primary hover:text-white">
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="p-0">
                 <div className="flex flex-col h-full">
                   <div className="flex items-center justify-between h-16 px-6 border-b">
-                    <span className="flex items-center gap-2 font-semibold text-lg">
-                      <Shield className="h-5 w-5 text-primary" />
+                    <span className="flex items-center gap-2 font-semibold text-lg text-n26-primary">
+                      <Shield className="h-5 w-5" />
                       Admin Portal
                     </span>
-                    <Button variant="ghost" size="icon" onClick={() => setIsMobileNavOpen(false)}>
+                    <Button variant="ghost" size="icon" onClick={() => setIsMobileNavOpen(false)} className="text-n26-primary hover:bg-n26-secondary/20">
                       <X className="h-5 w-5" />
                     </Button>
                   </div>
@@ -226,7 +229,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         <Separator className="my-4" />
                         <Link 
                           to="/" 
-                          className="flex items-center gap-3 px-4 py-2 rounded-md hover:bg-secondary"
+                          className="flex items-center gap-3 px-4 py-2 rounded-md hover:bg-n26-secondary/20 text-n26-primary"
                           onClick={() => setIsMobileNavOpen(false)}
                         >
                           <Home className="h-5 w-5" />
@@ -237,9 +240,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     
                     <div className="space-y-4 mt-4">
                       <Separator />
-                      <div className="px-3 text-sm text-muted-foreground">
+                      <div className="px-3 text-sm text-n26-primary/70">
                         <p>Angemeldet als:</p>
-                        <p className="font-medium text-foreground">{user?.name}</p>
+                        <p className="font-medium text-n26-primary">{user?.name}</p>
                         <p className="text-xs">{user?.email}</p>
                       </div>
                       <div className="px-3">
@@ -248,7 +251,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       <div className="px-3 pb-4">
                         <Button 
                           variant="outline" 
-                          className="w-full justify-start" 
+                          className="w-full justify-start border-n26-primary text-n26-primary hover:bg-n26-primary hover:text-white" 
                           onClick={() => handleLogout()}
                         >
                           <LogOut className="h-4 w-4 mr-2" />
@@ -268,8 +271,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="flex flex-col flex-1 md:pl-64 pt-16 md:pt-0 w-full max-w-full">
         <div className="p-3 md:p-4 lg:p-6 w-full max-w-full flex-1">
           {showInactivityWarning && (
-            <div className="mb-6 p-4 bg-yellow-100 dark:bg-yellow-900 border border-yellow-300 dark:border-yellow-700 rounded-md">
-              <p className="text-sm text-yellow-800 dark:text-yellow-200">
+            <div className="mb-6 p-4 bg-n26-secondary/20 border border-n26-accent/30 rounded-md">
+              <p className="text-sm text-n26-primary">
                 Ihre Sitzung wird in Kürze aufgrund von Inaktivität beendet. Bewegen Sie die Maus oder drücken Sie eine Taste, um die Sitzung aktiv zu halten.
               </p>
             </div>
