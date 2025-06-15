@@ -50,6 +50,19 @@ export default function BookingList({
   const [currentPage, setCurrentPage] = useState(1);
   const bookingsPerPage = 10;
 
+  // Debug logging
+  console.log("=== BookingList Debug Info ===");
+  console.log("Total assets:", assets.length);
+  console.log("Total bookings:", bookings.length);
+  console.log("Assets:", assets.map(a => ({ id: a.id, name: a.name, isPoolDevice: a.isPoolDevice, status: a.status })));
+  console.log("All bookings:", bookings.map(b => ({ 
+    id: b.id, 
+    assetId: b.assetId, 
+    status: b.status, 
+    startDate: b.startDate, 
+    endDate: b.endDate 
+  })));
+
   // Get asset details by ID
   const getAsset = (assetId: string): Asset | undefined => {
     return assets.find(a => a.id === assetId);
@@ -60,21 +73,29 @@ export default function BookingList({
     return employees.find(e => e.id === employeeId);
   };
 
-  // Get pool asset IDs to filter bookings
+  // CORRECTED: Get pool asset IDs - check for pool devices OR assets with status 'pool'
   const poolAssetIds = assets
-    .filter(asset => asset.isPoolDevice === true || asset.status === 'pool')
+    .filter(asset => {
+      const isPool = asset.isPoolDevice === true || asset.status === 'pool';
+      console.log(`Asset ${asset.name} (${asset.id}): isPoolDevice=${asset.isPoolDevice}, status=${asset.status}, isPool=${isPool}`);
+      return isPool;
+    })
     .map(asset => asset.id);
 
-  console.log("BookingList - Pool assets:", poolAssetIds.length);
-  console.log("BookingList - All bookings:", bookings.length);
+  console.log("Pool asset IDs:", poolAssetIds);
 
-  // Filter bookings to only show pool device bookings
-  const poolBookings = bookings.filter(booking => 
-    poolAssetIds.includes(booking.assetId)
-  );
+  // CORRECTED: Show ALL bookings, not just pool device bookings
+  // The booking overview should show all bookings regardless of pool status
+  const relevantBookings = bookings.filter(booking => {
+    // Show all bookings that have valid asset references
+    const asset = getAsset(booking.assetId);
+    const hasAsset = !!asset;
+    console.log(`Booking ${booking.id}: assetId=${booking.assetId}, hasAsset=${hasAsset}, asset=${asset?.name}`);
+    return hasAsset;
+  });
 
-  console.log("BookingList - Pool bookings:", poolBookings.length);
-  console.log("BookingList - Pool bookings data:", poolBookings);
+  console.log("Relevant bookings to display:", relevantBookings.length);
+  console.log("Relevant bookings data:", relevantBookings);
 
   // Handle booking cancellation
   const handleCancelBooking = async () => {
@@ -154,7 +175,7 @@ export default function BookingList({
   };
 
   // Sorted bookings - prioritize active and reserved bookings
-  const sortedBookings = poolBookings.sort((a, b) => {
+  const sortedBookings = relevantBookings.sort((a, b) => {
     // Sort by status priority first
     const statusPriority = { 'active': 1, 'reserved': 2, 'completed': 3, 'canceled': 4 };
     const aPriority = statusPriority[a.status as keyof typeof statusPriority] || 5;
@@ -164,7 +185,7 @@ export default function BookingList({
       return aPriority - bPriority;
     }
     
-    // Then sort by start date
+    // Then sort by start date (newest first)
     return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
   });
     
@@ -174,15 +195,15 @@ export default function BookingList({
   const startIndex = (currentPage - 1) * bookingsPerPage;
   const paginatedBookings = sortedBookings.slice(startIndex, startIndex + bookingsPerPage);
 
-  console.log("BookingList - Displaying bookings:", paginatedBookings.length);
+  console.log("Final display bookings:", paginatedBookings.length);
 
   return (
     <div>
-      {poolBookings.length > 0 ? (
+      {sortedBookings.length > 0 ? (
         <>
           <div className="mb-4">
             <p className="text-sm text-muted-foreground">
-              Zeige {poolBookings.length} Buchung(en) für Poolgeräte
+              Zeige {sortedBookings.length} Buchung(en)
             </p>
           </div>
           
@@ -336,7 +357,7 @@ export default function BookingList({
         <div className="text-center py-8 text-muted-foreground">
           <div className="p-4 bg-n26-secondary/20 rounded-lg">
             <h3 className="font-semibold mb-2">Keine Buchungen gefunden</h3>
-            <p>Es wurden noch keine Buchungen für Poolgeräte erstellt.</p>
+            <p>Es wurden noch keine Buchungen erstellt.</p>
           </div>
         </div>
       )}

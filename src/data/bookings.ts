@@ -23,17 +23,25 @@ type RawBooking = {
 // Get all bookings
 export const getAllBookings = async (): Promise<AssetBooking[]> => {
   try {
+    console.log("=== getAllBookings Debug ===");
+    
     const { data, error } = await supabase
       .from('asset_bookings')
       .select('*')
-      .order('start_date', { ascending: true });
+      .order('start_date', { ascending: false }); // Changed to descending to show recent first
 
     if (error) {
       console.error("Error fetching bookings:", error);
       throw error;
     }
 
-    return (data || []).map(mapDbBookingToBooking);
+    console.log("Raw booking data from database:", data);
+    console.log("Number of bookings found:", data?.length || 0);
+
+    const mappedBookings = (data || []).map(mapDbBookingToBooking);
+    console.log("Mapped bookings:", mappedBookings);
+
+    return mappedBookings;
   } catch (error) {
     console.error("Error in getAllBookings:", error);
     return [];
@@ -445,42 +453,77 @@ export const updateBookingDates = async (
   }
 };
 
-// Check for bookings that need status updates
+// CORRECTED: Check for bookings that need status updates
 export const updateBookingStatuses = async (): Promise<void> => {
   try {
     const now = new Date().toISOString();
     
+    console.log("=== updateBookingStatuses Debug ===");
     console.log("Updating booking statuses at:", now);
     
-    // Update reserved -> active (bookings that have started)
-    const { data: activatedBookings, error: activatedError } = await supabase
+    // First, get all non-canceled/completed bookings to check
+    const { data: allBookings, error: fetchError } = await supabase
       .from('asset_bookings')
-      .update({ status: 'active' })
-      .eq('status', 'reserved')
-      .lte('start_date', now)
-      .gt('end_date', now)
-      .select();
-    
-    if (activatedError) {
-      console.error("Error updating reserved to active:", activatedError);
-    } else if (activatedBookings && activatedBookings.length > 0) {
-      console.log("Updated bookings to active:", activatedBookings.length);
-    }
-    
-    // Update active -> completed (bookings that have ended)
-    const { data: completedBookings, error: completedError } = await supabase
-      .from('asset_bookings')
-      .update({ status: 'completed' })
-      .eq('status', 'active')
-      .lte('end_date', now)
-      .select();
+      .select('*')
+      .not('status', 'in', '(canceled,completed)');
 
-    if (completedError) {
-      console.error("Error updating active to completed:", completedError);
-    } else if (completedBookings && completedBookings.length > 0) {
-      console.log("Updated bookings to completed:", completedBookings.length);
+    if (fetchError) {
+      console.error("Error fetching bookings for status update:", fetchError);
+      return;
     }
 
+    console.log("Bookings to check for status updates:", allBookings?.length || 0);
+
+    if (!allBookings || allBookings.length === 0) {
+      console.log("No bookings to update");
+      return;
+    }
+
+    // Check each booking individually and update if needed
+    for (const booking of allBookings) {
+      const startDate = new Date(booking.start_date);
+      const endDate = new Date(booking.end_date);
+      const nowDate = new Date(now);
+      
+      console.log(`Checking booking ${booking.id}:`, {
+        current_status: booking.status,
+        start_date: booking.start_date,
+        end_date: booking.end_date,
+        now: now,
+        startDate_before_now: startDate <= nowDate,
+        endDate_after_now: endDate >= nowDate,
+        endDate_before_now: endDate < nowDate
+      });
+
+      let newStatus = booking.status;
+
+      // Update reserved -> active (bookings that have started and haven't ended)
+      if (booking.status === 'reserved' && startDate <= nowDate && endDate >= nowDate) {
+        newStatus = 'active';
+        console.log(`Updating booking ${booking.id} from reserved to active`);
+      }
+      
+      // Update active -> completed (bookings that have ended)
+      else if (booking.status === 'active' && endDate < nowDate) {
+        newStatus = 'completed';
+        console.log(`Updating booking ${booking.id} from active to completed`);
+      }
+
+      // Apply the update if status changed
+      if (newStatus !== booking.status) {
+        const { error: updateError } = await supabase
+          .from('asset_bookings')
+          .update({ status: newStatus })
+          .eq('id', booking.id);
+
+        if (updateError) {
+          console.error(`Error updating booking ${booking.id}:`, updateError);
+        } else {
+          console.log(`Successfully updated booking ${booking.id} to ${newStatus}`);
+        }
+      }
+    }
+    
   } catch (error) {
     console.error("Error in updateBookingStatuses:", error);
   }
