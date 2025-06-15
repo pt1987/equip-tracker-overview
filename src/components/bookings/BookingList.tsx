@@ -1,9 +1,7 @@
 
 import { useState } from "react";
-import { format, parseISO } from "date-fns";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -11,20 +9,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import { Trash2, Check, X, Eye } from "lucide-react";
-import { Asset, AssetBooking, BookingStatus, Employee } from "@/lib/types";
-import { updateBookingStatus, recordAssetReturn } from "@/data/bookings";
-import { useToast } from "@/hooks/use-toast";
+import { Asset, AssetBooking, Employee } from "@/lib/types";
 import BookingDetailDialog from "./BookingDetailDialog";
+import BookingTableRow from "./BookingTableRow";
+import BookingPagination from "./BookingPagination";
+import { useBookingActions } from "./hooks/useBookingActions";
 
 interface BookingListProps {
   assets: Asset[];
@@ -41,14 +30,21 @@ export default function BookingList({
   onAssetSelect,
   onRefresh
 }: BookingListProps) {
-  const [selectedBooking, setSelectedBooking] = useState<AssetBooking | null>(null);
-  const [bookingToCancel, setBookingToCancel] = useState<AssetBooking | null>(null);
-  const [showReturnDialog, setShowReturnDialog] = useState(false);
-  const { toast } = useToast();
-  
-  // Add pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const bookingsPerPage = 10;
+
+  const {
+    selectedBooking,
+    bookingToCancel,
+    showReturnDialog,
+    handleViewDetails,
+    handleReturnRequest,
+    handleCancelRequest,
+    handleCancelBooking,
+    handleReturnAsset,
+    closeDialogs,
+    setShowReturnDialog
+  } = useBookingActions(onRefresh);
 
   // Debug logging
   console.log("=== BookingList Debug Info ===");
@@ -75,7 +71,6 @@ export default function BookingList({
 
   // Determine if an asset is a pool device
   const isPoolDevice = (asset: Asset): boolean => {
-    // Check both isPoolDevice flag and status
     return asset.isPoolDevice === true || asset.status === 'pool';
   };
 
@@ -88,7 +83,6 @@ export default function BookingList({
       return false;
     }
     
-    // Only show bookings for pool devices
     if (!isPoolDevice(asset)) {
       console.log(`Excluding booking ${booking.id}: asset ${asset.name} is not a pool device (isPoolDevice: ${asset.isPoolDevice}, status: ${asset.status})`);
       return false;
@@ -101,86 +95,8 @@ export default function BookingList({
   console.log("Relevant bookings to display:", relevantBookings.length);
   console.log("Relevant bookings data:", relevantBookings);
 
-  // Handle booking cancellation
-  const handleCancelBooking = async () => {
-    if (!bookingToCancel) return;
-
-    try {
-      await updateBookingStatus(bookingToCancel.id, 'canceled');
-      toast({
-        title: "Buchung storniert",
-        description: "Die Buchung wurde erfolgreich storniert.",
-      });
-      setBookingToCancel(null);
-      onRefresh();
-    } catch (error) {
-      console.error("Error cancelling booking:", error);
-      toast({
-        variant: "destructive",
-        title: "Fehler",
-        description: "Die Buchung konnte nicht storniert werden.",
-      });
-    }
-  };
-
-  // Handle asset return
-  const handleReturnAsset = async (condition: 'good' | 'damaged' | 'incomplete' | 'lost', comments?: string) => {
-    if (!selectedBooking) return;
-
-    try {
-      await recordAssetReturn(selectedBooking.id, condition, comments);
-      toast({
-        title: "Gerät zurückgegeben",
-        description: "Das Gerät wurde erfolgreich zurückgegeben.",
-      });
-      setSelectedBooking(null);
-      setShowReturnDialog(false);
-      onRefresh();
-    } catch (error) {
-      console.error("Error returning asset:", error);
-      toast({
-        variant: "destructive",
-        title: "Fehler",
-        description: "Das Gerät konnte nicht zurückgegeben werden.",
-      });
-    }
-  };
-
-  // Get status badge variant
-  const getStatusBadgeVariant = (status: BookingStatus) => {
-    switch (status) {
-      case 'active':
-        return 'default';
-      case 'reserved':
-        return 'secondary';
-      case 'completed':
-        return 'outline';
-      case 'canceled':
-        return 'destructive';
-      default:
-        return 'default';
-    }
-  };
-
-  // Get status label
-  const getStatusLabel = (status: BookingStatus) => {
-    switch (status) {
-      case 'active':
-        return 'Aktiv';
-      case 'reserved':
-        return 'Reserviert';
-      case 'completed':
-        return 'Abgeschlossen';
-      case 'canceled':
-        return 'Storniert';
-      default:
-        return status;
-    }
-  };
-
   // Sorted bookings - prioritize active and reserved bookings
   const sortedBookings = relevantBookings.sort((a, b) => {
-    // Sort by status priority first
     const statusPriority = { 'active': 1, 'reserved': 2, 'completed': 3, 'canceled': 4 };
     const aPriority = statusPriority[a.status as keyof typeof statusPriority] || 5;
     const bPriority = statusPriority[b.status as keyof typeof statusPriority] || 5;
@@ -189,7 +105,6 @@ export default function BookingList({
       return aPriority - bPriority;
     }
     
-    // Then sort by start date (newest first)
     return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
   });
     
@@ -226,142 +141,33 @@ export default function BookingList({
                 const asset = getAsset(booking.assetId);
                 const employee = getEmployee(booking.employeeId);
                 
-                // This should not happen anymore due to filtering, but keep as safety
                 if (!asset) {
                   console.warn(`Asset ${booking.assetId} not found for booking ${booking.id}`);
                   return null;
                 }
                 
-                console.log(`Rendering booking ${booking.id}:`, {
-                  asset: asset.name,
-                  employee: `${employee?.firstName} ${employee?.lastName}`,
-                  status: booking.status
-                });
-                
                 return (
-                  <TableRow key={booking.id}>
-                    <TableCell>
-                      <div className="font-medium">{asset.name}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {asset.manufacturer} {asset.model}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {employee ? (
-                        <div>
-                          <div className="font-medium">
-                            {employee.firstName} {employee.lastName}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            {employee.position}
-                          </div>
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground">Unbekannt</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm">
-                        <div>Start: {format(parseISO(booking.startDate), "dd.MM.yyyy HH:mm")}</div>
-                        <div>Ende: {format(parseISO(booking.endDate), "dd.MM.yyyy HH:mm")}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={getStatusBadgeVariant(booking.status)}>
-                        {getStatusLabel(booking.status)}
-                      </Badge>
-                      {booking.returnInfo?.returned && (
-                        <div className="mt-1">
-                          <Badge variant="outline" className="text-xs">
-                            Zurückgegeben
-                          </Badge>
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setSelectedBooking(booking)}
-                          title="Details anzeigen"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        
-                        {booking.status === 'active' && !booking.returnInfo?.returned && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              setSelectedBooking(booking);
-                              setShowReturnDialog(true);
-                            }}
-                            title="Gerät zurückgeben"
-                          >
-                            <Check className="h-4 w-4" />
-                          </Button>
-                        )}
-                        
-                        {(booking.status === 'reserved' || booking.status === 'active') && !booking.returnInfo?.returned && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => setBookingToCancel(booking)}
-                            title="Buchung stornieren"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                  <BookingTableRow
+                    key={booking.id}
+                    booking={booking}
+                    asset={asset}
+                    employee={employee}
+                    onViewDetails={handleViewDetails}
+                    onReturn={handleReturnRequest}
+                    onCancel={handleCancelRequest}
+                  />
                 );
               })}
             </TableBody>
           </Table>
           
-          {/* Add pagination if needed */}
-          {totalPages > 1 && (
-            <div className="mt-4 flex justify-center">
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious 
-                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                      className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                    />
-                  </PaginationItem>
-                  
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                    <PaginationItem key={page}>
-                      <PaginationLink 
-                        isActive={currentPage === page} 
-                        onClick={() => setCurrentPage(page)}
-                        className="cursor-pointer"
-                      >
-                        {page}
-                      </PaginationLink>
-                    </PaginationItem>
-                  ))}
-                  
-                  <PaginationItem>
-                    <PaginationNext 
-                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            </div>
-          )}
-          
-          {/* Display information about showing X of Y bookings */}
-          {totalBookings > bookingsPerPage && (
-            <div className="text-center text-sm text-muted-foreground mt-2">
-              Zeige {Math.min(startIndex + 1, totalBookings)}-{Math.min(startIndex + bookingsPerPage, totalBookings)} von {totalBookings} Buchungen
-            </div>
-          )}
+          <BookingPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalBookings={totalBookings}
+            bookingsPerPage={bookingsPerPage}
+            onPageChange={setCurrentPage}
+          />
         </>
       ) : (
         <div className="text-center py-8 text-muted-foreground">
@@ -378,7 +184,7 @@ export default function BookingList({
           booking={selectedBooking}
           asset={assets.find(a => a.id === selectedBooking.assetId)}
           employee={employees.find(e => e.id === selectedBooking.employeeId)}
-          onClose={() => setSelectedBooking(null)}
+          onClose={closeDialogs}
           showReturnDialog={showReturnDialog}
           onReturn={handleReturnAsset}
           onCloseReturnDialog={() => setShowReturnDialog(false)}
@@ -386,7 +192,7 @@ export default function BookingList({
       )}
 
       {/* Cancel booking confirmation dialog */}
-      <Dialog open={!!bookingToCancel} onOpenChange={() => setBookingToCancel(null)}>
+      <Dialog open={!!bookingToCancel} onOpenChange={closeDialogs}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Buchung stornieren</DialogTitle>
@@ -395,7 +201,7 @@ export default function BookingList({
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end gap-2 mt-4">
-            <Button variant="outline" onClick={() => setBookingToCancel(null)}>
+            <Button variant="outline" onClick={closeDialogs}>
               Abbrechen
             </Button>
             <Button variant="destructive" onClick={handleCancelBooking}>
