@@ -1,8 +1,7 @@
 
-
 import { Asset } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
-import { mapAssetToDbAsset, mapDbAssetToAsset } from "./mappers";
+import { mapAssetToDbAssetInsert, mapDbAssetToAsset } from "./mappers";
 import { addAssetHistoryEntry } from "./history";
 import { getUserId } from "@/hooks/use-auth";
 
@@ -12,7 +11,13 @@ export const createAsset = async (asset: Asset): Promise<Asset> => {
   
   try {
     const now = new Date().toISOString();
-    const dbAsset = mapAssetToDbAsset(asset);
+    
+    // Validate required fields before mapping
+    if (!asset.category) {
+      throw new Error("Category is required for asset creation");
+    }
+    
+    const dbAsset = mapAssetToDbAssetInsert(asset);
     
     // Für externe Assets müssen wir einen Standardwert für das Kaufdatum setzen,
     // da die Datenbank ein Nicht-Null-Feld erfordert
@@ -26,6 +31,8 @@ export const createAsset = async (asset: Asset): Promise<Asset> => {
       created_at: now,
       updated_at: now
     };
+    
+    console.log("Final asset data for database insert:", dbAssetWithTimestamps);
     
     const { data, error } = await supabase
       .from('assets')
@@ -108,4 +115,3 @@ export const createAsset = async (asset: Asset): Promise<Asset> => {
     throw error;
   }
 };
-
