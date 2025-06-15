@@ -28,10 +28,7 @@ export default function AssetBookingSection({ asset, employees, refetchAsset }: 
     loadBookings,
     isBookingExpired,
     getAvailabilityStatus,
-    countUpcomingBookings,
-    getBookingDisplayStatus,
-    getStatusLabel,
-    getStatusBadgeVariant
+    countUpcomingBookings
   } = useAssetBookings(asset);
   
   const handleRefresh = () => {
@@ -98,9 +95,6 @@ export default function AssetBookingSection({ asset, employees, refetchAsset }: 
             {bookings.length > 0 && (
               <BookingHistorySection 
                 bookings={bookings}
-                getBookingDisplayStatus={getBookingDisplayStatus}
-                getStatusLabel={getStatusLabel}
-                getStatusBadgeVariant={getStatusBadgeVariant}
                 assetId={asset.id}
               />
             )}
