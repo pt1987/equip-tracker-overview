@@ -382,62 +382,62 @@ export default function DocumentManagement() {
             <div className="space-y-3 px-4 pb-4">
               {filteredDocuments.map((doc) => (
                 <div key={doc.id} className="border rounded-lg p-4 bg-white">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-3 min-w-0 flex-1">
-                      <FileText className="h-5 w-5 mt-0.5 text-muted-foreground flex-shrink-0" />
-                      <div className="min-w-0 flex-1">
-                        <h4 className="font-medium text-sm mb-1 truncate">
+                  <div className="flex items-start gap-3">
+                    <FileText className="h-5 w-5 mt-0.5 text-muted-foreground flex-shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <h4 className="font-medium text-sm truncate flex-1">
                           {doc.metadata.original_name || doc.name}
                         </h4>
-                        <p className="text-xs text-muted-foreground mb-2">
-                          Asset: {doc.assetId}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(doc)}
+                          className="text-destructive hover:text-destructive/80 h-8 w-8 p-0 flex-shrink-0"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        Asset: {doc.assetId}
+                      </p>
+                      {doc.metadata.description && (
+                        <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                          {doc.metadata.description}
                         </p>
-                        {doc.metadata.description && (
-                          <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
-                            {doc.metadata.description}
-                          </p>
-                        )}
-                        <div className="flex flex-wrap items-center gap-2 mb-3">
-                          <Badge variant="outline" className="text-xs">
-                            {getCategoryLabel(doc.metadata.category || 'other')}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground">
-                            {formatFileSize(doc.metadata.size)}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {new Date(doc.created_at).toLocaleDateString('de-DE')}
-                          </span>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setPreviewDocument(doc)}
-                            className="flex-1 text-xs"
-                          >
-                            <Eye className="h-3 w-3 mr-1" />
-                            Anzeigen
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDownload(doc)}
-                            className="flex-1 text-xs"
-                          >
-                            <Download className="h-3 w-3 mr-1" />
-                            Download
-                          </Button>
-                        </div>
+                      )}
+                      <div className="flex flex-wrap items-center gap-2 mb-3">
+                        <Badge variant="outline" className="text-xs">
+                          {getCategoryLabel(doc.metadata.category || 'other')}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                          {formatFileSize(doc.metadata.size)}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(doc.created_at).toLocaleDateString('de-DE')}
+                        </span>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setPreviewDocument(doc)}
+                          className="flex-1 text-xs"
+                        >
+                          <Eye className="h-3 w-3 mr-1" />
+                          Anzeigen
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDownload(doc)}
+                          className="flex-1 text-xs"
+                        >
+                          <Download className="h-3 w-3 mr-1" />
+                          Download
+                        </Button>
                       </div>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(doc)}
-                      className="text-destructive hover:text-destructive/80 flex-shrink-0 h-8 w-8 p-0"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
                   </div>
                 </div>
               ))}
