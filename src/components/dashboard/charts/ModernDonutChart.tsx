@@ -27,15 +27,15 @@ export default function ModernDonutChart({
   }));
 
   return (
-    <div className="dashboard-chart-container relative" style={{ height }}>
+    <div className="relative w-full" style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
             data={dataWithColors}
             cx="50%"
             cy="50%"
-            innerRadius={60}
-            outerRadius={90}
+            innerRadius="40%"
+            outerRadius="70%"
             paddingAngle={3}
             dataKey="value"
           >
@@ -57,21 +57,20 @@ export default function ModernDonutChart({
       
       {(centerLabel || centerValue) && (
         <div 
-          className="absolute pointer-events-none flex flex-col items-center justify-center"
-          style={{
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '120px',
-            height: '120px'
-          }}
+          className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
         >
-          {centerValue && (
-            <div className="text-4xl font-bold text-gray-900 leading-none">{centerValue}</div>
-          )}
-          {centerLabel && (
-            <div className="text-sm text-gray-600 mt-1">{centerLabel}</div>
-          )}
+          <div className="text-center">
+            {centerValue && (
+              <div className="text-3xl font-bold text-gray-900 mb-1">
+                {centerValue}
+              </div>
+            )}
+            {centerLabel && (
+              <div className="text-sm text-gray-600 uppercase tracking-wide">
+                {centerLabel}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
