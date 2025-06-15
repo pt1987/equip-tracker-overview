@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { AssetBooking, BookingReturnCondition, BookingStatus } from "@/lib/types";
 import { getEmployeeById } from "./employees";
@@ -240,26 +239,11 @@ export const createBooking = async (
 
     console.log("Booking created successfully:", data);
 
-    // Update asset status if booking is active and it's a pool device
-    if (status === 'active' && (assetData.is_pool_device || assetData.status === 'pool')) {
-      console.log("Updating asset to in_use status and assigning to employee");
-      
-      const { error: updateError } = await supabase
-        .from('assets')
-        .update({ 
-          status: 'in_use', 
-          employee_id: employeeId,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', assetId);
-      
-      if (updateError) {
-        console.error("Error updating asset status:", updateError);
-        // Don't throw - booking was created successfully
-      } else {
-        console.log("Asset status updated to in_use and assigned to employee");
-      }
-    }
+    // IMPORTANT: Do NOT change asset status or employee assignment for pool devices!
+    // Pool devices should remain pool devices and should not be permanently assigned
+    // The booking table already tracks who has the device temporarily
+    
+    console.log("Pool device booking created - asset status and assignment remain unchanged");
     
     // Add entry to asset history for ISO 27001 compliance
     try {
@@ -315,30 +299,11 @@ export const updateBookingStatus = async (
     
     const booking = mapDbBookingToBooking(data);
     
-    // If changing to completed or canceled, update the asset status accordingly
+    // IMPORTANT: For pool devices, do NOT change asset status back to pool
+    // Pool devices should ALWAYS remain pool devices regardless of booking status
+    // Only add history entry for status change
+    
     if (status === 'completed' || status === 'canceled') {
-      const asset = await getAssetById(booking.assetId);
-      
-      if (asset && (asset.isPoolDevice || asset.status === 'pool' || asset.status === 'in_use')) {
-        console.log("Updating asset back to pool status after booking completion/cancellation");
-        
-        const { error: updateError } = await supabase
-          .from('assets')
-          .update({ 
-            status: 'pool', 
-            employee_id: null,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', booking.assetId);
-          
-        if (updateError) {
-          console.error("Error updating asset status back to pool:", updateError);
-        } else {
-          console.log("Asset status updated back to pool");
-        }
-      }
-      
-      // Add history entry for booking status change
       try {
         const userId = await getUserId();
         const statusLabel = status === 'completed' ? 'abgeschlossen' : 'storniert';
@@ -402,16 +367,10 @@ export const recordAssetReturn = async (
 
     const booking = mapDbBookingToBooking(data);
     
-    // Reset the asset status to pool
-    await supabase
-      .from('assets')
-      .update({ 
-        status: 'pool', 
-        employee_id: null
-      })
-      .eq('id', booking.assetId);
-
-    // If condition is damaged, update the asset status
+    // IMPORTANT: Do NOT change asset status for pool devices
+    // Pool devices should remain pool devices and should not have employee assignments changed
+    
+    // If condition is damaged, we can update the asset status regardless of type
     if (condition === 'damaged') {
       await supabase
         .from('assets')
