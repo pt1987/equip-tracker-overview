@@ -1,11 +1,11 @@
 
 import { useState, useEffect } from "react";
-import { getEmployeeById } from "@/data/employees";
+import { getEmployeeById } from "@/data/employees/fetch";
 import { uploadEmployeeImage } from "@/data/employees/storage";
 import { toast } from "@/hooks/use-toast";
 import { EmployeeFormValues } from "@/components/employees/EmployeeFormTypes";
 import { useQueryClient } from "@tanstack/react-query";
-import { createEmployee, updateEmployee } from "@/data/employees";
+import { createEmployee, updateEmployee } from "@/data/employees/create";
 import { useNavigate } from "react-router-dom";
 
 export function useEmployeeForm(id: string | undefined) {

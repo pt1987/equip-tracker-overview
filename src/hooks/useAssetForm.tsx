@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -6,7 +5,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import { getAssets } from "@/data/mockData";
-import { createAsset, updateAsset } from "@/data/assets";
+import { createAsset } from "@/data/assets/create";
+import { updateAsset } from "@/data/assets/update";
 import { assetFormSchema, validateExternalAsset } from "@/components/assets/create-edit/AssetFormSchema";
 import type { AssetFormValues } from "@/components/assets/create-edit/AssetFormSchema";
 import type { Asset, AssetType, AssetStatus, AssetClassification } from "@/lib/types";

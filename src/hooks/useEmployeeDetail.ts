@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getEmployeeById, updateEmployee } from "@/data/employees";
-import { getAssetsByEmployeeId } from "@/data/assets";
+import { getEmployeeById } from "@/data/employees/fetch";
+import { updateEmployee } from "@/data/employees/update";
+import { getAssetsByEmployeeId } from "@/data/assets/fetch";
 import { Employee, Asset } from "@/lib/types";
 import { competenceLevels } from "@/components/employees/EmployeeFormTypes";
 import { toast } from "@/hooks/use-toast";

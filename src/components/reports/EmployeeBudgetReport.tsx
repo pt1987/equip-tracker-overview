@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getEmployees } from '@/data/employees';
-import { getAssets } from '@/data/assets';
+import { getEmployees } from '@/data/employees/fetch';
+import { getAssets } from '@/data/assets/fetch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { formatCurrency } from '@/lib/utils';

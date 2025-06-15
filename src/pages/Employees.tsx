@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from "react";
 import PageTransition from "@/components/layout/PageTransition";
 import { Employee } from "@/lib/types";
 import EmployeeCard from "@/components/employees/EmployeeCard";
 import ViewToggle from "@/components/shared/ViewToggle";
 import { useQuery } from "@tanstack/react-query";
-import { getEmployees } from "@/data/employees";
+import { getEmployees } from "@/data/employees/fetch";
 import EmployeeFilters from "@/components/employees/EmployeeFilters";
 import EmployeeEmptyState from "@/components/employees/EmployeeEmptyState";
 import EmployeeListView from "@/components/employees/EmployeeListView";

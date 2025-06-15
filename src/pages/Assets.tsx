@@ -1,10 +1,9 @@
-
 import { useState } from "react";
 import PageTransition from "@/components/layout/PageTransition";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { getAssets } from "@/data/assets";
-import { getEmployees } from "@/data/employees";
+import { getAssets } from "@/data/assets/fetch";
+import { getEmployees } from "@/data/employees/fetch";
 import { useAssetFilters } from "@/hooks/useAssetFilters";
 
 // Import our components
@@ -18,7 +17,7 @@ const AssetsPage = () => {
   const [view, setView] = useState<"grid" | "list">("grid");
   const { toast } = useToast();
   
-  // Use the centralized getAssets function from data/assets.ts
+  // Use the centralized getAssets function from data/assets/fetch.ts
   const { data: allAssets = [], isLoading, error } = useQuery({
     queryKey: ["assets"],
     queryFn: async () => {
