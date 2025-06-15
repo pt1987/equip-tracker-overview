@@ -99,30 +99,28 @@ export default function AssetDetail() {
 
   return (
     <PageTransition>
-      <div className="container mx-auto py-4 md:py-6 max-w-7xl">
-        <div className="flex flex-col gap-4 md:gap-6 px-3">
-          <div className="mb-2">
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate(-1)} 
-              className="mb-1 -ml-2 h-8 md:h-9 px-2"
-              size={isMobile ? "sm" : "default"}
-            >
-              <ChevronLeft size={isMobile ? 14 : 16} className="mr-1" />
-              Zurück
-            </Button>
-            <h1 className={`${isMobile ? 'text-xl' : 'text-3xl'} font-bold tracking-tight`}>Asset Details</h1>
-          </div>
-
-          <AssetDetailContent 
-            asset={asset}
-            assetHistory={assetHistory}
-            isHistoryLoading={isHistoryLoading}
-            queryClient={queryClient}
-            toast={toast}
-            onDelete={handleDelete}
-          />
+      <div className="p-3 md:p-4 xl:p-6 space-y-6 max-w-full">
+        <div className="mb-2">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate(-1)} 
+            className="mb-1 -ml-2 h-8 md:h-9 px-2"
+            size={isMobile ? "sm" : "default"}
+          >
+            <ChevronLeft size={isMobile ? 14 : 16} className="mr-1" />
+            Zurück
+          </Button>
+          <h1 className={`${isMobile ? 'text-xl' : 'text-3xl'} font-bold tracking-tight`}>Asset Details</h1>
         </div>
+
+        <AssetDetailContent 
+          asset={asset}
+          assetHistory={assetHistory}
+          isHistoryLoading={isHistoryLoading}
+          queryClient={queryClient}
+          toast={toast}
+          onDelete={handleDelete}
+        />
       </div>
     </PageTransition>
   );
