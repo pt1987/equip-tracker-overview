@@ -56,15 +56,22 @@ export default function ModernDonutChart({
       </ResponsiveContainer>
       
       {(centerLabel || centerValue) && (
-        <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center pointer-events-none">
-          <div className="flex flex-col items-center justify-center">
-            {centerValue && (
-              <div className="text-4xl font-bold text-gray-900 leading-none text-center">{centerValue}</div>
-            )}
-            {centerLabel && (
-              <div className="text-sm text-gray-600 mt-2 text-center">{centerLabel}</div>
-            )}
-          </div>
+        <div 
+          className="absolute pointer-events-none flex flex-col items-center justify-center"
+          style={{
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '120px',
+            height: '120px'
+          }}
+        >
+          {centerValue && (
+            <div className="text-4xl font-bold text-gray-900 leading-none">{centerValue}</div>
+          )}
+          {centerLabel && (
+            <div className="text-sm text-gray-600 mt-1">{centerLabel}</div>
+          )}
         </div>
       )}
     </div>
