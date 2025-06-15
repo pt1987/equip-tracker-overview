@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -72,23 +73,28 @@ export default function BookingList({
     return employees.find(e => e.id === employeeId);
   };
 
-  // Filter bookings to only show those with existing assets
+  // Determine if an asset is a pool device
+  const isPoolDevice = (asset: Asset): boolean => {
+    // Check both isPoolDevice flag and status
+    return asset.isPoolDevice === true || asset.status === 'pool';
+  };
+
+  // Filter bookings to only show those with existing assets that are pool devices
   const relevantBookings = bookings.filter(booking => {
     const asset = getAsset(booking.assetId);
-    const hasValidAsset = !!asset;
     
-    if (!hasValidAsset) {
+    if (!asset) {
       console.log(`Excluding booking ${booking.id}: asset ${booking.assetId} not found`);
       return false;
     }
     
     // Only show bookings for pool devices
-    if (!asset.isPoolDevice && asset.status !== 'pool') {
-      console.log(`Excluding booking ${booking.id}: asset ${asset.name} is not a pool device`);
+    if (!isPoolDevice(asset)) {
+      console.log(`Excluding booking ${booking.id}: asset ${asset.name} is not a pool device (isPoolDevice: ${asset.isPoolDevice}, status: ${asset.status})`);
       return false;
     }
     
-    console.log(`Including booking ${booking.id} for asset ${asset.name}`);
+    console.log(`Including booking ${booking.id} for pool asset ${asset.name} (isPoolDevice: ${asset.isPoolDevice}, status: ${asset.status})`);
     return true;
   });
 
