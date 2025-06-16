@@ -72,7 +72,7 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
       // Search Employees
       const { data: employees, error: employeesError } = await supabase
         .from('employees')
-        .select('id, first_name, last_name, email, department')
+        .select('id, first_name, last_name, email, cluster')
         .or(`first_name.ilike.%${query}%, last_name.ilike.%${query}%, email.ilike.%${query}%`)
         .limit(10);
 
@@ -81,7 +81,7 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
           id: employee.id,
           name: `${employee.first_name} ${employee.last_name}`,
           type: 'employee' as const,
-          description: `${employee.email} - ${employee.department || 'Keine Abteilung'}`,
+          description: `${employee.email} - ${employee.cluster || 'Kein Cluster'}`,
           metadata: employee
         })));
       }
