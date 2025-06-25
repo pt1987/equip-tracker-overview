@@ -1,10 +1,9 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { ThemeProvider } from "next-themes";
+import { ThemeProvider } from "@/hooks/use-theme";
 import { AuthProvider, ProtectedRoute } from "@/hooks/use-auth";
 import Navbar from "@/components/layout/Navbar";
 import Index from "./pages/Index";
@@ -71,7 +70,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => (
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <ThemeProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />

@@ -5,6 +5,7 @@ import { Menu, LogIn, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { MobileSidebar } from "./MobileSidebar";
+import { ThemeSwitcher } from "./ThemeSwitcher";
 import { useAuth } from "@/hooks/use-auth";
 
 export function MobileNavbar() {
@@ -41,6 +42,8 @@ export function MobileNavbar() {
       </div>
       
       <div className="flex items-center gap-2">
+        <ThemeSwitcher minimal={true} />
+        
         {!isAuthenticated && (
           <Link to="/login">
             <Button 
